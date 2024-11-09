@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "@chooseLanguagePrompt": {
+    "description": "Prompt message asking user to select language"
+  },
+  "@languageSelectionTitle": {
+    "description": "Title for the language selection screen"
+  },
+  "@nextButton": {
+    "description": "Text for the next button"
+  },
+  "@welcomeMessage": {
+    "description": "Welcome message before app name"
+  },
+  "chooseLanguagePrompt": "Choose your language to start",
+  "languageSelectionTitle": "Language selection",
+  "nextButton": "Next",
+  "welcomeMessage": "Welcome to"
+}

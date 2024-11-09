@@ -1,0 +1,19 @@
+{
+  "@@locale": "ar",
+  "@chooseLanguagePrompt": {
+    "description": "Prompt message asking user to select language"
+  },
+  "@languageSelectionTitle": {
+    "description": "Title for the language selection screen"
+  },
+  "@nextButton": {
+    "description": "Text for the next button"
+  },
+  "@welcomeMessage": {
+    "description": "Welcome message before app name"
+  },
+  "chooseLanguagePrompt": "اختر لغتك للبدء",
+  "languageSelectionTitle": "اختيار اللغة",
+  "nextButton": "التالي",
+  "welcomeMessage": "مرحباً بك في"
+}

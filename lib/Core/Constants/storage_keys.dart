@@ -1,7 +1,7 @@
 abstract class StorageKeys {
   // Settings
   static const String languageKey = 'lang';
-  static const String onboardingKey = 'onBording';
+  static const String onbordingKey = 'onBording';
   static const String accountTypeKey = 'accountType';
 
   // User Data

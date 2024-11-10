@@ -68,7 +68,7 @@ class SmallPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: context.getWidth(170),
+      width: context.getWidth(150),
       height: context.getWidth(45),
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
@@ -118,7 +118,7 @@ class SmallSecondaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: context.getWidth(170),
+      width: context.getWidth(150),
       height: context.getWidth(45),
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,

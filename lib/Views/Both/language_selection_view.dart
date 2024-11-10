@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Constants/app_colors.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
 
@@ -49,6 +50,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                         Image.asset(
                           AppAssets.appNameImage,
                           height: context.getHeight(32),
+                          color: AppColors.primaryColor,
                         ),
                       ],
                     ),
@@ -97,7 +99,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                     PrimaryButton(
                       text: AppLocalizations.of(context)!.nextButton,
                       onPressed: () {
-                        NavigationService.navigateTo(AppRoutes.userHome);
+                        NavigationService.navigateTo(AppRoutes.onBording);
                       },
                     ),
                     SizedBox(height: context.getHeight(50)),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../Views/Both/language_selection_view.dart';
+import '../../Views/Both/onbording_view.dart';
 import '../../Views/Both/splash_view.dart';
 import '../../Views/User/user_home_screen.dart';
 
@@ -8,6 +9,7 @@ class AppRoutes {
   // Both Screens
   static const String splash = '/';
   static const String languageSelection = '/LanguageSelectionScreen';
+  static const String onBording = '/onBording';
 
   //User Screens
   static const String userHome = '/userHomeScreen';
@@ -18,6 +20,7 @@ class AppRoutes {
       languageSelection: (BuildContext context) =>
           const LanguageSelectionScreen(),
       userHome: (BuildContext context) => const UserHomeScreen(),
+      onBording: (BuildContext context) => const OnBordingView(),
     };
   }
 }

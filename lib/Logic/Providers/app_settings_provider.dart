@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -7,7 +8,7 @@ import '../../Core/Constants/storage_keys.dart';
 import '../../Core/Utils/navigation_service.dart';
 
 class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
-  SharedPreferences? _prefs;
+  SharedPreferences? prefs;
 
   AppSettingsProvider() {
     WidgetsBinding.instance.addObserver(this);
@@ -26,11 +27,13 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
   int get pageIndex => _pageIndex;
 
   Future<void> initialize() async {
+    print('initialize ... ');
     if (_isInitialized) return;
 
-    _prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
     pageController = PageController(initialPage: 0);
     await _initializeLanguage();
+    FlutterNativeSplash.remove();
     await goToNextScreen();
 
     _isInitialized = true;
@@ -38,7 +41,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> _initializeLanguage() async {
-    final savedLanguage = _prefs!.getString(StorageKeys.languageKey);
+    final savedLanguage = prefs!.getString(StorageKeys.languageKey);
 
     if (savedLanguage == null) {
       final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
@@ -56,7 +59,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
       );
 
       _appLocale = matchedLocale;
-      _prefs!.setString(StorageKeys.languageKey, _appLocale!.languageCode);
+      prefs!.setString(StorageKeys.languageKey, _appLocale!.languageCode);
       notifyListeners();
     }
   }
@@ -66,14 +69,14 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (newLocale != _appLocale) {
       _appLocale = newLocale;
 
-      await _prefs!.setString(StorageKeys.languageKey, newLocale.languageCode);
+      await prefs!.setString(StorageKeys.languageKey, newLocale.languageCode);
       notifyListeners();
     }
   }
 
   Future<void> goToNextScreen() async {
     Future.delayed(
-      const Duration(seconds: 2),
+      const Duration(seconds: 1),
       () async {
         await NavigationService.navigateToAndReplace(
             AppRoutes.languageSelection);

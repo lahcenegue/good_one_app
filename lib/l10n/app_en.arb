@@ -15,5 +15,6 @@
   "chooseLanguagePrompt": "Choose your language to start",
   "languageSelectionTitle": "Language selection",
   "nextButton": "Next",
+  "skip": "Skip",
   "welcomeMessage": "Welcome to"
 }

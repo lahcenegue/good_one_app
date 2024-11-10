@@ -7,6 +7,8 @@ abstract class AppAssets {
   static const String languageIllustration =
       '$_imagesPath/language_illustration.png';
   static const String appNameImage = '$_imagesPath/app_name.png';
+  static const String onBordingImage1 = '$_imagesPath/onbording1.png';
+  static const String onBordingImage2 = '$_imagesPath/onbording2.png';
 
   // Icons
   static const String icon = '$_iconsPath/icon.png';

@@ -26,4 +26,12 @@ class AppTextStyles {
       color: Colors.black,
     );
   }
+
+  static TextStyle text(BuildContext context) {
+    return TextStyle(
+      fontSize: context.getAdaptiveSize(14),
+      fontWeight: FontWeight.w400,
+      color: const Color(0xFF838383),
+    );
+  }
 }

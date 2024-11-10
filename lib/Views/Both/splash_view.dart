@@ -9,37 +9,39 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
-        child: Stack(
-          children: [
-            _buildDecorationCircle(
-              context: context,
-              top: -100,
-              left: -100,
-              size: 280,
-              opacity: 0.15,
-            ),
-            _buildDecorationCircle(
-              context: context,
-              bottom: -100,
-              right: -180,
-              size: 320,
-              opacity: 0.20,
-            ),
-            Center(
-              child: Image.asset(
-                AppAssets.logo,
-                width: context.getWidth(300),
-                color: Colors.white,
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+          ),
+          child: Stack(
+            children: [
+              _buildDecorationCircle(
+                context: context,
+                top: -100,
+                left: -100,
+                size: 280,
+                opacity: 0.15,
               ),
-            ),
-          ],
+              _buildDecorationCircle(
+                context: context,
+                bottom: -100,
+                right: -180,
+                size: 320,
+                opacity: 0.20,
+              ),
+              // Center(
+              //   child: Image.asset(
+              //     AppAssets.logo,
+              //     width: context.getWidth(300),
+              //     color: Colors.white,
+              //   ),
+              // ),
+            ],
+          ),
         ),
       ),
     );

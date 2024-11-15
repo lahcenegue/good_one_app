@@ -6,8 +6,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'Core/Themes/app_theme.dart';
-import 'Logic/Providers/app_settings_provider.dart';
 import 'Core/Utils/navigation_service.dart';
+import 'Providers/app_settings_provider.dart';
+import 'Providers/auth_provider.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +27,20 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: Consumer<AppSettingsProvider>(
         builder: (context, appSettings, _) {
+          if (!appSettings.isInitialized) {
+            return const MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
+          }
+
           return MaterialApp(
             navigatorKey: NavigationService.navigatorKey,
             debugShowCheckedModeBanner: false,
@@ -41,6 +53,7 @@ class MyApp extends StatelessWidget {
             supportedLocales: AppLocalizations.supportedLocales,
             locale: appSettings.appLocale,
             theme: appTheme,
+            initialRoute: appSettings.initialRoute,
             routes: AppRoutes.define(),
           );
         },

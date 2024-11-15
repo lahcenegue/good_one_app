@@ -1,20 +1,29 @@
 {
   "@@locale": "ar",
-  "@chooseLanguagePrompt": {
-    "description": "Prompt message asking user to select language"
-  },
-  "@languageSelectionTitle": {
-    "description": "Title for the language selection screen"
-  },
-  "@nextButton": {
-    "description": "Text for the next button"
-  },
-  "@welcomeMessage": {
-    "description": "Welcome message before app name"
-  },
+  
   "chooseLanguagePrompt": "اختر لغتك للبدء",
   "languageSelectionTitle": "اختيار اللغة",
   "nextButton": "التالي",
   "skip": "تخطي",
-  "welcomeMessage": "مرحباً بك في"
+  "welcomeMessage": "مرحباً بك في",
+  "signIn": "تسجيل الدخول",
+  "login": "تسجيل الدخول",
+  "signUp": "إنشاء حساب",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "enterEmail": "أدخل بريدك الإلكتروني",
+  "enterPassword": "أدخل كلمة المرور",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "rememberMe": "تذكرني",
+  "loginButton": "تسجيل الدخول",
+  "noAccount": "ليس لديك حساب؟",
+  "hasAccount": "لديك حساب بالفعل؟",
+  "emailRequired": "البريد الإلكتروني مطلوب",
+  "passwordRequired": "كلمة المرور مطلوبة",
+  "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح",
+  "passwordTooShort": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  "loginSuccess": "تم تسجيل الدخول بنجاح",
+  "logoutSuccess": "تم تسجيل الخروج بنجاح",
+  "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+  "networkError": "خطأ في الاتصال بالشبكة. حاول مرة أخرى"
 }

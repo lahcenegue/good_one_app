@@ -4,13 +4,12 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
 
 import '../../Core/Constants/app_assets.dart';
-import '../../Core/Constants/storage_keys.dart';
-import '../../Core/Utils/navigation_service.dart';
 import '../../Core/Widgets/custom_buttons.dart';
 import '../../Core/Widgets/dot_indicator.dart';
-import '../../Logic/Providers/app_settings_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../Providers/app_settings_provider.dart';
 
 class OnBordingView extends StatelessWidget {
   const OnBordingView({super.key});
@@ -69,11 +68,7 @@ class OnBordingView extends StatelessWidget {
               height: context.getHeight(50),
               child: appsettings.pageIndex != length - 1
                   ? TextButton(
-                      onPressed: () {
-                        appsettings.prefs!
-                            .setString(StorageKeys.onbordingKey, 'watched');
-                        NavigationService.navigateTo(AppRoutes.userHome);
-                      },
+                      onPressed: () => appsettings.completeOnboarding(),
                       child: Text(
                         AppLocalizations.of(context)!.skip,
                         style: AppTextStyles.subTitle(context),
@@ -136,11 +131,9 @@ class OnBordingView extends StatelessWidget {
             ),
             SmallPrimaryButton(
               text: 'Next',
-              onPressed: () {
+              onPressed: () async {
                 if (appsettings.pageIndex == data.length - 1) {
-                  appsettings.prefs!
-                      .setString(StorageKeys.onbordingKey, 'watched');
-                  NavigationService.navigateTo(AppRoutes.userHome);
+                  await appsettings.completeOnboarding();
                 } else {
                   appsettings.pageController.nextPage(
                     duration: const Duration(milliseconds: 300),

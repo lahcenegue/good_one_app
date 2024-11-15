@@ -4,12 +4,12 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
 
 import '../../Core/Constants/app_assets.dart';
-import '../../Core/Utils/navigation_service.dart';
 import '../../Core/Themes/app_text_styles.dart';
 import '../../Core/Widgets/custom_buttons.dart';
-import '../../Logic/Providers/app_settings_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../Providers/app_settings_provider.dart';
 
 class LanguageSelectionScreen extends StatelessWidget {
   const LanguageSelectionScreen({super.key});
@@ -98,8 +98,8 @@ class LanguageSelectionScreen extends StatelessWidget {
                     SizedBox(height: context.getHeight(32)),
                     PrimaryButton(
                       text: AppLocalizations.of(context)!.nextButton,
-                      onPressed: () {
-                        NavigationService.navigateTo(AppRoutes.onBording);
+                      onPressed: () async {
+                        await provider.setLanguage(provider.appLocale);
                       },
                     ),
                     SizedBox(height: context.getHeight(50)),
@@ -171,6 +171,6 @@ class LanguageSelectionScreen extends StatelessWidget {
     AppSettingsProvider provider,
     String locale,
   ) async {
-    await provider.changeLanguage(Locale(locale));
+    await provider.setLanguage(Locale(locale));
   }
 }

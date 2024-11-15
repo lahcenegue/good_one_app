@@ -1,20 +1,106 @@
 {
   "@@locale": "en",
-  "@chooseLanguagePrompt": {
-    "description": "Prompt message asking user to select language"
+
+  "@welcomeMessage": {
+    "description": "Welcome message before app name"
   },
   "@languageSelectionTitle": {
     "description": "Title for the language selection screen"
   },
+  "@chooseLanguagePrompt": {
+    "description": "Prompt message asking user to select language"
+  },
   "@nextButton": {
     "description": "Text for the next button"
   },
-  "@welcomeMessage": {
-    "description": "Welcome message before app name"
+  "@skip": {
+    "description": "Text for the skip button"
   },
-  "chooseLanguagePrompt": "Choose your language to start",
+  "@signIn": {
+    "description": "Title for the login screen"
+  },
+  "@signUp": {
+    "description": "Title for the registration screen"
+  },
+  "@email": {
+    "description": "Label for email input"
+  },
+  "@password": {
+    "description": "Label for password input"
+  },
+  "@enterEmail": {
+    "description": "Placeholder for email input"
+  },
+  "@enterPassword": {
+    "description": "Placeholder for password input"
+  },
+  "@loginButton": {
+    "description": "Login button text"
+  },
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "@rememberMe": {
+    "description": "Remember me checkbox label"
+  },
+  "@noAccount": {
+    "description": "Text shown before sign up link"
+  },
+  "@hasAccount": {
+    "description": "Text shown before sign in link"
+  },
+  "@emailRequired": {
+    "description": "Error message when email is empty"
+  },
+  "@passwordRequired": {
+    "description": "Error message when password is empty"
+  },
+  "@invalidEmail": {
+    "description": "Error message for invalid email format"
+  },
+  "@passwordTooShort": {
+    "description": "Error message for short password"
+  },
+  "@loginSuccess": {
+    "description": "Message shown on successful login"
+  },
+  "@logoutSuccess": {
+    "description": "Message shown on successful logout"
+  },
+  "@loginError": {
+    "description": "Generic login error message"
+  },
+  "@networkError": {
+    "description": "Network error message"
+  },   
+  "@login": {
+      "description": "Text for login button"
+  },
+
+
+  "welcomeMessage": "Welcome to",
   "languageSelectionTitle": "Language selection",
+  "chooseLanguagePrompt": "Choose your language to start",
   "nextButton": "Next",
   "skip": "Skip",
-  "welcomeMessage": "Welcome to"
+  "signIn": "Sign In",
+  "login": "log in",
+  "signUp": "Sign Up",
+  "email": "Email",
+  "password": "Password",
+  "enterEmail": "enter your email",
+  "enterPassword": "enter your password",
+  "loginButton": "Log in",
+  "forgotPassword": "Forgot your password?",
+  "rememberMe": "Remember me",
+  "noAccount": "Don't have an account?",
+  "hasAccount": "Already have an account?",
+  "emailRequired": "Email is required",
+  "passwordRequired": "Password is required",
+  "invalidEmail": "Please enter a valid email address",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "loginSuccess": "Successfully logged in",
+  "logoutSuccess": "Successfully logged out",
+  "loginError": "Invalid email or password",
+  "networkError": "Network connection error. Please try again"
 }

@@ -123,7 +123,7 @@ class SmallSecondaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.secondaryButtonColor,
+          backgroundColor: AppColors.dimGray,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
               SizeConfig.adaptiveSize(8, context),

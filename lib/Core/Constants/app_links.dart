@@ -1,4 +1,7 @@
 abstract class AppLinks {
-  static const String _url = 'https://za3ad.com/apps/productive';
-  static const String api = '$_url/Api.php';
+  static const String baseUrl = 'http://162.254.35.98';
+  static const String api = '$baseUrl/api';
+
+  // Auth endpoints
+  static const String login = '$api/auth/login';
 }

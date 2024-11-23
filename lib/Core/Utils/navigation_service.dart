@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/features/auth/views/registration_screen.dart';
 
 import '../../Views/Both/language_selection_view.dart';
-import '../../Views/Both/login_screen.dart';
-import '../../Views/Both/onbording_view.dart';
+import '../../features/auth/views/login_screen.dart';
+import '../../features/on_bording/onbording_view.dart';
 import '../../Views/User/user_home_screen.dart';
 
 class AppRoutes {
@@ -11,6 +12,7 @@ class AppRoutes {
   static const String languageSelection = '/';
   static const String onBording = '/onBording';
   static const String login = '/login';
+  static const String register = '/register';
 
   //User Screens
   static const String userHome = '/userHomeScreen';
@@ -22,6 +24,7 @@ class AppRoutes {
       userHome: (BuildContext context) => const UserHomeScreen(),
       onBording: (BuildContext context) => const OnBordingView(),
       login: (BuildContext context) => const LoginScreen(),
+      register: (BuildContext context) => const RegistrationScreen(),
     };
   }
 }

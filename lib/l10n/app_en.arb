@@ -76,6 +76,66 @@
   "@login": {
       "description": "Text for login button"
   },
+  "@authError": {
+    "description": "Generic authentication error"
+  },
+  "@storageError": {
+    "description": "Error saving auth data"
+  },
+  "@invalidCredentials": {
+    "description": "Error message for invalid credentials"
+  },
+  "@serverError": {
+    "description": "Error message for server issues"
+  },
+  "@generalError": {
+    "description": "General error message"
+  },
+  "@fullName": {
+    "description": "Label for full name input"
+  },
+  "@enterFullName": {
+    "description": "Placeholder for full name input"
+  },
+  "@fullNameRequired": {
+    "description": "Error message when full name is empty"
+  },
+  "@phoneNumber": {
+    "description": "Label for phone number input"
+  },
+  "@enterPhoneNumber": {
+    "description": "Placeholder for phone number input"
+  },
+  "@phoneRequired": {
+    "description": "Error message when phone is empty"
+  },
+  "@retypePassword": {
+    "description": "Label for password confirmation input"
+  },
+  "@confirmPasswordRequired": {
+    "description": "Error message when confirm password is empty"
+  },
+  "@passwordsDoNotMatch": {
+    "description": "Error message when passwords don't match"
+  },
+  "@alreadyHaveAccount": {
+    "description": "Text shown before sign in link"
+  },
+  "@selectImage": {
+    "description": "Label for image selection"
+  },
+  "@takePhoto": {
+    "description": "Option to take photo"
+  },
+  "@chooseFromGallery": {
+    "description": "Option to choose from gallery"
+  },
+  "@imageRequired": {
+    "description": "Error message when image is not selected"
+  },
+  "@createAccount": {
+    "description": "Title for account creation"
+  },
 
 
   "welcomeMessage": "Welcome to",
@@ -102,5 +162,25 @@
   "loginSuccess": "Successfully logged in",
   "logoutSuccess": "Successfully logged out",
   "loginError": "Invalid email or password",
-  "networkError": "Network connection error. Please try again"
+  "networkError": "Network connection error. Please try again",
+  "authError": "Invalid email or password",
+  "storageError": "Failed to save authentication data",
+  "invalidCredentials": "Invalid email or password",
+  "serverError": "Server error occurred. Please try again",
+  "generalError": "An error occurred. Please try again",
+  "fullName": "Full Name",
+  "enterFullName": "Enter your full name",
+  "fullNameRequired": "Full name is required",
+  "phoneNumber": "Phone Number",
+  "enterPhoneNumber": "Enter your phone number",
+  "phoneRequired": "Phone number is required",
+  "retypePassword": "Retype Password",
+  "confirmPasswordRequired": "Please confirm your password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "alreadyHaveAccount": "Already have an account?",
+  "selectImage": "Profile Picture",
+  "takePhoto": "Take Photo",
+  "chooseFromGallery": "Choose from Gallery",
+  "imageRequired": "Profile picture is required",
+  "createAccount": "Create your account now"
 }

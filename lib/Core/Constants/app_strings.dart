@@ -1,5 +1,5 @@
 abstract class AppStrings {
-  // User Types
+  // Account Types
   static const String user = 'Customer';
-  static const String family = 'Store';
+  static const String service = 'Profissionel';
 }

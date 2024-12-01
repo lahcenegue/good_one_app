@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Constants/app_assets.dart';
-import 'package:good_one_app/Core/Widgets/custom_buttons.dart';
+
+import '../../../Core/Constants/app_assets.dart';
 import '../../../Core/Constants/app_colors.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../../../Core/Themes/app_text_styles.dart';
+import '../../../Core/Widgets/custom_buttons.dart';
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserProfileScreen extends StatelessWidget {
@@ -167,8 +169,8 @@ class UserProfileScreen extends StatelessWidget {
       decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: AppColors.dimGray,
-            width: 1,
+            color: Colors.grey,
+            width: 0.5,
           ),
           //bottom: BorderSide(color: Colors.grey, width: 0.5),
         ),

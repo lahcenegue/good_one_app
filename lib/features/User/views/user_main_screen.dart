@@ -6,6 +6,7 @@ import '../../../Core/Constants/app_assets.dart';
 import '../../../Core/Constants/app_colors.dart';
 import '../../../Providers/user_manager_provider.dart';
 
+import 'services_screen.dart';
 import 'user_home_screen.dart';
 import 'user_profile_screen.dart';
 
@@ -39,12 +40,7 @@ class UserMainScreen extends StatelessWidget {
           ),
         );
       case 2:
-        return Center(
-          child: Text(
-            'comingSoon',
-            style: const TextStyle(fontSize: 20),
-          ),
-        );
+        return const ServicesScreen();
       case 3:
         return const UserProfileScreen();
       default:

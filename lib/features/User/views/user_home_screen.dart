@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../Core/Constants/app_colors.dart';
 import '../../../Core/Errors/error_widget.dart';
@@ -9,6 +8,8 @@ import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/user_manager_provider.dart';
 import '../Widgets/contractor_list_item.dart';
 import '../Widgets/service_grid_item.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
@@ -163,7 +164,7 @@ class UserHomeScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                //TODO
+                userManager.setCurrentIndex(2);
               },
               child: Text(
                 AppLocalizations.of(context)!.seeAll,

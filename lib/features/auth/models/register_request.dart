@@ -5,6 +5,7 @@ class RegisterRequest {
   final String email;
   final String phone;
   final String password;
+  final String type;
   final File image;
 
   RegisterRequest({
@@ -12,6 +13,7 @@ class RegisterRequest {
     required this.email,
     required this.phone,
     required this.password,
+    required this.type,
     required this.image,
   });
 
@@ -21,12 +23,13 @@ class RegisterRequest {
       'email': email,
       'phone': phone,
       'password': password,
+      'type': type,
     };
   }
 
   Map<String, File> toFiles() {
     return {
-      'image': image,
+      'picture': image,
     };
   }
 }

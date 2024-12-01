@@ -53,7 +53,7 @@ class ApiService {
   // Generic GET method
   static Future<ApiResponse<T>> get<T>({
     required String url,
-    required T Function(Map<String, dynamic>) fromJson,
+    required T Function(dynamic) fromJson,
     String? token,
   }) async {
     try {
@@ -64,7 +64,19 @@ class ApiService {
           )
           .timeout(_timeout);
 
-      return _handleResponse(response, fromJson);
+      // First decode the response body
+      final dynamic decodedBody = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        try {
+          final T parsedData = fromJson(decodedBody);
+          return ApiResponse.success(parsedData);
+        } catch (e) {
+          return ApiResponse.error('Data parsing error: $e');
+        }
+      }
+
+      return ApiResponse.error(decodedBody['message'] ?? 'An error occurred');
     } catch (e) {
       return ApiResponse.error(_getErrorMessage(e));
     }
@@ -97,7 +109,10 @@ class ApiService {
       }
 
       final streamedResponse = await request.send().timeout(_timeout);
+
       final response = await http.Response.fromStream(streamedResponse);
+
+      print(response.body);
 
       return _handleResponse(response, fromJson);
     } catch (e) {

@@ -137,6 +137,25 @@
     "description": "Title for account creation"
   },
 
+  "@onboardingTitle1": {
+    "description": "Title for the first onboarding screen"
+  },
+  "@onboardingDesc1": {
+    "description": "Description for the first onboarding screen"
+  },
+  "@onboardingTitle2": {
+    "description": "Title for the second onboarding screen"
+  },
+  "@onboardingDesc2": {
+    "description": "Description for the second onboarding screen"
+  },
+  "@back": {
+    "description": "Text for back button"
+  },
+  "@next": {
+  "description": "Text for the next button to navigate to the following screen or step"
+  },
+
 
   "welcomeMessage": "Welcome to",
   "languageSelectionTitle": "Language selection",
@@ -182,5 +201,30 @@
   "takePhoto": "Take Photo",
   "chooseFromGallery": "Choose from Gallery",
   "imageRequired": "Profile picture is required",
-  "createAccount": "Create your account now"
+  "createAccount": "Create your account now",
+  "onboardingTitle1": "home services with a professional touch!",
+  "onboardingDesc1": "Discover quick and easy solutions for all your home needs, from plumbing and electrical to cleaning and renovation. Let us make your home more comfortable.",
+  "onboardingTitle2": "We're here to make your life easier!",
+  "onboardingDesc2": "We offer a comprehensive range of high-quality, reliable home services, so you can enjoy your time at home without any worries.",
+  "back": "Back",
+  "next": "Next",
+  "home": "Home",
+  "booking": "Booking",
+  "services": "Services",
+  "profile": "Profile",
+  "hello": "Hello",
+  "search": "Search",
+  "ourServices": "Our services",
+  "seeAll": "See all",
+  "bestContractors": "Best Contractors",
+  "yearsExperience": "$years Years Experience",
+  "@yearsExperience": {
+    "description": "Years of experience text",
+    "placeholders": {
+      "years": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  }
 }

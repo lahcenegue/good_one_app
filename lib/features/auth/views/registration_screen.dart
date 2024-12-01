@@ -19,9 +19,6 @@ class RegistrationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
-        // Set context for translations
-        auth.setContext(context);
-
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -101,9 +98,7 @@ class RegistrationScreen extends StatelessWidget {
             padding: EdgeInsets.only(top: context.getHeight(8)),
             child: Text(
               auth.imageError!,
-              style: AppTextStyles.text(context).copyWith(
-                color: AppColors.oxblood,
-              ),
+              style: AppTextStyles.textButton(context),
             ),
           ),
       ],
@@ -125,7 +120,7 @@ class RegistrationScreen extends StatelessWidget {
                 title: Text(AppLocalizations.of(context)!.takePhoto),
                 onTap: () {
                   Navigator.pop(context);
-                  auth.pickImage(ImageSource.camera);
+                  auth.pickImage(context, ImageSource.camera);
                 },
               ),
               ListTile(
@@ -133,7 +128,7 @@ class RegistrationScreen extends StatelessWidget {
                 title: Text(AppLocalizations.of(context)!.chooseFromGallery),
                 onTap: () {
                   Navigator.pop(context);
-                  auth.pickImage(ImageSource.gallery);
+                  auth.pickImage(context, ImageSource.gallery);
                 },
               ),
             ],
@@ -154,7 +149,7 @@ class RegistrationScreen extends StatelessWidget {
             controller: auth.fullNameController,
             label: AppLocalizations.of(context)!.fullName,
             hintText: AppLocalizations.of(context)!.enterFullName,
-            validator: auth.validateFullName,
+            validator: (value) => auth.validateFullName(value, context),
           ),
           SizedBox(height: context.getHeight(16)),
           SharedAuthWidgets.buildInputField(
@@ -162,7 +157,7 @@ class RegistrationScreen extends StatelessWidget {
             controller: auth.emailController,
             label: AppLocalizations.of(context)!.email,
             hintText: AppLocalizations.of(context)!.enterEmail,
-            validator: auth.validateEmail,
+            validator: (value) => auth.validateEmail(value, context),
             keyboardType: TextInputType.emailAddress,
           ),
           SizedBox(height: context.getHeight(16)),
@@ -171,7 +166,7 @@ class RegistrationScreen extends StatelessWidget {
             controller: auth.phoneController,
             label: AppLocalizations.of(context)!.phoneNumber,
             hintText: AppLocalizations.of(context)!.enterPhoneNumber,
-            validator: auth.validatePhone,
+            validator: (value) => auth.validatePhone(value, context),
             keyboardType: TextInputType.phone,
           ),
           SizedBox(height: context.getHeight(16)),
@@ -182,7 +177,7 @@ class RegistrationScreen extends StatelessWidget {
             hintText: AppLocalizations.of(context)!.enterPassword,
             obscurePassword: auth.obscurePassword,
             toggleVisibility: auth.togglePasswordVisibility,
-            validator: auth.validatePassword,
+            validator: (value) => auth.validatePassword(value, context),
           ),
           SizedBox(height: context.getHeight(16)),
           SharedAuthWidgets.buildPasswordField(
@@ -193,6 +188,7 @@ class RegistrationScreen extends StatelessWidget {
             obscurePassword: auth.obscureConfirmPassword,
             toggleVisibility: auth.toggleConfirmPasswordVisibility,
             validator: (value) => auth.validateConfirmPassword(
+              context,
               value,
               auth.passwordController.text,
             ),
@@ -201,7 +197,7 @@ class RegistrationScreen extends StatelessWidget {
           PrimaryButton(
             text: AppLocalizations.of(context)!.signUp,
             isLoading: auth.isLoading,
-            onPressed: auth.register,
+            onPressed: () => auth.register(context),
           ),
         ],
       ),
@@ -224,9 +220,7 @@ class RegistrationScreen extends StatelessWidget {
             },
             child: Text(
               AppLocalizations.of(context)!.signIn,
-              style: AppTextStyles.subTitle(context).copyWith(
-                color: AppColors.oxblood,
-              ),
+              style: AppTextStyles.textButton(context),
             ),
           ),
         ],

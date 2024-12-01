@@ -5,4 +5,9 @@ abstract class AppLinks {
   // Auth endpoints
   static const String login = '$api/auth/login';
   static const String register = '$api/auth/register';
+
+  //User endpoints
+  static const String categories = '$api/categories';
+  static const String contractors = '$api/services';
+  static const String image = '$baseUrl/storage/images';
 }

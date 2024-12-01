@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'Core/Themes/app_theme.dart';
 import 'Core/Utils/navigation_service.dart';
 import 'Providers/app_settings_provider.dart';
 import 'Providers/auth_provider.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'Providers/user_manager_provider.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +31,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => UserManagerProvider()),
       ],
       child: Consumer<AppSettingsProvider>(
         builder: (context, appSettings, _) {

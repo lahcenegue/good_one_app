@@ -7,10 +7,9 @@ import '../../../Core/Themes/app_text_styles.dart';
 import '../../../Core/Utils/navigation_service.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/auth_provider.dart';
+import '../Widgets/shared_auth_widgets.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import '../Widgets/shared_auth_widgets.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -19,9 +18,6 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
-        // Set context for translations
-        auth.setContext(context);
-
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -64,7 +60,7 @@ class LoginScreen extends StatelessWidget {
             controller: auth.emailController,
             label: AppLocalizations.of(context)!.email,
             hintText: AppLocalizations.of(context)!.enterEmail,
-            validator: auth.validateEmail,
+            validator: (value) => auth.validateEmail(value, context),
             keyboardType: TextInputType.emailAddress,
           ),
           SizedBox(height: context.getHeight(16)),
@@ -75,14 +71,14 @@ class LoginScreen extends StatelessWidget {
             hintText: AppLocalizations.of(context)!.enterPassword,
             obscurePassword: auth.obscurePassword,
             toggleVisibility: auth.togglePasswordVisibility,
-            validator: auth.validatePassword,
+            validator: (value) => auth.validatePassword(value, context),
           ),
           _buildForgotPassword(context),
           SizedBox(height: context.getHeight(20)),
           PrimaryButton(
             text: AppLocalizations.of(context)!.loginButton,
             isLoading: auth.isLoading,
-            onPressed: auth.login,
+            onPressed: () => auth.login(context),
           ),
         ],
       ),
@@ -99,10 +95,7 @@ class LoginScreen extends StatelessWidget {
         },
         child: Text(
           AppLocalizations.of(context)!.forgotPassword,
-          style: AppTextStyles.text(context).copyWith(
-            color: AppColors.oxblood,
-            fontSize: context.getAdaptiveSize(12),
-          ),
+          style: AppTextStyles.textButton(context),
         ),
       ),
     );
@@ -124,9 +117,7 @@ class LoginScreen extends StatelessWidget {
             },
             child: Text(
               AppLocalizations.of(context)!.signUp,
-              style: AppTextStyles.subTitle(context).copyWith(
-                color: AppColors.oxblood,
-              ),
+              style: AppTextStyles.textButton(context),
             ),
           ),
         ],

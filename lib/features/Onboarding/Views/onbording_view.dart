@@ -3,33 +3,34 @@ import 'package:good_one_app/Core/Themes/app_text_styles.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
 
-import '../../Core/Constants/app_assets.dart';
-import '../../Core/Widgets/custom_buttons.dart';
-import '../../Core/Widgets/dot_indicator.dart';
+import '../../../Core/Constants/app_assets.dart';
+import '../../../Core/Widgets/custom_buttons.dart';
+import '../Models/onboard_model.dart';
+import '../widgets/dot_indicator.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../Providers/app_settings_provider.dart';
+import '../../../Providers/app_settings_provider.dart';
+import '../widgets/onboard_content.dart';
 
 class OnBordingView extends StatelessWidget {
   const OnBordingView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<Onboard> demoData = [
-      Onboard(
+    final List<OnboardModel> onboardingData = [
+      OnboardModel(
         image: AppAssets.onBordingImage1,
-        title: 'home services with a\nprofessional touch!',
-        description:
-            'Discover quick and easy solutions for all your home needs, from plumbing and electrical to cleaning and renovation. Let us make your home more comfortable.',
+        title: AppLocalizations.of(context)!.onboardingTitle1,
+        description: AppLocalizations.of(context)!.onboardingDesc1,
       ),
-      Onboard(
+      OnboardModel(
         image: AppAssets.onBordingImage2,
-        title: "We're here to make your life\neasier!",
-        description:
-            'We offer a comprehensive range of high-quality, reliable home services, so you can enjoy your time at home without any worries.',
+        title: AppLocalizations.of(context)!.onboardingTitle2,
+        description: AppLocalizations.of(context)!.onboardingDesc2,
       ),
     ];
+
     return Consumer<AppSettingsProvider>(
       builder: (context, appsettings, _) {
         return Scaffold(
@@ -40,11 +41,11 @@ class OnBordingView extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildTopRow(context, appsettings, demoData.length),
+                _buildTopRow(context, appsettings, onboardingData.length),
                 Expanded(
-                  child: _buildPageView(context, appsettings, demoData),
+                  child: _buildPageView(context, appsettings, onboardingData),
                 ),
-                _buildBottomRow(context, appsettings, demoData),
+                _buildBottomRow(context, appsettings, onboardingData),
                 SizedBox(height: context.getWidth(30)),
               ],
             ),
@@ -83,7 +84,7 @@ class OnBordingView extends StatelessWidget {
   Widget _buildPageView(
     BuildContext context,
     AppSettingsProvider appsettings,
-    List<Onboard> data,
+    List<OnboardModel> data,
   ) {
     return PageView.builder(
       controller: appsettings.pageController,
@@ -97,22 +98,11 @@ class OnBordingView extends StatelessWidget {
     );
   }
 
-  Widget _buildDotsIndicator(
-      BuildContext context, AppSettingsProvider appsettings, int length) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        length,
-        (index) => Padding(
-          padding: EdgeInsets.only(right: context.getWidth(10)),
-          child: DotIndicator(isActive: index == appsettings.pageIndex),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomRow(BuildContext context, AppSettingsProvider appsettings,
-      List<Onboard> data) {
+  Widget _buildBottomRow(
+    BuildContext context,
+    AppSettingsProvider appsettings,
+    List<OnboardModel> data,
+  ) {
     return Column(
       children: [
         _buildDotsIndicator(context, appsettings, data.length),
@@ -121,7 +111,7 @@ class OnBordingView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SmallSecondaryButton(
-              text: 'Back',
+              text: AppLocalizations.of(context)!.back,
               onPressed: () {
                 appsettings.pageController.previousPage(
                   duration: const Duration(milliseconds: 300),
@@ -130,7 +120,7 @@ class OnBordingView extends StatelessWidget {
               },
             ),
             SmallPrimaryButton(
-              text: 'Next',
+              text: AppLocalizations.of(context)!.next,
               onPressed: () async {
                 if (appsettings.pageIndex == data.length - 1) {
                   await appsettings.completeOnboarding();
@@ -147,50 +137,21 @@ class OnBordingView extends StatelessWidget {
       ],
     );
   }
-}
 
-class Onboard {
-  final String image, title, description;
-  Onboard({
-    required this.image,
-    required this.title,
-    required this.description,
-  });
-}
-
-class OnBoardContent extends StatelessWidget {
-  final String image, title, description;
-
-  const OnBoardContent({
-    super.key,
-    required this.image,
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Image.asset(
-          image,
-          width: context.screenWidth,
-          fit: BoxFit.contain,
+  Widget _buildDotsIndicator(
+    BuildContext context,
+    AppSettingsProvider appsettings,
+    int length,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(
+        length,
+        (index) => Padding(
+          padding: EdgeInsets.only(right: context.getWidth(10)),
+          child: DotIndicator(isActive: index == appsettings.pageIndex),
         ),
-        const Spacer(),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.title(context),
-        ),
-        SizedBox(height: context.getHeight(16)),
-        Text(
-          description,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.text(context),
-        ),
-        const Spacer(),
-      ],
+      ),
     );
   }
 }

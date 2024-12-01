@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/features/auth/views/registration_screen.dart';
+import 'package:good_one_app/Features/auth/views/registration_screen.dart';
 
-import '../../Views/Both/language_selection_view.dart';
-import '../../features/auth/views/login_screen.dart';
-import '../../features/on_bording/onbording_view.dart';
-import '../../Views/User/user_home_screen.dart';
+import '../../Features/Setup/Views/account_type_screen.dart';
+import '../../Features/Setup/Views/language_selection_screen.dart';
+import '../../Features/auth/views/login_screen.dart';
+import '../../Features/Onboarding/Views/onbording_view.dart';
+import '../../Features/User/views/user_home_screen.dart';
 
 class AppRoutes {
   // Both Screens
@@ -13,6 +14,7 @@ class AppRoutes {
   static const String onBording = '/onBording';
   static const String login = '/login';
   static const String register = '/register';
+  static const String accountSelection = '/accountSelection';
 
   //User Screens
   static const String userHome = '/userHomeScreen';
@@ -25,6 +27,8 @@ class AppRoutes {
       onBording: (BuildContext context) => const OnBordingView(),
       login: (BuildContext context) => const LoginScreen(),
       register: (BuildContext context) => const RegistrationScreen(),
+      accountSelection: (BuildContext context) =>
+          const AccountTypeSelectionOverlay(),
     };
   }
 }

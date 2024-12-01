@@ -12,4 +12,15 @@ abstract class AppAssets {
 
   // Icons
   static const String icon = '$_iconsPath/icon.png';
+  static const String bookMark = '$_iconsPath/Bookmark.png';
+  static const String bookMark2 = '$_iconsPath/Bookmark2.png';
+
+  static const String home = '$_iconsPath/Home.png';
+  static const String booking = '$_iconsPath/booking.png';
+  static const String services = '$_iconsPath/services.png';
+  static const String profile = '$_iconsPath/profile.png';
+  static const String home2 = '$_iconsPath/Home2.png';
+  static const String booking2 = '$_iconsPath/booking2.png';
+  static const String services2 = '$_iconsPath/services2.png';
+  static const String profile2 = '$_iconsPath/profile2.png';
 }

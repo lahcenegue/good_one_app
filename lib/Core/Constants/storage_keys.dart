@@ -3,6 +3,7 @@ abstract class StorageKeys {
   static const String firstLaunch = 'first_launch';
   static const String languageKey = 'language_key';
   static const String onboardingKey = 'onboarding_completed';
+  static const String accountTypeKey = 'account_type';
 
   // User Data
   static const String phoneKey = 'phoneNumber';

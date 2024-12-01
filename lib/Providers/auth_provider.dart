@@ -6,16 +6,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Data/Models/auth_model.dart';
+import '../Core/Constants/storage_keys.dart';
 import '../Core/Errors/error_handler.dart';
 import '../Core/Errors/failures.dart';
 import '../Core/Utils/navigation_service.dart';
 
-import '../features/auth/Services/auth_api.dart';
-import '../features/auth/models/auth_request.dart';
+import '../Features/auth/Services/auth_api.dart';
+import '../Features/auth/models/auth_request.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../features/auth/models/register_request.dart';
+import '../Features/auth/models/register_request.dart';
 
 class AuthProvider with ChangeNotifier {
   // Authentication State
@@ -24,7 +25,7 @@ class AuthProvider with ChangeNotifier {
   Failure? _failure;
   String? _error;
 
-  BuildContext? _context;
+  //BuildContext? _context;
 
   // Form Controllers
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -56,9 +57,6 @@ class AuthProvider with ChangeNotifier {
   String? get imageError => _imageError;
 
   // UI Methods
-  void setContext(BuildContext context) {
-    _context = context;
-  }
 
   void togglePasswordVisibility() {
     _obscurePassword = !_obscurePassword;
@@ -70,63 +68,54 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  String? validateFullName(String? value) {
-    if (_context == null) return null;
-
+  String? validateFullName(String? value, BuildContext context) {
     if (value == null || value.isEmpty) {
-      return AppLocalizations.of(_context!)!.fullNameRequired;
+      return AppLocalizations.of(context)!.fullNameRequired;
     }
     return null;
   }
 
-  String? validateEmail(String? value) {
-    if (_context == null) return null;
-
+  String? validateEmail(String? value, BuildContext context) {
     if (value == null || value.isEmpty) {
-      return AppLocalizations.of(_context!)!.emailRequired;
+      return AppLocalizations.of(context)!.emailRequired;
     }
     if (!value.contains('@')) {
-      return AppLocalizations.of(_context!)!.invalidEmail;
+      return AppLocalizations.of(context)!.invalidEmail;
     }
     return null;
   }
 
-  String? validatePhone(String? value) {
-    if (_context == null) return null;
-
+  String? validatePhone(String? value, BuildContext context) {
     if (value == null || value.isEmpty) {
-      return AppLocalizations.of(_context!)!.phoneRequired;
+      return AppLocalizations.of(context)!.phoneRequired;
     }
     // Add your phone validation logic here
     return null;
   }
 
-  String? validatePassword(String? value) {
-    if (_context == null) return null;
-
+  String? validatePassword(String? value, BuildContext context) {
     if (value == null || value.isEmpty) {
-      return AppLocalizations.of(_context!)!.passwordRequired;
+      return AppLocalizations.of(context)!.passwordRequired;
     }
     if (value.length < 6) {
-      return AppLocalizations.of(_context!)!.passwordTooShort;
+      return AppLocalizations.of(context)!.passwordTooShort;
     }
     return null;
   }
 
-  String? validateConfirmPassword(String? value, String password) {
-    if (_context == null) return null;
-
+  String? validateConfirmPassword(
+      BuildContext context, String? value, String password) {
     if (value == null || value.isEmpty) {
-      return AppLocalizations.of(_context!)!.confirmPasswordRequired;
+      return AppLocalizations.of(context)!.confirmPasswordRequired;
     }
     if (value != password) {
-      return AppLocalizations.of(_context!)!.passwordsDoNotMatch;
+      return AppLocalizations.of(context)!.passwordsDoNotMatch;
     }
     return null;
   }
 
 // Authentication Methods
-  Future<void> login() async {
+  Future<void> login(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
 
     try {
@@ -143,7 +132,7 @@ class AuthProvider with ChangeNotifier {
       if (response.success) {
         _authData = response.data;
         await _saveAuthData();
-        NavigationService.navigateToAndReplace(AppRoutes.userHome);
+        await NavigationService.navigateToAndReplace(AppRoutes.userHome);
       } else {
         _error = response.error;
         notifyListeners();
@@ -169,13 +158,11 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> register() async {
+  Future<void> register(BuildContext context) async {
     if (!registrationFormKey.currentState!.validate()) return;
 
     if (_selectedImage == null) {
-      _imageError = _context != null
-          ? AppLocalizations.of(_context!)!.imageRequired
-          : 'Profile picture is required';
+      _imageError = AppLocalizations.of(context)!.imageRequired;
       notifyListeners();
       return;
     }
@@ -184,12 +171,18 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearErrors();
 
+      final sharedPrefs = await SharedPreferences.getInstance();
+      final accountType = sharedPrefs.getString(StorageKeys.accountTypeKey);
+
+      print(accountType);
+
       final request = RegisterRequest(
         image: _selectedImage!,
         fullName: fullNameController.text.trim(),
         email: emailController.text.trim(),
         phone: phoneController.text.trim(),
         password: passwordController.text,
+        type: accountType!,
       );
 
       final response = await AuthApi.register(request);
@@ -227,7 +220,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Private Helper Methods
-  Future<void> pickImage(ImageSource source) async {
+  Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
@@ -242,9 +235,10 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      _imageError = _context != null
-          ? AppLocalizations.of(_context!)!.generalError
-          : 'Failed to pick image';
+      if (context.mounted) {
+        _imageError = AppLocalizations.of(context)!.generalError;
+      }
+
       notifyListeners();
     }
   }
@@ -273,37 +267,35 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void _handleError(dynamic error) {
-    if (_context == null) return;
-
+  void _handleError(dynamic error, [BuildContext? context]) {
     if (error is AuthFailure) {
       _failure = error;
-      _error = _getLocalizedErrorMessage(error.code);
+      _error = _getLocalizedErrorMessage(error.code, context);
     } else {
       _failure = ErrorHandler.handleException(error);
-      _error = _getLocalizedErrorMessage(_failure?.code);
+      _error = _getLocalizedErrorMessage(_failure?.code, context);
     }
 
     notifyListeners();
   }
 
-  String? _getLocalizedErrorMessage(String? errorCode) {
-    if (_context == null) return null;
+  String? _getLocalizedErrorMessage(String? errorCode,
+      [BuildContext? context]) {
+    if (context == null) return null;
 
     switch (errorCode) {
       case 'auth_error':
-        return AppLocalizations.of(_context!)!.authError;
+        return AppLocalizations.of(context)!.authError;
       case 'network_error':
-        return AppLocalizations.of(_context!)!.networkError;
+        return AppLocalizations.of(context)!.networkError;
       case 'storage_error':
-        return AppLocalizations.of(_context!)!.storageError;
+        return AppLocalizations.of(context)!.storageError;
       case 'invalid_credentials':
-        return AppLocalizations.of(_context!)!.invalidCredentials;
+        return AppLocalizations.of(context)!.invalidCredentials;
       case 'invalid_response':
-        return AppLocalizations.of(_context!)!.serverError;
+        return AppLocalizations.of(context)!.serverError;
       default:
-        return _failure?.message ??
-            AppLocalizations.of(_context!)!.generalError;
+        return _failure?.message ?? AppLocalizations.of(context)!.generalError;
     }
   }
 

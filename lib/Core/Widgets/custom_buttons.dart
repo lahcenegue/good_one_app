@@ -53,6 +53,52 @@ class PrimaryButton extends StatelessWidget {
   }
 }
 
+class SecondaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final bool isPressed;
+
+  const SecondaryButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    required this.isPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: context.getWidth(50),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor:
+              isPressed ? const Color(0xFFFCCDCE) : AppColors.dimGray,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: 2,
+              color: isPressed ? AppColors.primaryColor : Colors.transparent,
+            ),
+            borderRadius: BorderRadius.circular(
+              SizeConfig.adaptiveSize(8, context),
+            ),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: context.getAdaptiveSize(16),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class SmallPrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;

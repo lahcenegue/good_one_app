@@ -132,7 +132,7 @@ class AuthProvider with ChangeNotifier {
       if (response.success) {
         _authData = response.data;
         await _saveAuthData();
-        await NavigationService.navigateToAndReplace(AppRoutes.userHome);
+        await NavigationService.navigateToAndReplace(AppRoutes.userMain);
       } else {
         _error = response.error;
         notifyListeners();
@@ -174,8 +174,6 @@ class AuthProvider with ChangeNotifier {
       final sharedPrefs = await SharedPreferences.getInstance();
       final accountType = sharedPrefs.getString(StorageKeys.accountTypeKey);
 
-      print(accountType);
-
       final request = RegisterRequest(
         image: _selectedImage!,
         fullName: fullNameController.text.trim(),
@@ -190,7 +188,7 @@ class AuthProvider with ChangeNotifier {
       if (response.success) {
         _authData = response.data;
         await _saveAuthData();
-        NavigationService.navigateToAndReplace(AppRoutes.userHome);
+        NavigationService.navigateToAndReplace(AppRoutes.userMain);
       } else {
         _error = response.error;
         notifyListeners();

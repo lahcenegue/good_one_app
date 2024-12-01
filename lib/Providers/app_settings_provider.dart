@@ -104,7 +104,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
     } else if (!hasCompletedOnboarding) {
       _initialRoute = AppRoutes.onBording;
     } else {
-      _initialRoute = AppRoutes.userHome;
+      _initialRoute = AppRoutes.userMain;
     }
   }
 

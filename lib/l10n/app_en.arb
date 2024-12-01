@@ -218,13 +218,13 @@
   "seeAll": "See all",
   "bestContractors": "Best Contractors",
   "yearsExperience": "$years Years Experience",
-  "@yearsExperience": {
-    "description": "Years of experience text",
-    "placeholders": {
-      "years": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  }
+  "edit": "Edit",
+  "phone": "Phone",
+  "location": "Location",
+  "accountDetails": "Account details",
+  "language": "Language",
+  "savedAddress": "Saved address",
+  "support": "Support",
+  "privacyPolicy": "Privacy and Policy"
+ 
 }

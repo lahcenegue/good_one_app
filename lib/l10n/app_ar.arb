@@ -61,6 +61,14 @@
   "ourServices": "خدماتنا",
   "seeAll": "عرض الكل",
   "bestContractors": "أفضل المقاولين",
-  "yearsExperience": "$years سنوات خبرة"
+  "yearsExperience": "$years سنوات خبرة",
+  "edit": "تعديل",
+  "phone": "الهاتف",
+  "location": "الموقع",
+  "accountDetails": "تفاصيل الحساب",
+  "language": "اللغة",
+  "savedAddress": "العناوين المحفوظة",
+  "support": "الدعم",
+  "privacyPolicy": "الخصوصية والسياسة"
  
 }

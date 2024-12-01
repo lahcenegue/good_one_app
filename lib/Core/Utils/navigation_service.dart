@@ -5,7 +5,7 @@ import '../../Features/Setup/Views/account_type_screen.dart';
 import '../../Features/Setup/Views/language_selection_screen.dart';
 import '../../Features/auth/views/login_screen.dart';
 import '../../Features/Onboarding/Views/onbording_view.dart';
-import '../../Features/User/views/user_home_screen.dart';
+import '../../Features/User/views/user_main_screen.dart';
 
 class AppRoutes {
   // Both Screens
@@ -17,13 +17,13 @@ class AppRoutes {
   static const String accountSelection = '/accountSelection';
 
   //User Screens
-  static const String userHome = '/userHomeScreen';
+  static const String userMain = '/userMainScreen';
 
   static Map<String, WidgetBuilder> define() {
     return {
       languageSelection: (BuildContext context) =>
           const LanguageSelectionScreen(),
-      userHome: (BuildContext context) => const UserHomeScreen(),
+      userMain: (BuildContext context) => const UserMainScreen(),
       onBording: (BuildContext context) => const OnBordingView(),
       login: (BuildContext context) => const LoginScreen(),
       register: (BuildContext context) => const RegistrationScreen(),

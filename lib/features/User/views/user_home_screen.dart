@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../Core/Constants/app_assets.dart';
 import '../../../Core/Constants/app_colors.dart';
 import '../../../Core/Errors/error_widget.dart';
 import '../../../Core/Themes/app_text_styles.dart';
+import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/user_manager_provider.dart';
 import '../Widgets/contractor_list_item.dart';
 import '../Widgets/service_grid_item.dart';
-
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
@@ -19,47 +17,36 @@ class UserHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        return Scaffold(
-          body: SafeArea(
-            child: RefreshIndicator(
-              onRefresh: userManager.initialize,
-              child: _buildBody(context, userManager),
+        if (userManager.error != null) {
+          return AppErrorWidget(
+            message: userManager.error!,
+            onRetry: userManager.initialize,
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: userManager.initialize,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.getWidth(20),
+                vertical: context.getHeight(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSearchBar(context, userManager),
+                  SizedBox(height: context.getHeight(20)),
+                  _buildServicesSection(context, userManager),
+                  SizedBox(height: context.getHeight(20)),
+                  _buildContractorsSection(context, userManager),
+                ],
+              ),
             ),
           ),
-          bottomNavigationBar: _buildBottomNavigation(context, userManager),
         );
       },
-    );
-  }
-
-  Widget _buildBody(BuildContext context, UserManagerProvider userManager) {
-    if (userManager.error != null) {
-      return AppErrorWidget(
-        message: userManager.error!,
-        onRetry: userManager.initialize,
-      );
-    }
-
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: context.getWidth(20),
-          vertical: context.getHeight(10),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // _buildHeader(context),
-            SizedBox(height: context.getHeight(20)),
-            _buildSearchBar(context, userManager),
-            SizedBox(height: context.getHeight(20)),
-            _buildServicesSection(context, userManager),
-            SizedBox(height: context.getHeight(20)),
-            _buildContractorsSection(context, userManager),
-          ],
-        ),
-      ),
     );
   }
 
@@ -94,51 +81,51 @@ class UserHomeScreen extends StatelessWidget {
   //   );
   // }
 
-  Widget _buildNotificationIcon(BuildContext context) {
-    return Stack(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () {},
-        ),
-        Positioned(
-          right: 8,
-          top: 8,
-          child: Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildNotificationIcon(BuildContext context) {
+  //   return Stack(
+  //     children: [
+  //       IconButton(
+  //         icon: const Icon(Icons.notifications_outlined),
+  //         onPressed: () {},
+  //       ),
+  //       Positioned(
+  //         right: 8,
+  //         top: 8,
+  //         child: Container(
+  //           width: 8,
+  //           height: 8,
+  //           decoration: const BoxDecoration(
+  //             color: AppColors.primaryColor,
+  //             shape: BoxShape.circle,
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildMessageIcon(BuildContext context) {
-    return Stack(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.chat_bubble_outline),
-          onPressed: () {},
-        ),
-        Positioned(
-          right: 8,
-          top: 8,
-          child: Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildMessageIcon(BuildContext context) {
+  //   return Stack(
+  //     children: [
+  //       IconButton(
+  //         icon: const Icon(Icons.chat_bubble_outline),
+  //         onPressed: () {},
+  //       ),
+  //       Positioned(
+  //         right: 8,
+  //         top: 8,
+  //         child: Container(
+  //           width: 8,
+  //           height: 8,
+  //           decoration: const BoxDecoration(
+  //             color: AppColors.primaryColor,
+  //             shape: BoxShape.circle,
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildSearchBar(
       BuildContext context, UserManagerProvider userManager) {
@@ -247,56 +234,6 @@ class UserHomeScreen extends StatelessWidget {
               );
             },
           ),
-      ],
-    );
-  }
-
-  Widget _buildBottomNavigation(
-    BuildContext context,
-    UserManagerProvider userManager,
-  ) {
-    return BottomNavigationBar(
-      backgroundColor: Colors.white,
-      currentIndex: userManager.currentIndex,
-      onTap: userManager.setCurrentIndex,
-      selectedItemColor: AppColors.primaryColor,
-      unselectedItemColor: AppColors.hintColor,
-      type: BottomNavigationBarType.fixed,
-      items: [
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            userManager.currentIndex == 0 ? AppAssets.home2 : AppAssets.home,
-            width: context.getAdaptiveSize(24),
-          ),
-          label: AppLocalizations.of(context)!.home,
-        ),
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            userManager.currentIndex == 1
-                ? AppAssets.booking2
-                : AppAssets.booking,
-            width: context.getAdaptiveSize(24),
-          ),
-          label: AppLocalizations.of(context)!.booking,
-        ),
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            userManager.currentIndex == 2
-                ? AppAssets.services2
-                : AppAssets.services,
-            width: context.getAdaptiveSize(24),
-          ),
-          label: AppLocalizations.of(context)!.services,
-        ),
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            userManager.currentIndex == 3
-                ? AppAssets.profile2
-                : AppAssets.profile,
-            width: context.getAdaptiveSize(24),
-          ),
-          label: AppLocalizations.of(context)!.profile,
-        ),
       ],
     );
   }

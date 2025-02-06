@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Constants/app_colors.dart';
+import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/Constants/app_assets.dart';
-import '../../../Core/Themes/app_text_styles.dart';
-import '../../../Core/Widgets/custom_buttons.dart';
+import '../../../Core/presentation/resources/app_assets.dart';
+import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Providers/app_settings_provider.dart';
 import '../widgets/language_option_tile.dart';
 
@@ -34,50 +34,9 @@ class LanguageSelectionScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: context.getHeight(20)),
-                    Center(
-                      child: Image.asset(
-                        AppAssets.languageIllustration,
-                        height: 150,
-                      ),
-                    ),
-                    SizedBox(height: context.getHeight(24)),
-                    Row(
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.welcomeMessage,
-                          style: AppTextStyles.title(context),
-                        ),
-                        Image.asset(
-                          AppAssets.appNameImage,
-                          height: context.getHeight(32),
-                          color: AppColors.primaryColor,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: context.getHeight(4)),
-                    Text(
-                      AppLocalizations.of(context)!.chooseLanguagePrompt,
-                      style: AppTextStyles.subTitle(context),
-                    ),
-                    SizedBox(height: context.getHeight(32)),
-                    ...appSettings.supportedLanguages.map(
-                      (language) => LanguageOptionTile(
-                        option: language,
-                        isSelected:
-                            appSettings.appLocale.languageCode == language.code,
-                        onTap: () =>
-                            appSettings.setLanguage(Locale(language.code)),
-                      ),
-                    ),
-                    SizedBox(height: context.getHeight(32)),
-                    PrimaryButton(
-                      text: AppLocalizations.of(context)!.nextButton,
-                      onPressed: () async {
-                        await appSettings.setLanguage(appSettings.appLocale);
-                      },
-                    ),
-                    SizedBox(height: context.getHeight(50)),
+                    _buildHeader(context),
+                    _buildLanguageOptions(context, appSettings),
+                    _buildNavigationButton(context, appSettings),
                   ],
                 ),
               ),
@@ -85,6 +44,80 @@ class LanguageSelectionScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: context.getHeight(20)),
+        Center(
+          child: Image.asset(
+            AppAssets.languageIllustration,
+            height: 150,
+          ),
+        ),
+        SizedBox(height: context.getHeight(24)),
+        Row(
+          children: [
+            Text(
+              AppLocalizations.of(context)!.welcomeMessage,
+              style: AppTextStyles.title(context),
+            ),
+            Image.asset(
+              AppAssets.appNameImage,
+              height: context.getHeight(32),
+              color: AppColors.primaryColor,
+            ),
+          ],
+        ),
+        SizedBox(height: context.getHeight(4)),
+        Text(
+          AppLocalizations.of(context)!.chooseLanguagePrompt,
+          style: AppTextStyles.subTitle(context),
+        ),
+        SizedBox(height: context.getHeight(32)),
+      ],
+    );
+  }
+
+  Widget _buildLanguageOptions(
+    BuildContext context,
+    AppSettingsProvider appSettings,
+  ) {
+    return Column(
+      children: [
+        ...appSettings.supportedLanguages.map(
+          (language) => LanguageOptionTile(
+            option: language,
+            isSelected: appSettings.appLocale.languageCode == language.code,
+            onTap: () async {
+              await appSettings.setLanguage(Locale(language.code));
+            },
+          ),
+        ),
+        SizedBox(height: context.getHeight(32)),
+      ],
+    );
+  }
+
+  Widget _buildNavigationButton(
+    BuildContext context,
+    AppSettingsProvider appSettings,
+  ) {
+    return Column(
+      children: [
+        PrimaryButton(
+          text: AppLocalizations.of(context)!.nextButton,
+          onPressed: () async {
+            if (context.mounted) {
+              await appSettings.handleLanguageSelectionNavigation();
+            }
+          },
+        ),
+        SizedBox(height: context.getHeight(50)),
+      ],
     );
   }
 }

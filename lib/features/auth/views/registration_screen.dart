@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Widgets/custom_buttons.dart';
+import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/Constants/app_colors.dart';
-import '../../../Core/Themes/app_text_styles.dart';
+import '../../../Core/presentation/resources/app_colors.dart';
+import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/auth_provider.dart';
 

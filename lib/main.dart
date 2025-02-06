@@ -1,21 +1,32 @@
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'Core/Themes/app_theme.dart';
-import 'Core/Utils/navigation_service.dart';
+import 'Core/Navigation/app_routes.dart';
+import 'Core/presentation/Theme/app_theme.dart';
+import 'Core/Navigation/navigation_service.dart';
+import 'Features/auth/Services/token_manager.dart';
 import 'Providers/app_settings_provider.dart';
 import 'Providers/auth_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'Providers/chat_provider.dart';
 import 'Providers/user_manager_provider.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await TokenManager.instance.initialize();
 
   HttpOverrides.global = MyHttpOverrides();
 
@@ -32,11 +43,19 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserManagerProvider()),
+        ChangeNotifierProxyProvider<UserManagerProvider, ChatProvider>(
+          create: (context) => ChatProvider(),
+          update: (context, userManager, previous) {
+            final chatProvider = previous ?? ChatProvider();
+            return chatProvider;
+          },
+        ),
       ],
       child: Consumer<AppSettingsProvider>(
         builder: (context, appSettings, _) {
           if (!appSettings.isInitialized) {
-            return const MaterialApp(
+            return MaterialApp(
+              theme: AppTheme.light,
               home: Scaffold(
                 body: Center(
                   child: CircularProgressIndicator(),
@@ -56,7 +75,7 @@ class MyApp extends StatelessWidget {
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: appSettings.appLocale,
-            theme: appTheme,
+            theme: AppTheme.light,
             initialRoute: appSettings.initialRoute,
             routes: AppRoutes.define(),
           );

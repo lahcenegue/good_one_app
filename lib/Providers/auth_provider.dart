@@ -1,22 +1,25 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Data/Models/auth_model.dart';
-import '../Core/Constants/storage_keys.dart';
-import '../Core/Errors/error_handler.dart';
-import '../Core/Errors/failures.dart';
-import '../Core/Utils/navigation_service.dart';
+import '../Core/Utils/storage_keys.dart';
+import '../Core/Utils/error_handling/error_handler.dart';
+import '../Core/Utils/error_handling/failures.dart';
+import '../Core/Navigation/app_routes.dart';
+import '../Core/Navigation/navigation_service.dart';
 
 import '../Features/auth/Services/auth_api.dart';
+import '../Features/auth/Services/token_manager.dart';
 import '../Features/auth/models/auth_request.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../Features/auth/models/register_request.dart';
+import 'user_manager_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   // Authentication State
@@ -44,6 +47,13 @@ class AuthProvider with ChangeNotifier {
   File? _selectedImage;
   String? _imageError;
   final ImagePicker _picker = ImagePicker();
+
+  AuthProvider() {
+    TokenManager.instance.tokenStream.listen((auth) {
+      _authData = auth;
+      notifyListeners();
+    });
+  }
 
   // Getters
   bool get isLoading => _isLoading;
@@ -97,7 +107,7 @@ class AuthProvider with ChangeNotifier {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context)!.passwordRequired;
     }
-    if (value.length < 6) {
+    if (value.length < 4) {
       return AppLocalizations.of(context)!.passwordTooShort;
     }
     return null;
@@ -122,16 +132,29 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearErrors();
 
+      final sharedPrefs = await SharedPreferences.getInstance();
+
       final request = AuthRequest(
         email: emailController.text.trim(),
         password: passwordController.text,
+        deviceToken: sharedPrefs.getString(StorageKeys.fcmTokenKey)!,
       );
+
+      debugPrint('The Device token fron login ${request.deviceToken}');
 
       final response = await AuthApi.login(request);
 
       if (response.success) {
         _authData = response.data;
         await _saveAuthData();
+
+        // Update UserManagerProvider with new token
+        if (context.mounted) {
+          await context
+              .read<UserManagerProvider>()
+              .updateToken(_authData!.accessToken);
+        }
+
         await NavigationService.navigateToAndReplace(AppRoutes.userMain);
       } else {
         _error = response.error;
@@ -146,13 +169,10 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> tryAutoLogin() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      if (!prefs.containsKey('authData')) return false;
-
-      final authData = json.decode(prefs.getString('authData')!);
-      _authData = AuthModel.fromJson(authData);
+      await TokenManager.instance.initialize();
+      _authData = TokenManager.instance.currentAuth;
       notifyListeners();
-      return true;
+      return _authData != null;
     } catch (e) {
       return false;
     }
@@ -181,6 +201,7 @@ class AuthProvider with ChangeNotifier {
         phone: phoneController.text.trim(),
         password: passwordController.text,
         type: accountType!,
+        deviceToken: sharedPrefs.getString(StorageKeys.fcmTokenKey)!,
       );
 
       final response = await AuthApi.register(request);
@@ -200,14 +221,17 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     try {
       _setLoading(true);
       _clearErrors();
 
-      _authData = null;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('authData');
+      await TokenManager.instance.clearToken();
+
+      // Clear UserManagerProvider data
+      if (context.mounted) {
+        await context.read<UserManagerProvider>().clearData();
+      }
 
       _clearFormData();
     } catch (e) {
@@ -243,8 +267,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _saveAuthData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('authData', json.encode(_authData!.toJson()));
+      await TokenManager.instance.setToken(_authData!);
     } catch (e) {
       throw const AuthFailure(
         message: 'Failed to save authentication data',

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Widgets/custom_buttons.dart';
+import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/Themes/app_text_styles.dart';
-import '../../../Core/Utils/navigation_service.dart';
+import '../../../Core/Navigation/app_routes.dart';
+import '../../../Core/presentation/Theme/app_text_styles.dart';
+import '../../../Core/Navigation/navigation_service.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/auth_provider.dart';
 import '../Widgets/shared_auth_widgets.dart';
@@ -89,7 +90,8 @@ class LoginScreen extends StatelessWidget {
       alignment: Alignment.bottomLeft,
       child: TextButton(
         onPressed: () {
-          // Will implement later
+          //TODO
+
           // NavigationService.navigateTo(AppRoutes.forgotPassword);
         },
         child: Text(

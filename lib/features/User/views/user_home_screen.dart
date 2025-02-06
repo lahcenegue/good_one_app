@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/Constants/app_colors.dart';
-import '../../../Core/Errors/error_widget.dart';
-import '../../../Core/Themes/app_text_styles.dart';
+import '../../../Core/presentation/Widgets/user_avatar.dart';
+import '../../../Core/presentation/resources/app_colors.dart';
+import '../../../Core/presentation/Widgets/error/error_widget.dart';
+import '../../../Core/Navigation/app_routes.dart';
+import '../../../Core/presentation/Theme/app_text_styles.dart';
+import '../../../Core/Navigation/navigation_service.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/user_manager_provider.dart';
 import '../Widgets/contractor_list_item.dart';
 import '../Widgets/service_grid_item.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'contractor_profile.dart';
 
 class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
@@ -18,6 +23,7 @@ class UserHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
+        // Handle error state
         if (userManager.error != null) {
           return AppErrorWidget(
             message: userManager.error!,
@@ -37,6 +43,10 @@ class UserHomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: context.getHeight(40)),
+                  if (userManager.token != null)
+                    _buildHeader(context, userManager),
+                  SizedBox(height: context.getHeight(20)),
                   _buildSearchBar(context, userManager),
                   SizedBox(height: context.getHeight(20)),
                   _buildServicesSection(context, userManager),
@@ -51,85 +61,157 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  // Widget _buildHeader(BuildContext context) {
-  //   return Row(
-  //     children: [
-  //       CircleAvatar(
-  //         radius: context.getWidth(20),
-  //         backgroundImage: const NetworkImage(
-  //             '${AppLinks.baseUrl}/storage/profile.jpg'), // Replace with actual profile image
-  //       ),
-  //       SizedBox(width: context.getWidth(10)),
-  //       Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //              '${AppLocalizations.of(context)!.hello}, Lahsen',
-  //             style: AppTextStyles.title(context),
-  //           ),
-  //           Text(
-  //             'Yonge Street',
-  //             style: AppTextStyles.text(context).copyWith(
-  //               color: AppColors.hintColor,
+  Widget _buildHeader(
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
+    if (!userManager.isAuthenticated) {
+      return const SizedBox.shrink();
+    }
+
+    final user = userManager.userInfo;
+
+    return Row(
+      children: [
+        UserAvatar(
+          picture: user?.picture,
+          size: context.getWidth(40),
+        ),
+        SizedBox(width: context.getWidth(10)),
+        Expanded(
+            child: _buildUserInfo(context, user?.fullName, user?.location)),
+        _buildNotificationIcon(context),
+        SizedBox(width: context.getWidth(10)),
+        _buildMessageIcon(context, userManager),
+      ],
+    );
+  }
+
+  // Widget _buildUserAvatar(BuildContext context, String? picture) {
+  //   return CircleAvatar(
+  //     radius: context.getWidth(20),
+  //     backgroundColor: AppColors.dimGray,
+  //     child: picture != null && picture.isNotEmpty
+  //         ? ClipRRect(
+  //             borderRadius: BorderRadius.circular(context.getWidth(20)),
+  //             child: Image.network(
+  //               '${ApiEndpoints.imageBaseUrl}/$picture',
+  //               width: context.getWidth(40),
+  //               height: context.getWidth(40),
+  //               fit: BoxFit.cover,
+  //               errorBuilder: (context, error, stackTrace) {
+  //                 return Icon(
+  //                   Icons.person,
+  //                   size: context.getWidth(24),
+  //                   color: AppColors.primaryColor,
+  //                 );
+  //               },
   //             ),
+  //           )
+  //         : Icon(
+  //             Icons.person,
+  //             size: context.getWidth(24),
+  //             color: AppColors.primaryColor,
   //           ),
-  //         ],
-  //       ),
-  //       const Spacer(),
-  //       _buildNotificationIcon(context),
-  //       _buildMessageIcon(context),
-  //     ],
   //   );
   // }
 
-  // Widget _buildNotificationIcon(BuildContext context) {
-  //   return Stack(
-  //     children: [
-  //       IconButton(
-  //         icon: const Icon(Icons.notifications_outlined),
-  //         onPressed: () {},
-  //       ),
-  //       Positioned(
-  //         right: 8,
-  //         top: 8,
-  //         child: Container(
-  //           width: 8,
-  //           height: 8,
-  //           decoration: const BoxDecoration(
-  //             color: AppColors.primaryColor,
-  //             shape: BoxShape.circle,
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
+  Widget _buildUserInfo(
+    BuildContext context,
+    String? name,
+    String? location,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name != null
+              ? '${AppLocalizations.of(context)!.hello}, $name'
+              : AppLocalizations.of(context)!.hello,
+          style: AppTextStyles.title2(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (location != null)
+          Text(
+            location,
+            style: AppTextStyles.text(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+      ],
+    );
+  }
 
-  // Widget _buildMessageIcon(BuildContext context) {
-  //   return Stack(
-  //     children: [
-  //       IconButton(
-  //         icon: const Icon(Icons.chat_bubble_outline),
-  //         onPressed: () {},
-  //       ),
-  //       Positioned(
-  //         right: 8,
-  //         top: 8,
-  //         child: Container(
-  //           width: 8,
-  //           height: 8,
-  //           decoration: const BoxDecoration(
-  //             color: AppColors.primaryColor,
-  //             shape: BoxShape.circle,
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
+  Widget _buildNotificationIcon(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.dimGray,
+      ),
+      child: Stack(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {},
+          ),
+          Positioned(
+            right: 8,
+            top: 8,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageIcon(
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
+    return Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.dimGray,
+      ),
+      child: Stack(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline),
+            onPressed: () {
+              if (userManager.userInfo != null) {
+                NavigationService.navigateTo(AppRoutes.conversations);
+              }
+            },
+          ),
+          Positioned(
+            right: 8,
+            top: 8,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildSearchBar(
-      BuildContext context, UserManagerProvider userManager) {
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.dimGray,
@@ -153,52 +235,77 @@ class UserHomeScreen extends StatelessWidget {
       BuildContext context, UserManagerProvider userManager) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.ourServices,
-              style: AppTextStyles.subTitle(context).copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                userManager.setCurrentIndex(2);
-              },
-              child: Text(
-                AppLocalizations.of(context)!.seeAll,
-                style: AppTextStyles.textButton(context),
-              ),
-            ),
-          ],
+        _buildSectionHeader(
+          context,
+          title: AppLocalizations.of(context)!.ourServices,
+          onSeeAll: () => userManager.setCurrentIndex(2),
         ),
-        SizedBox(height: context.getHeight(10)),
         if (userManager.isLoading && userManager.categories.isEmpty)
-          const CircularProgressIndicator()
+          const Center(child: CircularProgressIndicator())
         else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 1.2,
-              crossAxisSpacing: context.getWidth(10),
-              mainAxisSpacing: context.getHeight(10),
-            ),
-            itemCount: userManager.categories.length,
-            itemBuilder: (context, index) {
-              return ServiceGridItem(
-                category: userManager.categories[index],
-              );
-            },
-          ),
+          _buildServicesGrid(context, userManager),
       ],
     );
   }
 
-  Widget _buildContractorsSection(
+  Widget _buildSectionHeader(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onSeeAll,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: AppTextStyles.subTitle(context).copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        TextButton(
+          onPressed: onSeeAll,
+          child: Text(
+            AppLocalizations.of(context)!.seeAll,
+            style: AppTextStyles.textButton(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildServicesGrid(
       BuildContext context, UserManagerProvider userManager) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 1.2,
+        crossAxisSpacing: context.getWidth(10),
+        mainAxisSpacing: context.getHeight(10),
+      ),
+      itemCount:
+          userManager.categories.length > 6 ? 6 : userManager.categories.length,
+      itemBuilder: (context, index) => ServiceGridItem(
+        category: userManager.categories[index],
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.contractorsByService,
+            arguments: {
+              'id': userManager.categories[index].id,
+              'name': userManager.categories[index].name,
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContractorsSection(
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     return Column(
       children: [
         Row(
@@ -210,7 +317,7 @@ class UserHomeScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                //TODO
+                //TODO: Navigate to all contractors
               },
               child: Text(
                 AppLocalizations.of(context)!.seeAll,
@@ -220,18 +327,29 @@ class UserHomeScreen extends StatelessWidget {
           ],
         ),
         SizedBox(height: context.getHeight(10)),
-        if (userManager.isLoading && userManager.contractors.isEmpty)
-          const CircularProgressIndicator()
+        if (userManager.isLoading && userManager.bestContractors.isEmpty)
+          const Center(child: CircularProgressIndicator())
         else
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: userManager.filteredContractors.length,
+            itemCount: userManager.getBestContractors.length,
             itemBuilder: (context, index) {
               return ContractorListItem(
-                contractor: userManager.filteredContractors[index],
-                onFavorite: () => userManager
-                    .toggleFavorite(userManager.filteredContractors[index].id),
+                contractor: userManager.getBestContractors[index],
+                onFavorite: () => userManager.toggleFavorite(
+                  userManager.getBestContractors[index].id,
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ContractorProfile(
+                        contractor: userManager.getBestContractors[index],
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),

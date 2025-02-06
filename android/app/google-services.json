@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "884659155357",
+    "project_id": "goodone-73cff",
+    "storage_bucket": "goodone-73cff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884659155357:android:bbc1ebee82af756a21bf74",
+        "android_client_info": {
+          "package_name": "com.example.good_one_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ7qFFacoi5mIk38NElq18cJIQwd47WWQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

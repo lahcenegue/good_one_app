@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 
-import '../../../Core/Constants/app_colors.dart';
+import '../../../Core/presentation/resources/app_colors.dart';
 
 class DotIndicator extends StatelessWidget {
   final bool isActive;

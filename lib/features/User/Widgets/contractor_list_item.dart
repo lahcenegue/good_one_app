@@ -1,110 +1,135 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Constants/app_assets.dart';
-import '../../../Core/Constants/app_colors.dart';
-import '../../../Core/Constants/app_links.dart';
-import '../../../Core/Themes/app_text_styles.dart';
+import '../../../Core/presentation/Widgets/user_avatar.dart';
+import '../../../Core/presentation/resources/app_colors.dart';
+import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../models/contractor.dart';
-
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContractorListItem extends StatelessWidget {
   final Contractor contractor;
   final VoidCallback onFavorite;
+  final VoidCallback? onTap;
 
   const ContractorListItem({
     super.key,
     required this.contractor,
     required this.onFavorite,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Card(
-          color: Colors.white,
-          margin: EdgeInsets.only(bottom: context.getAdaptiveSize(12)),
-          child: Padding(
-            padding: EdgeInsets.all(context.getWidth(10)),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    '${AppLinks.image}/${contractor.picture}',
-                    width: context.getAdaptiveSize(88),
-                    height: context.getAdaptiveSize(96),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: context.getAdaptiveSize(88),
-                        height: context.getAdaptiveSize(96),
-                        color: AppColors.dimGray,
-                        child: Icon(
-                          Icons.person,
-                          size: context.getAdaptiveSize(40),
-                          color: AppColors.primaryColor,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(width: context.getWidth(10)),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        contractor.fullName,
-                        style: AppTextStyles.text(context),
-                      ),
-                      Text(
-                        contractor.service,
-                        style: AppTextStyles.title2(context),
-                      ),
-                      Text(
-                        '\$${contractor.costPerHour}',
-                        style: AppTextStyles.price(context),
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.star_rate_rounded,
-                            size: context.getWidth(18),
-                            color: Colors.amber,
-                          ),
-                          SizedBox(width: context.getWidth(4)),
-                          Text(
-                            '4.6', //TODO
-                            style: AppTextStyles.subTitle(context),
-                          ),
-                          SizedBox(width: context.getWidth(4)),
-                          Text(
-                            '(20 customers)', //TODO
-                            style: AppTextStyles.text(context),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(
+          context.getWidth(10),
         ),
-        Align(
-          alignment: Alignment.topLeft,
-          child: IconButton(
-            icon: Image.asset(
-              contractor.isFavorite ? AppAssets.bookMark2 : AppAssets.bookMark,
-              width: context.getAdaptiveSize(24),
-              height: context.getAdaptiveSize(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
-            onPressed: onFavorite,
+          ],
+        ),
+        child: Row(
+          children: [
+            _buildContractorImage(context),
+            SizedBox(width: context.getWidth(12)),
+            Expanded(child: _buildContractorInfo(context)),
+            _buildFavoriteButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContractorImage(BuildContext context) {
+    return Container(
+      width: context.getWidth(88),
+      height: context.getWidth(96),
+      decoration: BoxDecoration(
+        color: AppColors.dimGray,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
+      child: UserAvatar(
+        picture: contractor.picture,
+        size: context.getWidth(88),
+      ),
+    );
+  }
+
+  Widget _buildContractorInfo(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Text(
+          contractor.fullName,
+          style: AppTextStyles.text(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          contractor.service,
+          style: AppTextStyles.title2(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          contractor.costPerHour.toString(),
+          style: AppTextStyles.price(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Row(
+          children: [
+            Icon(
+              Icons.star_outlined,
+              size: context.getAdaptiveSize(18),
+              color: AppColors.warning,
+            ),
+            SizedBox(width: context.getWidth(4)),
+            Text(
+              "4.6",
+              style: AppTextStyles.text(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(width: context.getWidth(4)),
+            Text(
+              "(255 Customers)",
+              style: AppTextStyles.text(context).copyWith(fontSize: 10),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildFavoriteButton(BuildContext context) {
+    return IconButton(
+      onPressed: onFavorite,
+      icon: Icon(
+        contractor.isFavorite ? Icons.bookmark : Icons.bookmark_border_outlined,
+        color: contractor.isFavorite
+            ? AppColors.primaryColor
+            : AppColors.hintColor,
+        size: context.getAdaptiveSize(24),
+      ),
     );
   }
 }

@@ -1,65 +1,79 @@
 {
   "@@locale": "en",
-
-  "@welcomeMessage": {
-    "description": "Welcome message before app name"
+  "@alreadyHaveAccount": {
+    "description": "Text shown before sign in link"
   },
-  "@languageSelectionTitle": {
-    "description": "Title for the language selection screen"
+  "@authError": {
+    "description": "Generic authentication error"
+  },
+  "@back": {
+    "description": "Text for back button"
+  },
+  "@chooseFromGallery": {
+    "description": "Option to choose from gallery"
   },
   "@chooseLanguagePrompt": {
     "description": "Prompt message asking user to select language"
   },
-  "@nextButton": {
-    "description": "Text for the next button"
+  "@confirmPasswordRequired": {
+    "description": "Error message when confirm password is empty"
   },
-  "@skip": {
-    "description": "Text for the skip button"
-  },
-  "@signIn": {
-    "description": "Title for the login screen"
-  },
-  "@signUp": {
-    "description": "Title for the registration screen"
+  "@createAccount": {
+    "description": "Title for account creation"
   },
   "@email": {
     "description": "Label for email input"
   },
-  "@password": {
-    "description": "Label for password input"
+  "@emailRequired": {
+    "description": "Error message when email is empty"
   },
   "@enterEmail": {
     "description": "Placeholder for email input"
   },
+  "@enterFullName": {
+    "description": "Placeholder for full name input"
+  },
   "@enterPassword": {
     "description": "Placeholder for password input"
   },
-  "@loginButton": {
-    "description": "Login button text"
+  "@enterPhoneNumber": {
+    "description": "Placeholder for phone number input"
   },
   "@forgotPassword": {
     "description": "Forgot password link text"
   },
-  "@rememberMe": {
-    "description": "Remember me checkbox label"
+  "@fullName": {
+    "description": "Label for full name input"
   },
-  "@noAccount": {
-    "description": "Text shown before sign up link"
+  "@fullNameRequired": {
+    "description": "Error message when full name is empty"
+  },
+  "@generalError": {
+    "description": "General error message"
   },
   "@hasAccount": {
     "description": "Text shown before sign in link"
   },
-  "@emailRequired": {
-    "description": "Error message when email is empty"
+  "@imageRequired": {
+    "description": "Error message when image is not selected"
   },
-  "@passwordRequired": {
-    "description": "Error message when password is empty"
+  "@invalidCredentials": {
+    "description": "Error message for invalid credentials"
   },
   "@invalidEmail": {
     "description": "Error message for invalid email format"
   },
-  "@passwordTooShort": {
-    "description": "Error message for short password"
+  "@languageSelectionTitle": {
+    "description": "Title for the language selection screen"
+  },
+  "@login": {
+    "description": "Text for login button"
+  },
+  "@loginButton": {
+    "description": "Login button text"
+  },
+  "@loginError": {
+    "description": "Generic login error message"
   },
   "@loginSuccess": {
     "description": "Message shown on successful login"
@@ -67,164 +81,148 @@
   "@logoutSuccess": {
     "description": "Message shown on successful logout"
   },
-  "@loginError": {
-    "description": "Generic login error message"
-  },
   "@networkError": {
     "description": "Network error message"
-  },   
-  "@login": {
-      "description": "Text for login button"
   },
-  "@authError": {
-    "description": "Generic authentication error"
+  "@next": {
+    "description": "Text for the next button to navigate to the following screen or step"
   },
-  "@storageError": {
-    "description": "Error saving auth data"
+  "@nextButton": {
+    "description": "Text for the next button"
   },
-  "@invalidCredentials": {
-    "description": "Error message for invalid credentials"
-  },
-  "@serverError": {
-    "description": "Error message for server issues"
-  },
-  "@generalError": {
-    "description": "General error message"
-  },
-  "@fullName": {
-    "description": "Label for full name input"
-  },
-  "@enterFullName": {
-    "description": "Placeholder for full name input"
-  },
-  "@fullNameRequired": {
-    "description": "Error message when full name is empty"
-  },
-  "@phoneNumber": {
-    "description": "Label for phone number input"
-  },
-  "@enterPhoneNumber": {
-    "description": "Placeholder for phone number input"
-  },
-  "@phoneRequired": {
-    "description": "Error message when phone is empty"
-  },
-  "@retypePassword": {
-    "description": "Label for password confirmation input"
-  },
-  "@confirmPasswordRequired": {
-    "description": "Error message when confirm password is empty"
-  },
-  "@passwordsDoNotMatch": {
-    "description": "Error message when passwords don't match"
-  },
-  "@alreadyHaveAccount": {
-    "description": "Text shown before sign in link"
-  },
-  "@selectImage": {
-    "description": "Label for image selection"
-  },
-  "@takePhoto": {
-    "description": "Option to take photo"
-  },
-  "@chooseFromGallery": {
-    "description": "Option to choose from gallery"
-  },
-  "@imageRequired": {
-    "description": "Error message when image is not selected"
-  },
-  "@createAccount": {
-    "description": "Title for account creation"
-  },
-
-  "@onboardingTitle1": {
-    "description": "Title for the first onboarding screen"
+  "@noAccount": {
+    "description": "Text shown before sign up link"
   },
   "@onboardingDesc1": {
     "description": "Description for the first onboarding screen"
   },
-  "@onboardingTitle2": {
-    "description": "Title for the second onboarding screen"
-  },
   "@onboardingDesc2": {
     "description": "Description for the second onboarding screen"
   },
-  "@back": {
-    "description": "Text for back button"
+  "@onboardingTitle1": {
+    "description": "Title for the first onboarding screen"
   },
-  "@next": {
-  "description": "Text for the next button to navigate to the following screen or step"
+  "@onboardingTitle2": {
+    "description": "Title for the second onboarding screen"
   },
-
-
-  "welcomeMessage": "Welcome to",
-  "languageSelectionTitle": "Language selection",
-  "chooseLanguagePrompt": "Choose your language to start",
-  "nextButton": "Next",
-  "skip": "Skip",
-  "signIn": "Sign In",
-  "login": "log in",
-  "signUp": "Sign Up",
-  "email": "Email",
-  "password": "Password",
-  "enterEmail": "enter your email",
-  "enterPassword": "enter your password",
-  "loginButton": "Log in",
-  "forgotPassword": "Forgot your password?",
-  "rememberMe": "Remember me",
-  "noAccount": "Don't have an account?",
-  "hasAccount": "Already have an account?",
-  "emailRequired": "Email is required",
-  "passwordRequired": "Password is required",
-  "invalidEmail": "Please enter a valid email address",
-  "passwordTooShort": "Password must be at least 6 characters",
-  "loginSuccess": "Successfully logged in",
-  "logoutSuccess": "Successfully logged out",
-  "loginError": "Invalid email or password",
-  "networkError": "Network connection error. Please try again",
-  "authError": "Invalid email or password",
-  "storageError": "Failed to save authentication data",
-  "invalidCredentials": "Invalid email or password",
-  "serverError": "Server error occurred. Please try again",
-  "generalError": "An error occurred. Please try again",
-  "fullName": "Full Name",
-  "enterFullName": "Enter your full name",
-  "fullNameRequired": "Full name is required",
-  "phoneNumber": "Phone Number",
-  "enterPhoneNumber": "Enter your phone number",
-  "phoneRequired": "Phone number is required",
-  "retypePassword": "Retype Password",
-  "confirmPasswordRequired": "Please confirm your password",
-  "passwordsDoNotMatch": "Passwords do not match",
-  "alreadyHaveAccount": "Already have an account?",
-  "selectImage": "Profile Picture",
-  "takePhoto": "Take Photo",
-  "chooseFromGallery": "Choose from Gallery",
-  "imageRequired": "Profile picture is required",
-  "createAccount": "Create your account now",
-  "onboardingTitle1": "home services with a professional touch!",
-  "onboardingDesc1": "Discover quick and easy solutions for all your home needs, from plumbing and electrical to cleaning and renovation. Let us make your home more comfortable.",
-  "onboardingTitle2": "We're here to make your life easier!",
-  "onboardingDesc2": "We offer a comprehensive range of high-quality, reliable home services, so you can enjoy your time at home without any worries.",
-  "back": "Back",
-  "next": "Next",
-  "home": "Home",
-  "booking": "Booking",
-  "services": "Services",
-  "profile": "Profile",
-  "hello": "Hello",
-  "search": "Search",
-  "ourServices": "Our services",
-  "seeAll": "See all",
-  "bestContractors": "Best Contractors",
-  "yearsExperience": "$years Years Experience",
-  "edit": "Edit",
-  "phone": "Phone",
-  "location": "Location",
+  "@password": {
+    "description": "Label for password input"
+  },
+  "@passwordRequired": {
+    "description": "Error message when password is empty"
+  },
+  "@passwordTooShort": {
+    "description": "Error message for short password"
+  },
+  "@passwordsDoNotMatch": {
+    "description": "Error message when passwords don't match"
+  },
+  "@phoneNumber": {
+    "description": "Label for phone number input"
+  },
+  "@phoneRequired": {
+    "description": "Error message when phone is empty"
+  },
+  "@rememberMe": {
+    "description": "Remember me checkbox label"
+  },
+  "@retypePassword": {
+    "description": "Label for password confirmation input"
+  },
+  "@selectImage": {
+    "description": "Label for image selection"
+  },
+  "@serverError": {
+    "description": "Error message for server issues"
+  },
+  "@signIn": {
+    "description": "Title for the login screen"
+  },
+  "@signUp": {
+    "description": "Title for the registration screen"
+  },
+  "@skip": {
+    "description": "Text for the skip button"
+  },
+  "@storageError": {
+    "description": "Error saving auth data"
+  },
+  "@takePhoto": {
+    "description": "Option to take photo"
+  },
+  "@welcomeMessage": {
+    "description": "Welcome message before app name"
+  },
   "accountDetails": "Account details",
+  "alreadyHaveAccount": "Already have an account?",
+  "authError": "Invalid email or password",
+  "back": "Back",
+  "bestContractors": "Best Contractors",
+  "booking": "Booking",
+  "chooseFromGallery": "Choose from Gallery",
+  "chooseLanguagePrompt": "Choose your language to start",
+  "confirmPasswordRequired": "Please confirm your password",
+  "createAccount": "Create your account now",
+  "edit": "Edit",
+  "email": "Email",
+  "emailRequired": "Email is required",
+  "enterEmail": "enter your email",
+  "enterFullName": "Enter your full name",
+  "enterPassword": "enter your password",
+  "enterPhoneNumber": "Enter your phone number",
+  "forgotPassword": "Forgot your password?",
+  "fullName": "Full Name",
+  "fullNameRequired": "Full name is required",
+  "generalError": "An error occurred. Please try again",
+  "hasAccount": "Already have an account?",
+  "hello": "Hello",
+  "home": "Home",
+  "imageRequired": "Profile picture is required",
+  "invalidCredentials": "Invalid email or password",
+  "invalidEmail": "Please enter a valid email address",
   "language": "Language",
+  "languageSelectionTitle": "Language selection",
+  "location": "Location",
+  "login": "log in",
+  "loginButton": "Log in",
+  "loginError": "Invalid email or password",
+  "loginSuccess": "Successfully logged in",
+  "loginToAccess": "Login to Access",
+  "logout": "Logout",
+  "logoutSuccess": "Successfully logged out",
+  "networkError": "Network connection error. Please try again",
+  "next": "Next",
+  "nextButton": "Next",
+  "noAccount": "Don't have an account?",
+  "noServicesAvailable": "No Services Available",
+  "onboardingDesc1": "Discover quick and easy solutions for all your home needs, from plumbing and electrical to cleaning and renovation. Let us make your home more comfortable.",
+  "onboardingDesc2": "We offer a comprehensive range of high-quality, reliable home services, so you can enjoy your time at home without any worries.",
+  "onboardingTitle1": "home services with a professional touch!",
+  "onboardingTitle2": "We're here to make your life easier!",
+  "ourServices": "Our services",
+  "password": "Password",
+  "passwordRequired": "Password is required",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "phone": "Phone",
+  "phoneNumber": "Phone Number",
+  "phoneRequired": "Phone number is required",
+  "privacyPolicy": "Privacy and Policy",
+  "profile": "Profile",
+  "rememberMe": "Remember me",
+  "retypePassword": "Retype Password",
   "savedAddress": "Saved address",
+  "search": "Search",
+  "seeAll": "See all",
+  "selectImage": "Profile Picture",
+  "serverError": "Server error occurred. Please try again",
+  "services": "Services",
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "skip": "Skip",
+  "storageError": "Failed to save authentication data",
   "support": "Support",
-  "privacyPolicy": "Privacy and Policy"
- 
+  "takePhoto": "Take Photo",
+  "welcomeMessage": "Welcome to",
+  "yearsExperience": "$years Years Experience"
 }

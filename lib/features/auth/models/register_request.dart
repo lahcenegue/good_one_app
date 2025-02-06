@@ -7,6 +7,7 @@ class RegisterRequest {
   final String password;
   final String type;
   final File image;
+  final String deviceToken;
 
   RegisterRequest({
     required this.fullName,
@@ -15,6 +16,7 @@ class RegisterRequest {
     required this.password,
     required this.type,
     required this.image,
+    required this.deviceToken,
   });
 
   Map<String, String> toFields() {
@@ -24,6 +26,7 @@ class RegisterRequest {
       'phone': phone,
       'password': password,
       'type': type,
+      'device_token': deviceToken,
     };
   }
 

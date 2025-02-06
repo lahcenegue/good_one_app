@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/Constants/app_assets.dart';
-import '../../../Core/Constants/app_colors.dart';
-import '../../../Core/Themes/app_text_styles.dart';
-import '../../../Core/Widgets/custom_buttons.dart';
+import '../../../Core/Navigation/app_routes.dart';
+import '../../../Core/Navigation/navigation_service.dart';
+import '../../../Core/presentation/resources/app_assets.dart';
+import '../../../Core/presentation/resources/app_colors.dart';
+import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Providers/app_settings_provider.dart';
 import '../Models/account_type.dart';
 import '../widgets/account_type_card.dart';
@@ -72,7 +74,14 @@ class AccountTypeSelectionOverlay extends StatelessWidget {
                       PrimaryButton(
                         text: 'Next',
                         onPressed: appSettings.canProceed
-                            ? () => appSettings.proceedWithAccountType()
+                            ? () {
+                                if (appSettings.isSetupComplete) {
+                                  NavigationService.navigateToAndReplace(
+                                      AppRoutes.login);
+                                } else {
+                                  appSettings.proceedWithAccountType();
+                                }
+                              }
                             : () {},
                       ),
                     ],

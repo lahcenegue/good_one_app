@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../Core/Constants/app_assets.dart';
-import '../../../../Core/Constants/app_colors.dart';
-import '../../../../Core/Themes/app_text_styles.dart';
+import '../../../Core/presentation/resources/app_assets.dart';
+import '../../../Core/presentation/resources/app_colors.dart';
+import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../../Core/Utils/size_config.dart';
 
 class SharedAuthWidgets {

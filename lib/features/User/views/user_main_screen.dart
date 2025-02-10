@@ -7,6 +7,7 @@ import '../../../Core/presentation/resources/app_colors.dart';
 import '../../../Core/presentation/Widgets/error/error_widget.dart';
 import '../../../Providers/user_manager_provider.dart';
 
+import 'booking_screen.dart';
 import 'services_screen.dart';
 import 'user_home_screen.dart';
 import 'user_profile_screen.dart';
@@ -70,12 +71,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
       case 0:
         return const UserHomeScreen();
       case 1:
-        return Center(
-          child: Text(
-            'Coming Soon',
-            style: const TextStyle(fontSize: 20),
-          ),
-        );
+        return const BookingScreen();
       case 2:
         return const ServicesScreen();
       case 3:

@@ -20,6 +20,7 @@ dependencies:
   http: ^1.2.2
   image_picker: ^1.1.2
   intl: any
+  photo_view: ^0.15.0
   provider: ^6.1.2
   shared_preferences: ^2.3.2
   socket_io_client: ^3.0.2

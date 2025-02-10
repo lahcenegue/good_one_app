@@ -87,35 +87,6 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  // Widget _buildUserAvatar(BuildContext context, String? picture) {
-  //   return CircleAvatar(
-  //     radius: context.getWidth(20),
-  //     backgroundColor: AppColors.dimGray,
-  //     child: picture != null && picture.isNotEmpty
-  //         ? ClipRRect(
-  //             borderRadius: BorderRadius.circular(context.getWidth(20)),
-  //             child: Image.network(
-  //               '${ApiEndpoints.imageBaseUrl}/$picture',
-  //               width: context.getWidth(40),
-  //               height: context.getWidth(40),
-  //               fit: BoxFit.cover,
-  //               errorBuilder: (context, error, stackTrace) {
-  //                 return Icon(
-  //                   Icons.person,
-  //                   size: context.getWidth(24),
-  //                   color: AppColors.primaryColor,
-  //                 );
-  //               },
-  //             ),
-  //           )
-  //         : Icon(
-  //             Icons.person,
-  //             size: context.getWidth(24),
-  //             color: AppColors.primaryColor,
-  //           ),
-  //   );
-  // }
-
   Widget _buildUserInfo(
     BuildContext context,
     String? name,

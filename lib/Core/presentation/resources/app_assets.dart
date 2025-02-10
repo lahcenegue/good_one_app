@@ -29,4 +29,11 @@ abstract class AppAssets {
   static const String bookMark2 = '$_iconsPath/Bookmark2.png';
   static const String location = '$_iconsPath/Location.png';
   static const String lisence = '$_iconsPath/Award.png';
+  static const String security = '$_iconsPath/Verified.png';
+  static const String experience = '$_iconsPath/experience.png';
+  static const String rating = '$_iconsPath/rating.png';
+  static const String clients = '$_iconsPath/clients.png';
+  static const String distance = '$_iconsPath/distance.png';
+  static const String translate = '$_iconsPath/translate.png';
+  static const String privancy = '$_iconsPath/privancy.png';
 }

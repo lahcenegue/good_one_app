@@ -64,7 +64,7 @@ class UserProfileScreen extends StatelessWidget {
     if (user == null) return const SizedBox.shrink();
 
     return SizedBox(
-      height: 320,
+      height: context.getHeight(320),
       child: Stack(
         children: [
           // Background container
@@ -144,26 +144,48 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildUnauthenticatedHeader(BuildContext context) {
-    return Container(
-      height: 200,
-      width: double.infinity,
-      color: AppColors.primaryColor.withOpacity(0.2),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.account_circle,
-              size: context.getAdaptiveSize(80),
-              color: AppColors.primaryColor,
+    return SizedBox(
+      height: context.getHeight(320),
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              width: double.infinity,
+              height: context.getHeight(150),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.2),
+              ),
             ),
-            SizedBox(height: context.getHeight(16)),
-            Text(
-              AppLocalizations.of(context)!.loginToAccess,
-              style: AppTextStyles.title2(context),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+              child: Icon(
+                Icons.account_circle,
+                size: context.getHeight(150),
+                color: AppColors.primaryColor,
+              ),
             ),
-          ],
-        ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.loginToAccess,
+                  style: AppTextStyles.title(context),
+                ),
+                SizedBox(height: context.getHeight(40)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -216,13 +238,15 @@ class UserProfileScreen extends StatelessWidget {
       children: [
         _buildMenuItem(
           context,
-          image: AppAssets.profile,
+          image: AppAssets.translate,
           title: AppLocalizations.of(context)!.language,
-          onTap: () {},
+          onTap: () {
+            NavigationService.navigateTo(AppRoutes.languageSettingsScreen);
+          },
         ),
         _buildMenuItem(
           context,
-          image: AppAssets.profile,
+          image: AppAssets.privancy,
           title: AppLocalizations.of(context)!.privacyPolicy,
           onTap: () {},
         ),
@@ -276,11 +300,11 @@ class UserProfileScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Colors.grey,
-            width: 0.5,
+            color: AppColors.dimGray,
+            width: 1,
           ),
         ),
       ),
@@ -288,7 +312,7 @@ class UserProfileScreen extends StatelessWidget {
         leading: Image.asset(
           image,
           color: Colors.black,
-          width: context.getAdaptiveSize(20),
+          width: context.getAdaptiveSize(25),
         ),
         title: Text(
           title,
@@ -315,9 +339,9 @@ class UserProfileScreen extends StatelessWidget {
         onPressed: () {
           if (userManager.storage.getString(StorageKeys.accountTypeKey) ==
               null) {
-            NavigationService.navigateToAndReplace(AppRoutes.accountSelection);
+            NavigationService.navigateTo(AppRoutes.accountSelection);
           } else {
-            NavigationService.navigateToAndReplace(AppRoutes.login);
+            NavigationService.navigateTo(AppRoutes.login);
           }
         },
       ),

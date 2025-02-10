@@ -1,24 +1,28 @@
-import 'gallery_image.dart';
+import 'dart:convert';
 
 class Contractor {
   final int id;
   final String email;
-  final int phone;
+  final String phone;
   final String type;
   final String fullName;
   final String picture;
   final String location;
-  final double costPerHour;
+  final int costPerHour;
   final String service;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? emailVerifiedAt;
+  final String createdAt;
+  final String updatedAt;
   final int category;
   final int active;
   final int yearsOfExperience;
   final String about;
-  final bool securityCheck;
-  final bool verifiedLicense;
-  final List<GalleryImage> gallery;
+  final int securityCheck;
+  final int verifiedLiscence;
+  final Rating rating;
+  final List<RatingDetail> ratings;
+  final int orders;
+  final List<Gallery> gallery;
   final bool isFavorite;
 
   const Contractor({
@@ -31,6 +35,7 @@ class Contractor {
     required this.location,
     required this.costPerHour,
     required this.service,
+    this.emailVerifiedAt,
     required this.createdAt,
     required this.updatedAt,
     required this.category,
@@ -38,116 +43,199 @@ class Contractor {
     required this.yearsOfExperience,
     required this.about,
     required this.securityCheck,
-    required this.verifiedLicense,
+    required this.verifiedLiscence,
+    required this.rating,
+    required this.ratings,
+    required this.orders,
     required this.gallery,
     this.isFavorite = false,
   });
 
   factory Contractor.fromJson(Map<String, dynamic> json) {
     return Contractor(
-      id: json['id'] ?? 0,
-      email: json['email'] as String? ?? '',
-      phone: (json['phone'] as num?)?.toInt() ?? 0,
-      type: json['type'] as String? ?? '',
-      fullName: json['full_name'] as String? ?? '',
-      picture: json['picture'] as String? ?? '',
-      location: json['location'] as String? ?? '',
-      costPerHour: (json['cost_per_hour'] as num?)?.toDouble() ?? 0.0,
-      service: json['service'] as String? ?? '',
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : DateTime.now(),
-      category: json['category'] ?? 0,
-      active: json['active'] as int? ?? 0,
-      yearsOfExperience: json['years_of_experience'] as int? ?? 0,
-      about: json['about'] as String? ?? '',
-      securityCheck: json['security_check'] == 1,
-      verifiedLicense: json['verified_liscence'] == 1,
-      gallery: (json['gallary'] as List<dynamic>?)
-              ?.map((e) => GalleryImage.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
+      id: json['id'],
+      email: json['email'],
+      phone: json['phone'].toString(),
+      type: json['type'],
+      fullName: json['full_name'],
+      picture: json['picture'],
+      location: json['location'],
+      costPerHour: json['cost_per_hour'],
+      service: json['service'],
+      emailVerifiedAt: json['email_verified_at'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+      category: json['category'],
+      active: json['active'],
+      yearsOfExperience: json['years_of_experience'],
+      about: json['about'],
+      securityCheck: json['security_check'],
+      verifiedLiscence: json['verified_liscence'],
+      rating: Rating.fromJson(json['rating']),
+      ratings: (json['ratings'] as List)
+          .map((item) => RatingDetail.fromJson(item))
+          .toList(),
+      orders: json['orders'],
+      gallery: (json['gallary'] as List)
+          .map((item) => Gallery.fromJson(item))
+          .toList(),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'phone': phone,
-      'type': type,
-      'full_name': fullName,
-      'picture': picture,
-      'location': location,
-      'cost_per_hour': costPerHour,
-      'service': service,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-      'category': category,
-      'active': active,
-      'years_of_experience': yearsOfExperience,
-      'about': about,
-      'security_check': securityCheck ? 1 : 0,
-      'verified_liscence': verifiedLicense ? 1 : 0,
-      'gallary': gallery.map((e) => e.toJson()).toList(),
-      'is_favorite': isFavorite,
-    };
-  }
+  // Contractor copyWith({
+  //   int? id,
+  //   String? email,
+  //   int? phone,
+  //   String? type,
+  //   String? fullName,
+  //   String? picture,
+  //   String? location,
+  //   double? costPerHour,
+  //   String? service,
+  //   DateTime? emailVerifiedAt,
+  //   DateTime? createdAt,
+  //   DateTime? updatedAt,
+  //   int? category,
+  //   int? active,
+  //   int? yearsOfExperience,
+  //   String? about,
+  //   bool? securityCheck,
+  //   bool? verifiedLicense,
+  //   List<GalleryImage>? gallery,
+  //   int? orders,
+  //   RatingSummary? ratings,
+  //   List<Rating>? rating,
+  //   bool? isFavorite,
+  // }) {
+  //   return Contractor(
+  //     id: id ?? this.id,
+  //     email: email ?? this.email,
+  //     phone: phone ?? this.phone,
+  //     type: type ?? this.type,
+  //     fullName: fullName ?? this.fullName,
+  //     picture: picture ?? this.picture,
+  //     location: location ?? this.location,
+  //     costPerHour: costPerHour ?? this.costPerHour,
+  //     service: service ?? this.service,
+  //     emailVerifiedAt: emailVerifiedAt ?? this.emailVerifiedAt,
+  //     createdAt: createdAt ?? this.createdAt,
+  //     updatedAt: updatedAt ?? this.updatedAt,
+  //     category: category ?? this.category,
+  //     active: active ?? this.active,
+  //     yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
+  //     about: about ?? this.about,
+  //     securityCheck: securityCheck ?? this.securityCheck,
+  //     verifiedLicense: verifiedLicense ?? this.verifiedLicense,
+  //     gallery: gallery ?? this.gallery,
+  //     orders: orders ?? this.orders,
+  //     ratings: ratings ?? this.ratings,
+  //     rating: rating ?? this.rating,
+  //     isFavorite: isFavorite ?? this.isFavorite,
+  //   );
+  // }
 
-  Contractor copyWith({
-    int? id,
-    String? email,
-    int? phone,
-    String? type,
-    String? fullName,
-    String? picture,
-    String? location,
-    double? costPerHour,
-    String? service,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    int? category,
-    int? active,
-    int? yearsOfExperience,
-    String? about,
-    bool? securityCheck,
-    bool? verifiedLicense,
-    List<GalleryImage>? gallery,
-    bool? isFavorite,
-  }) {
-    return Contractor(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
-      type: type ?? this.type,
-      fullName: fullName ?? this.fullName,
-      picture: picture ?? this.picture,
-      location: location ?? this.location,
-      costPerHour: costPerHour ?? this.costPerHour,
-      service: service ?? this.service,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      category: category ?? this.category,
-      active: active ?? this.active,
-      yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
-      about: about ?? this.about,
-      securityCheck: securityCheck ?? this.securityCheck,
-      verifiedLicense: verifiedLicense ?? this.verifiedLicense,
-      gallery: gallery ?? this.gallery,
-      isFavorite: isFavorite ?? this.isFavorite,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'Contractor(id: $id, fullName: $fullName, service: $service)';
-  }
+  // @override
+  // String toString() {
+  //   return 'Contractor(id: $id, fullName: $fullName, service: $service, rating: ${ratings.rating})';
+  // }
 
   // Helpful getters
-  bool get isActive => active == 1;
-  String get experienceText => '$yearsOfExperience years';
-  String get hourlyRate => '\$${costPerHour.toStringAsFixed(2)}/hr';
+  // bool get isActive => active == 1;
+  // String get experienceText => '$yearsOfExperience years';
+  // String get hourlyRate => '\$${costPerHour.toStringAsFixed(2)}/hr';
+  // bool get isVerified => emailVerifiedAt != null;
+  // String get ratingText => '${rating.toStringAsFixed(1)} ($timesRated)';
+}
+
+class Rating {
+  final int rating;
+  final int timesRated;
+
+  Rating({required this.rating, required this.timesRated});
+
+  factory Rating.fromJson(Map<String, dynamic> json) {
+    return Rating(
+      rating: json['rating'],
+      timesRated: json['times_rated'],
+    );
+  }
+}
+
+class RatingDetail {
+  final int id;
+  final int rate;
+  final String message;
+  final int serviceId;
+  final String createdAt;
+  final String updatedAt;
+  final User user;
+
+  RatingDetail({
+    required this.id,
+    required this.rate,
+    required this.message,
+    required this.serviceId,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.user,
+  });
+
+  factory RatingDetail.fromJson(Map<String, dynamic> json) {
+    return RatingDetail(
+      id: json['id'],
+      rate: json['rate'],
+      message: json['message'],
+      serviceId: json['service_id'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+      user: User.fromJson(json['user']),
+    );
+  }
+}
+
+class User {
+  final int id;
+  final String fullName;
+  final String picture;
+
+  User({required this.id, required this.fullName, required this.picture});
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      fullName: json['full_name'],
+      picture: json['picture'],
+    );
+  }
+}
+
+class Gallery {
+  final int id;
+  final String image;
+  final int userId;
+  final String createdAt;
+  final String updatedAt;
+
+  Gallery({
+    required this.id,
+    required this.image,
+    required this.userId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory Gallery.fromJson(Map<String, dynamic> json) {
+    return Gallery(
+      id: json['id'],
+      image: json['image'],
+      userId: json['user_id'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+    );
+  }
+}
+
+List<Contractor> parseWorkers(String responseBody) {
+  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+  return parsed.map<Contractor>((json) => Contractor.fromJson(json)).toList();
 }

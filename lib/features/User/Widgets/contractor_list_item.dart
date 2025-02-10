@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../../../Core/presentation/Widgets/user_avatar.dart';
 import '../../../Core/presentation/resources/app_colors.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../models/contractor.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContractorListItem extends StatelessWidget {
   final Contractor contractor;
@@ -102,14 +105,14 @@ class ContractorListItem extends StatelessWidget {
             ),
             SizedBox(width: context.getWidth(4)),
             Text(
-              "4.6",
+              contractor.rating.rating.toString(),
               style: AppTextStyles.text(context),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             SizedBox(width: context.getWidth(4)),
             Text(
-              "(255 Customers)",
+              "(${contractor.orders} ${AppLocalizations.of(context)!.order})",
               style: AppTextStyles.text(context).copyWith(fontSize: 10),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

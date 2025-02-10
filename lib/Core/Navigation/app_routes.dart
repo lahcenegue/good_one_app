@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../Features/Chat/Views/conversations_screen.dart';
 import '../../Features/User/views/contractors_by_service.dart';
+import '../../Features/User/views/language_settings_screen.dart';
 import '../../Features/auth/views/registration_screen.dart';
 import '../../Features/Chat/Views/chat_screen.dart';
 import '../../Features/Setup/Views/account_type_screen.dart';
@@ -22,11 +23,13 @@ class AppRoutes {
   static const String userMain = '/userMainScreen';
   static const String conversations = '/conversations';
   static const String contractorsByService = '/contractorsByService';
+  static const String languageSettingsScreen = '/LanguageSettingsScreen';
 
   // Route Definitions
   static Map<String, WidgetBuilder> define() {
     return {
       languageSelection: (_) => const LanguageSelectionScreen(),
+      languageSettingsScreen: (_) => const LanguageSettingsScreen(),
       userMain: (_) => const UserMainScreen(),
       onBording: (_) => const OnBordingView(),
       login: (_) => const LoginScreen(),

@@ -70,6 +70,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       title: Text(
         AppLocalizations.of(context)!.services,
         style: AppTextStyles.appBarTitle(context),

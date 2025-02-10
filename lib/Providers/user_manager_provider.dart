@@ -210,15 +210,15 @@ class UserManagerProvider extends ChangeNotifier {
 
   // Favorite functionality
   void toggleFavorite(int contractorId) {
-    final contractorIndex =
-        _bestContractors.indexWhere((c) => c.id == contractorId);
-    if (contractorIndex >= 0) {
-      _bestContractors[contractorIndex] =
-          _bestContractors[contractorIndex].copyWith(
-        isFavorite: !_bestContractors[contractorIndex].isFavorite,
-      );
-      notifyListeners();
-    }
+    // final contractorIndex =
+    //     _bestContractors.indexWhere((c) => c.id == contractorId);
+    // if (contractorIndex >= 0) {
+    //   _bestContractors[contractorIndex] =
+    //       _bestContractors[contractorIndex].copyWith(
+    //     isFavorite: !_bestContractors[contractorIndex].isFavorite,
+    //   );
+    //   notifyListeners();
+    // }
   }
 
   // Best contractors

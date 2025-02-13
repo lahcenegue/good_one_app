@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Core/Navigation/app_routes.dart';
 import '../../../Core/presentation/resources/app_colors.dart';
 import '../../../Core/presentation/Widgets/error/error_widget.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
@@ -128,6 +129,16 @@ class _ServicesScreenState extends State<ServicesScreen> {
       itemCount: userManager.categories.length,
       itemBuilder: (context, index) => ServiceGridItem(
         category: userManager.categories[index],
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.contractorsByService,
+            arguments: {
+              'id': userManager.categories[index].id,
+              'name': userManager.categories[index].name,
+            },
+          );
+        },
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Core/Navigation/app_routes.dart';
 import '../../../Core/infrastructure/api/api_endpoints.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/presentation/Widgets/user_avatar.dart';
@@ -17,6 +18,7 @@ import '../models/contractor.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'calender_booking_screen.dart';
 import 'customer_reviews_screen.dart';
 
 class ContractorProfile extends StatelessWidget {
@@ -71,7 +73,14 @@ class ContractorProfile extends StatelessWidget {
                               builder: (context) => const AuthRequiredDialog(),
                             );
                           } else {
-                            // Handle messaging logic here
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.chat,
+                              arguments: {
+                                'otherUserId': contractor.id.toString(),
+                                'otherUserName': contractor.fullName,
+                              },
+                            );
                           }
                         },
                       ),
@@ -84,7 +93,11 @@ class ContractorProfile extends StatelessWidget {
                               builder: (context) => const AuthRequiredDialog(),
                             );
                           } else {
-                            // Handle booking logic here
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CalenderBookingScreen()));
                           }
                         },
                       ),

@@ -204,12 +204,21 @@ class AuthProvider with ChangeNotifier {
         deviceToken: sharedPrefs.getString(StorageKeys.fcmTokenKey)!,
       );
 
+      debugPrint('The Device token fron register ${request.deviceToken}');
+
       final response = await AuthApi.register(request);
 
       if (response.success) {
         _authData = response.data;
         await _saveAuthData();
-        NavigationService.navigateToAndReplace(AppRoutes.userMain);
+
+        if (context.mounted) {
+          await context
+              .read<UserManagerProvider>()
+              .updateToken(_authData!.accessToken);
+        }
+
+        await NavigationService.navigateToAndReplace(AppRoutes.userMain);
       } else {
         _error = response.error;
         notifyListeners();

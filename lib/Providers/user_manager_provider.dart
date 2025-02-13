@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 import '../Core/Utils/storage_keys.dart';
 import '../Core/infrastructure/storage/storage_service.dart';
@@ -21,6 +23,14 @@ class UserManagerProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  DateTime _selectedDay = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
+  String _selectedTime = '09:00';
+  final List<String> _timeSlots = List.generate(24, (index) {
+    final hour = index.toString().padLeft(2, '0');
+    return '$hour:00';
+  });
+
   // Getters
   String? get token => _token;
   UserInfo? get userInfo => _userInfo;
@@ -32,6 +42,25 @@ class UserManagerProvider extends ChangeNotifier {
   int get currentIndex => _currentIndex;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  DateTime get selectedDay => _selectedDay;
+  DateTime get focusedDay => _focusedDay;
+  String get selectedTime => _selectedTime;
+  List<String> get timeSlots => _timeSlots;
+  String get formattedDateTime {
+    final formatter = DateFormat('MMM dd, yyyy');
+    return '${formatter.format(_selectedDay)} at $_selectedTime';
+  }
+
+  int get bookingTimestamp {
+    final dateTime = DateTime(
+      _selectedDay.year,
+      _selectedDay.month,
+      _selectedDay.day,
+      int.parse(_selectedTime.split(':')[0]),
+      0,
+    );
+    return dateTime.millisecondsSinceEpoch ~/ 1000;
+  }
 
   UserManagerProvider() {
     _initializeProvider();
@@ -277,5 +306,37 @@ class UserManagerProvider extends ChangeNotifier {
                 .toLowerCase()
                 .contains(_contractorsByServiceSearch.toLowerCase()))
         .toList();
+  }
+
+  void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (!isSameDay(_selectedDay, selectedDay)) {
+      _selectedDay = selectedDay;
+      _focusedDay = focusedDay;
+      notifyListeners();
+    }
+  }
+
+  void selectTime(String time) {
+    _selectedTime = time;
+    notifyListeners();
+  }
+
+  bool isValidBookingSelection() {
+    final now = DateTime.now();
+    final selectedDateTime = DateTime(
+      _selectedDay.year,
+      _selectedDay.month,
+      _selectedDay.day,
+      int.parse(_selectedTime.split(':')[0]),
+      0,
+    );
+    return selectedDateTime.isAfter(now);
+  }
+
+  void resetBookingData() {
+    _selectedDay = DateTime.now();
+    _focusedDay = DateTime.now();
+    _selectedTime = '09:00';
+    notifyListeners();
   }
 }

@@ -183,6 +183,7 @@
   "language": "Language",
   "languageSelectionTitle": "Language selection",
   "location": "Location",
+  "locationRequired": "Your city and Country are required",
   "login": "Log in",
   "loginButton": "Log in",
   "loginError": "Invalid email or password",

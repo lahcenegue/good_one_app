@@ -3,7 +3,6 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Core/Navigation/app_routes.dart';
@@ -320,7 +319,7 @@ class ContractorProfile extends StatelessWidget {
                             borderRadius:
                                 BorderRadius.circular(context.getWidth(12)),
                             child: Image.network(
-                              '${ApiEndpoints.imageBaseUrl}/${contractor.gallery[0].image}',
+                              '${ApiEndpoints.imageBaseUrl}/${contractor.gallery[0]}',
                               fit: BoxFit.cover,
                               errorBuilder: _errorBuilder,
                             ),
@@ -346,7 +345,7 @@ class ContractorProfile extends StatelessWidget {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
                                     child: Image.network(
-                                      '${ApiEndpoints.imageBaseUrl}/${contractor.gallery[i].image}',
+                                      '${ApiEndpoints.imageBaseUrl}/${contractor.gallery[i]}',
                                       fit: BoxFit.cover,
                                       errorBuilder: _errorBuilder,
                                     ),
@@ -441,7 +440,6 @@ class ContractorProfile extends StatelessWidget {
         borderRadius: BorderRadius.circular(context.getWidth(12)),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -452,52 +450,50 @@ class ContractorProfile extends StatelessWidget {
                 size: context.getWidth(40),
               ),
               SizedBox(width: context.getWidth(10)),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    review.user.fullName,
-                    style: AppTextStyles.title2(context),
-                  ),
-                  Text(
-                    _formatDate(review.updatedAt),
-                    style: AppTextStyles.text(context).copyWith(
-                      color: Colors.grey,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            review.user.fullName,
+                            style: AppTextStyles.title2(context),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: context.getWidth(20),
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              '(${review.rate}.0)',
+                              style: AppTextStyles.text(context),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              Spacer(),
-              Row(
-                children: [
-                  Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                    size: context.getWidth(20),
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '(${review.rate}.0)',
-                    style: AppTextStyles.text(context),
-                  ),
-                ],
+                    if (review.message.isNotEmpty) ...[
+                      SizedBox(height: context.getHeight(10)),
+                      Text(
+                        review.message,
+                        textAlign: TextAlign.justify,
+                        style: AppTextStyles.text(context),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ],
-          ),
-          SizedBox(height: context.getHeight(10)),
-          Text(
-            review.message,
-            textAlign: TextAlign.justify,
-            style: AppTextStyles.text(context),
           ),
         ],
       ),
     );
-  }
-
-  String _formatDate(String date) {
-    DateTime parsedDate = DateTime.parse(date);
-    return DateFormat('dd/MM/yyyy').format(parsedDate);
   }
 }

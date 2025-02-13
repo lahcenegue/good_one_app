@@ -12,6 +12,7 @@ import '../Core/Utils/error_handling/failures.dart';
 import '../Core/Navigation/app_routes.dart';
 import '../Core/Navigation/navigation_service.dart';
 
+import '../Core/presentation/resources/app_strings.dart';
 import '../Features/auth/Services/auth_api.dart';
 import '../Features/auth/Services/token_manager.dart';
 import '../Features/auth/models/auth_request.dart';
@@ -22,13 +23,38 @@ import '../Features/auth/models/register_request.dart';
 import 'user_manager_provider.dart';
 
 class AuthProvider with ChangeNotifier {
+  late final SharedPreferences prefs;
+  bool _isInitialized = false;
   // Authentication State
   AuthModel? _authData;
   bool _isLoading = false;
   Failure? _failure;
   String? _error;
 
-  //BuildContext? _context;
+  String? selectedCountry;
+  String? selectedCity;
+
+  List<String> countries = [
+    'Canada',
+    'United States',
+  ];
+
+  Map<String, List<String>> citiesByCountry = {
+    'United States': [
+      'New York',
+      'Los Angeles',
+      'Chicago',
+      'Houston',
+      'Phoenix',
+    ],
+    'Canada': [
+      'Toronto',
+      'Vancouver',
+      'Montreal',
+      'Calgary',
+      'Ottawa',
+    ],
+  };
 
   // Form Controllers
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -49,10 +75,7 @@ class AuthProvider with ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
 
   AuthProvider() {
-    TokenManager.instance.tokenStream.listen((auth) {
-      _authData = auth;
-      notifyListeners();
-    });
+    initialize();
   }
 
   // Getters
@@ -65,6 +88,22 @@ class AuthProvider with ChangeNotifier {
   bool get obscureConfirmPassword => _obscureConfirmPassword;
   File? get selectedImage => _selectedImage;
   String? get imageError => _imageError;
+  List<String> get availableCities {
+    return selectedCountry != null
+        ? citiesByCountry[selectedCountry] ?? []
+        : [];
+  }
+
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    prefs = await SharedPreferences.getInstance();
+    TokenManager.instance.tokenStream.listen((auth) {
+      _authData = auth;
+    });
+    _isInitialized = true;
+    notifyListeners();
+  }
 
   // UI Methods
 
@@ -124,6 +163,17 @@ class AuthProvider with ChangeNotifier {
     return null;
   }
 
+  void setCountry(String? country) {
+    selectedCountry = country;
+    selectedCity = null;
+    notifyListeners();
+  }
+
+  void setCity(String? city) {
+    selectedCity = city;
+    notifyListeners();
+  }
+
 // Authentication Methods
   Future<void> login(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
@@ -132,12 +182,10 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearErrors();
 
-      final sharedPrefs = await SharedPreferences.getInstance();
-
       final request = AuthRequest(
         email: emailController.text.trim(),
         password: passwordController.text,
-        deviceToken: sharedPrefs.getString(StorageKeys.fcmTokenKey)!,
+        deviceToken: prefs.getString(StorageKeys.fcmTokenKey)!,
       );
 
       debugPrint('The Device token fron login ${request.deviceToken}');
@@ -155,6 +203,7 @@ class AuthProvider with ChangeNotifier {
               .updateToken(_authData!.accessToken);
         }
 
+        _setLoading(false);
         await NavigationService.navigateToAndReplace(AppRoutes.userMain);
       } else {
         _error = response.error;
@@ -187,12 +236,19 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
+    final accountType = prefs.getString(StorageKeys.accountTypeKey);
+
+    if (accountType == AppStrings.service) {
+      if (selectedCountry == null || selectedCity == null) {
+        _error = AppLocalizations.of(context)!.locationRequired;
+        notifyListeners();
+        return;
+      }
+    }
+
     try {
       _setLoading(true);
       _clearErrors();
-
-      final sharedPrefs = await SharedPreferences.getInstance();
-      final accountType = sharedPrefs.getString(StorageKeys.accountTypeKey);
 
       final request = RegisterRequest(
         image: _selectedImage!,
@@ -201,7 +257,9 @@ class AuthProvider with ChangeNotifier {
         phone: phoneController.text.trim(),
         password: passwordController.text,
         type: accountType!,
-        deviceToken: sharedPrefs.getString(StorageKeys.fcmTokenKey)!,
+        deviceToken: prefs.getString(StorageKeys.fcmTokenKey)!,
+        country: accountType == AppStrings.service ? selectedCountry : null,
+        city: accountType == AppStrings.service ? selectedCity : null,
       );
 
       debugPrint('The Device token fron register ${request.deviceToken}');
@@ -218,7 +276,12 @@ class AuthProvider with ChangeNotifier {
               .updateToken(_authData!.accessToken);
         }
 
-        await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+        _setLoading(false);
+        if (accountType == AppStrings.service) {
+          //  await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+        } else {
+          await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+        }
       } else {
         _error = response.error;
         notifyListeners();

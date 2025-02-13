@@ -10,11 +10,6 @@ class Contractor {
   final String location;
   final int costPerHour;
   final String service;
-  final String? emailVerifiedAt;
-  final String createdAt;
-  final String updatedAt;
-  final int category;
-  final int active;
   final int yearsOfExperience;
   final String about;
   final int securityCheck;
@@ -22,7 +17,7 @@ class Contractor {
   final Rating rating;
   final List<RatingDetail> ratings;
   final int orders;
-  final List<Gallery> gallery;
+  final List<String> gallery;
   final bool isFavorite;
 
   const Contractor({
@@ -35,11 +30,6 @@ class Contractor {
     required this.location,
     required this.costPerHour,
     required this.service,
-    this.emailVerifiedAt,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.category,
-    required this.active,
     required this.yearsOfExperience,
     required this.about,
     required this.securityCheck,
@@ -62,11 +52,6 @@ class Contractor {
       location: json['location'],
       costPerHour: json['cost_per_hour'],
       service: json['service'],
-      emailVerifiedAt: json['email_verified_at'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      category: json['category'],
-      active: json['active'],
       yearsOfExperience: json['years_of_experience'],
       about: json['about'],
       securityCheck: json['security_check'],
@@ -76,9 +61,7 @@ class Contractor {
           .map((item) => RatingDetail.fromJson(item))
           .toList(),
       orders: json['orders'],
-      gallery: (json['gallary'] as List)
-          .map((item) => Gallery.fromJson(item))
-          .toList(),
+      gallery: List<String>.from(json['gallary']),
     );
   }
 
@@ -162,32 +145,20 @@ class Rating {
 }
 
 class RatingDetail {
-  final int id;
   final int rate;
   final String message;
-  final int serviceId;
-  final String createdAt;
-  final String updatedAt;
   final User user;
 
   RatingDetail({
-    required this.id,
     required this.rate,
     required this.message,
-    required this.serviceId,
-    required this.createdAt,
-    required this.updatedAt,
     required this.user,
   });
 
   factory RatingDetail.fromJson(Map<String, dynamic> json) {
     return RatingDetail(
-      id: json['id'],
       rate: json['rate'],
       message: json['message'],
-      serviceId: json['service_id'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
       user: User.fromJson(json['user']),
     );
   }
@@ -205,32 +176,6 @@ class User {
       id: json['id'],
       fullName: json['full_name'],
       picture: json['picture'],
-    );
-  }
-}
-
-class Gallery {
-  final int id;
-  final String image;
-  final int userId;
-  final String createdAt;
-  final String updatedAt;
-
-  Gallery({
-    required this.id,
-    required this.image,
-    required this.userId,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Gallery.fromJson(Map<String, dynamic> json) {
-    return Gallery(
-      id: json['id'],
-      image: json['image'],
-      userId: json['user_id'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
     );
   }
 }

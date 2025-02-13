@@ -30,6 +30,7 @@
   "language": "اللغة",
   "languageSelectionTitle": "اختيار اللغة",
   "location": "الموقع",
+  "locationRequired": "مدينتك وبلدك مطلوبة",
   "login": "تسجيل الدخول",
   "loginButton": "تسجيل الدخول",
   "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",

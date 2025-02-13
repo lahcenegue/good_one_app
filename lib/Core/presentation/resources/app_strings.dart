@@ -3,7 +3,7 @@ abstract class AppStrings {
 
   // Account Types
   static const String user = 'Customer';
-  static const String service = 'Profissionel';
+  static const String service = 'worker';
 
   // General
   static const String appName = 'Good One';

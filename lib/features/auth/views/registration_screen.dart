@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Core/Utils/storage_keys.dart';
 import '../../../Core/presentation/resources/app_colors.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/Utils/size_config.dart';
@@ -138,7 +140,10 @@ class RegistrationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRegistrationForm(BuildContext context, AuthProvider auth) {
+  Widget _buildRegistrationForm(
+    BuildContext context,
+    AuthProvider auth,
+  ) {
     return Form(
       key: auth.registrationFormKey,
       child: Column(
@@ -161,6 +166,12 @@ class RegistrationScreen extends StatelessWidget {
             keyboardType: TextInputType.emailAddress,
           ),
           SizedBox(height: context.getHeight(16)),
+          if (auth.prefs.getString(StorageKeys.accountTypeKey) ==
+              AppStrings.service) ...[
+            SizedBox(height: context.getHeight(16)),
+            _buildLocationFields(context, auth),
+            SizedBox(height: context.getHeight(16)),
+          ],
           SharedAuthWidgets.buildInputField(
             context,
             controller: auth.phoneController,
@@ -197,7 +208,10 @@ class RegistrationScreen extends StatelessWidget {
           PrimaryButton(
             text: AppLocalizations.of(context)!.signUp,
             isLoading: auth.isLoading,
-            onPressed: () => auth.register(context),
+            //onPressed: () => auth.register(context),
+            onPressed: () {
+              print(auth.prefs.getString(StorageKeys.accountTypeKey));
+            },
           ),
         ],
       ),
@@ -225,6 +239,85 @@ class RegistrationScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLocationFields(BuildContext context, AuthProvider auth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Country',
+          style: AppTextStyles.subTitle(context),
+        ),
+        SizedBox(height: context.getHeight(8)),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: context.getHeight(12)),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: AppColors.dimGray,
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: auth.selectedCountry,
+              hint: Text(
+                'Select Country',
+                style: AppTextStyles.text(context),
+              ),
+              items: auth.countries.map((String country) {
+                return DropdownMenuItem<String>(
+                  value: country,
+                  child: Text(
+                    country,
+                    style: AppTextStyles.subTitle(context),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                auth.setCountry(newValue);
+              },
+            ),
+          ),
+        ),
+        SizedBox(height: context.getHeight(16)),
+        Text(
+          'City',
+          style: AppTextStyles.subTitle(context),
+        ),
+        SizedBox(height: context.getHeight(8)),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: context.getHeight(12)),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: AppColors.dimGray,
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: auth.selectedCity,
+              hint: Text(
+                'Select City',
+                style: AppTextStyles.text(context),
+              ),
+              items: auth.availableCities.map((String city) {
+                return DropdownMenuItem<String>(
+                  value: city,
+                  child: Text(
+                    city,
+                    style: AppTextStyles.subTitle(context),
+                  ),
+                );
+              }).toList(),
+              onChanged: auth.selectedCountry != null
+                  ? (String? newValue) {
+                      auth.setCity(newValue);
+                    }
+                  : null,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -5,6 +5,8 @@ class RegisterRequest {
   final String email;
   final String phone;
   final String password;
+  final String? city;
+  final String? country;
   final String type;
   final File image;
   final String deviceToken;
@@ -14,13 +16,15 @@ class RegisterRequest {
     required this.email,
     required this.phone,
     required this.password,
+    this.city,
+    this.country,
     required this.type,
     required this.image,
     required this.deviceToken,
   });
 
   Map<String, String> toFields() {
-    return {
+    final fields = {
       'full_name': fullName,
       'email': email,
       'phone': phone,
@@ -28,6 +32,11 @@ class RegisterRequest {
       'type': type,
       'device_token': deviceToken,
     };
+
+    if (city != null) fields['city'] = city!;
+    if (country != null) fields['country'] = country!;
+
+    return fields;
   }
 
   Map<String, File> toFiles() {

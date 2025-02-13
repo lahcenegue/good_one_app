@@ -3,10 +3,9 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
 import '../../../Core/infrastructure/api/api_endpoints.dart';
-import '../models/contractor.dart';
 
 class GalleryViewerPage extends StatefulWidget {
-  final List<Gallery> gallery;
+  final List<String> gallery;
   final int initialIndex;
 
   const GalleryViewerPage({
@@ -51,7 +50,7 @@ class _GalleryViewerPageState extends State<GalleryViewerPage> {
         builder: (context, index) {
           return PhotoViewGalleryPageOptions(
             imageProvider: NetworkImage(
-                '${ApiEndpoints.imageBaseUrl}/${widget.gallery[index].image}'),
+                '${ApiEndpoints.imageBaseUrl}/${widget.gallery[index]}'),
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 2,
           );

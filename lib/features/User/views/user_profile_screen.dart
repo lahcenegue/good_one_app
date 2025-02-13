@@ -285,7 +285,7 @@ class UserProfileScreen extends StatelessWidget {
           onTap: () async {
             await userManager.clearAuthData();
             if (context.mounted) {
-              NavigationService.navigateToAndReplace(AppRoutes.login);
+              NavigationService.navigateToAndReplace(AppRoutes.userMain);
             }
           },
         ),
@@ -337,12 +337,7 @@ class UserProfileScreen extends StatelessWidget {
       child: PrimaryButton(
         text: AppLocalizations.of(context)!.login,
         onPressed: () {
-          if (userManager.storage.getString(StorageKeys.accountTypeKey) ==
-              null) {
-            NavigationService.navigateTo(AppRoutes.accountSelection);
-          } else {
-            NavigationService.navigateTo(AppRoutes.login);
-          }
+          NavigationService.navigateTo(AppRoutes.accountSelection);
         },
       ),
     );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:intl/intl.dart';
 
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/presentation/Widgets/user_avatar.dart';
@@ -32,29 +31,6 @@ class CustomerReviewsScreen extends StatelessWidget {
           ),
         ],
       ),
-      // body: ListView.builder(
-      //   itemCount: reviews.length,
-      //   itemBuilder: (context, index) {
-      //     final review = reviews[index];
-      //     return ListTile(
-      //       title: Text(
-      //         review.user.fullName,
-      //         style: TextStyle(fontWeight: FontWeight.bold),
-      //       ),
-      //       subtitle: Text(review.message),
-      //       trailing: Row(
-      //         mainAxisSize: MainAxisSize.min,
-      //         children: List.generate(
-      //           review.rate,
-      //           (index) => const Icon(
-      //             Icons.star,
-      //             color: Colors.amber,
-      //           ),
-      //         ),
-      //       ),
-      //     );
-      //   },
-      // ),
     );
   }
 
@@ -223,32 +199,20 @@ class CustomerReviewsScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Text(
-                      _formatDate(review.updatedAt),
-                      style: AppTextStyles.text(context).copyWith(
-                        color: Colors.grey,
-                        fontSize: 12,
+                    if (review.message.isNotEmpty) ...[
+                      SizedBox(height: context.getHeight(12)),
+                      Text(
+                        review.message,
+                        style: AppTextStyles.text(context),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
-          if (review.message.isNotEmpty) ...[
-            SizedBox(height: context.getHeight(12)),
-            Text(
-              review.message,
-              style: AppTextStyles.text(context),
-            ),
-          ],
         ],
       ),
     );
-  }
-
-  String _formatDate(String date) {
-    DateTime parsedDate = DateTime.parse(date);
-    return DateFormat('dd/MM/yyyy').format(parsedDate);
   }
 }

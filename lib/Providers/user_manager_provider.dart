@@ -174,7 +174,9 @@ class UserManagerProvider extends ChangeNotifier {
     _token = null;
     _userInfo = null;
     await storage.remove(StorageKeys.tokenKey);
+    await storage.remove(StorageKeys.accountTypeKey);
     await TokenManager.instance.clearToken();
+    setCurrentIndex(0);
     notifyListeners();
   }
 

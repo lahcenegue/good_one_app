@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Core/Utils/storage_keys.dart';
+import '../../../Core/infrastructure/storage/storage_manager.dart';
 import '../../../Core/presentation/resources/app_colors.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/Utils/size_config.dart';
@@ -166,7 +167,7 @@ class RegistrationScreen extends StatelessWidget {
             keyboardType: TextInputType.emailAddress,
           ),
           SizedBox(height: context.getHeight(16)),
-          if (auth.prefs.getString(StorageKeys.accountTypeKey) ==
+          if (StorageManager.getString(StorageKeys.accountTypeKey) ==
               AppStrings.service) ...[
             SizedBox(height: context.getHeight(16)),
             _buildLocationFields(context, auth),
@@ -208,10 +209,7 @@ class RegistrationScreen extends StatelessWidget {
           PrimaryButton(
             text: AppLocalizations.of(context)!.signUp,
             isLoading: auth.isLoading,
-            //onPressed: () => auth.register(context),
-            onPressed: () {
-              print(auth.prefs.getString(StorageKeys.accountTypeKey));
-            },
+            onPressed: () => auth.register(context),
           ),
         ],
       ),

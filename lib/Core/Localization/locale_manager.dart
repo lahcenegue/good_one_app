@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Utils/storage_keys.dart';
+import '../infrastructure/storage/storage_manager.dart';
 import 'app_localizations.dart';
 
 class LocaleManager {
-  final SharedPreferences _prefs;
-
-  const LocaleManager(this._prefs);
+  const LocaleManager();
 
   Future<Locale> initializeLocale() async {
-    final savedLanguage = _prefs.getString(StorageKeys.languageKey);
+    final savedLanguage = StorageManager.getString(StorageKeys.languageKey);
     if (savedLanguage != null) {
       return Locale(savedLanguage);
     }
@@ -23,21 +22,23 @@ class LocaleManager {
   Future<void> saveLocale(Locale locale) async {
     if (!AppLocalization.isSupported(locale)) return;
 
-    await _prefs.setString(StorageKeys.languageKey, locale.languageCode);
-    await _prefs.setBool(StorageKeys.firstLaunch, false);
+    await StorageManager.setString(
+        StorageKeys.languageKey, locale.languageCode);
+    await StorageManager.setBool(StorageKeys.firstLaunch, false);
   }
 
   // Getters
   bool get hasStoredLanguage =>
-      _prefs.getString(StorageKeys.languageKey) != null;
-  String? get currentLanguageCode => _prefs.getString(StorageKeys.languageKey);
+      StorageManager.getString(StorageKeys.languageKey) != null;
+  String? get currentLanguageCode =>
+      StorageManager.getString(StorageKeys.languageKey);
   String get currentLanguageName =>
       AppLocalization.getLanguageName(currentLanguageCode ?? 'en');
 
   // Clear settings
   Future<void> clearLanguageSettings() async {
-    await _prefs.remove(StorageKeys.languageKey);
-    await _prefs.remove(StorageKeys.firstLaunch);
+    await StorageManager.remove(StorageKeys.languageKey);
+    await StorageManager.remove(StorageKeys.firstLaunch);
   }
 
   // Validation

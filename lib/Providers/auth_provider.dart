@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Data/Models/auth_model.dart';
 import '../Core/Utils/storage_keys.dart';
@@ -12,6 +11,7 @@ import '../Core/Utils/error_handling/failures.dart';
 import '../Core/Navigation/app_routes.dart';
 import '../Core/Navigation/navigation_service.dart';
 
+import '../Core/infrastructure/storage/storage_manager.dart';
 import '../Core/presentation/resources/app_strings.dart';
 import '../Features/auth/Services/auth_api.dart';
 import '../Features/auth/Services/token_manager.dart';
@@ -23,7 +23,6 @@ import '../Features/auth/models/register_request.dart';
 import 'user_manager_provider.dart';
 
 class AuthProvider with ChangeNotifier {
-  late final SharedPreferences prefs;
   bool _isInitialized = false;
   // Authentication State
   AuthModel? _authData;
@@ -97,7 +96,6 @@ class AuthProvider with ChangeNotifier {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    prefs = await SharedPreferences.getInstance();
     TokenManager.instance.tokenStream.listen((auth) {
       _authData = auth;
     });
@@ -178,6 +176,8 @@ class AuthProvider with ChangeNotifier {
   Future<void> login(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
 
+    final accountType = StorageManager.getString(StorageKeys.accountTypeKey);
+
     try {
       _setLoading(true);
       _clearErrors();
@@ -185,7 +185,7 @@ class AuthProvider with ChangeNotifier {
       final request = AuthRequest(
         email: emailController.text.trim(),
         password: passwordController.text,
-        deviceToken: prefs.getString(StorageKeys.fcmTokenKey)!,
+        deviceToken: StorageManager.getString(StorageKeys.fcmTokenKey)!,
       );
 
       debugPrint('The Device token fron login ${request.deviceToken}');
@@ -204,7 +204,12 @@ class AuthProvider with ChangeNotifier {
         }
 
         _setLoading(false);
-        await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+
+        if (accountType == AppStrings.service) {
+          await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+        } else {
+          await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+        }
       } else {
         _error = response.error;
         notifyListeners();
@@ -236,7 +241,7 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
-    final accountType = prefs.getString(StorageKeys.accountTypeKey);
+    final accountType = StorageManager.getString(StorageKeys.accountTypeKey);
 
     if (accountType == AppStrings.service) {
       if (selectedCountry == null || selectedCity == null) {
@@ -257,7 +262,7 @@ class AuthProvider with ChangeNotifier {
         phone: phoneController.text.trim(),
         password: passwordController.text,
         type: accountType!,
-        deviceToken: prefs.getString(StorageKeys.fcmTokenKey)!,
+        deviceToken: StorageManager.getString(StorageKeys.fcmTokenKey)!,
         country: accountType == AppStrings.service ? selectedCountry : null,
         city: accountType == AppStrings.service ? selectedCity : null,
       );
@@ -278,7 +283,7 @@ class AuthProvider with ChangeNotifier {
 
         _setLoading(false);
         if (accountType == AppStrings.service) {
-          //  await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+          await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
         } else {
           await NavigationService.navigateToAndReplace(AppRoutes.userMain);
         }

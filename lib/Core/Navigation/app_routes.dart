@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Features/Worker/views/worker_main_screen.dart';
 import '../../Features/Chat/Views/conversations_screen.dart';
 import '../../Features/User/views/contractors_by_service.dart';
 import '../../Features/User/views/language_settings_screen.dart';
@@ -24,6 +25,8 @@ class AppRoutes {
   static const String conversations = '/conversations';
   static const String contractorsByService = '/contractorsByService';
   static const String languageSettingsScreen = '/LanguageSettingsScreen';
+
+  static const String workerMain = '/workerMainScreen';
 
   // Route Definitions
   static Map<String, WidgetBuilder> define() {
@@ -52,6 +55,9 @@ class AppRoutes {
           title: args['name'],
         );
       },
+
+      //
+      workerMain: (_) => const WorkerMainScreen(),
     };
   }
 

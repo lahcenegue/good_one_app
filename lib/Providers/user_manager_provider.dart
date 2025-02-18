@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../Core/Utils/storage_keys.dart';
-import '../Core/infrastructure/storage/storage_service.dart';
+import '../Core/infrastructure/storage/storage_manager.dart';
 import '../Features/User/models/contractor.dart';
 import '../Features/User/models/service_category.dart';
 import '../Features/User/models/user_info.dart';
@@ -11,41 +11,46 @@ import '../Features/User/services/user_api.dart';
 import '../Features/auth/Services/token_manager.dart';
 
 class UserManagerProvider extends ChangeNotifier {
-  late final StorageService storage;
   String? _token;
   UserInfo? _userInfo;
-  List<ServiceCategory> _categories = [];
-  List<Contractor> _bestContractors = [];
-  List<Contractor> _contractorsbyService = [];
   String _searchQuery = '';
   String _contractorsByServiceSearch = '';
+  String? _error;
   int _currentIndex = 0;
   bool _isLoading = false;
-  String? _error;
 
+  // Date and time selection properties
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   String _selectedTime = '09:00';
-  final List<String> _timeSlots = List.generate(24, (index) {
-    final hour = index.toString().padLeft(2, '0');
-    return '$hour:00';
-  });
+
+  // Cached time slots
+  final List<String> _cachedTimeSlots = List.generate(
+    24,
+    (index) => '${index.toString().padLeft(2, '0')}:00',
+  );
+
+  // Categories and contractors lists
+  List<ServiceCategory> _categories = [];
+  List<Contractor> _bestContractors = [];
+  List<Contractor> _contractorsbyService = [];
 
   // Getters
   String? get token => _token;
+  String get selectedTime => _selectedTime;
+  String? get error => _error;
+  String get searchQuery => _searchQuery;
   UserInfo? get userInfo => _userInfo;
   bool get isAuthenticated => _token != null && _userInfo != null;
+  bool get isLoading => _isLoading;
+  int get currentIndex => _currentIndex;
+  DateTime get selectedDay => _selectedDay;
+  DateTime get focusedDay => _focusedDay;
+  List<String> get timeSlots => _cachedTimeSlots;
   List<ServiceCategory> get categories => _categories;
   List<Contractor> get bestContractors => _bestContractors;
   List<Contractor> get contractorsbyService => _contractorsbyService;
-  String get searchQuery => _searchQuery;
-  int get currentIndex => _currentIndex;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-  DateTime get selectedDay => _selectedDay;
-  DateTime get focusedDay => _focusedDay;
-  String get selectedTime => _selectedTime;
-  List<String> get timeSlots => _timeSlots;
+
   String get formattedDateTime {
     final formatter = DateFormat('MMM dd, yyyy');
     return '${formatter.format(_selectedDay)} at $_selectedTime';
@@ -66,18 +71,19 @@ class UserManagerProvider extends ChangeNotifier {
     _initializeProvider();
   }
 
+  // Navigation
+  void setCurrentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
+  }
+
   Future<void> _initializeProvider() async {
-    try {
-      storage = await StorageService.getInstance();
-      await _loadUserData();
-    } catch (e) {
-      debugPrint('Provider initialization error: $e');
-    }
+    await _loadUserData();
   }
 
   Future<void> _loadUserData() async {
     try {
-      _token = storage.getString(StorageKeys.tokenKey);
+      _token = StorageManager.getString(StorageKeys.tokenKey);
       debugPrint('Loaded token: $_token');
 
       if (_token != null) {
@@ -99,48 +105,49 @@ class UserManagerProvider extends ChangeNotifier {
       }
 
       // Always fetch public data
-      await Future.wait([
-        fetchCategories(),
-        fetchBestContractors(),
-      ]);
+      await _fetchPublicData();
     } catch (e) {
-      _error = e.toString();
-      debugPrint('Error loading user data: $e');
-      notifyListeners();
+      _setError('Error loading user data: $e');
     }
   }
 
   // Initialize data
   Future<void> initialize() async {
     try {
-      _error = null;
-      await Future.wait([
-        fetchCategories(),
-        fetchBestContractors(),
-        if (_token != null) fetchUserInfo(),
-      ]);
+      _setError(null);
+      if (_token != null) {
+        await Future.wait([
+          _fetchPublicData(),
+          fetchUserInfo(),
+        ]);
+      } else {
+        await _fetchPublicData();
+      }
     } catch (e) {
-      _error = e.toString();
-      debugPrint('Initialization error: $e');
-      notifyListeners();
+      _setError('Initialization error: $e');
     }
+  }
+
+  // Fetch public data method
+  Future<void> _fetchPublicData() {
+    return Future.wait([
+      fetchCategories(),
+      fetchBestContractors(),
+    ]);
   }
 
   // Update token
   Future<void> updateToken(String newToken) async {
     _token = newToken;
-    await storage.setString(StorageKeys.tokenKey, newToken);
+    await StorageManager.setString(StorageKeys.tokenKey, newToken);
     await _loadUserData();
   }
 
   // Clear data on logout
   Future<void> clearData() async {
-    _token = null;
-    _userInfo = null;
-    await storage.remove(StorageKeys.tokenKey);
-    notifyListeners();
+    await clearAuthData();
     // Reinitialize public data
-    await initialize();
+    await _fetchPublicData();
   }
 
   // Fetch user info
@@ -157,13 +164,11 @@ class UserManagerProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _error = response.error;
-        debugPrint('Error fetching user info: ${response.error}');
+        _setError('Error fetching user info: ${response.error}');
         return false;
       }
     } catch (e) {
-      _error = e.toString();
-      debugPrint('Exception fetching user info: $e');
+      _setError('Exception fetching user info: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -173,8 +178,8 @@ class UserManagerProvider extends ChangeNotifier {
   Future<void> clearAuthData() async {
     _token = null;
     _userInfo = null;
-    await storage.remove(StorageKeys.tokenKey);
-    await storage.remove(StorageKeys.accountTypeKey);
+    await StorageManager.remove(StorageKeys.tokenKey);
+    await StorageManager.remove(StorageKeys.accountTypeKey);
     await TokenManager.instance.clearToken();
     setCurrentIndex(0);
     notifyListeners();
@@ -189,13 +194,12 @@ class UserManagerProvider extends ChangeNotifier {
       if (response.success && response.data != null) {
         _categories = response.data!;
         debugPrint('Categories fetched: ${_categories.length}');
+        notifyListeners();
       } else {
-        _error = response.error;
-        debugPrint('Error fetching categories: ${response.error}');
+        _setError('Error fetching categories: ${response.error}');
       }
     } catch (e) {
-      _error = e.toString();
-      debugPrint('Exception fetching categories: $e');
+      _setError('Exception fetching categories: $e');
     } finally {
       _setLoading(false);
     }
@@ -210,13 +214,12 @@ class UserManagerProvider extends ChangeNotifier {
       if (response.success && response.data != null) {
         _bestContractors = response.data!;
         debugPrint('Contractors fetched: ${_bestContractors.length}');
+        notifyListeners();
       } else {
-        _error = response.error;
-        debugPrint('Error fetching contractors: ${response.error}');
+        _setError('Error fetching contractors: ${response.error}');
       }
     } catch (e) {
-      _error = e.toString();
-      debugPrint('Exception fetching contractors: $e');
+      _setError('Exception fetching contractors: $e');
     } finally {
       _setLoading(false);
     }
@@ -227,43 +230,30 @@ class UserManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _setError(String? errorMessage) {
+    _error = errorMessage;
+    if (errorMessage != null) {
+      debugPrint(errorMessage);
+    }
+    notifyListeners();
+  }
+
   // Search functionality
   void updateSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
   }
 
-  // Navigation
-  void setCurrentIndex(int index) {
-    _currentIndex = index;
-    notifyListeners();
-  }
-
-  // Favorite functionality
-  void toggleFavorite(int contractorId) {
-    // final contractorIndex =
-    //     _bestContractors.indexWhere((c) => c.id == contractorId);
-    // if (contractorIndex >= 0) {
-    //   _bestContractors[contractorIndex] =
-    //       _bestContractors[contractorIndex].copyWith(
-    //     isFavorite: !_bestContractors[contractorIndex].isFavorite,
-    //   );
-    //   notifyListeners();
-    // }
-  }
-
   // Best contractors
   List<Contractor> get getBestContractors {
     if (_searchQuery.isEmpty) return _bestContractors;
-    return _bestContractors
-        .where((contractor) =>
-            contractor.fullName
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            contractor.service
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()))
-        .toList();
+    return _bestContractors.where(_matchesSearchQuery).toList();
+  }
+
+  bool _matchesSearchQuery(Contractor contractor) {
+    final query = _searchQuery.toLowerCase();
+    return contractor.fullName.toLowerCase().contains(query) ||
+        contractor.service.toLowerCase().contains(query);
   }
 
   // Fetch contractors by service
@@ -275,13 +265,12 @@ class UserManagerProvider extends ChangeNotifier {
       if (response.success && response.data != null) {
         _contractorsbyService = response.data!;
         debugPrint('Contractors fetched: ${_contractorsbyService.length}');
+        notifyListeners();
       } else {
-        _error = response.error;
-        debugPrint('Error fetching contractors: ${response.error}');
+        _setError('Error fetching contractors by service: ${response.error}');
       }
     } catch (e) {
-      _error = e.toString();
-      debugPrint('Exception fetching contractors: $e');
+      _setError('Exception fetching contractors by service: $e');
     } finally {
       _setLoading(false);
     }
@@ -299,14 +288,11 @@ class UserManagerProvider extends ChangeNotifier {
 
   List<Contractor> get getContractorsByService {
     if (_contractorsByServiceSearch.isEmpty) return _contractorsbyService;
+    final query = _contractorsByServiceSearch.toLowerCase();
     return _contractorsbyService
         .where((contractor) =>
-            contractor.fullName
-                .toLowerCase()
-                .contains(_contractorsByServiceSearch.toLowerCase()) ||
-            contractor.service
-                .toLowerCase()
-                .contains(_contractorsByServiceSearch.toLowerCase()))
+            contractor.fullName.toLowerCase().contains(query) ||
+            contractor.service.toLowerCase().contains(query))
         .toList();
   }
 

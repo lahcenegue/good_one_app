@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../Core/Navigation/app_routes.dart';
 import '../../../Core/Navigation/navigation_service.dart';
 import '../../../Core/Utils/storage_keys.dart';
+import '../../../Core/infrastructure/storage/storage_manager.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -77,7 +78,7 @@ class BookingScreen extends StatelessWidget {
             PrimaryButton(
               text: AppLocalizations.of(context)!.signIn,
               onPressed: () {
-                if (userManager.storage.getString(StorageKeys.accountTypeKey) ==
+                if (StorageManager.getString(StorageKeys.accountTypeKey) ==
                     null) {
                   NavigationService.navigateTo(AppRoutes.accountSelection);
                 } else {
@@ -88,7 +89,7 @@ class BookingScreen extends StatelessWidget {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () {
-                if (userManager.storage.getString(StorageKeys.accountTypeKey) ==
+                if (StorageManager.getString(StorageKeys.accountTypeKey) ==
                     null) {
                   NavigationService.navigateTo(AppRoutes.accountSelection);
                 } else {

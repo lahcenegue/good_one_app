@@ -1,5 +1,6 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Utils/storage_keys.dart';
+import '../infrastructure/storage/storage_manager.dart';
+import '../presentation/resources/app_strings.dart';
 import 'app_routes.dart';
 
 class NavigationState {
@@ -7,32 +8,42 @@ class NavigationState {
   final bool hasLanguage;
   final bool hasCompletedOnboarding;
   final bool hasToken;
+  final bool isAWorker;
 
   const NavigationState({
     required this.isFirstLaunch,
     required this.hasLanguage,
     required this.hasCompletedOnboarding,
     required this.hasToken,
+    required this.isAWorker,
   });
 
-  factory NavigationState.fromPrefs(SharedPreferences prefs) {
-    final hasLanguage = prefs.getString(StorageKeys.languageKey) != null;
+  factory NavigationState.fromPrefs() {
+    final hasLanguage =
+        StorageManager.getString(StorageKeys.languageKey) != null;
     // First launch should be false if we have a language selected
     final isFirstLaunch =
-        prefs.getBool(StorageKeys.firstLaunch) ?? !hasLanguage;
+        StorageManager.getBool(StorageKeys.firstLaunch) ?? !hasLanguage;
 
     return NavigationState(
       isFirstLaunch: isFirstLaunch,
       hasLanguage: hasLanguage,
-      hasCompletedOnboarding: prefs.getBool(StorageKeys.onboardingKey) ?? false,
-      hasToken: prefs.getString(StorageKeys.tokenKey) != null,
+      hasCompletedOnboarding:
+          StorageManager.getBool(StorageKeys.onboardingKey) ?? false,
+      hasToken: StorageManager.getString(StorageKeys.tokenKey) != null,
+      isAWorker: StorageManager.getString(StorageKeys.accountTypeKey) ==
+          AppStrings.service,
     );
   }
 
   String determineRoute() {
     // If we have a token, go directly to main screen
     if (hasToken) {
-      return AppRoutes.userMain;
+      if (isAWorker) {
+        return AppRoutes.workerMain;
+      } else {
+        return AppRoutes.userMain;
+      }
     }
 
     // If language is selected and we're not on first launch

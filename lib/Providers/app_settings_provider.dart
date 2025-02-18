@@ -2,7 +2,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Core/Config/app_config.dart';
 import '../Core/Utils/storage_keys.dart';
@@ -10,6 +9,7 @@ import '../Core/Localization/locale_manager.dart';
 import '../Core/Navigation/app_routes.dart';
 import '../Core/Navigation/navigation_service.dart';
 import '../Core/Navigation/navigation_state.dart';
+import '../Core/infrastructure/storage/storage_manager.dart';
 import '../Features/Setup/Models/account_type.dart';
 import '../Features/Setup/Models/language_option.dart';
 
@@ -22,7 +22,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
   // Core properties
-  late final SharedPreferences _prefs;
   late final LocaleManager _localeManager;
   late final PageController pageController;
 
@@ -73,8 +72,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (_isInitialized) return;
 
     try {
-      _prefs = await SharedPreferences.getInstance();
-      _localeManager = LocaleManager(_prefs);
+      _localeManager = LocaleManager();
       pageController = PageController(initialPage: 0);
 
       await Future.wait([
@@ -100,7 +98,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
   // Settings initialization
   Future<void> _initializeSettings() async {
     // Set default device locale if it's first launch
-    if (_prefs.getBool(StorageKeys.firstLaunch) ?? true) {
+    if (StorageManager.getBool(StorageKeys.firstLaunch) ?? true) {
       final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
       if (_localeManager.isValidLocale(deviceLocale)) {
         await _localeManager.saveLocale(deviceLocale);
@@ -212,7 +210,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> _saveFCMToken(String? token) async {
     if (token != null) {
-      await _prefs.setString(StorageKeys.fcmTokenKey, token);
+      await StorageManager.setString(StorageKeys.fcmTokenKey, token);
     }
   }
 
@@ -232,13 +230,13 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
       await _localeManager.saveLocale(appLocale);
     }
 
-    final navigationState = NavigationState.fromPrefs(_prefs);
+    final navigationState = NavigationState.fromPrefs();
     final nextRoute = navigationState.determineRoute();
     await NavigationService.navigateToAndReplace(nextRoute);
   }
 
   Future<void> _determineInitialRoute() async {
-    final navigationState = NavigationState.fromPrefs(_prefs);
+    final navigationState = NavigationState.fromPrefs();
     _initialRoute = navigationState.determineRoute();
   }
 
@@ -250,7 +248,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // Account type related methods
   Future<void> _loadSavedAccountType() async {
-    final accountTypeStr = _prefs.getString(StorageKeys.accountTypeKey);
+    final accountTypeStr = StorageManager.getString(StorageKeys.accountTypeKey);
     if (accountTypeStr != null) {
       _selectedAccountType = AccountTypeExtension.fromJson(accountTypeStr);
       _isSetupComplete = true;
@@ -259,7 +257,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> setAccountType(AccountType type) async {
     _selectedAccountType = type;
-    await _prefs.setString(StorageKeys.accountTypeKey, type.toJson());
+    await StorageManager.setString(StorageKeys.accountTypeKey, type.toJson());
     notifyListeners();
   }
 
@@ -277,7 +275,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> completeOnboarding() async {
-    await _prefs.setBool(StorageKeys.onboardingKey, true);
+    await StorageManager.setBool(StorageKeys.onboardingKey, true);
     await NavigationService.navigateToAndReplace(AppRoutes.userMain);
   }
 

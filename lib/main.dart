@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'Core/Navigation/app_routes.dart';
+import 'Core/infrastructure/storage/storage_manager.dart';
 import 'Core/presentation/Theme/app_theme.dart';
 import 'Core/Navigation/navigation_service.dart';
 import 'Features/auth/Services/token_manager.dart';
@@ -16,18 +17,25 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'Providers/chat_provider.dart';
 import 'Providers/user_manager_provider.dart';
+import 'Providers/worker_maganer_provider.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  // Initialize StorageManager
+  await StorageManager.init();
+
+  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Initialize TokenManager
   await TokenManager.instance.initialize();
 
+  // Set global HttpOverrides
   HttpOverrides.global = MyHttpOverrides();
 
   runApp(const MyApp());
@@ -43,6 +51,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserManagerProvider()),
+        ChangeNotifierProvider(create: (_) => WorkerMaganerProvider()),
         ChangeNotifierProxyProvider<UserManagerProvider, ChatProvider>(
           create: (context) => ChatProvider(),
           update: (context, userManager, previous) {

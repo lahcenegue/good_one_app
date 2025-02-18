@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Features/User/views/location_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -164,62 +165,6 @@ class CalenderBookingScreen extends StatelessWidget {
     );
   }
 
-  // Widget _buildTimeSelection(
-  //   BuildContext context,
-  //   UserManagerProvider provider,
-  // ) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Container(
-  //         decoration: BoxDecoration(
-  //           borderRadius: BorderRadius.circular(12),
-  //           border: Border.all(color: AppColors.dimGray.withOpacity(0.3)),
-  //         ),
-  //         child: GridView.builder(
-  //           padding: EdgeInsets.all(context.getWidth(8)),
-  //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  //             crossAxisCount: 4,
-  //             childAspectRatio: 2.2,
-  //             mainAxisSpacing: context.getHeight(8),
-  //             crossAxisSpacing: context.getWidth(8),
-  //           ),
-  //           itemCount: provider.timeSlots.length,
-  //           itemBuilder: (context, index) {
-  //             final timeSlot = provider.timeSlots[index];
-  //             final isSelected = timeSlot == provider.selectedTime;
-
-  //             return Material(
-  //               color: isSelected ? AppColors.primaryColor : Colors.transparent,
-  //               borderRadius: BorderRadius.circular(8),
-  //               child: InkWell(
-  //                 onTap: () => provider.selectTime(timeSlot),
-  //                 borderRadius: BorderRadius.circular(8),
-  //                 child: Container(
-  //                   decoration: BoxDecoration(
-  //                     borderRadius: BorderRadius.circular(8),
-  //                     border: Border.all(
-  //                       color: isSelected
-  //                           ? AppColors.primaryColor
-  //                           : AppColors.dimGray,
-  //                     ),
-  //                   ),
-  //                   child: Center(
-  //                     child: Text(
-  //                       timeSlot,
-  //                       style: AppTextStyles.text(context),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   // Widget _buildCouponSection() {
   //   return Column(
   //     crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +243,11 @@ class CalenderBookingScreen extends StatelessWidget {
     return PrimaryButton(
       text: AppLocalizations.of(context)!.next,
       onPressed: () {
-        print(provider.bookingTimestamp);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LocationScreen(),
+            ));
       },
     );
   }

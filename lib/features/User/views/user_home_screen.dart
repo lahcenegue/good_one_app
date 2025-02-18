@@ -308,9 +308,7 @@ class UserHomeScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               return ContractorListItem(
                 contractor: userManager.getBestContractors[index],
-                onFavorite: () => userManager.toggleFavorite(
-                  userManager.getBestContractors[index].id,
-                ),
+                onFavorite: () {},
                 onTap: () {
                   Navigator.push(
                     context,

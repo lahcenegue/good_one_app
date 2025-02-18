@@ -92,9 +92,7 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
       itemBuilder: (context, index) {
         return ContractorListItem(
           contractor: filteredContractors[index],
-          onFavorite: () => userManager.toggleFavorite(
-            filteredContractors[index].id,
-          ),
+          onFavorite: () {},
           onTap: () {
             Navigator.push(
               context,

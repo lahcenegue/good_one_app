@@ -128,7 +128,7 @@ class ContractorProfile extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    contractor.fullName,
+                    contractor.fullName!,
                     style: AppTextStyles.text(context),
                   ),
                   SizedBox(width: context.getWidth(5)),
@@ -141,7 +141,7 @@ class ContractorProfile extends StatelessWidget {
                 ],
               ),
               Text(
-                contractor.service,
+                contractor.service!,
                 style: AppTextStyles.title2(context),
               ),
               Text(
@@ -152,7 +152,7 @@ class ContractorProfile extends StatelessWidget {
                 children: [
                   Image.asset(AppAssets.location),
                   Text(
-                    contractor.location,
+                    contractor.location!,
                     style: AppTextStyles.text(context),
                   )
                 ],
@@ -212,7 +212,7 @@ class ContractorProfile extends StatelessWidget {
         _serviceBox(
           context,
           AppAssets.distance,
-          contractor.location,
+          contractor.location!,
           'Direction',
         ),
       ],
@@ -270,7 +270,7 @@ class ContractorProfile extends StatelessWidget {
         ),
         SizedBox(height: context.getHeight(10)),
         Text(
-          contractor.about,
+          contractor.about!,
           style: AppTextStyles.text(context),
         ),
       ],

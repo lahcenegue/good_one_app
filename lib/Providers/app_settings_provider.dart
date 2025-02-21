@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
 
 import '../Core/Config/app_config.dart';
 import '../Core/Utils/storage_keys.dart';
@@ -276,7 +277,16 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> completeOnboarding() async {
     await StorageManager.setBool(StorageKeys.onboardingKey, true);
-    await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+    if (StorageManager.getString(StorageKeys.tokenKey) == null) {
+      await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+    } else {
+      if (StorageManager.getString(StorageKeys.accountTypeKey) ==
+          AppStrings.service) {
+        await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+      } else {
+        await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+      }
+    }
   }
 
   @override

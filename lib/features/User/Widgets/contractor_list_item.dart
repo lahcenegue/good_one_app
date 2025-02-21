@@ -79,13 +79,13 @@ class ContractorListItem extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Text(
-          contractor.fullName,
+          contractor.fullName!,
           style: AppTextStyles.text(context),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         Text(
-          contractor.service,
+          contractor.service!,
           style: AppTextStyles.title2(context),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

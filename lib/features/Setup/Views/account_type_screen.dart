@@ -75,12 +75,8 @@ class AccountTypeSelectionOverlay extends StatelessWidget {
                         text: 'Next',
                         onPressed: appSettings.canProceed
                             ? () {
-                                if (appSettings.isSetupComplete) {
-                                  NavigationService.navigateToAndReplace(
-                                      AppRoutes.login);
-                                } else {
-                                  appSettings.proceedWithAccountType();
-                                }
+                                NavigationService.navigateToAndReplace(
+                                    AppRoutes.login);
                               }
                             : () {},
                       ),

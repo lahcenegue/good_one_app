@@ -11,9 +11,7 @@ import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/user_manager_provider.dart';
 import '../Widgets/contractor_list_item.dart';
 import '../Widgets/service_grid_item.dart';
-
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import 'contractor_profile.dart';
 
 class UserHomeScreen extends StatelessWidget {
@@ -23,7 +21,6 @@ class UserHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        // Handle error state
         if (userManager.error != null) {
           return AppErrorWidget(
             message: userManager.error!,
@@ -61,10 +58,7 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(
-    BuildContext context,
-    UserManagerProvider userManager,
-  ) {
+  Widget _buildHeader(BuildContext context, UserManagerProvider userManager) {
     if (!userManager.isAuthenticated) {
       return const SizedBox.shrink();
     }
@@ -79,7 +73,8 @@ class UserHomeScreen extends StatelessWidget {
         ),
         SizedBox(width: context.getWidth(10)),
         Expanded(
-            child: _buildUserInfo(context, user?.fullName, user?.location)),
+          child: _buildUserInfo(context, user?.fullName, user?.location),
+        ),
         _buildNotificationIcon(context),
         SizedBox(width: context.getWidth(10)),
         _buildMessageIcon(context, userManager),
@@ -87,11 +82,7 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUserInfo(
-    BuildContext context,
-    String? name,
-    String? location,
-  ) {
+  Widget _buildUserInfo(BuildContext context, String? name, String? location) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -144,9 +135,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildMessageIcon(
-    BuildContext context,
-    UserManagerProvider userManager,
-  ) {
+      BuildContext context, UserManagerProvider userManager) {
     return Container(
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
@@ -180,9 +169,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildSearchBar(
-    BuildContext context,
-    UserManagerProvider userManager,
-  ) {
+      BuildContext context, UserManagerProvider userManager) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.dimGray,
@@ -274,9 +261,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildContractorsSection(
-    BuildContext context,
-    UserManagerProvider userManager,
-  ) {
+      BuildContext context, UserManagerProvider userManager) {
     return Column(
       children: [
         Row(
@@ -288,7 +273,7 @@ class UserHomeScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                //TODO: Navigate to all contractors
+                // TODO: Navigate to all contractors
               },
               child: Text(
                 AppLocalizations.of(context)!.seeAll,
@@ -304,18 +289,18 @@ class UserHomeScreen extends StatelessWidget {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: userManager.getBestContractors.length,
+            itemCount: userManager.filteredBestContractors.length,
             itemBuilder: (context, index) {
               return ContractorListItem(
-                contractor: userManager.getBestContractors[index],
+                contractor: userManager.filteredBestContractors[index],
                 onFavorite: () {},
                 onTap: () {
+                  userManager.setSelectedContractor(
+                      userManager.filteredBestContractors[index]);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ContractorProfile(
-                        contractor: userManager.getBestContractors[index],
-                      ),
+                      builder: (context) => const ContractorProfile(),
                     ),
                   );
                 },

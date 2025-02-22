@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
@@ -14,192 +15,184 @@ import '../Features/User/models/user_info.dart';
 import '../Features/User/services/user_api.dart';
 import '../Features/auth/Services/token_manager.dart';
 
+/// Manages user-related state and business logic for the application.
+///
+/// This class handles authentication, contractor data, booking schedules,
+/// and location services, notifying listeners when state changes.
 class UserManagerProvider extends ChangeNotifier {
+  // Authentication State
   String? _token;
   UserInfo? _userInfo;
-  String _searchQuery = '';
-  String _contractorsByServiceSearch = '';
   String? _error;
+
+  // UI State
   int _currentIndex = 0;
   bool _isLoading = false;
 
-  //------ LOCATION SCREEN VARIABLES ------//
-  // Map controller
+  // Search State
+  String _searchQuery = '';
+  String _contractorsByServiceSearch = '';
+
+  // Contractor Data
+  Contractor? _selectedContractor;
+  final List<ServiceCategory> _categories = [];
+  final List<Contractor> _bestContractors = [];
+  final List<Contractor> _contractorsByService = [];
+
+  // Location State
   final MapController _mapController = MapController();
   final TextEditingController _locationSearchController =
       TextEditingController();
-  bool _locationScreenIsLoading = false;
-  bool _locationSelected = false;
-
-  // Location data
   LatLng? _selectedLocation;
   String _locationAddress = '';
-  bool _hasSelectedLocation = false;
+  bool _isLocationScreenLoading = false;
+  bool _isLocationSelected = false;
 
-  //------ DATE AND TIME SELECTION PROPERTIES ------//
-  DateTime _selectedDay = DateTime.now();
-  DateTime _focusedDay = DateTime.now();
-  String _selectedTime = '09:00';
+  // Booking State
+  DateTime _selectedDay;
+  DateTime _focusedDay;
+  String _selectedTime;
+  int _taskDurationHours = 1;
+  DateTime? _taskEndTime;
+  final List<int> _availableDurations = [1, 2, 3, 4, 5, 6, 7, 8];
+  static const List<String> _timeSlots = [
+    '00:00',
+    '01:00',
+    '02:00',
+    '03:00',
+    '04:00',
+    '05:00',
+    '06:00',
+    '07:00',
+    '08:00',
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+    '19:00',
+    '20:00',
+    '21:00',
+    '22:00',
+    '23:00',
+  ];
 
-  // Cached time slots
-  final List<String> _cachedTimeSlots = List.generate(
-    24,
-    (index) => '${index.toString().padLeft(2, '0')}:00',
-  );
-
-  //------ CATEGORIES AND CONTRACTORS LISTS ------//
-  List<ServiceCategory> _categories = [];
-  List<Contractor> _bestContractors = [];
-  List<Contractor> _contractorsbyService = [];
-
-  //------ GENERAL GETTERS ------//
+  // Getters
   String? get token => _token;
-  String? get error => _error;
-  String get searchQuery => _searchQuery;
   UserInfo? get userInfo => _userInfo;
   bool get isAuthenticated => _token != null && _userInfo != null;
-  bool get isLoading => _isLoading;
+  String? get error => _error;
   int get currentIndex => _currentIndex;
+  bool get isLoading => _isLoading;
 
-  //------ LOCATION SCREEN GETTERS ------//
+  String get searchQuery => _searchQuery;
+  Contractor? get selectedContractor => _selectedContractor;
+  List<ServiceCategory> get categories => List.unmodifiable(_categories);
+  List<Contractor> get bestContractors => List.unmodifiable(_bestContractors);
+  List<Contractor> get contractorsByService =>
+      _contractorsByServiceSearch.isEmpty
+          ? List.unmodifiable(_contractorsByService)
+          : _contractorsByService.where(_matchesSearchQuery).toList();
+
   MapController get mapController => _mapController;
   TextEditingController get locationSearchController =>
       _locationSearchController;
-  bool get locationScreenIsLoading => _locationScreenIsLoading;
-  bool get locationSelected => _locationSelected;
   LatLng? get selectedLocation => _selectedLocation;
   String get locationAddress => _locationAddress;
-  bool get hasSelectedLocation => _hasSelectedLocation;
+  bool get isLocationScreenLoading => _isLocationScreenLoading;
+  bool get isLocationSelected => _isLocationSelected;
+  bool get hasSelectedLocation => _selectedLocation != null;
 
-  //------ DATE AND TIME GETTERS ------//
-  String get selectedTime => _selectedTime;
   DateTime get selectedDay => _selectedDay;
   DateTime get focusedDay => _focusedDay;
-  List<String> get timeSlots => _cachedTimeSlots;
+  String get selectedTime => _selectedTime;
+  int get taskDurationHours => _taskDurationHours;
+  List<int> get availableDurations => List.unmodifiable(_availableDurations);
+  DateTime? get taskEndTime => _taskEndTime;
+  List<String> get timeSlots => _timeSlots;
+  String get formattedDateTime => _formatBookingDateTime();
 
-  String get formattedDateTime {
-    final formatter = DateFormat('MMM dd, yyyy');
-    return '${formatter.format(_selectedDay)} at $_selectedTime';
+  int get bookingTimestamp => _getTimestamp(_selectedDay, _selectedTime);
+  int get bookingEndTimestamp =>
+      _getTimestamp(_selectedDay, _selectedTime, _taskDurationHours);
+
+  // Constructor
+  UserManagerProvider()
+      : _selectedDay = DateTime.now(),
+        _focusedDay = DateTime.now(),
+        _selectedTime = _computeNextAvailableTime() {
+    _initialize();
   }
 
-  int get bookingTimestamp {
-    final dateTime = DateTime(
-      _selectedDay.year,
-      _selectedDay.month,
-      _selectedDay.day,
-      int.parse(_selectedTime.split(':')[0]),
-      0,
-    );
-    return dateTime.millisecondsSinceEpoch ~/ 1000;
-  }
-
-  //------ CONTRACTOR AND CATEGORY GETTERS ------//
-  List<ServiceCategory> get categories => _categories;
-  List<Contractor> get bestContractors => _bestContractors;
-  List<Contractor> get contractorsbyService => _contractorsbyService;
-
-  //------ CONSTRUCTOR ------//
-  UserManagerProvider() {
-    _initializeProvider();
-  }
-
-  //------ GENERAL METHODS ------//
-  void setCurrentIndex(int index) {
-    _currentIndex = index;
-    notifyListeners();
-  }
-
-  Future<void> _initializeProvider() async {
+  // Initialization
+  Future<void> _initialize() async {
     await _loadUserData();
-    _initializeLocationController();
-  }
-
-  void _initializeLocationController() {
-    if (hasSelectedLocation && locationAddress.isNotEmpty) {
-      _locationSearchController.text = locationAddress;
-    }
+    _syncLocationController();
   }
 
   Future<void> _loadUserData() async {
     try {
       _token = StorageManager.getString(StorageKeys.tokenKey);
-      debugPrint('Loaded token: $_token');
-
       if (_token != null) {
-        // Try to get user info with current token
         final userInfoSuccess = await fetchUserInfo();
-
-        // If user info fails, try token refresh
-        if (!userInfoSuccess && _token != null) {
+        if (!userInfoSuccess) {
           final refreshed = await TokenManager.instance.refreshToken();
           if (refreshed) {
-            // Update token and try user info again
             _token = TokenManager.instance.token;
             await fetchUserInfo();
           } else {
-            // If refresh fails, clear authentication
             await clearAuthData();
           }
         }
       }
-
-      // Always fetch public data
       await _fetchPublicData();
     } catch (e) {
-      _setError('Error loading user data: $e');
+      _setError('Failed to load user data: $e');
     }
   }
 
-  // Initialize data
+  void _syncLocationController() {
+    if (hasSelectedLocation && _locationAddress.isNotEmpty) {
+      _locationSearchController.text = _locationAddress;
+    }
+  }
+
+  // State Management
+  void setCurrentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
+  }
+
   Future<void> initialize() async {
+    _setError(null);
+    _setLoading(true);
     try {
-      _setError(null);
       if (_token != null) {
-        await Future.wait([
-          _fetchPublicData(),
-          fetchUserInfo(),
-        ]);
+        await Future.wait([_fetchPublicData(), fetchUserInfo()]);
       } else {
         await _fetchPublicData();
       }
     } catch (e) {
-      _setError('Initialization error: $e');
+      _setError('Initialization failed: $e');
+    } finally {
+      _setLoading(false);
     }
   }
 
-  // Fetch public data method
-  Future<void> _fetchPublicData() {
-    return Future.wait([
-      fetchCategories(),
-      fetchBestContractors(),
-    ]);
-  }
-
-  // Update token
   Future<void> updateToken(String newToken) async {
     _token = newToken;
     await StorageManager.setString(StorageKeys.tokenKey, newToken);
     await _loadUserData();
   }
 
-  // Clear data on logout
   Future<void> clearData() async {
     await clearAuthData();
-    // Reinitialize public data
     await _fetchPublicData();
-  }
-
-  void _setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
-  }
-
-  void _setError(String? errorMessage) {
-    _error = errorMessage;
-    if (errorMessage != null) {
-      debugPrint(errorMessage);
-    }
-    notifyListeners();
   }
 
   Future<void> clearAuthData() async {
@@ -208,28 +201,35 @@ class UserManagerProvider extends ChangeNotifier {
     await StorageManager.remove(StorageKeys.tokenKey);
     await StorageManager.remove(StorageKeys.accountTypeKey);
     await TokenManager.instance.clearToken();
-    setCurrentIndex(0);
+    _currentIndex = 0;
     notifyListeners();
   }
 
-  //------ USER INFO METHODS ------//
-  // Fetch user info
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  void _setError(String? message) {
+    _error = message;
+    if (message != null) debugPrint(message);
+    notifyListeners();
+  }
+
+  // User Info
   Future<bool> fetchUserInfo() async {
     if (_token == null) return false;
-
+    _setLoading(true);
     try {
-      _setLoading(true);
-      final response = await UserApi.getUserInfo(token: _token);
-
+      final response = await UserApi.getUserInfo(token: _token!);
       if (response.success && response.data != null) {
         _userInfo = response.data;
-        debugPrint('User info fetched successfully: ${_userInfo?.fullName}');
+        debugPrint('User info fetched: ${_userInfo?.fullName}');
         notifyListeners();
         return true;
-      } else {
-        _setError('Error fetching user info: ${response.error}');
-        return false;
       }
+      _setError('Failed to fetch user info: ${response.error}');
+      return false;
     } catch (e) {
       _setError('Exception fetching user info: $e');
       return false;
@@ -238,19 +238,23 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
-  //------ CATEGORY METHODS ------//
-  // Fetch categories
-  Future<void> fetchCategories() async {
-    try {
-      _setLoading(true);
-      final response = await UserApi.getCategories();
+  // Categories and Contractors
+  Future<void> _fetchPublicData() async {
+    await Future.wait([fetchCategories(), fetchBestContractors()]);
+  }
 
+  Future<void> fetchCategories() async {
+    _setLoading(true);
+    try {
+      final response = await UserApi.getCategories();
       if (response.success && response.data != null) {
-        _categories = response.data!;
+        _categories
+          ..clear()
+          ..addAll(response.data!);
         debugPrint('Categories fetched: ${_categories.length}');
         notifyListeners();
       } else {
-        _setError('Error fetching categories: ${response.error}');
+        _setError('Failed to fetch categories: ${response.error}');
       }
     } catch (e) {
       _setError('Exception fetching categories: $e');
@@ -259,19 +263,18 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
-  //------ CONTRACTOR METHODS ------//
-  // Fetch best contractors
   Future<void> fetchBestContractors() async {
+    _setLoading(true);
     try {
-      _setLoading(true);
       final response = await UserApi.getBestContractors();
-
       if (response.success && response.data != null) {
-        _bestContractors = response.data!;
-        debugPrint('Contractors fetched: ${_bestContractors.length}');
+        _bestContractors
+          ..clear()
+          ..addAll(response.data!);
+        debugPrint('Best contractors fetched: ${_bestContractors.length}');
         notifyListeners();
       } else {
-        _setError('Error fetching contractors: ${response.error}');
+        _setError('Failed to fetch contractors: ${response.error}');
       }
     } catch (e) {
       _setError('Exception fetching contractors: $e');
@@ -280,36 +283,19 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
-  // Search functionality
-  void updateSearchQuery(String query) {
-    _searchQuery = query;
-    notifyListeners();
-  }
-
-  // Best contractors
-  List<Contractor> get getBestContractors {
-    if (_searchQuery.isEmpty) return _bestContractors;
-    return _bestContractors.where(_matchesSearchQuery).toList();
-  }
-
-  bool _matchesSearchQuery(Contractor contractor) {
-    final query = _searchQuery.toLowerCase();
-    return contractor.fullName!.toLowerCase().contains(query) ||
-        contractor.service!.toLowerCase().contains(query);
-  }
-
-  // Fetch contractors by service
   Future<void> fetchContractorsByService(int? id) async {
+    _setLoading(true);
     try {
-      _setLoading(true);
       final response = await UserApi.getContractorsByService(id: id);
-
       if (response.success && response.data != null) {
-        _contractorsbyService = response.data!;
-        debugPrint('Contractors fetched: ${_contractorsbyService.length}');
+        _contractorsByService
+          ..clear()
+          ..addAll(response.data!);
+        debugPrint(
+            'Contractors by service fetched: ${_contractorsByService.length}');
         notifyListeners();
       } else {
-        _setError('Error fetching contractors by service: ${response.error}');
+        _setError('Failed to fetch contractors by service: ${response.error}');
       }
     } catch (e) {
       _setError('Exception fetching contractors by service: $e');
@@ -318,591 +304,270 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
+  void setSelectedContractor(Contractor contractor) {
+    _selectedContractor = contractor;
+    notifyListeners();
+  }
+
+  void clearSelectedContractor() {
+    _selectedContractor = null;
+    notifyListeners();
+  }
+
+  void updateSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
   void updateContractorsByServiceSearch(String query) {
     _contractorsByServiceSearch = query;
     notifyListeners();
   }
 
-  void clearContractorsByServiceSearch() {
-    _contractorsByServiceSearch = '';
-    notifyListeners();
+  bool _matchesSearchQuery(Contractor contractor) {
+    final query = _contractorsByServiceSearch.toLowerCase();
+    return contractor.fullName!.toLowerCase().contains(query) ||
+        contractor.service!.toLowerCase().contains(query);
   }
 
-  List<Contractor> get getContractorsByService {
-    if (_contractorsByServiceSearch.isEmpty) return _contractorsbyService;
-    final query = _contractorsByServiceSearch.toLowerCase();
-    return _contractorsbyService
-        .where((contractor) =>
-            contractor.fullName!.toLowerCase().contains(query) ||
-            contractor.service!.toLowerCase().contains(query))
+  List<Contractor> get filteredBestContractors {
+    if (_searchQuery.isEmpty) return List.unmodifiable(_bestContractors);
+    final query = _searchQuery.toLowerCase();
+    return _bestContractors
+        .where((c) =>
+            c.fullName!.toLowerCase().contains(query) ||
+            c.service!.toLowerCase().contains(query))
         .toList();
   }
 
-  //------ DATE AND TIME SELECTION METHODS ------//
+  // Booking Logic
+  static String _computeNextAvailableTime() {
+    final now = DateTime.now();
+    final nextHour = now.hour + 1 >= 24 ? 6 : now.hour + 1;
+    return '${nextHour.toString().padLeft(2, '0')}:00';
+  }
+
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       _selectedDay = selectedDay;
       _focusedDay = focusedDay;
+      _updateEndTime();
+      notifyListeners();
+    }
+  }
+
+  void setTaskDuration(int hours) {
+    if (_availableDurations.contains(hours)) {
+      _taskDurationHours = hours;
+      _updateEndTime();
       notifyListeners();
     }
   }
 
   void selectTime(String time) {
-    _selectedTime = time;
-    notifyListeners();
+    if (_timeSlots.contains(time)) {
+      _selectedTime = time;
+      _updateEndTime();
+      notifyListeners();
+    }
   }
 
-  bool isValidBookingSelection() {
+  bool isValidBookingSelection({bool debug = false}) {
     final now = DateTime.now();
-    final selectedDateTime = DateTime(
-      _selectedDay.year,
-      _selectedDay.month,
-      _selectedDay.day,
-      int.parse(_selectedTime.split(':')[0]),
-      0,
-    );
-    return selectedDateTime.isAfter(now);
+    final startDateTime = _buildDateTime(_selectedDay, _selectedTime);
+    final endDateTime = calculateEndTime();
+
+    if (debug) {
+      debugPrint('Now: $now');
+      debugPrint('Start: $startDateTime');
+      debugPrint('End: $endDateTime');
+    }
+
+    if (!startDateTime.isAfter(now)) {
+      if (debug) debugPrint('Invalid: Start time is not in the future');
+      return false;
+    }
+    if (endDateTime.day != startDateTime.day) {
+      if (debug) debugPrint('Invalid: End time spans to next day');
+      return false;
+    }
+    if (endDateTime.hour > 22 || endDateTime.hour < 6) {
+      if (debug) debugPrint('Invalid: End time outside 6:00-22:00');
+      return false;
+    }
+    if (debug) debugPrint('Booking selection is valid');
+    return true;
+  }
+
+  List<String> getAvailableTimeSlots() {
+    final now = DateTime.now();
+    return _timeSlots.where((slot) {
+      final hour = int.parse(slot.split(':')[0]);
+      final endHour = hour + _taskDurationHours;
+      final startDateTime = _buildDateTime(_selectedDay, slot);
+      return endHour <= 22 && startDateTime.isAfter(now);
+    }).toList();
+  }
+
+  bool isTimeSlotAvailable(String timeSlot) {
+    final hour = int.parse(timeSlot.split(':')[0]);
+    final endHour = hour + _taskDurationHours;
+    return endHour <= 22;
   }
 
   void resetBookingData() {
     _selectedDay = DateTime.now();
     _focusedDay = DateTime.now();
-    _selectedTime = '09:00';
+    _selectedTime = _computeNextAvailableTime();
+    _taskDurationHours = 1;
+    _taskEndTime = null;
     notifyListeners();
   }
 
-  //------ LOCATION SCREEN METHODS ------//
-  // Set location selection state
-  void setLocationSelectedState(bool selected) {
-    _locationSelected = selected;
-    notifyListeners();
+  DateTime calculateEndTime() {
+    final startHour = int.parse(_selectedTime.split(':')[0]);
+    return DateTime(
+      _selectedDay.year,
+      _selectedDay.month,
+      _selectedDay.day,
+      startHour + _taskDurationHours,
+      0,
+    );
   }
 
-  // Set location loading state
-  void setLocationScreenLoading(bool loading) {
-    _locationScreenIsLoading = loading;
-    notifyListeners();
+  // Location Logic
+  Future<void> getCurrentLocation(BuildContext context) async {
+    _setLocationLoading(true);
+    try {
+      if (!await _ensureLocationServiceEnabled(context)) return;
+      if (!await _ensureLocationPermissionGranted(context)) return;
+
+      final position = await Geolocator.getCurrentPosition();
+      final newLocation = LatLng(position.latitude, position.longitude);
+      _mapController.move(newLocation, 16.0);
+      await _reverseGeocode(newLocation);
+    } catch (e) {
+      _showSnackBar(context, 'Error getting location: $e');
+    } finally {
+      _setLocationLoading(false);
+    }
   }
 
-  // Set location
+  Future<void> searchLocation(BuildContext context) async {
+    if (_locationSearchController.text.isEmpty) return;
+    _setLocationLoading(true);
+    try {
+      final locations =
+          await locationFromAddress(_locationSearchController.text);
+      if (locations.isNotEmpty) {
+        final location = locations.first;
+        final newLocation = LatLng(location.latitude, location.longitude);
+        _mapController.move(newLocation, 13.0);
+      } else {
+        _showSnackBar(context, 'Location not found');
+      }
+    } catch (e) {
+      _showSnackBar(context, 'Error searching location: $e');
+    } finally {
+      _setLocationLoading(false);
+    }
+  }
+
+  Future<void> confirmMapLocation() async {
+    final mapCenter = _mapController.camera.center;
+    _isLocationSelected = true;
+    await _reverseGeocode(mapCenter);
+    setLocation(mapCenter, _locationAddress);
+  }
+
+  // Public Location Methods
   void setLocation(LatLng location, String address) {
     _selectedLocation = location;
     _locationAddress = address;
-    _hasSelectedLocation = true;
+    _isLocationSelected = true;
     notifyListeners();
   }
 
-  void clearLocation() {
-    _selectedLocation = null;
-    _locationAddress = '';
-    _hasSelectedLocation = false;
+  void clearLocationSelection() {
+    _isLocationSelected = false;
     notifyListeners();
   }
 
-  // For formatted display of location
-  String get formattedLocation {
-    if (!_hasSelectedLocation || _selectedLocation == null) {
-      return 'No location selected';
+  // Private Helpers
+  Future<bool> _ensureLocationServiceEnabled(BuildContext context) async {
+    final enabled = await Geolocator.isLocationServiceEnabled();
+    if (!enabled) {
+      _showSnackBar(context, 'Location services are disabled');
     }
-
-    if (_locationAddress.isNotEmpty) {
-      return _locationAddress;
-    }
-
-    return '${_selectedLocation!.latitude.toStringAsFixed(6)}, ${_selectedLocation!.longitude.toStringAsFixed(6)}';
+    return enabled;
   }
 
-  // Get current location from GPS
-  Future<void> getCurrentLocation(BuildContext context) async {
-    setLocationScreenLoading(true);
-
-    try {
-      // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Location services are disabled')));
-        setLocationScreenLoading(false);
-        return;
-      }
-
-      // Check location permission
-      LocationPermission permission = await Geolocator.checkPermission();
+  Future<bool> _ensureLocationPermissionGranted(BuildContext context) async {
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Location permissions are denied')));
-          setLocationScreenLoading(false);
-          return;
-        }
+        _showSnackBar(context, 'Location permissions denied');
+        return false;
       }
-
-      if (permission == LocationPermission.deniedForever) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                'Location permissions are permanently denied, we cannot request permissions.')));
-        setLocationScreenLoading(false);
-        return;
-      }
-
-      // Get current position
-      Position position = await Geolocator.getCurrentPosition();
-      LatLng newLocation = LatLng(position.latitude, position.longitude);
-
-      // Update map and state
-      _mapController.move(newLocation, 16.0);
-      setLocationScreenLoading(false);
-
-      // Try to get address for the coordinates
-      reverseGeocode(newLocation);
-    } catch (e) {
-      setLocationScreenLoading(false);
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error getting location: ${e.toString()}')));
     }
+    if (permission == LocationPermission.deniedForever) {
+      _showSnackBar(context, 'Location permissions permanently denied');
+      return false;
+    }
+    return true;
   }
 
-  // Search location method
-  Future<void> searchLocation(BuildContext context) async {
-    if (_locationSearchController.text.isEmpty) return;
-
-    setLocationScreenLoading(true);
-
+  Future<void> _reverseGeocode(LatLng point) async {
     try {
-      List<Location> locations =
-          await locationFromAddress(_locationSearchController.text);
-      if (locations.isNotEmpty) {
-        Location location = locations.first;
-        LatLng newLocation = LatLng(location.latitude, location.longitude);
-
-        // Update map and state
-        _mapController.move(
-            newLocation, 13.0); // Zoom out a bit to show the area
-        setLocationScreenLoading(false);
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Location not found')));
-        setLocationScreenLoading(false);
-      }
-    } catch (e) {
-      setLocationScreenLoading(false);
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error searching location: ${e.toString()}')));
-    }
-  }
-
-  // Reverse geocode method
-  Future<void> reverseGeocode(LatLng point) async {
-    try {
-      List<Placemark> placemarks =
+      final placemarks =
           await placemarkFromCoordinates(point.latitude, point.longitude);
-
       if (placemarks.isNotEmpty) {
-        Placemark place = placemarks.first;
-        String address = '';
-
-        if (place.locality != null && place.locality!.isNotEmpty) {
-          address += place.locality!;
-        }
-        if (place.administrativeArea != null &&
-            place.administrativeArea!.isNotEmpty) {
-          if (address.isNotEmpty) address += ', ';
-          address += place.administrativeArea!;
-        }
-        if (place.country != null && place.country!.isNotEmpty) {
-          if (address.isNotEmpty) address += ', ';
-          address += place.country!;
-        }
-
-        if (address.isNotEmpty) {
-          _locationSearchController.text = address;
-          notifyListeners();
-        }
+        final place = placemarks.first;
+        _locationAddress = [
+          place.locality,
+          place.administrativeArea,
+          place.country
+        ].where((e) => e != null && e.isNotEmpty).join(', ');
+        _locationSearchController.text = _locationAddress;
+        notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error in reverse geocoding: ${e.toString()}');
+      debugPrint('Reverse geocoding failed: $e');
     }
   }
 
-  // Confirm current map location
-  void confirmMapLocation() {
-    LatLng mapCenter = _mapController.camera.center;
-    setLocationSelectedState(true);
-    reverseGeocode(mapCenter);
+  void _setLocationLoading(bool loading) {
+    _isLocationScreenLoading = loading;
+    notifyListeners();
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  void _updateEndTime() {
+    _taskEndTime = calculateEndTime();
+  }
+
+  DateTime _buildDateTime(DateTime day, String time) {
+    final hour = int.parse(time.split(':')[0]);
+    return DateTime(day.year, day.month, day.day, hour, 0);
+  }
+
+  String _formatBookingDateTime() {
+    final formatter = DateFormat('MMM dd, yyyy');
+    final endTime = calculateEndTime();
+    return '${formatter.format(_selectedDay)} from $_selectedTime to ${DateFormat('HH:mm').format(endTime)} ($_taskDurationHours ${_taskDurationHours == 1 ? 'hour' : 'hours'})';
+  }
+
+  int _getTimestamp(DateTime day, String time, [int duration = 0]) {
+    final hour = int.parse(time.split(':')[0]) + duration;
+    return DateTime(day.year, day.month, day.day, hour, 0)
+            .millisecondsSinceEpoch ~/
+        1000;
   }
 }
-
-// class UserManagerProvider extends ChangeNotifier {
-//   String? _token;
-//   UserInfo? _userInfo;
-//   String _searchQuery = '';
-//   String _contractorsByServiceSearch = '';
-//   String? _error;
-//   int _currentIndex = 0;
-//   bool _isLoading = false;
-
-//   //------ LOCATION SCREEN VARIABLES ------//
-//   // Map controller
-//   final MapController _mapController = MapController();
-//   TextEditingController _locationSearchController = TextEditingController();
-//   bool _locationScreenIsLoading = false;
-//   bool _locationSelected = false;
-
-//   // Location data
-//   LatLng? _selectedLocation;
-//   String _locationAddress = '';
-//   bool _hasSelectedLocation = false;
-
-//   //------ DATE AND TIME SELECTION PROPERTIES ------//
-//   DateTime _selectedDay = DateTime.now();
-//   DateTime _focusedDay = DateTime.now();
-//   String _selectedTime = '09:00';
-
-//   // Cached time slots
-//   final List<String> _cachedTimeSlots = List.generate(
-//     24,
-//     (index) => '${index.toString().padLeft(2, '0')}:00',
-//   );
-
-//   //------ CATEGORIES AND CONTRACTORS LISTS ------//
-//   List<ServiceCategory> _categories = [];
-//   List<Contractor> _bestContractors = [];
-//   List<Contractor> _contractorsbyService = [];
-
-//   //------ GENERAL GETTERS ------//
-//   String? get token => _token;
-//   String? get error => _error;
-//   String get searchQuery => _searchQuery;
-//   UserInfo? get userInfo => _userInfo;
-//   bool get isAuthenticated => _token != null && _userInfo != null;
-//   bool get isLoading => _isLoading;
-//   int get currentIndex => _currentIndex;
-
-//   //------ LOCATION SCREEN GETTERS ------//
-//   MapController get mapController => _mapController;
-//   TextEditingController get locationSearchController =>
-//       _locationSearchController;
-//   bool get locationScreenIsLoading => _locationScreenIsLoading;
-//   bool get locationSelected => _locationSelected;
-//   LatLng? get selectedLocation => _selectedLocation;
-//   String get locationAddress => _locationAddress;
-//   bool get hasSelectedLocation => _hasSelectedLocation;
-
-//   //------ DATE AND TIME GETTERS ------//
-//   String get selectedTime => _selectedTime;
-//   DateTime get selectedDay => _selectedDay;
-//   DateTime get focusedDay => _focusedDay;
-//   List<String> get timeSlots => _cachedTimeSlots;
-
-//   String get formattedDateTime {
-//     final formatter = DateFormat('MMM dd, yyyy');
-//     return '${formatter.format(_selectedDay)} at $_selectedTime';
-//   }
-
-//   int get bookingTimestamp {
-//     final dateTime = DateTime(
-//       _selectedDay.year,
-//       _selectedDay.month,
-//       _selectedDay.day,
-//       int.parse(_selectedTime.split(':')[0]),
-//       0,
-//     );
-//     return dateTime.millisecondsSinceEpoch ~/ 1000;
-//   }
-
-//   //------ CONTRACTOR AND CATEGORY GETTERS ------//
-//   List<ServiceCategory> get categories => _categories;
-//   List<Contractor> get bestContractors => _bestContractors;
-//   List<Contractor> get contractorsbyService => _contractorsbyService;
-
-//   //------ CONSTRUCTOR ------//
-//   UserManagerProvider() {
-//     _initializeProvider();
-//   }
-
-//   // Navigation
-//   void setCurrentIndex(int index) {
-//     _currentIndex = index;
-//     notifyListeners();
-//   }
-
-//   // Location setters
-//   void setLocation(LatLng location, String address) {
-//     _selectedLocation = location;
-//     _locationAddress = address;
-//     _hasSelectedLocation = true;
-//     notifyListeners();
-//   }
-
-//   Future<void> _initializeProvider() async {
-//     await _loadUserData();
-//   }
-
-//   Future<void> _loadUserData() async {
-//     try {
-//       _token = StorageManager.getString(StorageKeys.tokenKey);
-//       debugPrint('Loaded token: $_token');
-
-//       if (_token != null) {
-//         // Try to get user info with current token
-//         final userInfoSuccess = await fetchUserInfo();
-
-//         // If user info fails, try token refresh
-//         if (!userInfoSuccess && _token != null) {
-//           final refreshed = await TokenManager.instance.refreshToken();
-//           if (refreshed) {
-//             // Update token and try user info again
-//             _token = TokenManager.instance.token;
-//             await fetchUserInfo();
-//           } else {
-//             // If refresh fails, clear authentication
-//             await clearAuthData();
-//           }
-//         }
-//       }
-
-//       // Always fetch public data
-//       await _fetchPublicData();
-//     } catch (e) {
-//       _setError('Error loading user data: $e');
-//     }
-//   }
-
-//   // Initialize data
-//   Future<void> initialize() async {
-//     try {
-//       _setError(null);
-//       if (_token != null) {
-//         await Future.wait([
-//           _fetchPublicData(),
-//           fetchUserInfo(),
-//         ]);
-//       } else {
-//         await _fetchPublicData();
-//       }
-//     } catch (e) {
-//       _setError('Initialization error: $e');
-//     }
-//   }
-
-//   // Fetch public data method
-//   Future<void> _fetchPublicData() {
-//     return Future.wait([
-//       fetchCategories(),
-//       fetchBestContractors(),
-//     ]);
-//   }
-
-//   // Update token
-//   Future<void> updateToken(String newToken) async {
-//     _token = newToken;
-//     await StorageManager.setString(StorageKeys.tokenKey, newToken);
-//     await _loadUserData();
-//   }
-
-//   // Clear data on logout
-//   Future<void> clearData() async {
-//     await clearAuthData();
-//     // Reinitialize public data
-//     await _fetchPublicData();
-//   }
-
-//   // Fetch user info
-//   Future<bool> fetchUserInfo() async {
-//     if (_token == null) return false;
-
-//     try {
-//       _setLoading(true);
-//       final response = await UserApi.getUserInfo(token: _token);
-
-//       if (response.success && response.data != null) {
-//         _userInfo = response.data;
-//         debugPrint('User info fetched successfully: ${_userInfo?.fullName}');
-//         notifyListeners();
-//         return true;
-//       } else {
-//         _setError('Error fetching user info: ${response.error}');
-//         return false;
-//       }
-//     } catch (e) {
-//       _setError('Exception fetching user info: $e');
-//       return false;
-//     } finally {
-//       _setLoading(false);
-//     }
-//   }
-
-//   Future<void> clearAuthData() async {
-//     _token = null;
-//     _userInfo = null;
-//     await StorageManager.remove(StorageKeys.tokenKey);
-//     await StorageManager.remove(StorageKeys.accountTypeKey);
-//     await TokenManager.instance.clearToken();
-//     setCurrentIndex(0);
-//     notifyListeners();
-//   }
-
-//   // Fetch categories
-//   Future<void> fetchCategories() async {
-//     try {
-//       _setLoading(true);
-//       final response = await UserApi.getCategories();
-
-//       if (response.success && response.data != null) {
-//         _categories = response.data!;
-//         debugPrint('Categories fetched: ${_categories.length}');
-//         notifyListeners();
-//       } else {
-//         _setError('Error fetching categories: ${response.error}');
-//       }
-//     } catch (e) {
-//       _setError('Exception fetching categories: $e');
-//     } finally {
-//       _setLoading(false);
-//     }
-//   }
-
-//   // Fetch best contractors
-//   Future<void> fetchBestContractors() async {
-//     try {
-//       _setLoading(true);
-//       final response = await UserApi.getBestContractors();
-
-//       if (response.success && response.data != null) {
-//         _bestContractors = response.data!;
-//         debugPrint('Contractors fetched: ${_bestContractors.length}');
-//         notifyListeners();
-//       } else {
-//         _setError('Error fetching contractors: ${response.error}');
-//       }
-//     } catch (e) {
-//       _setError('Exception fetching contractors: $e');
-//     } finally {
-//       _setLoading(false);
-//     }
-//   }
-
-//   void _setLoading(bool value) {
-//     _isLoading = value;
-//     notifyListeners();
-//   }
-
-//   void _setError(String? errorMessage) {
-//     _error = errorMessage;
-//     if (errorMessage != null) {
-//       debugPrint(errorMessage);
-//     }
-//     notifyListeners();
-//   }
-
-//   // Search functionality
-//   void updateSearchQuery(String query) {
-//     _searchQuery = query;
-//     notifyListeners();
-//   }
-
-//   // Best contractors
-//   List<Contractor> get getBestContractors {
-//     if (_searchQuery.isEmpty) return _bestContractors;
-//     return _bestContractors.where(_matchesSearchQuery).toList();
-//   }
-
-//   bool _matchesSearchQuery(Contractor contractor) {
-//     final query = _searchQuery.toLowerCase();
-//     return contractor.fullName!.toLowerCase().contains(query) ||
-//         contractor.service!.toLowerCase().contains(query);
-//   }
-
-//   // Fetch contractors by service
-//   Future<void> fetchContractorsByService(int? id) async {
-//     try {
-//       _setLoading(true);
-//       final response = await UserApi.getContractorsByService(id: id);
-
-//       if (response.success && response.data != null) {
-//         _contractorsbyService = response.data!;
-//         debugPrint('Contractors fetched: ${_contractorsbyService.length}');
-//         notifyListeners();
-//       } else {
-//         _setError('Error fetching contractors by service: ${response.error}');
-//       }
-//     } catch (e) {
-//       _setError('Exception fetching contractors by service: $e');
-//     } finally {
-//       _setLoading(false);
-//     }
-//   }
-
-//   void updateContractorsByServiceSearch(String query) {
-//     _contractorsByServiceSearch = query;
-//     notifyListeners();
-//   }
-
-//   void clearContractorsByServiceSearch() {
-//     _contractorsByServiceSearch = '';
-//     notifyListeners();
-//   }
-
-//   List<Contractor> get getContractorsByService {
-//     if (_contractorsByServiceSearch.isEmpty) return _contractorsbyService;
-//     final query = _contractorsByServiceSearch.toLowerCase();
-//     return _contractorsbyService
-//         .where((contractor) =>
-//             contractor.fullName!.toLowerCase().contains(query) ||
-//             contractor.service!.toLowerCase().contains(query))
-//         .toList();
-//   }
-
-//   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-//     if (!isSameDay(_selectedDay, selectedDay)) {
-//       _selectedDay = selectedDay;
-//       _focusedDay = focusedDay;
-//       notifyListeners();
-//     }
-//   }
-
-//   void selectTime(String time) {
-//     _selectedTime = time;
-//     notifyListeners();
-//   }
-
-//   bool isValidBookingSelection() {
-//     final now = DateTime.now();
-//     final selectedDateTime = DateTime(
-//       _selectedDay.year,
-//       _selectedDay.month,
-//       _selectedDay.day,
-//       int.parse(_selectedTime.split(':')[0]),
-//       0,
-//     );
-//     return selectedDateTime.isAfter(now);
-//   }
-
-//   void clearLocation() {
-//     _selectedLocation = null;
-//     _locationAddress = '';
-//     _hasSelectedLocation = false;
-//     notifyListeners();
-//   }
-
-//   // For formatted display of location
-//   String get formattedLocation {
-//     if (!_hasSelectedLocation || _selectedLocation == null) {
-//       return 'No location selected';
-//     }
-
-//     if (_locationAddress.isNotEmpty) {
-//       return _locationAddress;
-//     }
-
-//     return '${_selectedLocation!.latitude.toStringAsFixed(6)}, ${_selectedLocation!.longitude.toStringAsFixed(6)}';
-//   }
-
-//   void resetBookingData() {
-//     _selectedDay = DateTime.now();
-//     _focusedDay = DateTime.now();
-//     _selectedTime = '09:00';
-//     notifyListeners();
-//   }
-// }

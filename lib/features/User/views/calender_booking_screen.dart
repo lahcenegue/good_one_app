@@ -5,14 +5,12 @@ import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Features/User/views/location_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Providers/user_manager_provider.dart';
 
-class CalenderBookingScreen extends StatelessWidget {
-  const CalenderBookingScreen({super.key});
+class CalendarBookingScreen extends StatelessWidget {
+  const CalendarBookingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +28,23 @@ class CalenderBookingScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 1. Start Date (Calendar) first
                 _buildCalendar(context, provider),
-                SizedBox(height: context.getHeight(20)),
+                SizedBox(height: context.getHeight(24)),
+
+                // 2. Start Time selection second
                 _buildTimeSelection(context, provider),
-                SizedBox(height: context.getHeight(20)),
-                _buildSelectedDateTime(context, provider),
-                SizedBox(height: context.getHeight(50)),
+                SizedBox(height: context.getHeight(24)),
+
+                // 3. Task Duration third
+                _buildDurationSelection(context, provider),
+                SizedBox(height: context.getHeight(24)),
+
+                // Summary and Next button remain at the bottom
+                _buildSummaryCard(context, provider),
+                SizedBox(height: context.getHeight(32)),
                 _buildNextButton(context, provider),
-                SizedBox(height: context.getHeight(30)),
+                SizedBox(height: context.getHeight(24)),
               ],
             ),
           );
@@ -46,52 +53,8 @@ class CalenderBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCalendar(
-    BuildContext context,
-    UserManagerProvider provider,
-  ) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          AppLocalizations.of(context)!.startDate,
-          style: AppTextStyles.title2(context),
-        ),
-        TableCalendar(
-          firstDay: DateTime.now(),
-          lastDay: DateTime.now().add(const Duration(days: 31)),
-          focusedDay: provider.focusedDay,
-          selectedDayPredicate: (day) => isSameDay(provider.selectedDay, day),
-          calendarFormat: CalendarFormat.month,
-          headerStyle: HeaderStyle(
-            titleCentered: true,
-            formatButtonVisible: false,
-            leftChevronIcon:
-                Icon(Icons.chevron_left, size: context.getWidth(24)),
-            rightChevronIcon:
-                Icon(Icons.chevron_right, size: context.getWidth(24)),
-          ),
-          calendarStyle: CalendarStyle(
-            selectedDecoration: BoxDecoration(
-              color: AppColors.primaryColor,
-              shape: BoxShape.circle,
-            ),
-            todayDecoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-          ),
-          onDaySelected: provider.onDaySelected,
-        ),
-      ],
-    );
-  }
-
   Widget _buildTimeSelection(
-    BuildContext context,
-    UserManagerProvider provider,
-  ) {
+      BuildContext context, UserManagerProvider provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -99,140 +62,241 @@ class CalenderBookingScreen extends StatelessWidget {
           AppLocalizations.of(context)!.startTime,
           style: AppTextStyles.title2(context),
         ),
-        Padding(
-          padding: EdgeInsets.all(context.getWidth(8)),
-          child: Column(
-            children: List.generate(6, (rowIndex) {
-              return Padding(
-                padding: EdgeInsets.only(
-                    bottom: rowIndex < 5 ? context.getHeight(8) : 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(4, (colIndex) {
-                    final timeIndex = rowIndex * 4 + colIndex;
+        SizedBox(height: context.getHeight(12)),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.all(context.getWidth(12)),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              childAspectRatio: 2.2,
+              crossAxisSpacing: context.getWidth(8),
+              mainAxisSpacing: context.getHeight(8),
+            ),
+            itemCount: 24,
+            itemBuilder: (context, index) {
+              final hour = index;
+              final timeSlot = '${hour.toString().padLeft(2, '0')}:00';
+              final isSelected = timeSlot == provider.selectedTime;
+              final isAvailable = provider.isTimeSlotAvailable(timeSlot);
 
-                    // Convert to 12-hour format with AM/PM
-                    int hour = timeIndex;
-                    String period = hour >= 12 ? 'PM' : 'AM';
-
-                    if (hour == 0) {
-                      hour = 12;
-                    } else if (hour > 12) {
-                      hour -= 12;
-                    }
-
-                    final hourString = hour.toString().padLeft(2, '0');
-                    final timeSlot = '$hourString:00 $period';
-                    final isSelected = timeSlot == provider.selectedTime;
-
-                    return SizedBox(
-                      width: (context.screenWidth - context.getWidth(64)) / 4,
-                      child: ChoiceChip(
-                        label: Text(
-                          timeSlot,
-                          style: AppTextStyles.text(context).copyWith(
-                            color: isSelected ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            provider.selectTime(timeSlot);
-                          }
-                        },
-                        selectedColor: AppColors.primaryColor,
-                        backgroundColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(
-                            color: isSelected
-                                ? AppColors.primaryColor
-                                : AppColors.dimGray,
-                          ),
-                        ),
-                        padding: EdgeInsets.all(context.getWidth(4)),
-                        labelPadding: EdgeInsets.zero,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    );
-                  }),
-                ),
+              return _buildTimeChip(
+                context,
+                timeSlot,
+                isSelected,
+                isAvailable,
+                provider,
               );
-            }),
+            },
           ),
         ),
       ],
     );
   }
 
-  // Widget _buildCouponSection() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       const Row(
-  //         children: [
-  //           Icon(Icons.local_offer_outlined),
-  //           SizedBox(width: 8),
-  //           Text(
-  //             'Coupons & Offers',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.w500,
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       const SizedBox(height: 8),
-  //       Row(
-  //         children: [
-  //           Expanded(
-  //             child: TextField(
-  //               controller: _couponController,
-  //               decoration: const InputDecoration(
-  //                 hintText: 'Type your coupon code here...',
-  //                 border: OutlineInputBorder(),
-  //                 contentPadding:
-  //                     EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  //               ),
-  //             ),
-  //           ),
-  //           const SizedBox(width: 8),
-  //           ElevatedButton(
-  //             onPressed: () {},
-  //             style: ElevatedButton.styleFrom(
-  //               backgroundColor: Colors.red,
-  //               padding:
-  //                   const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-  //             ),
-  //             child: const Text('Apply'),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
+  Widget _buildTimeChip(
+    BuildContext context,
+    String timeSlot,
+    bool isSelected,
+    bool isAvailable,
+    UserManagerProvider provider,
+  ) {
+    final hour = int.parse(timeSlot.split(':')[0]);
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayTime = '${displayHour.toString()}${period}';
 
-  Widget _buildSelectedDateTime(
+    return InkWell(
+      onTap: isAvailable ? () => provider.selectTime(timeSlot) : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryColor
+              : isAvailable
+                  ? Colors.transparent
+                  : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryColor
+                : isAvailable
+                    ? Colors.grey.shade300
+                    : Colors.grey.shade200,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            displayTime,
+            style: TextStyle(
+              color: isSelected
+                  ? Colors.white
+                  : isAvailable
+                      ? Colors.black87
+                      : Colors.grey,
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDurationSelection(
     BuildContext context,
     UserManagerProvider provider,
   ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Task Duration',
+          style: AppTextStyles.title2(context),
+        ),
+        SizedBox(height: context.getHeight(12)),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          padding: EdgeInsets.all(context.getWidth(12)),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: provider.availableDurations.map((hours) {
+                final isSelected = provider.taskDurationHours == hours;
+                return Padding(
+                  padding: EdgeInsets.only(
+                      right: hours == provider.availableDurations.last
+                          ? 0
+                          : context.getWidth(8)),
+                  child: InkWell(
+                    onTap: () => provider.setTaskDuration(hours),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.getWidth(16),
+                        vertical: context.getHeight(8),
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : AppColors.dimGray,
+                        ),
+                      ),
+                      child: Text(
+                        '$hours ${hours == 1 ? 'hour' : 'hours'}',
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black87,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalendar(BuildContext context, UserManagerProvider provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.startDate,
+          style: AppTextStyles.title2(context),
+        ),
+        SizedBox(height: context.getHeight(12)),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          padding: EdgeInsets.all(context.getWidth(12)),
+          child: TableCalendar(
+            firstDay: DateTime.now(),
+            lastDay: DateTime.now().add(const Duration(days: 31)),
+            focusedDay: provider.focusedDay,
+            selectedDayPredicate: (day) => isSameDay(provider.selectedDay, day),
+            calendarFormat: CalendarFormat.month,
+            headerStyle: HeaderStyle(
+              titleCentered: true,
+              formatButtonVisible: false,
+              titleTextStyle: AppTextStyles.title2(context),
+              leftChevronIcon: Icon(
+                Icons.chevron_left,
+                size: context.getWidth(24),
+                color: AppColors.primaryColor,
+              ),
+              rightChevronIcon: Icon(
+                Icons.chevron_right,
+                size: context.getWidth(24),
+                color: AppColors.primaryColor,
+              ),
+            ),
+            calendarStyle: CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              weekendTextStyle: TextStyle(color: Colors.red.shade300),
+            ),
+            onDaySelected: provider.onDaySelected,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummaryCard(BuildContext context, UserManagerProvider provider) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.1),
+        color: AppColors.primaryColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.primaryColor.withOpacity(0.3),
+          color: AppColors.primaryColor.withOpacity(0.2),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.event, color: AppColors.primaryColor),
-          SizedBox(width: context.getWidth(8)),
-          Expanded(
-            child: Text(
-                '${AppLocalizations.of(context)!.selected}: ${provider.formattedDateTime}',
-                style: AppTextStyles.text(context)),
+          Text(
+            'Booking Summary',
+            style: AppTextStyles.title2(context).copyWith(
+              color: AppColors.primaryColor,
+            ),
+          ),
+          SizedBox(height: context.getHeight(12)),
+          Row(
+            children: [
+              Icon(Icons.event, color: AppColors.primaryColor, size: 20),
+              SizedBox(width: context.getWidth(8)),
+              Expanded(
+                child: Text(
+                  provider.formattedDateTime,
+                  style: AppTextStyles.text(context),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -240,15 +304,26 @@ class CalenderBookingScreen extends StatelessWidget {
   }
 
   Widget _buildNextButton(BuildContext context, UserManagerProvider provider) {
+    final bool isValid = provider.isValidBookingSelection(debug: true);
+
     return PrimaryButton(
       text: AppLocalizations.of(context)!.next,
-      onPressed: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LocationScreen(),
-            ));
-      },
+      onPressed: isValid
+          ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LocationScreen(),
+                ),
+              );
+            }
+          : () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Please select a valid future time slot'),
+                ),
+              );
+            },
     );
   }
 }

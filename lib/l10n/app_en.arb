@@ -9,17 +9,38 @@
   "@back": {
     "description": "Text for back button"
   },
+  "@bestContractors": {
+    "description": "Label for the best contractors section"
+  },
+  "@booking": {
+    "description": "Label for booking section or feature"
+  },
+  "@bookingDetails": {
+    "description": "Section title for booking information"
+  },
   "@chooseFromGallery": {
     "description": "Option to choose from gallery"
   },
   "@chooseLanguagePrompt": {
     "description": "Prompt message asking user to select language"
   },
+  "@confirm": {
+    "description": "Text for confirmation button"
+  },
   "@confirmPasswordRequired": {
     "description": "Error message when confirm password is empty"
   },
   "@createAccount": {
     "description": "Title for account creation"
+  },
+  "@date": {
+    "description": "Label for date field"
+  },
+  "@duration": {
+    "description": "Label for duration field"
+  },
+  "@edit": {
+    "description": "Text for edit action"
   },
   "@email": {
     "description": "Label for email input"
@@ -54,6 +75,21 @@
   "@hasAccount": {
     "description": "Text shown before sign in link"
   },
+  "@hello": {
+    "description": "Greeting text"
+  },
+  "@home": {
+    "description": "Label for home screen or section"
+  },
+  "@hour": {
+    "description": "Singular form of hour for duration"
+  },
+  "@hourlyRate": {
+    "description": "Label for hourly rate in pricing"
+  },
+  "@hours": {
+    "description": "Plural form of hours for duration"
+  },
   "@imageRequired": {
     "description": "Error message when image is not selected"
   },
@@ -63,8 +99,17 @@
   "@invalidEmail": {
     "description": "Error message for invalid email format"
   },
+  "@language": {
+    "description": "Label for language selection"
+  },
   "@languageSelectionTitle": {
     "description": "Title for the language selection screen"
+  },
+  "@location": {
+    "description": "Label for location field or section"
+  },
+  "@locationRequired": {
+    "description": "Error message when location is empty"
   },
   "@login": {
     "description": "Text for login button"
@@ -75,8 +120,20 @@
   "@loginError": {
     "description": "Generic login error message"
   },
+  "@loginRequired": {
+    "description": "Message indicating login is required"
+  },
   "@loginSuccess": {
     "description": "Message shown on successful login"
+  },
+  "@loginToAccess": {
+    "description": "Prompt to login for access"
+  },
+  "@loginToContinue": {
+    "description": "Prompt to login to continue an action"
+  },
+  "@logout": {
+    "description": "Text for logout action"
   },
   "@logoutSuccess": {
     "description": "Message shown on successful logout"
@@ -93,6 +150,15 @@
   "@noAccount": {
     "description": "Text shown before sign up link"
   },
+  "@noContractorSelected": {
+    "description": "Error message when no contractor is selected"
+  },
+  "@noLocationSpecified": {
+    "description": "Fallback text when no location is specified"
+  },
+  "@noServicesAvailable": {
+    "description": "Message when no services are available"
+  },
   "@onboardingDesc1": {
     "description": "Description for the first onboarding screen"
   },
@@ -104,6 +170,12 @@
   },
   "@onboardingTitle2": {
     "description": "Title for the second onboarding screen"
+  },
+  "@order": {
+    "description": "Label for orders section"
+  },
+  "@ourServices": {
+    "description": "Label for services section"
   },
   "@password": {
     "description": "Label for password input"
@@ -117,11 +189,23 @@
   "@passwordsDoNotMatch": {
     "description": "Error message when passwords don't match"
   },
+  "@phone": {
+    "description": "Label for phone input"
+  },
   "@phoneNumber": {
     "description": "Label for phone number input"
   },
   "@phoneRequired": {
     "description": "Error message when phone is empty"
+  },
+  "@priceSummary": {
+    "description": "Section title for pricing information"
+  },
+  "@privacyPolicy": {
+    "description": "Label for privacy policy"
+  },
+  "@profile": {
+    "description": "Label for profile section"
   },
   "@rememberMe": {
     "description": "Remember me checkbox label"
@@ -129,11 +213,32 @@
   "@retypePassword": {
     "description": "Label for password confirmation input"
   },
+  "@save": {
+    "description": "Text for save action"
+  },
+  "@savedAddress": {
+    "description": "Label for saved addresses"
+  },
+  "@schedule": {
+    "description": "Label for scheduling action or section"
+  },
+  "@search": {
+    "description": "Label for search action or field"
+  },
+  "@seeAll": {
+    "description": "Text for see all link"
+  },
   "@selectImage": {
     "description": "Label for image selection"
   },
+  "@selected": {
+    "description": "Text indicating something is selected"
+  },
   "@serverError": {
     "description": "Error message for server issues"
+  },
+  "@services": {
+    "description": "Label for services"
   },
   "@signIn": {
     "description": "Title for the login screen"
@@ -144,14 +249,41 @@
   "@skip": {
     "description": "Text for the skip button"
   },
+  "@startDate": {
+    "description": "Label for start date field"
+  },
+  "@startTime": {
+    "description": "Label for start time field"
+  },
   "@storageError": {
     "description": "Error saving auth data"
+  },
+  "@support": {
+    "description": "Label for support section"
   },
   "@takePhoto": {
     "description": "Option to take photo"
   },
+  "@totalAmount": {
+    "description": "Label for total price"
+  },
   "@welcomeMessage": {
     "description": "Welcome message before app name"
+  },
+  "@yearsExperience": {
+    "description": "Text for years of experience with placeholder"
+  },
+  "@bookingSummary": {
+    "description": "Title for the booking summary screen"
+  },
+  "@apply": {
+    "description": "Text for the apply button in coupons and offers section"
+  },
+  "@couponsAndOffers": {
+    "description": "Label for coupons and offers section"
+  },
+  "@typeCouponCodeHere": {
+    "description": "Hint text for coupon code input field"
   },
   "accountDetails": "Account details",
   "alreadyHaveAccount": "Already have an account?",
@@ -159,10 +291,14 @@
   "back": "Back",
   "bestContractors": "Best Contractors",
   "booking": "Booking",
+  "bookingDetails": "Booking Details",
   "chooseFromGallery": "Choose from Gallery",
   "chooseLanguagePrompt": "Choose your language to start",
+  "confirm": "Confirm",
   "confirmPasswordRequired": "Please confirm your password",
   "createAccount": "Create your account now",
+  "date": "Date",
+  "duration": "Duration",
   "edit": "Edit",
   "email": "Email",
   "emailRequired": "Email is required",
@@ -177,6 +313,9 @@
   "hasAccount": "Already have an account?",
   "hello": "Hello",
   "home": "Home",
+  "hour": "hour",
+  "hourlyRate": "Hourly Rate",
+  "hours": "hours",
   "imageRequired": "Profile picture is required",
   "invalidCredentials": "Invalid email or password",
   "invalidEmail": "Please enter a valid email address",
@@ -197,6 +336,8 @@
   "next": "Next",
   "nextButton": "Next",
   "noAccount": "Don't have an account?",
+  "noContractorSelected": "No contractor selected",
+  "noLocationSpecified": "No location specified",
   "noServicesAvailable": "No Services Available",
   "onboardingDesc1": "Discover quick and easy solutions for all your home needs, from plumbing and electrical to cleaning and renovation. Let us make your home more comfortable.",
   "onboardingDesc2": "We offer a comprehensive range of high-quality, reliable home services, so you can enjoy your time at home without any worries.",
@@ -211,6 +352,7 @@
   "phone": "Phone",
   "phoneNumber": "Phone Number",
   "phoneRequired": "Phone number is required",
+  "priceSummary": "Price Summary",
   "privacyPolicy": "Privacy and Policy",
   "profile": "Profile",
   "rememberMe": "Remember me",
@@ -232,6 +374,11 @@
   "storageError": "Failed to save authentication data",
   "support": "Support",
   "takePhoto": "Take Photo",
+  "totalAmount": "Total Amount",
   "welcomeMessage": "Welcome to",
-  "yearsExperience": "$years Years Experience"
+  "yearsExperience": "$years Years Experience",
+  "bookingSummary": "Booking Summary",
+  "apply": "Apply",
+  "couponsAndOffers": "Coupons & Offers",
+  "typeCouponCodeHere": "Type your coupon code here..."
 }

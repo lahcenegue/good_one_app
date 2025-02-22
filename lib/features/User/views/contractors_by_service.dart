@@ -9,6 +9,7 @@ import 'contractor_profile.dart';
 class ContractorsByService extends StatefulWidget {
   final int? serviceId;
   final String? title;
+
   const ContractorsByService({
     super.key,
     required this.serviceId,
@@ -26,7 +27,6 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userManager =
           Provider.of<UserManagerProvider>(context, listen: false);
-      userManager.clearContractorsByServiceSearch();
       userManager.fetchContractorsByService(widget.serviceId);
     });
   }
@@ -71,7 +71,7 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
 
   Widget _buildContractorsList(
       BuildContext context, UserManagerProvider userManager) {
-    final filteredContractors = userManager.getContractorsByService;
+    final filteredContractors = userManager.contractorsByService;
 
     if (userManager.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -94,12 +94,11 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
           contractor: filteredContractors[index],
           onFavorite: () {},
           onTap: () {
+            userManager.setSelectedContractor(filteredContractors[index]);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ContractorProfile(
-                  contractor: userManager.getContractorsByService[index],
-                ),
+                builder: (context) => const ContractorProfile(),
               ),
             );
           },

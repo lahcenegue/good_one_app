@@ -21,16 +21,15 @@ import 'calender_booking_screen.dart';
 import 'customer_reviews_screen.dart';
 
 class ContractorProfile extends StatelessWidget {
-  final Contractor contractor;
   const ContractorProfile({
     super.key,
-    required this.contractor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
+        final contractor = userManager.selectedContractor;
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -48,17 +47,17 @@ class ContractorProfile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildContractorInfo(context),
+                  _buildContractorInfo(context, contractor!),
                   SizedBox(height: context.getHeight(20)),
-                  _buildChecked(context),
+                  _buildChecked(context, contractor),
                   SizedBox(height: context.getHeight(20)),
-                  _buildServiceInfo(context),
+                  _buildServiceInfo(context, contractor),
                   SizedBox(height: context.getHeight(20)),
-                  _buildServiceDescription(context),
+                  _buildServiceDescription(context, contractor),
                   SizedBox(height: context.getHeight(20)),
-                  _buildServiceGallery(context),
+                  _buildServiceGallery(context, contractor),
                   SizedBox(height: context.getHeight(20)),
-                  _buildCostomersReviews(context),
+                  _buildCostomersReviews(context, contractor),
                   SizedBox(height: context.getHeight(20)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -93,10 +92,12 @@ class ContractorProfile extends StatelessWidget {
                             );
                           } else {
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const CalenderBookingScreen()));
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CalendarBookingScreen(),
+                              ),
+                            );
                           }
                         },
                       ),
@@ -112,7 +113,10 @@ class ContractorProfile extends StatelessWidget {
     );
   }
 
-  Widget _buildContractorInfo(BuildContext context) {
+  Widget _buildContractorInfo(
+    BuildContext context,
+    Contractor contractor,
+  ) {
     return Row(
       children: [
         UserAvatar(
@@ -145,7 +149,7 @@ class ContractorProfile extends StatelessWidget {
                 style: AppTextStyles.title2(context),
               ),
               Text(
-                '${contractor.costPerHour} \$',
+                '${contractor.costPerHour} \$ /hr',
                 style: AppTextStyles.price(context),
               ),
               Row(
@@ -164,7 +168,10 @@ class ContractorProfile extends StatelessWidget {
     );
   }
 
-  Widget _buildChecked(BuildContext context) {
+  Widget _buildChecked(
+    BuildContext context,
+    Contractor contractor,
+  ) {
     if (contractor.verifiedLiscence == 0) {
       return SizedBox(
         child: Row(
@@ -186,7 +193,10 @@ class ContractorProfile extends StatelessWidget {
     return SizedBox();
   }
 
-  Widget _buildServiceInfo(BuildContext context) {
+  Widget _buildServiceInfo(
+    BuildContext context,
+    Contractor contractor,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +269,10 @@ class ContractorProfile extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceDescription(BuildContext context) {
+  Widget _buildServiceDescription(
+    BuildContext context,
+    Contractor contractor,
+  ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +290,10 @@ class ContractorProfile extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceGallery(BuildContext context) {
+  Widget _buildServiceGallery(
+    BuildContext context,
+    Contractor contractor,
+  ) {
     if (contractor.gallery.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -381,14 +397,16 @@ class ContractorProfile extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => GalleryViewerPage(
-          gallery: contractor.gallery,
           initialIndex: initialIndex,
         ),
       ),
     );
   }
 
-  Widget _buildCostomersReviews(BuildContext context) {
+  Widget _buildCostomersReviews(
+    BuildContext context,
+    Contractor contractor,
+  ) {
     return Column(
       children: [
         Row(

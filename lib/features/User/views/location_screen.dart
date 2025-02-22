@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Features/User/views/booking_summary_screen.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,7 @@ import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/presentation/resources/app_colors.dart';
 import '../../../Providers/user_manager_provider.dart';
 
+/// Allows users to select a location for a booking using a map interface.
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
 
@@ -16,7 +18,6 @@ class LocationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        // Initialize with provider data if available
         LatLng initialLocation = userManager.selectedLocation ??
             LatLng(43.6532, -79.3832); // Default to Toronto
 
@@ -27,7 +28,7 @@ class LocationScreen extends StatelessWidget {
               style: AppTextStyles.appBarTitle(context),
             ),
           ),
-          body: userManager.locationSelected
+          body: userManager.isLocationSelected
               ? _buildSelectedLocationView(
                   context, userManager, initialLocation)
               : _buildSearchLocationView(context, userManager, initialLocation),
@@ -43,18 +44,15 @@ class LocationScreen extends StatelessWidget {
   ) {
     return Column(
       children: [
-        // Map view for initial state
         Expanded(
           child: Stack(
             children: [
-              // Map layer
               FlutterMap(
                 mapController: userManager.mapController,
                 options: MapOptions(
                   initialCenter: initialLocation,
                   initialZoom: 15.0,
                   onMapReady: () {
-                    // If we have a stored location, let's use it
                     if (userManager.hasSelectedLocation &&
                         userManager.selectedLocation != null) {
                       userManager.mapController
@@ -70,8 +68,6 @@ class LocationScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // Existing UI elements...
               Center(
                 child: Icon(
                   Icons.location_pin,
@@ -79,8 +75,6 @@ class LocationScreen extends StatelessWidget {
                   size: context.getAdaptiveSize(40),
                 ),
               ),
-
-              // GPS Location Button - top right
               Positioned(
                 bottom: context.getHeight(16),
                 right: context.getWidth(16),
@@ -101,22 +95,16 @@ class LocationScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Loading indicator
-              if (userManager.locationScreenIsLoading)
+              if (userManager.isLocationScreenLoading)
                 Positioned.fill(
                   child: Container(
                     color: Colors.black.withOpacity(0.3),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),
             ],
           ),
         ),
-
-        // Search box
         Container(
           padding: EdgeInsets.all(context.getHeight(12)),
           color: Colors.white,
@@ -127,21 +115,25 @@ class LocationScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Search city or place...',
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   suffixIcon: IconButton(
-                    icon: Icon(Icons.search),
+                    icon: const Icon(Icons.search),
                     onPressed: () => userManager.searchLocation(context),
                   ),
                 ),
                 onSubmitted: (_) => userManager.searchLocation(context),
               ),
-
               SizedBox(height: context.getHeight(12)),
-
-              // Confirm location button - bottom center
               PrimaryButton(
                 text: 'Confirm This Location',
-                onPressed: () => userManager.confirmMapLocation(),
+                onPressed: () async {
+                  await userManager.confirmMapLocation();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Location confirmed')),
+                    );
+                  }
+                },
               ),
               SizedBox(height: context.getHeight(12)),
             ],
@@ -160,7 +152,6 @@ class LocationScreen extends StatelessWidget {
 
     return Column(
       children: [
-        // Map with location pin
         Expanded(
           child: Stack(
             children: [
@@ -170,16 +161,15 @@ class LocationScreen extends StatelessWidget {
                   initialCenter: location,
                   initialZoom: 17.0,
                   onTap: (tapPosition, point) {
-                    // Update map center
                     userManager.mapController.move(point, 17.0);
-                    userManager.reverseGeocode(point);
+                    userManager.confirmMapLocation(); // Updates address on tap
                   },
                 ),
                 children: [
                   TileLayer(
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    //userAgentPackageName: 'com.example.app',
+                    userAgentPackageName: 'com.example.app',
                   ),
                   MarkerLayer(
                     markers: [
@@ -197,30 +187,27 @@ class LocationScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // Back to search button
               Positioned(
                 top: context.getWidth(16),
                 left: context.getWidth(16),
                 child: FloatingActionButton(
                   mini: true,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: () => userManager.setLocationSelectedState(false),
+                  child: const Icon(Icons.arrow_back, color: Colors.black),
+                  onPressed: () {
+                    userManager
+                        .clearLocationSelection(); // Reset selection state
+                  },
                 ),
               ),
             ],
           ),
         ),
-
-        // Location card and next button
         Container(
-          //color: Colors.white,
           padding: EdgeInsets.all(context.getAdaptiveSize(16)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Location card
               Row(
                 children: [
                   ClipRRect(
@@ -232,9 +219,7 @@ class LocationScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  SizedBox(
-                    width: context.getWidth(16),
-                  ),
+                  SizedBox(width: context.getWidth(16)),
                   SizedBox(
                     width: context.getAdaptiveSize(260),
                     height: context.getAdaptiveSize(60),
@@ -243,8 +228,8 @@ class LocationScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(
-                          userManager.locationSearchController.text.isNotEmpty
-                              ? userManager.locationSearchController.text
+                          userManager.locationAddress.isNotEmpty
+                              ? userManager.locationAddress
                               : 'Selected location on map',
                           style: AppTextStyles.title2(context),
                           overflow: TextOverflow.ellipsis,
@@ -259,20 +244,24 @@ class LocationScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
               SizedBox(height: context.getHeight(20)),
-
-              // Next button - Now saves to provider
               PrimaryButton(
-                  text: 'Next',
-                  onPressed: () {
-                    userManager.setLocation(
-                        location,
-                        userManager.locationSearchController.text.isNotEmpty
-                            ? userManager.locationSearchController.text
-                            : 'Selected location on map');
-                  }),
-
+                text: 'Next',
+                onPressed: () {
+                  userManager.setLocation(
+                    location,
+                    userManager.locationAddress.isNotEmpty
+                        ? userManager.locationAddress
+                        : 'Selected location on map',
+                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BookingSummaryScreen(),
+                    ),
+                  );
+                },
+              ),
               SizedBox(height: context.getHeight(20)),
             ],
           ),

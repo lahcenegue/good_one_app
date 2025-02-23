@@ -9,6 +9,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../Core/Utils/storage_keys.dart';
 import '../Core/infrastructure/storage/storage_manager.dart';
+import '../Features/User/models/booking.dart';
 import '../Features/User/models/contractor.dart';
 import '../Features/User/models/service_category.dart';
 import '../Features/User/models/user_info.dart';
@@ -18,7 +19,7 @@ import '../Features/auth/Services/token_manager.dart';
 /// Manages user-related state and business logic for the application.
 ///
 /// This class handles authentication, contractor data, booking schedules,
-/// and location services, notifying listeners when state changes.
+/// bookings, and location services, notifying listeners when state changes.
 class UserManagerProvider extends ChangeNotifier {
   // Authentication State
   String? _token;
@@ -38,6 +39,10 @@ class UserManagerProvider extends ChangeNotifier {
   final List<ServiceCategory> _categories = [];
   final List<Contractor> _bestContractors = [];
   final List<Contractor> _contractorsByService = [];
+
+  // Booking Data
+  final List<Booking> _bookings = [];
+  int _currentBookingTab = 1; // Default to "Completed" (status 1)
 
   // Location State
   final MapController _mapController = MapController();
@@ -117,6 +122,9 @@ class UserManagerProvider extends ChangeNotifier {
   List<String> get timeSlots => _timeSlots;
   String get formattedDateTime => _formatBookingDateTime();
 
+  int get currentBookingTab => _currentBookingTab;
+  List<Booking> get bookings => _getFilteredBookings();
+
   int get bookingTimestamp => _getTimestamp(_selectedDay, _selectedTime);
   int get bookingEndTimestamp =>
       _getTimestamp(_selectedDay, _selectedTime, _taskDurationHours);
@@ -133,6 +141,7 @@ class UserManagerProvider extends ChangeNotifier {
   Future<void> _initialize() async {
     await _loadUserData();
     _syncLocationController();
+    await fetchBookings(); // Fetch bookings on initialization
   }
 
   Future<void> _loadUserData() async {
@@ -168,12 +177,18 @@ class UserManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCurrentBookingTab(int tab) {
+    _currentBookingTab = tab;
+    notifyListeners();
+  }
+
   Future<void> initialize() async {
     _setError(null);
     _setLoading(true);
     try {
       if (_token != null) {
-        await Future.wait([_fetchPublicData(), fetchUserInfo()]);
+        await Future.wait(
+            [_fetchPublicData(), fetchUserInfo(), fetchBookings()]);
       } else {
         await _fetchPublicData();
       }
@@ -435,6 +450,32 @@ class UserManagerProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> fetchBookings() async {
+    if (_token == null) return;
+    _setLoading(true);
+    try {
+      final response = await UserApi.getBookings(token: _token!);
+      if (response.success && response.data != null) {
+        _bookings.clear();
+        _bookings.addAll(response.data!);
+        debugPrint('Bookings fetched: ${_bookings.length}');
+        notifyListeners();
+      } else {
+        _setError('Failed to fetch bookings: ${response.error}');
+      }
+    } catch (e) {
+      _setError('Exception fetching bookings: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  List<Booking> _getFilteredBookings() {
+    return _bookings
+        .where((booking) => booking.status == _currentBookingTab)
+        .toList();
+  }
+
   // Location Logic
   Future<void> getCurrentLocation(BuildContext context) async {
     _setLocationLoading(true);
@@ -480,7 +521,6 @@ class UserManagerProvider extends ChangeNotifier {
     setLocation(mapCenter, _locationAddress);
   }
 
-  // Public Location Methods
   void setLocation(LatLng location, String address) {
     _selectedLocation = location;
     _locationAddress = address;

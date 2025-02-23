@@ -1,3 +1,5 @@
+import 'package:good_one_app/Features/User/models/booking.dart';
+
 import '../../../Core/infrastructure/api/api_response.dart';
 import '../../../Core/infrastructure/api/api_service.dart';
 import '../../../Core/infrastructure/api/api_endpoints.dart';
@@ -63,6 +65,21 @@ class UserApi {
         }
         throw Exception('Invalid response format');
       },
+    );
+  }
+
+  static Future<ApiResponse<List<Booking>>> getBookings({String? token}) async {
+    return _api.get<List<Booking>>(
+      url: ApiEndpoints.bookings,
+      fromJson: (dynamic response) {
+        if (response is List) {
+          return response
+              .map((item) => Booking.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+        throw Exception('Invalid response format');
+      },
+      token: token,
     );
   }
 }

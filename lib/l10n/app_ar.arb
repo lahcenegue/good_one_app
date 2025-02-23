@@ -95,5 +95,16 @@
   "bookingSummary": "ملخص الحجز",
   "apply": "تطبيق",
   "couponsAndOffers": "القسائم والعروض",
-  "typeCouponCodeHere": "اكتب رمز القسيمة هنا..."
+  "typeCouponCodeHere": "اكتب رمز القسيمة هنا...",
+  "completed": "مكتمل",
+  "inProgress": "قيد التنفيذ",
+  "canceled": "ملغى",
+  "noBookings": "لا توجد حجوزات",
+  "service": "الخدمة",
+  "servicePrice": "سعر الخدمة",
+  "provider": "المقدم",
+  "receive": "استلام",
+  "unknownStatus": "حالة غير معروفة",
+  "unknownService": "خدمة غير معروفة",
+  "unknownProvider": "مقدم غير معروف"
 }

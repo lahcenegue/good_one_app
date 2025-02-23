@@ -285,6 +285,41 @@
   "@typeCouponCodeHere": {
     "description": "Hint text for coupon code input field"
   },
+ 
+ 
+  "@completed": {
+    "description": "Status text for completed bookings"
+  },
+  "@inProgress": {
+    "description": "Status text for bookings in progress"
+  },
+  "@canceled": {
+    "description": "Status text for canceled bookings"
+  },
+  "@noBookings": {
+    "description": "Message when no bookings are available"
+  },
+  "@service": {
+    "description": "Label for service field"
+  },
+  "@servicePrice": {
+    "description": "Label for service price"
+  },
+  "@provider": {
+    "description": "Label for service provider"
+  },
+  "@receive": {
+    "description": "Text for receive action button"
+  },
+  "@unknownStatus": {
+    "description": "Text for unknown booking status"
+  },
+  "@unknownService": {
+    "description": "Fallback text for unknown service"
+  },
+  "@unknownProvider": {
+    "description": "Fallback text for unknown provider"
+  },
   "accountDetails": "Account details",
   "alreadyHaveAccount": "Already have an account?",
   "authError": "Invalid email or password",
@@ -380,5 +415,16 @@
   "bookingSummary": "Booking Summary",
   "apply": "Apply",
   "couponsAndOffers": "Coupons & Offers",
-  "typeCouponCodeHere": "Type your coupon code here..."
+  "typeCouponCodeHere": "Type your coupon code here...",
+  "completed": "Completed",
+  "inProgress": "In progress",
+  "canceled": "Canceled",
+  "noBookings": "No bookings",
+  "service": "Service",
+  "servicePrice": "Service price",
+  "provider": "Provider",
+  "receive": "Receive",
+  "unknownStatus": "Unknown status",
+  "unknownService": "Unknown service",
+  "unknownProvider": "Unknown provider"
 }

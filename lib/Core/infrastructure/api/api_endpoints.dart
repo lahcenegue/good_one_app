@@ -17,6 +17,7 @@ abstract class ApiEndpoints {
   static String get categories => '$api/categories';
   static String get bestcontractors => '$api/services';
   static String get contractorsByService => '$api/services/category';
+  static String get bookings => '$api/user/orders';
 
   // Asset URLs
   static String get imageBaseUrl => '$baseUrl/storage/images';

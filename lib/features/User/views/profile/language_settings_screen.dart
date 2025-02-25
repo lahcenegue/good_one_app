@@ -3,10 +3,10 @@ import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../Core/Utils/size_config.dart';
-import '../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../Providers/app_settings_provider.dart';
+import '../../../../Core/Utils/size_config.dart';
+import '../../../../Core/presentation/Theme/app_text_styles.dart';
+import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
+import '../../../../Providers/app_settings_provider.dart';
 
 class LanguageSettingsScreen extends StatefulWidget {
   const LanguageSettingsScreen({super.key});

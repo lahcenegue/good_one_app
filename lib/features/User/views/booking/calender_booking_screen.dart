@@ -6,8 +6,8 @@ import 'package:good_one_app/Features/User/views/location_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../Providers/user_manager_provider.dart';
+import '../../../../Core/presentation/Theme/app_text_styles.dart';
+import '../../../../Providers/user_manager_provider.dart';
 
 class CalendarBookingScreen extends StatelessWidget {
   const CalendarBookingScreen({super.key});

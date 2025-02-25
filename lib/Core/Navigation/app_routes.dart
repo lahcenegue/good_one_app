@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Features/Worker/views/worker_main_screen.dart';
 import '../../Features/Chat/Views/conversations_screen.dart';
 import '../../Features/User/views/contractors_by_service.dart';
-import '../../Features/User/views/language_settings_screen.dart';
+import '../../Features/User/views/profile/language_settings_screen.dart';
 import '../../Features/auth/views/registration_screen.dart';
 import '../../Features/Chat/Views/chat_screen.dart';
 import '../../Features/Setup/Views/account_type_screen.dart';

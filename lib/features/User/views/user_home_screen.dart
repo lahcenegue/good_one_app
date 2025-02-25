@@ -9,8 +9,8 @@ import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/Navigation/navigation_service.dart';
 import '../../../Core/Utils/size_config.dart';
 import '../../../Providers/user_manager_provider.dart';
-import '../Widgets/contractor_list_item.dart';
-import '../Widgets/service_grid_item.dart';
+import '../Widgets/booking/contractor_list_item.dart';
+import '../Widgets/booking/service_grid_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'contractor_profile.dart';
 

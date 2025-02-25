@@ -5,11 +5,11 @@ import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/Navigation/app_routes.dart';
-import '../../../Core/Navigation/navigation_service.dart';
-import '../../../Core/Utils/storage_keys.dart';
-import '../../../Core/infrastructure/storage/storage_manager.dart';
-import '../../../Providers/user_manager_provider.dart';
+import '../../../../Core/Navigation/app_routes.dart';
+import '../../../../Core/Navigation/navigation_service.dart';
+import '../../../../Core/Utils/storage_keys.dart';
+import '../../../../Core/infrastructure/storage/storage_manager.dart';
+import '../../../../Providers/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

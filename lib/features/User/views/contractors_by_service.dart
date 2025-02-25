@@ -3,7 +3,7 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Providers/user_manager_provider.dart';
-import '../Widgets/contractor_list_item.dart';
+import '../Widgets/booking/contractor_list_item.dart';
 import 'contractor_profile.dart';
 
 class ContractorsByService extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Features/User/views/booking_summary_screen.dart';
+import 'package:good_one_app/Features/User/views/booking/booking_summary_screen.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 

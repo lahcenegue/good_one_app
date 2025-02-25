@@ -11,13 +11,13 @@ import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/presentation/Widgets/user_avatar.dart';
 import '../../../Core/presentation/resources/app_assets.dart';
 import '../../../Providers/user_manager_provider.dart';
-import '../Widgets/auth_required_dialog.dart';
+import '../Widgets/profile/auth_required_dialog.dart';
 import '../Widgets/gallery_viewer_page.dart';
 import '../models/contractor.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'calender_booking_screen.dart';
+import 'booking/calender_booking_screen.dart';
 import 'customer_reviews_screen.dart';
 
 class ContractorProfile extends StatelessWidget {

@@ -4,12 +4,12 @@ import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../Providers/user_manager_provider.dart';
-import '../models/booking.dart';
+import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
+import '../../../../Providers/user_manager_provider.dart';
+import '../../models/booking.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../models/contractor.dart';
+import '../../models/contractor.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});

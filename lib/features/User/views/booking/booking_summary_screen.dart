@@ -6,7 +6,7 @@ import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Providers/user_manager_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BookingSummaryScreen extends StatefulWidget {

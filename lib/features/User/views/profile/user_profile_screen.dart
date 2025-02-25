@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../Core/presentation/Widgets/Buttons/secondary_button.dart';
-import '../../../Core/presentation/Widgets/user_avatar.dart';
-import '../../../Core/presentation/resources/app_assets.dart';
-import '../../../Core/presentation/resources/app_colors.dart';
-import '../../../Core/Navigation/app_routes.dart';
-import '../../../Core/Navigation/navigation_service.dart';
-import '../../../Core/Utils/size_config.dart';
-import '../../../Core/presentation/Theme/app_text_styles.dart';
+import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
+import '../../../../Core/presentation/Widgets/Buttons/secondary_button.dart';
+import '../../../../Core/presentation/Widgets/user_avatar.dart';
+import '../../../../Core/presentation/resources/app_assets.dart';
+import '../../../../Core/presentation/resources/app_colors.dart';
+import '../../../../Core/Navigation/app_routes.dart';
+import '../../../../Core/Navigation/navigation_service.dart';
+import '../../../../Core/Utils/size_config.dart';
+import '../../../../Core/presentation/Theme/app_text_styles.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../Providers/user_manager_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});

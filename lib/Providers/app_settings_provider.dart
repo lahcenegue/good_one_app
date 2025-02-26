@@ -52,7 +52,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // Getters
   bool get isInitialized => _isInitialized;
-  Locale get appLocale => _appLocale ?? Locale(AppConfig.defaultLanguage);
+  Locale get appLocale => _appLocale ?? Locale(AppConfig.defaultLocale);
   int get pageIndex => _pageIndex;
   String get initialRoute => _initialRoute ?? AppRoutes.languageSelection;
   AccountType? get selectedAccountType => _selectedAccountType;

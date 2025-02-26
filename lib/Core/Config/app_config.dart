@@ -1,28 +1,30 @@
 class AppConfig {
   AppConfig._(); // Private constructor to prevent instantiation
 
-  // API Configuration
-  static const String appName = 'Good One App';
-  static const String appVersion = '1.0.0';
-
-  // API Configuration
+  /// The timeout duration for API requests, set to 30 seconds.
   static const Duration apiTimeout = Duration(seconds: 30);
 
-  // Storage Configuration
-  static const String storagePrefix = 'good_one_';
+  /// The name of the application.
+  static const String appName = 'Good One App';
 
-  // Pagination
+  /// The version of the application,
+  static const String appVersion = '1.0.0';
+
+  /// The base URL for API endpoints.
+  static const String apiBaseUrl = 'http://162.254.35.98';
+
+  /// The default locale for the app, set to English ('en').
+  static const String defaultLocale = 'en';
+
+  /// Default page size for pagination.
   static const int defaultPageSize = 20;
 
-  // Image Configuration
-  static const double maxImageWidth = 1024.0;
-  static const double maxImageHeight = 1024.0;
-  static const int imageQuality = 85;
+  /// Minimum length for passwords.
+  static const int minPasswordLength = 4;
 
-  // Validation Rules
-  static const int minPasswordLength = 6;
+  /// Maximum length for passwords.
   static const int maxPasswordLength = 20;
 
-  // Default Settings
-  static const String defaultLanguage = 'en';
+  /// Prefix for storage keys to avoid naming conflicts.
+  static const String storagePrefix = 'good_one_';
 }

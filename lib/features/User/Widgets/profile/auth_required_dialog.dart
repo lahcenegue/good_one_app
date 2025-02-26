@@ -9,7 +9,7 @@ import '../../../../Core/Navigation/app_routes.dart';
 import '../../../../Core/Navigation/navigation_service.dart';
 import '../../../../Core/Utils/storage_keys.dart';
 import '../../../../Core/infrastructure/storage/storage_manager.dart';
-import '../../../../Providers/user_manager_provider.dart';
+import '../../../../Providers/user_state_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -22,7 +22,7 @@ class AuthRequiredDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Consumer<UserManagerProvider>(builder: (context, userManager, _) {
+      child: Consumer<UserStateProvider>(builder: (context, userManager, _) {
         return Container(
           width: context.screenWidth * 0.85,
           constraints: BoxConstraints(

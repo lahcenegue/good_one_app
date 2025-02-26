@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
+import 'package:good_one_app/Providers/user_state_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +37,7 @@ class _GalleryViewerPageState extends State<GalleryViewerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
+    return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         return Scaffold(
           backgroundColor: Colors.black,

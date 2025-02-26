@@ -16,7 +16,7 @@ import 'Providers/auth_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'Providers/chat_provider.dart';
-import 'Providers/user_manager_provider.dart';
+import 'Providers/user_state_provider.dart';
 import 'Providers/worker_maganer_provider.dart';
 import 'firebase_options.dart';
 
@@ -50,9 +50,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => UserManagerProvider()),
+        ChangeNotifierProvider(create: (_) => UserStateProvider()),
         ChangeNotifierProvider(create: (_) => WorkerMaganerProvider()),
-        ChangeNotifierProxyProvider<UserManagerProvider, ChatProvider>(
+        ChangeNotifierProxyProvider<UserStateProvider, ChatProvider>(
           create: (context) => ChatProvider(),
           update: (context, userManager, previous) {
             final chatProvider = previous ?? ChatProvider();

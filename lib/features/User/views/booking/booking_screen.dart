@@ -5,7 +5,7 @@ import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../../Providers/user_manager_provider.dart';
+import '../../../../Providers/user_state_provider.dart';
 import '../../models/booking.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -28,12 +28,12 @@ class _BookingScreenState extends State<BookingScreen>
     _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        Provider.of<UserManagerProvider>(context, listen: false)
+        Provider.of<UserStateProvider>(context, listen: false)
             .setCurrentBookingTab(_tabController.index + 1);
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserManagerProvider>(context, listen: false).fetchBookings();
+      Provider.of<UserStateProvider>(context, listen: false).fetchBookings();
     });
   }
 
@@ -45,7 +45,7 @@ class _BookingScreenState extends State<BookingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
+    return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         return Scaffold(
           appBar: AppBar(
@@ -108,7 +108,7 @@ class _BookingScreenState extends State<BookingScreen>
   Widget _buildBookingCard(
     BuildContext context,
     Booking booking,
-    UserManagerProvider userManager,
+    UserStateProvider userManager,
   ) {
     // Assuming the contractor is fetched or stored elsewhere; for now, use placeholder data
     final contractor = userManager.bestContractors.firstWhere(

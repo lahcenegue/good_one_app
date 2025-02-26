@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../Core/presentation/resources/app_colors.dart';
 import '../../../Providers/chat_provider.dart';
-import '../../../Providers/user_manager_provider.dart';
+import '../../../Providers/user_state_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final String otherUserId;
@@ -32,8 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _initializeChat() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final userId =
-          context.read<UserManagerProvider>().userInfo?.id.toString();
+      final userId = context.read<UserStateProvider>().userInfo?.id.toString();
       if (userId != null) {
         final chatProvider = context.read<ChatProvider>();
         await chatProvider.initialize(userId);

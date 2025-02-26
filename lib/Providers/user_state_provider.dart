@@ -20,7 +20,7 @@ import '../Features/auth/Services/token_manager.dart';
 ///
 /// This class handles authentication, contractor data, booking schedules,
 /// bookings, and location services, notifying listeners when state changes.
-class UserManagerProvider extends ChangeNotifier {
+class UserStateProvider extends ChangeNotifier {
   // Authentication State
   String? _token;
   UserInfo? _userInfo;
@@ -130,7 +130,7 @@ class UserManagerProvider extends ChangeNotifier {
       _getTimestamp(_selectedDay, _selectedTime, _taskDurationHours);
 
   // Constructor
-  UserManagerProvider()
+  UserStateProvider()
       : _selectedDay = DateTime.now(),
         _focusedDay = DateTime.now(),
         _selectedTime = _computeNextAvailableTime() {

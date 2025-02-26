@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/presentation/resources/app_colors.dart';
-import '../../../Providers/user_manager_provider.dart';
+import '../../../Providers/user_state_provider.dart';
 
 /// Allows users to select a location for a booking using a map interface.
 class LocationScreen extends StatelessWidget {
@@ -16,7 +16,7 @@ class LocationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
+    return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         LatLng initialLocation = userManager.selectedLocation ??
             LatLng(43.6532, -79.3832); // Default to Toronto
@@ -39,7 +39,7 @@ class LocationScreen extends StatelessWidget {
 
   Widget _buildSearchLocationView(
     BuildContext context,
-    UserManagerProvider userManager,
+    UserStateProvider userManager,
     LatLng initialLocation,
   ) {
     return Column(
@@ -145,7 +145,7 @@ class LocationScreen extends StatelessWidget {
 
   Widget _buildSelectedLocationView(
     BuildContext context,
-    UserManagerProvider userManager,
+    UserStateProvider userManager,
     LatLng initialLocation,
   ) {
     LatLng location = userManager.mapController.camera.center;

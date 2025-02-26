@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Providers/user_manager_provider.dart';
+import '../../../Providers/user_state_provider.dart';
 import '../Widgets/booking/contractor_list_item.dart';
 import 'contractor_profile.dart';
 
@@ -26,14 +26,14 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userManager =
-          Provider.of<UserManagerProvider>(context, listen: false);
+          Provider.of<UserStateProvider>(context, listen: false);
       userManager.fetchContractorsByService(widget.serviceId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
+    return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         return Scaffold(
           appBar: AppBar(
@@ -52,8 +52,7 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
     );
   }
 
-  Widget _buildSearchBar(
-      BuildContext context, UserManagerProvider userManager) {
+  Widget _buildSearchBar(BuildContext context, UserStateProvider userManager) {
     return Padding(
       padding: EdgeInsets.all(context.getAdaptiveSize(15)),
       child: TextField(
@@ -70,7 +69,7 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
   }
 
   Widget _buildContractorsList(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     final filteredContractors = userManager.contractorsByService;
 
     if (userManager.isLoading) {

@@ -6,7 +6,7 @@ import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../Providers/user_manager_provider.dart';
+import '../../../../Providers/user_state_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BookingSummaryScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
+    return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         if (userManager.selectedContractor == null) {
           return Scaffold(
@@ -79,7 +79,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   }
 
   Widget _buildContractorInfo(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -131,7 +131,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   }
 
   Widget _buildBookingDetails(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -173,7 +173,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   }
 
   Widget _buildLocationDetails(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -289,7 +289,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   Widget _buildPricingSummary(
     BuildContext context,
     double totalPrice,
-    UserManagerProvider userManager,
+    UserStateProvider userManager,
   ) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),

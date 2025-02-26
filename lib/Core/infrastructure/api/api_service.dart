@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
-import '../../../Features/auth/Services/token_manager.dart';
 import '../../Config/app_config.dart';
 import 'api_response.dart';
 import '../../presentation/resources/app_strings.dart';
@@ -22,35 +21,62 @@ class ApiService {
     required Future<http.Response> Function(String? token) requestFunction,
     required T Function(dynamic) fromJson,
     String? token,
+    int maxRetries = 2,
   }) async {
-    try {
-      // First attempt
-      final response = await requestFunction(token);
-
-      // Handle 401 (Unauthorized) response
-      if (response.statusCode == 401) {
-        debugPrint('Received 401, attempting token refresh');
-
-        // Try to refresh token
-        final refreshed = await TokenManager.instance.refreshToken();
-        if (refreshed) {
-          debugPrint('Token refreshed successfully, retrying request');
-          final newToken = TokenManager.instance.token;
-          final retryResponse = await requestFunction(newToken);
-          return _processResponse(retryResponse, fromJson);
+    int retryCount = 0;
+    while (retryCount <= maxRetries) {
+      try {
+        final response =
+            await requestFunction(token).timeout(AppConfig.apiTimeout);
+        return _processResponse(response, fromJson);
+      } catch (e) {
+        if (e is TimeoutException && retryCount < maxRetries) {
+          retryCount++;
+          debugPrint('Retry attempt $retryCount for network timeout');
+          await Future.delayed(
+              Duration(seconds: 1 * retryCount)); // Exponential backoff
+          continue;
         }
-
-        // If refresh fails, clear token and return error
-        await TokenManager.instance.clearToken();
-        return ApiResponse.error(AppStrings.sessionExpired);
+        debugPrint('API request failed after retries: $e');
+        return ApiResponse.error(AppStrings.networkError);
       }
-
-      return _processResponse(response, fromJson);
-    } catch (e) {
-      debugPrint('API request failed: $e');
-      return ApiResponse.error(AppStrings.generalError);
     }
+    return ApiResponse.error(AppStrings.networkError);
   }
+
+  // Future<ApiResponse<T>> _executeRequest<T>({
+  //   required Future<http.Response> Function(String? token) requestFunction,
+  //   required T Function(dynamic) fromJson,
+  //   String? token,
+  // }) async {
+  //   try {
+  //     // First attempt
+  //     final response = await requestFunction(token);
+
+  //     // Handle 401 (Unauthorized) response
+  //     if (response.statusCode == 401) {
+  //       debugPrint('Received 401, attempting token refresh');
+
+  //       // Try to refresh token
+  //       final refreshed = await TokenManager.instance.refreshToken();
+  //       if (refreshed) {
+  //         debugPrint('Token refreshed successfully, retrying request');
+  //         final newToken = TokenManager.instance.token;
+  //         final retryResponse = await requestFunction(newToken);
+  //         return _processResponse(retryResponse, fromJson);
+  //       }
+
+  //       // If refresh fails, clear token and return error
+  //       await TokenManager.instance.clearToken();
+  //       return ApiResponse.error(AppStrings.sessionExpired);
+  //     }
+
+  //     return _processResponse(response, fromJson);
+  //   } catch (e) {
+  //     debugPrint('API request failed: $e');
+  //     return ApiResponse.error(AppStrings.generalError);
+  //   }
+  // }
 
   Map<String, String> _getHeaders(String? token) {
     final headers = {

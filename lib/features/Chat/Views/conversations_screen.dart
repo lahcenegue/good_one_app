@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../Core/Navigation/app_routes.dart';
 import '../../../Core/presentation/Widgets/user_avatar.dart';
 import '../../../Providers/chat_provider.dart';
-import '../../../Providers/user_manager_provider.dart';
+import '../../../Providers/user_state_provider.dart';
 import '../Widgets/chat_utils.dart';
 
 class ConversationsScreen extends StatefulWidget {
@@ -35,8 +35,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     if (_isInitialized) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final userId =
-          context.read<UserManagerProvider>().userInfo?.id.toString();
+      final userId = context.read<UserStateProvider>().userInfo?.id.toString();
       if (userId != null) {
         final chatProvider = context.read<ChatProvider>();
 

@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Providers/user_manager_provider.dart';
+import '../../../../Providers/user_state_provider.dart';
 
 class CalendarBookingScreen extends StatelessWidget {
   const CalendarBookingScreen({super.key});
@@ -21,7 +21,7 @@ class CalendarBookingScreen extends StatelessWidget {
           style: AppTextStyles.appBarTitle(context),
         ),
       ),
-      body: Consumer<UserManagerProvider>(
+      body: Consumer<UserStateProvider>(
         builder: (context, provider, _) {
           return SingleChildScrollView(
             padding: EdgeInsets.all(context.getWidth(16)),
@@ -53,8 +53,7 @@ class CalendarBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeSelection(
-      BuildContext context, UserManagerProvider provider) {
+  Widget _buildTimeSelection(BuildContext context, UserStateProvider provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -104,7 +103,7 @@ class CalendarBookingScreen extends StatelessWidget {
     String timeSlot,
     bool isSelected,
     bool isAvailable,
-    UserManagerProvider provider,
+    UserStateProvider provider,
   ) {
     final hour = int.parse(timeSlot.split(':')[0]);
     final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
@@ -149,7 +148,7 @@ class CalendarBookingScreen extends StatelessWidget {
 
   Widget _buildDurationSelection(
     BuildContext context,
-    UserManagerProvider provider,
+    UserStateProvider provider,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +211,7 @@ class CalendarBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCalendar(BuildContext context, UserManagerProvider provider) {
+  Widget _buildCalendar(BuildContext context, UserStateProvider provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -266,7 +265,7 @@ class CalendarBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, UserManagerProvider provider) {
+  Widget _buildSummaryCard(BuildContext context, UserStateProvider provider) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -303,7 +302,7 @@ class CalendarBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNextButton(BuildContext context, UserManagerProvider provider) {
+  Widget _buildNextButton(BuildContext context, UserStateProvider provider) {
     final bool isValid = provider.isValidBookingSelection(debug: true);
 
     return PrimaryButton(

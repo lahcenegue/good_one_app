@@ -9,7 +9,7 @@ import '../../Features/Setup/Views/account_type_screen.dart';
 import '../../Features/Setup/Views/language_selection_screen.dart';
 import '../../Features/auth/views/login_screen.dart';
 import '../../Features/Onboarding/Views/onbording_view.dart';
-import '../../Features/User/views/user_main_screen.dart';
+import '../../Features/User/views/home/user_main_screen.dart';
 
 class AppRoutes {
   AppRoutes._(); // Private constructor to prevent instantiation

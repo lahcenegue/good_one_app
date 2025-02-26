@@ -20,7 +20,7 @@ import '../Features/auth/models/auth_request.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../Features/auth/models/register_request.dart';
-import 'user_manager_provider.dart';
+import 'user_state_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isInitialized = false;
@@ -199,7 +199,7 @@ class AuthProvider with ChangeNotifier {
         // Update UserManagerProvider with new token
         if (context.mounted) {
           await context
-              .read<UserManagerProvider>()
+              .read<UserStateProvider>()
               .updateToken(_authData!.accessToken);
         }
 
@@ -277,7 +277,7 @@ class AuthProvider with ChangeNotifier {
 
         if (context.mounted) {
           await context
-              .read<UserManagerProvider>()
+              .read<UserStateProvider>()
               .updateToken(_authData!.accessToken);
         }
 
@@ -307,7 +307,7 @@ class AuthProvider with ChangeNotifier {
 
       // Clear UserManagerProvider data
       if (context.mounted) {
-        await context.read<UserManagerProvider>().clearData();
+        await context.read<UserStateProvider>().clearData();
       }
 
       _clearFormData();

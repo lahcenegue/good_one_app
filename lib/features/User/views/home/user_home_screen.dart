@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/presentation/Widgets/user_avatar.dart';
-import '../../../Core/presentation/resources/app_colors.dart';
-import '../../../Core/presentation/Widgets/error/error_widget.dart';
-import '../../../Core/Navigation/app_routes.dart';
-import '../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../Core/Navigation/navigation_service.dart';
-import '../../../Core/Utils/size_config.dart';
-import '../../../Providers/user_manager_provider.dart';
-import '../Widgets/booking/contractor_list_item.dart';
-import '../Widgets/booking/service_grid_item.dart';
+import '../../../../Core/presentation/Widgets/user_avatar.dart';
+import '../../../../Core/presentation/resources/app_colors.dart';
+import '../../../../Core/presentation/Widgets/error/error_widget.dart';
+import '../../../../Core/Navigation/app_routes.dart';
+import '../../../../Core/presentation/Theme/app_text_styles.dart';
+import '../../../../Core/Navigation/navigation_service.dart';
+import '../../../../Core/Utils/size_config.dart';
+import '../../../../Providers/user_state_provider.dart';
+import '../../Widgets/booking/contractor_list_item.dart';
+import '../../Widgets/booking/service_grid_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'contractor_profile.dart';
+import '../contractor_profile.dart';
 
 class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
+    return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         if (userManager.error != null) {
           return AppErrorWidget(
@@ -58,7 +58,7 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, UserManagerProvider userManager) {
+  Widget _buildHeader(BuildContext context, UserStateProvider userManager) {
     if (!userManager.isAuthenticated) {
       return const SizedBox.shrink();
     }
@@ -135,7 +135,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildMessageIcon(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return Container(
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
@@ -168,8 +168,7 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar(
-      BuildContext context, UserManagerProvider userManager) {
+  Widget _buildSearchBar(BuildContext context, UserStateProvider userManager) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.dimGray,
@@ -190,7 +189,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildServicesSection(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return Column(
       children: [
         _buildSectionHeader(
@@ -232,7 +231,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildServicesGrid(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -261,7 +260,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildContractorsSection(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return Column(
       children: [
         Row(

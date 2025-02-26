@@ -13,14 +13,14 @@ import '../../../../Core/presentation/Theme/app_text_styles.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../../Providers/user_manager_provider.dart';
+import '../../../../Providers/user_state_provider.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
+    return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         return Scaffold(
           body: SingleChildScrollView(
@@ -58,7 +58,7 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAuthenticatedHeader(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     final user = userManager.userInfo;
     if (user == null) return const SizedBox.shrink();
 
@@ -190,7 +190,7 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileInfo(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     final user = userManager.userInfo;
     if (user == null) return const SizedBox.shrink();
 
@@ -255,7 +255,7 @@ class UserProfileScreen extends StatelessWidget {
 
   Widget _buildAuthenticatedMenuItems(
     BuildContext context,
-    UserManagerProvider userManager,
+    UserStateProvider userManager,
   ) {
     return Column(
       children: [
@@ -327,7 +327,7 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildLoginButton(
-      BuildContext context, UserManagerProvider userManager) {
+      BuildContext context, UserStateProvider userManager) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: context.getWidth(20),

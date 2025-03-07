@@ -13,9 +13,10 @@ class ApiService {
   factory ApiService() => _instance;
   ApiService._internal();
 
-  static ApiService get instance => _instance;
-
+  /// The default timeout duration for API requests, from AppConfig.
   final Duration _timeout = AppConfig.apiTimeout;
+
+  static ApiService get instance => _instance;
 
   Future<ApiResponse<T>> _executeRequest<T>({
     required Future<http.Response> Function(String? token) requestFunction,
@@ -32,12 +33,12 @@ class ApiService {
       } catch (e) {
         if (e is TimeoutException && retryCount < maxRetries) {
           retryCount++;
-          debugPrint('Retry attempt $retryCount for network timeout');
+          print('Retry attempt $retryCount for network timeout');
           await Future.delayed(
               Duration(seconds: 1 * retryCount)); // Exponential backoff
           continue;
         }
-        debugPrint('API request failed after retries: $e');
+        print('API request failed after retries: $e');
         return ApiResponse.error(AppStrings.networkError);
       }
     }
@@ -57,7 +58,7 @@ class ApiService {
       headers['Authorization'] = 'Bearer $token';
     }
 
-    debugPrint('Request Headers: $headers');
+    print('Request Headers: $headers');
     return headers;
   }
 
@@ -67,8 +68,8 @@ class ApiService {
     required T Function(dynamic) fromJson,
     String? token,
   }) async {
-    debugPrint('POST Request to: $url');
-    debugPrint('Request Body: $body');
+    print('POST Request to: $url');
+    print('Request Body: $body');
 
     return _executeRequest<T>(
       requestFunction: (currentToken) => http
@@ -109,8 +110,8 @@ class ApiService {
     required T Function(dynamic) fromJson,
     String? token,
   }) async {
-    debugPrint('Multipart POST Request to: $url');
-    debugPrint('Fields: $fields');
+    print('Multipart POST Request to: $url');
+    print('Fields: $fields');
 
     Future<http.Response> multipartRequest(String? currentToken) async {
       final request = http.MultipartRequest('POST', Uri.parse(url))
@@ -158,7 +159,7 @@ class ApiService {
 
       // Check for token expiration first
       if (_isTokenExpired(response)) {
-        debugPrint('Token expired or invalid detected in response');
+        print('Token expired or invalid detected');
         return ApiResponse.error(AppStrings.sessionExpired);
       }
 
@@ -193,7 +194,7 @@ class ApiService {
 
       return ApiResponse.error(AppStrings.generalError);
     } catch (e) {
-      debugPrint('Response processing error: $e');
+      print('Response processing error: $e');
       return ApiResponse.error(AppStrings.generalError);
     }
   }
@@ -210,7 +211,7 @@ class ApiService {
       }
       return false;
     } catch (e) {
-      debugPrint('Error checking token expiration: $e');
+      print('Error checking token expiration: $e');
       return false;
     }
   }

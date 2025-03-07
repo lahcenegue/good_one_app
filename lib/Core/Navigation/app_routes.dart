@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Features/Worker/views/worker_main_screen.dart';
 import '../../Features/Chat/Views/conversations_screen.dart';
+import '../../Features/User/views/booking/booking_summary_screen.dart';
+import '../../Features/User/views/booking/calender_booking_screen.dart';
+import '../../Features/User/views/booking/location_screen.dart';
 import '../../Features/User/views/contractors_by_service.dart';
+import '../../Features/User/views/payment/payment_method_selection_screen.dart';
 import '../../Features/User/views/profile/language_settings_screen.dart';
 import '../../Features/auth/views/registration_screen.dart';
 import '../../Features/Chat/Views/chat_screen.dart';
@@ -12,7 +16,7 @@ import '../../Features/Onboarding/Views/onbording_view.dart';
 import '../../Features/User/views/home/user_main_screen.dart';
 
 class AppRoutes {
-  AppRoutes._(); // Private constructor to prevent instantiation
+  AppRoutes._();
 
   // Route Names
   static const String languageSelection = '/';
@@ -25,6 +29,10 @@ class AppRoutes {
   static const String conversations = '/conversations';
   static const String contractorsByService = '/contractorsByService';
   static const String languageSettingsScreen = '/LanguageSettingsScreen';
+  static const String paymentMethodSelection = '/paymentMethodSelection'; //TODO
+  static const String calendarBookingScreen = '/calendarBookingScreen';
+  static const String locationScreen = '/locationScreen';
+  static const String bookingSummaryScreen = '/bookingSummaryScreen';
 
   static const String workerMain = '/workerMainScreen';
 
@@ -55,6 +63,13 @@ class AppRoutes {
           title: args['name'],
         );
       },
+
+      calendarBookingScreen: (_) => const CalendarBookingScreen(),
+      locationScreen: (_) => const LocationScreen(),
+      bookingSummaryScreen: (_) => const BookingSummaryScreen(),
+
+      paymentMethodSelection: (_) =>
+          const PaymentMethodSelectionScreen(), //TODO
 
       //
       workerMain: (_) => const WorkerMainScreen(),

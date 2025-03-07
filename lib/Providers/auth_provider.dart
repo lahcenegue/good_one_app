@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../Data/Models/auth_model.dart';
+import '../Features/auth/models/auth_model.dart';
 import '../Core/Utils/storage_keys.dart';
 import '../Core/Utils/error_handling/error_handler.dart';
 import '../Core/Utils/error_handling/failures.dart';
@@ -24,6 +24,7 @@ import 'user_state_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isInitialized = false;
+
   // Authentication State
   AuthModel? _authData;
   bool _isLoading = false;
@@ -32,28 +33,6 @@ class AuthProvider with ChangeNotifier {
 
   String? selectedCountry;
   String? selectedCity;
-
-  List<String> countries = [
-    'Canada',
-    'United States',
-  ];
-
-  Map<String, List<String>> citiesByCountry = {
-    'United States': [
-      'New York',
-      'Los Angeles',
-      'Chicago',
-      'Houston',
-      'Phoenix',
-    ],
-    'Canada': [
-      'Toronto',
-      'Vancouver',
-      'Montreal',
-      'Calgary',
-      'Ottawa',
-    ],
-  };
 
   // Form Controllers
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -89,7 +68,7 @@ class AuthProvider with ChangeNotifier {
   String? get imageError => _imageError;
   List<String> get availableCities {
     return selectedCountry != null
-        ? citiesByCountry[selectedCountry] ?? []
+        ? AppStrings.citiesByCountry[selectedCountry] ?? []
         : [];
   }
 
@@ -104,7 +83,6 @@ class AuthProvider with ChangeNotifier {
   }
 
   // UI Methods
-
   void togglePasswordVisibility() {
     _obscurePassword = !_obscurePassword;
     notifyListeners();
@@ -176,16 +154,19 @@ class AuthProvider with ChangeNotifier {
   Future<void> login(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
 
-    final accountType = StorageManager.getString(StorageKeys.accountTypeKey);
-
     try {
       _setLoading(true);
       _clearErrors();
 
+      final [accountType, deviceToken] = await Future.wait([
+        StorageManager.getString(StorageKeys.accountTypeKey),
+        StorageManager.getString(StorageKeys.fcmTokenKey),
+      ]);
+
       final request = AuthRequest(
         email: emailController.text.trim(),
         password: passwordController.text,
-        deviceToken: StorageManager.getString(StorageKeys.fcmTokenKey)!,
+        deviceToken: deviceToken!,
       );
 
       debugPrint('The Device token fron login ${request.deviceToken}');
@@ -241,19 +222,25 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
-    final accountType = StorageManager.getString(StorageKeys.accountTypeKey);
-
-    if (accountType == AppStrings.service) {
-      if (selectedCountry == null || selectedCity == null) {
-        _error = AppLocalizations.of(context)!.locationRequired;
-        notifyListeners();
-        return;
-      }
-    }
-
     try {
       _setLoading(true);
       _clearErrors();
+
+      final [accountType, deviceToken] = await Future.wait([
+        StorageManager.getString(StorageKeys.accountTypeKey),
+        StorageManager.getString(StorageKeys.fcmTokenKey),
+      ]);
+
+      if (accountType == AppStrings.service) {
+        if (selectedCountry == null || selectedCity == null) {
+          if (context.mounted) {
+            _error = AppLocalizations.of(context)!.locationRequired;
+          }
+
+          notifyListeners();
+          return;
+        }
+      }
 
       final request = RegisterRequest(
         image: _selectedImage!,
@@ -262,7 +249,7 @@ class AuthProvider with ChangeNotifier {
         phone: phoneController.text.trim(),
         password: passwordController.text,
         type: accountType!,
-        deviceToken: StorageManager.getString(StorageKeys.fcmTokenKey)!,
+        deviceToken: deviceToken ?? '',
         country: accountType == AppStrings.service ? selectedCountry : null,
         city: accountType == AppStrings.service ? selectedCity : null,
       );

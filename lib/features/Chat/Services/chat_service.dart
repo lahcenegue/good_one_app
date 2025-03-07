@@ -13,7 +13,7 @@ class ChatService {
       {required String token}) async {
     try {
       final response = await _api.get<List<ChatConversation>>(
-        url: ApiEndpoints.getEndpointUrl('/chat'),
+        url: ApiEndpoints.chat,
         token: token,
         fromJson: (json) {
           if (json is List) {
@@ -40,8 +40,7 @@ class ChatService {
   }) async {
     try {
       final response = await _api.get<List<ChatMessage>>(
-        url: ApiEndpoints.getEndpointUrl(
-            '/chat/messages/$userId${startFrom != null ? '?start_from=$startFrom' : ''}'),
+        url: ApiEndpoints.messages(userId, startFrom: startFrom),
         token: token,
         fromJson: (json) {
           if (json is List) {
@@ -68,7 +67,7 @@ class ChatService {
   }) async {
     try {
       final response = await _api.post<ChatMessage>(
-        url: ApiEndpoints.getEndpointUrl('/chat/send'),
+        url: ApiEndpoints.send,
         body: {
           'user_id': userId,
           'message': message,

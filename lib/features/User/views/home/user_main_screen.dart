@@ -8,7 +8,7 @@ import '../../../../Core/presentation/Widgets/error/error_widget.dart';
 import '../../../../Providers/user_state_provider.dart';
 
 import '../booking/booking_screen.dart';
-import '../services/services_screen.dart';
+import '../servicesScreen/services_screen.dart';
 import 'user_home_screen.dart';
 import '../profile/user_profile_screen.dart';
 
@@ -70,6 +70,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
     switch (userManager.currentIndex) {
       case 0:
         return const UserHomeScreen();
+
       case 1:
         return const BookingScreen();
       case 2:

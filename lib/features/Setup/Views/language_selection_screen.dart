@@ -4,6 +4,7 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Core/Localization/app_localizations.dart';
 import '../../../Core/presentation/resources/app_assets.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Providers/app_settings_provider.dart';
@@ -88,7 +89,7 @@ class LanguageSelectionScreen extends StatelessWidget {
   ) {
     return Column(
       children: [
-        ...appSettings.supportedLanguages.map(
+        ...AppLocalization.supportedLanguages.map(
           (language) => LanguageOptionTile(
             option: language,
             isSelected: appSettings.appLocale.languageCode == language.code,

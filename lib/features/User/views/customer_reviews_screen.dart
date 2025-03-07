@@ -19,7 +19,7 @@ class CustomerReviewsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "All Reviews (${contractor.ratings.length})",
+          "All Reviews (${contractor.ratings!.length})",
           style: AppTextStyles.appBarTitle(context),
         ),
       ),
@@ -35,8 +35,8 @@ class CustomerReviewsScreen extends StatelessWidget {
   }
 
   Widget _buildRatingSummary(BuildContext context) {
-    final averageRating = contractor.rating.rating;
-    final totalReviews = contractor.rating.timesRated;
+    final averageRating = contractor.rating!.rating;
+    final totalReviews = contractor.rating!.timesRated;
 
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
@@ -93,7 +93,7 @@ class CustomerReviewsScreen extends StatelessWidget {
   Widget _buildRatingBars(BuildContext context) {
     // Calculate rating distribution
     Map<int, int> ratingCounts = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
-    for (var rating in contractor.ratings) {
+    for (var rating in contractor.ratings!) {
       ratingCounts[rating.rate] = (ratingCounts[rating.rate] ?? 0) + 1;
     }
 
@@ -114,9 +114,9 @@ class CustomerReviewsScreen extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: contractor.ratings.isEmpty
+                      value: contractor.ratings!.isEmpty
                           ? 0
-                          : (ratingCounts[i] ?? 0) / contractor.ratings.length,
+                          : (ratingCounts[i] ?? 0) / contractor.ratings!.length,
                       backgroundColor: Colors.grey[200],
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
                       minHeight: 8,
@@ -141,11 +141,11 @@ class CustomerReviewsScreen extends StatelessWidget {
     return ListView.separated(
       controller: _scrollController,
       padding: EdgeInsets.all(context.getWidth(16)),
-      itemCount: contractor.ratings.length,
+      itemCount: contractor.ratings!.length,
       separatorBuilder: (context, index) =>
           SizedBox(height: context.getHeight(16)),
       itemBuilder: (context, index) {
-        final review = contractor.ratings[index];
+        final review = contractor.ratings![index];
         return _buildReviewItem(context, review);
       },
     );
@@ -166,7 +166,7 @@ class CustomerReviewsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserAvatar(
-                picture: review.user.picture,
+                picture: review.reviewer.picture,
                 size: context.getWidth(48),
               ),
               SizedBox(width: context.getWidth(12)),
@@ -179,7 +179,7 @@ class CustomerReviewsScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            review.user.fullName,
+                            review.reviewer.fullName,
                             style: AppTextStyles.title2(context),
                           ),
                         ),

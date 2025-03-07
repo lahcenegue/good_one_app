@@ -18,21 +18,28 @@ class NavigationState {
     required this.isAWorker,
   });
 
-  factory NavigationState.fromPrefs() {
-    final hasLanguage =
-        StorageManager.getString(StorageKeys.languageKey) != null;
-    // First launch should be false if we have a language selected
-    final isFirstLaunch =
-        StorageManager.getBool(StorageKeys.firstLaunch) ?? !hasLanguage;
+  static Future<NavigationState> fromPrefs() async {
+    final results = await Future.wait([
+      StorageManager.getString(StorageKeys.languageKey),
+      StorageManager.getBool(StorageKeys.firstLaunch),
+      StorageManager.getBool(StorageKeys.onboardingKey),
+      StorageManager.getString(StorageKeys.tokenKey),
+      StorageManager.getString(StorageKeys.accountTypeKey),
+    ]);
+
+    final savedLanguage = results[0] as String?;
+    final hasLanguage = savedLanguage != null;
+    final firstLaunchValue = results[1] as bool?;
+    final onboardingValue = results[2] as bool?;
+    final token = results[3] as String?;
+    final accountType = results[4] as String?;
 
     return NavigationState(
-      isFirstLaunch: isFirstLaunch,
+      isFirstLaunch: firstLaunchValue ?? !hasLanguage,
       hasLanguage: hasLanguage,
-      hasCompletedOnboarding:
-          StorageManager.getBool(StorageKeys.onboardingKey) ?? false,
-      hasToken: StorageManager.getString(StorageKeys.tokenKey) != null,
-      isAWorker: StorageManager.getString(StorageKeys.accountTypeKey) ==
-          AppStrings.service,
+      hasCompletedOnboarding: onboardingValue ?? false,
+      hasToken: token != null,
+      isAWorker: accountType == AppStrings.service,
     );
   }
 

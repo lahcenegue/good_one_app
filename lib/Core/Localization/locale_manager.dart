@@ -7,7 +7,8 @@ class LocaleManager {
   const LocaleManager();
 
   Future<Locale> initializeLocale() async {
-    final savedLanguage = StorageManager.getString(StorageKeys.languageKey);
+    final savedLanguage =
+        await StorageManager.getString(StorageKeys.languageKey);
     if (savedLanguage != null) {
       return Locale(savedLanguage);
     }
@@ -27,12 +28,19 @@ class LocaleManager {
   }
 
   // Getters
-  bool get hasStoredLanguage =>
-      StorageManager.getString(StorageKeys.languageKey) != null;
-  String? get currentLanguageCode =>
-      StorageManager.getString(StorageKeys.languageKey);
-  String get currentLanguageName =>
-      AppLocalization.getLanguageName(currentLanguageCode ?? 'en');
+  Future<bool> get hasStoredLanguage async {
+    final language = await StorageManager.getString(StorageKeys.languageKey);
+    return language != null;
+  }
+
+  Future<String?> get currentLanguageCode async {
+    return await StorageManager.getString(StorageKeys.languageKey);
+  }
+
+  Future<String> get currentLanguageName async {
+    final code = await StorageManager.getString(StorageKeys.languageKey);
+    return AppLocalization.getLanguageName(code ?? 'en');
+  }
 
   // Clear settings
   Future<void> clearLanguageSettings() async {

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Features/User/views/location_screen.dart';
+import 'package:good_one_app/Features/User/views/booking/location_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../../../Core/Navigation/app_routes.dart';
 import '../../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../../Providers/user_state_provider.dart';
 
@@ -43,6 +45,7 @@ class CalendarBookingScreen extends StatelessWidget {
                 // Summary and Next button remain at the bottom
                 _buildSummaryCard(context, provider),
                 SizedBox(height: context.getHeight(32)),
+
                 _buildNextButton(context, provider),
                 SizedBox(height: context.getHeight(24)),
               ],
@@ -309,17 +312,13 @@ class CalendarBookingScreen extends StatelessWidget {
       text: AppLocalizations.of(context)!.next,
       onPressed: isValid
           ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LocationScreen(),
-                ),
-              );
+              NavigationService.navigateTo(AppRoutes.locationScreen);
             }
           : () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Please select a valid future time slot'),
+                  content: Text(
+                      'Please select a valid future time slot'), //TODO translate
                 ),
               );
             },

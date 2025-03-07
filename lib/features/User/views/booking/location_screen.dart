@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Features/User/views/booking/booking_summary_screen.dart';
+
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../Core/presentation/resources/app_colors.dart';
-import '../../../Providers/user_state_provider.dart';
+import '../../../../Core/Navigation/app_routes.dart';
+import '../../../../Core/Navigation/navigation_service.dart';
+import '../../../../Core/presentation/Theme/app_text_styles.dart';
+import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
+import '../../../../Core/presentation/resources/app_assets.dart';
+import '../../../../Core/presentation/resources/app_colors.dart';
+import '../../../../Providers/user_state_provider.dart';
 
-/// Allows users to select a location for a booking using a map interface.
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
 
@@ -24,7 +26,7 @@ class LocationScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              'Location',
+              'Location', //TODO translate
               style: AppTextStyles.appBarTitle(context),
             ),
           ),
@@ -113,7 +115,7 @@ class LocationScreen extends StatelessWidget {
               TextField(
                 controller: userManager.locationSearchController,
                 decoration: InputDecoration(
-                  hintText: 'Search city or place...',
+                  hintText: 'Search city or place...', //TODO trnslate
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   suffixIcon: IconButton(
@@ -125,14 +127,9 @@ class LocationScreen extends StatelessWidget {
               ),
               SizedBox(height: context.getHeight(12)),
               PrimaryButton(
-                text: 'Confirm This Location',
+                text: 'Confirm This Location', //TODO trnslate
                 onPressed: () async {
                   await userManager.confirmMapLocation();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Location confirmed')),
-                    );
-                  }
                 },
               ),
               SizedBox(height: context.getHeight(12)),
@@ -213,7 +210,7 @@ class LocationScreen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      'https://images.unsplash.com/photo-1517090504586-fde19ea6066f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                      AppAssets.cityImageLink,
                       width: context.getAdaptiveSize(60),
                       height: context.getAdaptiveSize(60),
                       fit: BoxFit.cover,
@@ -230,7 +227,7 @@ class LocationScreen extends StatelessWidget {
                         Text(
                           userManager.locationAddress.isNotEmpty
                               ? userManager.locationAddress
-                              : 'Selected location on map',
+                              : 'Selected location on map', //TODO translate
                           style: AppTextStyles.title2(context),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -246,20 +243,16 @@ class LocationScreen extends StatelessWidget {
               ),
               SizedBox(height: context.getHeight(20)),
               PrimaryButton(
-                text: 'Next',
+                text: 'Next', //TODO translate
                 onPressed: () {
                   userManager.setLocation(
                     location,
                     userManager.locationAddress.isNotEmpty
                         ? userManager.locationAddress
-                        : 'Selected location on map',
+                        : 'Selected location on map', //TODO translate
                   );
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BookingSummaryScreen(),
-                    ),
-                  );
+
+                  NavigationService.navigateTo(AppRoutes.bookingSummaryScreen);
                 },
               ),
               SizedBox(height: context.getHeight(20)),

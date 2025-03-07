@@ -3,15 +3,16 @@ import 'package:intl/intl.dart';
 class Booking {
   final int id;
   final int totalHours;
-  final int startAt; // Unix timestamp in seconds
+  final int startAt;
   final String note;
-  final int status; // 1 = Completed, 2 = In Progress, 3 = Canceled
+  final int status;
   final int userId;
   final int serviceId;
   final String location;
   final double price;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final Service service;
 
   Booking({
     required this.id,
@@ -25,35 +26,53 @@ class Booking {
     required this.price,
     required this.createdAt,
     required this.updatedAt,
+    required this.service,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
     return Booking(
-      id: json['id'] as int,
-      totalHours: json['total_hours'] as int,
-      startAt: json['start_at'] as int,
-      note: json['note'] as String,
-      status: json['status'] as int,
-      userId: json['user_id'] as int,
-      serviceId: json['service_id'] as int,
-      location: json['location'] as String,
-      price: (json['price'] as num).toDouble(),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      id: json['id'] as int? ?? 0,
+      totalHours: json['total_hours'] as int? ?? 0,
+      startAt: json['start_at'] as int? ?? 0,
+      note: json['note'] as String? ?? '',
+      status: json['status'] as int? ?? 0,
+      userId: json['user_id'] as int? ?? 0,
+      serviceId: json['service_id'] as int? ?? 0,
+      location: json['location'] as String? ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      createdAt: DateTime.parse(
+          json['created_at'] as String? ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(
+          json['updated_at'] as String? ?? DateTime.now().toIso8601String()),
+      service: Service.fromJson(json['service'] as Map<String, dynamic>),
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'total_hours': totalHours,
+        'start_at': startAt,
+        'note': note,
+        'status': status,
+        'user_id': userId,
+        'service_id': serviceId,
+        'location': location,
+        'price': price,
+        'created_at': createdAt.toIso8601String(),
+        'updated_at': updatedAt.toIso8601String(),
+        'service': service.toJson(),
+      };
+
   String getStatusText() {
-    // Define status strings as constants or methods, localized in UI
     switch (status) {
       case 1:
-        return 'completed'; // Will be localized in UI
+        return 'inProgress';
       case 2:
-        return 'inProgress'; // Will be localized in UI
+        return 'completed';
       case 3:
-        return 'canceled'; // Will be localized in UI
+        return 'canceled';
       default:
-        return 'unknownStatus'; // Will be localized in UI
+        return 'unknownStatus';
     }
   }
 
@@ -66,4 +85,69 @@ class Booking {
     final date = DateTime.fromMillisecondsSinceEpoch(startAt * 1000);
     return DateFormat('HH:mm').format(date);
   }
+}
+
+class Service {
+  final int id;
+  final String fullName;
+  final String picture;
+  final String service;
+  final int subcategoryId;
+  final double costPerHour;
+  final Subcategory subcategory;
+
+  Service({
+    required this.id,
+    required this.fullName,
+    required this.picture,
+    required this.service,
+    required this.subcategoryId,
+    required this.costPerHour,
+    required this.subcategory,
+  });
+
+  factory Service.fromJson(Map<String, dynamic> json) {
+    return Service(
+      id: json['id'] as int,
+      fullName: json['full_name'] as String,
+      picture: json['picture'] as String,
+      service: json['service'] as String,
+      subcategoryId: json['subcategory_id'] as int,
+      costPerHour: (json['cost_per_hour'] as num).toDouble(),
+      subcategory:
+          Subcategory.fromJson(json['subcategory'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'full_name': fullName,
+        'picture': picture,
+        'service': service,
+        'subcategory_id': subcategoryId,
+        'cost_per_hour': costPerHour,
+        'subcategory': subcategory.toJson(),
+      };
+}
+
+class Subcategory {
+  final int id;
+  final String name;
+
+  Subcategory({
+    required this.id,
+    required this.name,
+  });
+
+  factory Subcategory.fromJson(Map<String, dynamic> json) {
+    return Subcategory(
+      id: json['id'] as int,
+      name: json['name'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+      };
 }

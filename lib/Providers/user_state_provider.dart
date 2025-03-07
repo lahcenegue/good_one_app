@@ -1,25 +1,29 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../Core/Navigation/app_routes.dart';
+import '../Core/Navigation/navigation_service.dart';
 import '../Core/Utils/storage_keys.dart';
 import '../Core/infrastructure/storage/storage_manager.dart';
+import '../Core/presentation/Widgets/success_dialog.dart';
+import '../Core/presentation/resources/app_strings.dart';
 import '../Features/User/models/booking.dart';
 import '../Features/User/models/contractor.dart';
+import '../Features/User/models/order_model.dart';
 import '../Features/User/models/service_category.dart';
 import '../Features/User/models/user_info.dart';
 import '../Features/User/services/user_api.dart';
 import '../Features/auth/Services/token_manager.dart';
 
-/// Manages user-related state and business logic for the application.
-///
-/// This class handles authentication, contractor data, booking schedules,
-/// bookings, and location services, notifying listeners when state changes.
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class UserStateProvider extends ChangeNotifier {
   // Authentication State
   String? _token;
@@ -42,7 +46,8 @@ class UserStateProvider extends ChangeNotifier {
 
   // Booking Data
   final List<Booking> _bookings = [];
-  int _currentBookingTab = 1; // Default to "Completed" (status 1)
+  bool _isBookingLoading = false;
+  String? _bookingError;
 
   // Location State
   final MapController _mapController = MapController();
@@ -59,33 +64,14 @@ class UserStateProvider extends ChangeNotifier {
   String _selectedTime;
   int _taskDurationHours = 1;
   DateTime? _taskEndTime;
-  final List<int> _availableDurations = [1, 2, 3, 4, 5, 6, 7, 8];
-  static const List<String> _timeSlots = [
-    '00:00',
-    '01:00',
-    '02:00',
-    '03:00',
-    '04:00',
-    '05:00',
-    '06:00',
-    '07:00',
-    '08:00',
-    '09:00',
-    '10:00',
-    '11:00',
-    '12:00',
-    '13:00',
-    '14:00',
-    '15:00',
-    '16:00',
-    '17:00',
-    '18:00',
-    '19:00',
-    '20:00',
-    '21:00',
-    '22:00',
-    '23:00',
-  ];
+
+  // Coupon State
+  String? _appliedCoupon;
+  double? _discountPercentage;
+
+  // Payment-related properties
+  bool _isPaymentProcessing = false;
+  String? _paymentError;
 
   // Getters
   String? get token => _token;
@@ -117,23 +103,39 @@ class UserStateProvider extends ChangeNotifier {
   DateTime get focusedDay => _focusedDay;
   String get selectedTime => _selectedTime;
   int get taskDurationHours => _taskDurationHours;
-  List<int> get availableDurations => List.unmodifiable(_availableDurations);
+  List<int> get availableDurations =>
+      List.unmodifiable(AppStrings.availableDurations);
   DateTime? get taskEndTime => _taskEndTime;
-  List<String> get timeSlots => _timeSlots;
+  List<String> get timeSlots => AppStrings.timeSlots;
   String get formattedDateTime => _formatBookingDateTime();
 
-  int get currentBookingTab => _currentBookingTab;
-  List<Booking> get bookings => _getFilteredBookings();
+  List<Booking> get bookings => _bookings;
+  bool get isBookingLoading => _isBookingLoading;
+  String? get bookingError => _bookingError;
 
   int get bookingTimestamp => _getTimestamp(_selectedDay, _selectedTime);
   int get bookingEndTimestamp =>
       _getTimestamp(_selectedDay, _selectedTime, _taskDurationHours);
+
+  String? get appliedCoupon => _appliedCoupon;
+  double? get discountPercentage => _discountPercentage;
+  double get effectiveTotalPrice {
+    if (selectedContractor == null || selectedContractor!.costPerHour == null) {
+      return 0.0; // Handle null case gracefully
+    }
+    final basePrice = selectedContractor!.costPerHour! * taskDurationHours;
+    return basePrice * (1 - (_discountPercentage ?? 0.0));
+  }
+
+  bool get isPaymentProcessing => _isPaymentProcessing;
+  String? get paymentError => _paymentError;
 
   // Constructor
   UserStateProvider()
       : _selectedDay = DateTime.now(),
         _focusedDay = DateTime.now(),
         _selectedTime = _computeNextAvailableTime() {
+    _initializeStripe();
     _initialize();
   }
 
@@ -141,12 +143,24 @@ class UserStateProvider extends ChangeNotifier {
   Future<void> _initialize() async {
     await _loadUserData();
     _syncLocationController();
-    await fetchBookings(); // Fetch bookings on initialization
+    await fetchBookings();
+  }
+
+  Future<void> _initializeStripe() async {
+    try {
+      Stripe.publishableKey = AppStrings.stripePublicKey;
+      Stripe.merchantIdentifier = AppStrings.merchantIdentifier;
+      Stripe.stripeAccountId = AppStrings.stripeAccountId;
+      await Stripe.instance.applySettings();
+      print('Stripe initialized successfully');
+    } catch (e) {
+      print('Error initializing Stripe: $e');
+    }
   }
 
   Future<void> _loadUserData() async {
     try {
-      _token = StorageManager.getString(StorageKeys.tokenKey);
+      _token = await StorageManager.getString(StorageKeys.tokenKey);
       if (_token != null) {
         final userInfoSuccess = await fetchUserInfo();
         if (!userInfoSuccess) {
@@ -161,7 +175,7 @@ class UserStateProvider extends ChangeNotifier {
       }
       await _fetchPublicData();
     } catch (e) {
-      _setError('Failed to load user data: $e');
+      setError('Failed to load user data: $e');
     }
   }
 
@@ -177,23 +191,23 @@ class UserStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setCurrentBookingTab(int tab) {
-    _currentBookingTab = tab;
-    notifyListeners();
-  }
-
   Future<void> initialize() async {
-    _setError(null);
+    setError(null);
     _setLoading(true);
     try {
       if (_token != null) {
         await Future.wait(
-            [_fetchPublicData(), fetchUserInfo(), fetchBookings()]);
+          [
+            _fetchPublicData(),
+            fetchUserInfo(),
+            fetchBookings(),
+          ],
+        );
       } else {
         await _fetchPublicData();
       }
     } catch (e) {
-      _setError('Initialization failed: $e');
+      setError('Initialization failed: $e');
     } finally {
       _setLoading(false);
     }
@@ -225,7 +239,7 @@ class UserStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setError(String? message) {
+  void setError(String? message) {
     _error = message;
     if (message != null) debugPrint(message);
     notifyListeners();
@@ -243,10 +257,10 @@ class UserStateProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       }
-      _setError('Failed to fetch user info: ${response.error}');
+      setError('Failed to fetch user info: ${response.error}');
       return false;
     } catch (e) {
-      _setError('Exception fetching user info: $e');
+      setError('Exception fetching user info: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -255,7 +269,12 @@ class UserStateProvider extends ChangeNotifier {
 
   // Categories and Contractors
   Future<void> _fetchPublicData() async {
-    await Future.wait([fetchCategories(), fetchBestContractors()]);
+    await Future.wait(
+      [
+        fetchCategories(),
+        fetchBestContractors(),
+      ],
+    );
   }
 
   Future<void> fetchCategories() async {
@@ -266,13 +285,13 @@ class UserStateProvider extends ChangeNotifier {
         _categories
           ..clear()
           ..addAll(response.data!);
-        debugPrint('Categories fetched: ${_categories.length}');
+        print('Categories fetched: ${_categories.length}');
         notifyListeners();
       } else {
-        _setError('Failed to fetch categories: ${response.error}');
+        setError('Failed to fetch categories: ${response.error}');
       }
     } catch (e) {
-      _setError('Exception fetching categories: $e');
+      setError('Exception fetching categories: $e');
     } finally {
       _setLoading(false);
     }
@@ -286,13 +305,13 @@ class UserStateProvider extends ChangeNotifier {
         _bestContractors
           ..clear()
           ..addAll(response.data!);
-        debugPrint('Best contractors fetched: ${_bestContractors.length}');
+        print('Best contractors fetched: ${_bestContractors.length}');
         notifyListeners();
       } else {
-        _setError('Failed to fetch contractors: ${response.error}');
+        setError('Failed to fetch contractors: ${response.error}');
       }
     } catch (e) {
-      _setError('Exception fetching contractors: $e');
+      setError('Exception fetching contractors: $e');
     } finally {
       _setLoading(false);
     }
@@ -310,10 +329,10 @@ class UserStateProvider extends ChangeNotifier {
             'Contractors by service fetched: ${_contractorsByService.length}');
         notifyListeners();
       } else {
-        _setError('Failed to fetch contractors by service: ${response.error}');
+        setError('Failed to fetch contractors by service: ${response.error}');
       }
     } catch (e) {
-      _setError('Exception fetching contractors by service: $e');
+      setError('Exception fetching contractors by service: $e');
     } finally {
       _setLoading(false);
     }
@@ -372,7 +391,7 @@ class UserStateProvider extends ChangeNotifier {
   }
 
   void setTaskDuration(int hours) {
-    if (_availableDurations.contains(hours)) {
+    if (AppStrings.availableDurations.contains(hours)) {
       _taskDurationHours = hours;
       _updateEndTime();
       notifyListeners();
@@ -380,7 +399,7 @@ class UserStateProvider extends ChangeNotifier {
   }
 
   void selectTime(String time) {
-    if (_timeSlots.contains(time)) {
+    if (AppStrings.timeSlots.contains(time)) {
       _selectedTime = time;
       _updateEndTime();
       notifyListeners();
@@ -416,7 +435,7 @@ class UserStateProvider extends ChangeNotifier {
 
   List<String> getAvailableTimeSlots() {
     final now = DateTime.now();
-    return _timeSlots.where((slot) {
+    return AppStrings.timeSlots.where((slot) {
       final hour = int.parse(slot.split(':')[0]);
       final endHour = hour + _taskDurationHours;
       final startDateTime = _buildDateTime(_selectedDay, slot);
@@ -452,28 +471,25 @@ class UserStateProvider extends ChangeNotifier {
 
   Future<void> fetchBookings() async {
     if (_token == null) return;
-    _setLoading(true);
+    _isBookingLoading = true;
+    _bookingError = null;
+    notifyListeners();
     try {
       final response = await UserApi.getBookings(token: _token!);
       if (response.success && response.data != null) {
         _bookings.clear();
         _bookings.addAll(response.data!);
-        debugPrint('Bookings fetched: ${_bookings.length}');
-        notifyListeners();
+        print('Bookings fetched: ${_bookings.length}');
       } else {
-        _setError('Failed to fetch bookings: ${response.error}');
+        _bookingError =
+            'Failed to fetch bookings: ${response.error ?? AppStrings.generalError}';
       }
     } catch (e) {
-      _setError('Exception fetching bookings: $e');
+      _bookingError = 'Exception fetching bookings: $e';
     } finally {
-      _setLoading(false);
+      _isBookingLoading = false;
+      notifyListeners();
     }
-  }
-
-  List<Booking> _getFilteredBookings() {
-    return _bookings
-        .where((booking) => booking.status == _currentBookingTab)
-        .toList();
   }
 
   // Location Logic
@@ -488,7 +504,9 @@ class UserStateProvider extends ChangeNotifier {
       _mapController.move(newLocation, 16.0);
       await _reverseGeocode(newLocation);
     } catch (e) {
-      _showSnackBar(context, 'Error getting location: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Error getting location: $e');
+      }
     } finally {
       _setLocationLoading(false);
     }
@@ -505,10 +523,14 @@ class UserStateProvider extends ChangeNotifier {
         final newLocation = LatLng(location.latitude, location.longitude);
         _mapController.move(newLocation, 13.0);
       } else {
-        _showSnackBar(context, 'Location not found');
+        if (context.mounted) {
+          _showSnackBar(context, 'Location not found');
+        }
       }
     } catch (e) {
-      _showSnackBar(context, 'Error searching location: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Error searching location: $e');
+      }
     } finally {
       _setLocationLoading(false);
     }
@@ -537,7 +559,9 @@ class UserStateProvider extends ChangeNotifier {
   Future<bool> _ensureLocationServiceEnabled(BuildContext context) async {
     final enabled = await Geolocator.isLocationServiceEnabled();
     if (!enabled) {
-      _showSnackBar(context, 'Location services are disabled');
+      if (context.mounted) {
+        _showSnackBar(context, 'Location services are disabled');
+      }
     }
     return enabled;
   }
@@ -547,12 +571,18 @@ class UserStateProvider extends ChangeNotifier {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        _showSnackBar(context, 'Location permissions denied');
+        if (context.mounted) {
+          _showSnackBar(context, 'Location permissions denied');
+        }
+
         return false;
       }
     }
     if (permission == LocationPermission.deniedForever) {
-      _showSnackBar(context, 'Location permissions permanently denied');
+      if (context.mounted) {
+        _showSnackBar(context, 'Location permissions permanently denied');
+      }
+
       return false;
     }
     return true;
@@ -582,13 +612,6 @@ class UserStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _showSnackBar(BuildContext context, String message) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
-    }
-  }
-
   void _updateEndTime() {
     _taskEndTime = calculateEndTime();
   }
@@ -609,5 +632,157 @@ class UserStateProvider extends ChangeNotifier {
     return DateTime(day.year, day.month, day.day, hour, 0)
             .millisecondsSinceEpoch ~/
         1000;
+  }
+
+  Future<void> applyCoupon(String couponCode, BuildContext context) async {
+    _setLoading(true);
+    try {
+      final response =
+          await UserApi.checkCoupon(token: _token, coupon: couponCode);
+      if (response.success && response.data != null) {
+        _appliedCoupon = couponCode;
+        _discountPercentage = response.data!.percentage.toDouble() / 100;
+
+        setError(null); // Clear any previous errors
+      } else {
+        _appliedCoupon = null;
+        _discountPercentage = null;
+        if (context.mounted) {
+          setError(
+              response.error ?? AppLocalizations.of(context)!.invalidCoupon);
+        }
+      }
+    } catch (e) {
+      _appliedCoupon = null;
+      _discountPercentage = null;
+      if (context.mounted) {
+        setError(AppLocalizations.of(context)!.invalidCoupon);
+      }
+
+      debugPrint('Error applying coupon: $e');
+    } finally {
+      _setLoading(false);
+      notifyListeners();
+    }
+  }
+
+  void clearCoupon() {
+    _appliedCoupon = null;
+    _discountPercentage = null;
+    setError(null);
+    print('Coupon cleared');
+    notifyListeners();
+  }
+
+  Future<bool> createOrder(BuildContext context) async {
+    if (_token == null || _selectedContractor == null) {
+      setError(AppLocalizations.of(context)!.authError);
+      return false;
+    }
+
+    _setPaymentProcessing(true);
+    _paymentError = null;
+    try {
+      // Step 1: Calculate amount and prepare payment
+      final amount =
+          (effectiveTotalPrice * 100).toInt().toString(); // Convert to cents
+      final currency = 'CAD'; // Adjust as needed
+
+      // Step 2: Create Payment Intent
+      final paymentResponse = await UserApi.createPaymentIntent(
+        amount: amount,
+        currency: currency,
+      );
+
+      if (!paymentResponse.success || paymentResponse.data == null) {
+        _paymentError = paymentResponse.error ??
+            AppLocalizations.of(context)!.paymentFailed;
+        return false;
+      }
+
+      final clientSecret = paymentResponse.data!['client_secret'];
+
+      // Step 3: Initialize and present Stripe Payment Sheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: AppStrings.appName,
+          style: ThemeMode.system,
+          googlePay: const PaymentSheetGooglePay(
+            merchantCountryCode: 'CA',
+            testEnv: true,
+          ),
+        ),
+      );
+
+      await Stripe.instance.presentPaymentSheet();
+
+      // Step 4: If payment is successful, create the order
+      final orderRequest = OrderRequest(
+        serviceId: _selectedContractor!.serviceId!,
+        location: locationAddress,
+        startAt: bookingTimestamp,
+        totalHours: taskDurationHours,
+        coupon: _appliedCoupon,
+      );
+
+      final orderResponse = await UserApi.createServiceOrder(
+        token: _token!,
+        orderRequest: orderRequest,
+      );
+
+      if (orderResponse.success && orderResponse.data != null) {
+        resetBookingData();
+        clearCoupon();
+        debugPrint('Order created successfully: ${orderResponse.data}');
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return SuccessDialog(
+                title: AppLocalizations.of(context)!.paymentSuccessful,
+                description: AppLocalizations.of(context)!.transactionProcessed,
+                confirmText: AppLocalizations.of(context)!.confirm,
+                cancelText: AppLocalizations.of(context)!.close,
+                onConfirm: () async {
+                  Navigator.of(context).pop();
+                  await NavigationService.navigateTo(AppRoutes.userMain);
+                },
+                onCancel: () async {
+                  Navigator.of(context).pop();
+                  await NavigationService.navigateTo(AppRoutes.userMain);
+                },
+              );
+            },
+          );
+        }
+        return true;
+      } else {
+        _paymentError =
+            orderResponse.error ?? AppLocalizations.of(context)!.paymentFailed;
+        _showSnackBar(context, AppLocalizations.of(context)!.paymentFailed);
+        return false;
+      }
+    } catch (e) {
+      _paymentError = '${AppLocalizations.of(context)!.paymentFailed}: $e';
+      debugPrint('Order creation error: $e');
+      return false;
+    } finally {
+      _setPaymentProcessing(false);
+      notifyListeners();
+    }
+  }
+
+  void _setPaymentProcessing(bool value) {
+    _isPaymentProcessing = value;
+    notifyListeners();
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 }

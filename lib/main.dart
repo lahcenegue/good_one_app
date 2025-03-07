@@ -5,20 +5,21 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'Core/Navigation/app_routes.dart';
-import 'Core/infrastructure/storage/storage_manager.dart';
-import 'Core/presentation/Theme/app_theme.dart';
-import 'Core/Navigation/navigation_service.dart';
-import 'Features/auth/Services/token_manager.dart';
-import 'Providers/app_settings_provider.dart';
-import 'Providers/auth_provider.dart';
+import 'firebase_options.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'Core/Navigation/app_routes.dart';
+import 'Core/Navigation/navigation_service.dart';
+import 'Core/infrastructure/storage/storage_manager.dart';
+import 'Core/presentation/Theme/app_theme.dart';
+import 'Features/auth/Services/token_manager.dart';
+
+import 'Providers/app_settings_provider.dart';
+import 'Providers/auth_provider.dart';
 import 'Providers/chat_provider.dart';
 import 'Providers/user_state_provider.dart';
 import 'Providers/worker_maganer_provider.dart';
-import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -74,8 +75,8 @@ class MyApp extends StatelessWidget {
           }
 
           return MaterialApp(
-            navigatorKey: NavigationService.navigatorKey,
             debugShowCheckedModeBanner: false,
+            navigatorKey: NavigationService.navigatorKey,
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,

@@ -263,7 +263,7 @@ class RegistrationScreen extends StatelessWidget {
                 'Select Country',
                 style: AppTextStyles.text(context),
               ),
-              items: auth.countries.map((String country) {
+              items: AppStrings.countries.map((String country) {
                 return DropdownMenuItem<String>(
                   value: country,
                   child: Text(

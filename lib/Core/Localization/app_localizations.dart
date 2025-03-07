@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../Features/Setup/Models/language_option.dart';
+
 class AppLocalization {
   const AppLocalization._();
 
@@ -37,4 +39,12 @@ class AppLocalization {
         return 'Unknown';
     }
   }
+
+  static List<LanguageOption> supportedLanguages = const [
+    LanguageOption(code: 'fr', name: 'Francais', subtitle: 'Franche'),
+    LanguageOption(code: 'ar', name: 'العربية', subtitle: 'Arabic'),
+    LanguageOption(code: 'en', name: 'English', subtitle: 'Englais'),
+    LanguageOption(code: 'af', name: 'Afrikaans', subtitle: 'Afikaans'),
+    LanguageOption(code: 'sq', name: 'Shqip', subtitle: 'Albanais'),
+  ];
 }

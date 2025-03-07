@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
@@ -63,7 +64,7 @@ class ContractorProfile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SmallSecondaryButton(
-                        text: 'message',
+                        text: 'message', //TODO translate
                         onPressed: () {
                           if (userManager.token == null) {
                             showDialog(
@@ -75,7 +76,8 @@ class ContractorProfile extends StatelessWidget {
                               context,
                               AppRoutes.chat,
                               arguments: {
-                                'otherUserId': contractor.id.toString(),
+                                'otherUserId':
+                                    contractor.contractorId!.toString(),
                                 'otherUserName': contractor.fullName,
                               },
                             );
@@ -83,7 +85,7 @@ class ContractorProfile extends StatelessWidget {
                         },
                       ),
                       SmallPrimaryButton(
-                        text: 'Book',
+                        text: 'Book', //TODO translate
                         onPressed: () {
                           if (userManager.token == null) {
                             showDialog(
@@ -91,13 +93,8 @@ class ContractorProfile extends StatelessWidget {
                               builder: (context) => const AuthRequiredDialog(),
                             );
                           } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const CalendarBookingScreen(),
-                              ),
-                            );
+                            NavigationService.navigateTo(
+                                AppRoutes.calendarBookingScreen);
                           }
                         },
                       ),
@@ -172,7 +169,7 @@ class ContractorProfile extends StatelessWidget {
     BuildContext context,
     Contractor contractor,
   ) {
-    if (contractor.verifiedLiscence == 0) {
+    if (contractor.verifiedLicense == 0) {
       return SizedBox(
         child: Row(
           children: [
@@ -210,7 +207,7 @@ class ContractorProfile extends StatelessWidget {
         _serviceBox(
           context,
           AppAssets.rating,
-          contractor.ratings.length.toString(),
+          contractor.ratings!.length.toString(),
           'Rating',
         ),
         _serviceBox(
@@ -294,7 +291,7 @@ class ContractorProfile extends StatelessWidget {
     BuildContext context,
     Contractor contractor,
   ) {
-    if (contractor.gallery.isEmpty) {
+    if (contractor.gallery!.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -323,7 +320,7 @@ class ContractorProfile extends StatelessWidget {
             builder: (context, constraints) {
               return Row(
                 children: [
-                  if (contractor.gallery.isNotEmpty)
+                  if (contractor.gallery!.isNotEmpty)
                     Expanded(
                       flex: 3,
                       child: GestureDetector(
@@ -335,7 +332,7 @@ class ContractorProfile extends StatelessWidget {
                             borderRadius:
                                 BorderRadius.circular(context.getWidth(12)),
                             child: Image.network(
-                              '${ApiEndpoints.imageBaseUrl}/${contractor.gallery[0]}',
+                              '${ApiEndpoints.imageBaseUrl}/${contractor.gallery![0]}',
                               fit: BoxFit.cover,
                               errorBuilder: _errorBuilder,
                             ),
@@ -343,13 +340,13 @@ class ContractorProfile extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (contractor.gallery.length > 1)
+                  if (contractor.gallery!.length > 1)
                     Expanded(
                       flex: 2,
                       child: Column(
                         children: [
                           for (var i = 1;
-                              i < contractor.gallery.length.clamp(0, 4);
+                              i < contractor.gallery!.length.clamp(0, 4);
                               i++)
                             Expanded(
                               child: GestureDetector(
@@ -361,7 +358,7 @@ class ContractorProfile extends StatelessWidget {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
                                     child: Image.network(
-                                      '${ApiEndpoints.imageBaseUrl}/${contractor.gallery[i]}',
+                                      '${ApiEndpoints.imageBaseUrl}/${contractor.gallery![i]}',
                                       fit: BoxFit.cover,
                                       errorBuilder: _errorBuilder,
                                     ),
@@ -434,15 +431,15 @@ class ContractorProfile extends StatelessWidget {
           ],
         ),
         SizedBox(height: context.getHeight(10)),
-        if (contractor.ratings.isEmpty) const SizedBox.shrink(),
+        if (contractor.ratings!.isEmpty) const SizedBox.shrink(),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: contractor.ratings.length.clamp(0, 3),
+          itemCount: contractor.ratings!.length.clamp(0, 3),
           separatorBuilder: (context, index) =>
               SizedBox(height: context.getHeight(20)),
           itemBuilder: (context, index) {
-            final review = contractor.ratings[index];
+            final review = contractor.ratings![index];
             return _buildReviewItem(context, review);
           },
         ),
@@ -464,7 +461,7 @@ class ContractorProfile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserAvatar(
-                picture: review.user.picture,
+                picture: review.reviewer.picture,
                 size: context.getWidth(40),
               ),
               SizedBox(width: context.getWidth(10)),
@@ -477,7 +474,7 @@ class ContractorProfile extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            review.user.fullName,
+                            review.reviewer.fullName,
                             style: AppTextStyles.title2(context),
                           ),
                         ),

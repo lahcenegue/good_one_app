@@ -105,7 +105,7 @@ class ContractorListItem extends StatelessWidget {
             ),
             SizedBox(width: context.getWidth(4)),
             Text(
-              contractor.rating.rating.toString(),
+              contractor.rating!.rating.toString(),
               style: AppTextStyles.text(context),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -124,13 +124,12 @@ class ContractorListItem extends StatelessWidget {
   }
 
   Widget _buildFavoriteButton(BuildContext context) {
+    //TODO
     return IconButton(
       onPressed: onFavorite,
       icon: Icon(
-        contractor.isFavorite ? Icons.bookmark : Icons.bookmark_border_outlined,
-        color: contractor.isFavorite
-            ? AppColors.primaryColor
-            : AppColors.hintColor,
+        Icons.bookmark,
+        color: AppColors.hintColor,
         size: context.getAdaptiveSize(24),
       ),
     );

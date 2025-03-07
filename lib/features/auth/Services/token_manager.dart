@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../Data/Models/auth_model.dart';
+import '../models/auth_model.dart';
 import 'auth_api.dart';
 
 class TokenManager {

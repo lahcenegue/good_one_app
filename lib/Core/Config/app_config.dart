@@ -13,6 +13,9 @@ class AppConfig {
   /// The base URL for API endpoints.
   static const String apiBaseUrl = 'http://162.254.35.98';
 
+  /// The base url for Stripe payment
+  static const String stripeApiBase = 'https://api.stripe.com/v1';
+
   /// The default locale for the app, set to English ('en').
   static const String defaultLocale = 'en';
 

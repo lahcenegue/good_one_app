@@ -30,51 +30,71 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     return Consumer<UserStateProvider>(
       builder: (context, userManager, _) {
         if (userManager.selectedContractor == null) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                AppLocalizations.of(context)!.bookingSummary,
-                style: AppTextStyles.appBarTitle(context),
-              ),
-            ),
-            body: const Center(child: Text('No contractor selected')),
-          );
+          return _buildNoContractorSelected(context);
         }
 
         final totalPrice = userManager.selectedContractor!.costPerHour! *
             userManager.taskDurationHours;
+        final effectivePrice = userManager.effectiveTotalPrice;
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              AppLocalizations.of(context)!.bookingSummary,
-              style: AppTextStyles.appBarTitle(context),
-            ),
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(context.getWidth(16)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildContractorInfo(context, userManager),
-                  SizedBox(height: context.getHeight(24)),
-                  _buildBookingDetails(context, userManager),
-                  SizedBox(height: context.getHeight(24)),
-                  _buildLocationDetails(context, userManager),
-                  SizedBox(height: context.getHeight(24)),
-                  _buildOffersSection(context), // New offers box
-                  SizedBox(height: context.getHeight(24)),
-                  _buildPricingSummary(
-                      context, totalPrice.toDouble(), userManager),
-                  SizedBox(height: context.getHeight(32)),
-                  _buildConfirmButton(context),
-                ],
-              ),
-            ),
+          appBar: _buildAppBar(context),
+          body: _buildBody(
+            context,
+            userManager,
+            totalPrice.toDouble(),
+            effectivePrice,
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNoContractorSelected(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)!.bookingSummary,
+          style: AppTextStyles.appBarTitle(context),
+        ),
+      ),
+      body: const Center(
+        child: Text('No contractor selected'),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Text(
+        AppLocalizations.of(context)!.bookingSummary,
+        style: AppTextStyles.appBarTitle(context),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, UserStateProvider userManager,
+      double totalPrice, double effectivePrice) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(context.getWidth(16)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildContractorInfo(context, userManager),
+            SizedBox(height: context.getHeight(24)),
+            _buildBookingDetails(context, userManager),
+            SizedBox(height: context.getHeight(24)),
+            _buildLocationDetails(context, userManager),
+            SizedBox(height: context.getHeight(24)),
+            _buildOffersSection(context, userManager),
+            SizedBox(height: context.getHeight(24)),
+            _buildPricingSummary(context, userManager),
+            SizedBox(height: context.getHeight(32)),
+            _buildConfirmButton(context, userManager),
+          ],
+        ),
+      ),
     );
   }
 
@@ -117,7 +137,14 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                     ),
                     SizedBox(width: context.getWidth(4)),
                     Text(
-                      '${userManager.selectedContractor!.ratings.isNotEmpty ? (userManager.selectedContractor!.ratings.map((r) => r.rate).reduce((a, b) => a + b) / userManager.selectedContractor!.ratings.length).toStringAsFixed(1) : '0.0'}',
+                      userManager.selectedContractor!.ratings!.isNotEmpty
+                          ? (userManager.selectedContractor!.ratings!
+                                      .map((r) => r.rate)
+                                      .reduce((a, b) => a + b) /
+                                  userManager
+                                      .selectedContractor!.ratings!.length)
+                              .toStringAsFixed(1)
+                          : '0.0',
                       style: AppTextStyles.text(context),
                     ),
                   ],
@@ -217,7 +244,8 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  Widget _buildOffersSection(BuildContext context) {
+  Widget _buildOffersSection(
+      BuildContext context, UserStateProvider userManager) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -244,6 +272,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
           ),
           SizedBox(height: context.getHeight(12)),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: TextField(
@@ -268,90 +297,131 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                 width: context.getWidth(100),
                 child: SmallPrimaryButton(
                   text: AppLocalizations.of(context)!.apply,
-                  onPressed: () {
-                    // TODO: Implement coupon validation and apply discount logic
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Coupon "${_couponController.text}" applied (if valid)'),
-                      ),
-                    );
-                  },
+                  onPressed: userManager.isLoading
+                      ? () {}
+                      : () => _applyCoupon(context, userManager),
+                  isLoading: userManager.isLoading,
                 ),
               ),
             ],
           ),
+          if (userManager.error != null)
+            Padding(
+              padding: EdgeInsets.only(top: context.getHeight(8)),
+              child: Text(
+                userManager.error!,
+                style: AppTextStyles.text(context).copyWith(color: Colors.red),
+              ),
+            ),
+          if (userManager.appliedCoupon != null)
+            Padding(
+              padding: EdgeInsets.only(top: context.getHeight(8)),
+              child: Text(
+                AppLocalizations.of(context)!.couponApplied(
+                    userManager.appliedCoupon!,
+                    (userManager.discountPercentage! * 100).toStringAsFixed(0)),
+                style:
+                    AppTextStyles.text(context).copyWith(color: Colors.green),
+              ),
+            ),
         ],
       ),
     );
   }
 
+  void _applyCoupon(BuildContext context, UserStateProvider userManager) {
+    final couponCode = _couponController.text.trim();
+    if (couponCode.isEmpty) {
+      userManager.setError(AppLocalizations.of(context)!.couponRequired);
+      return;
+    }
+    userManager.applyCoupon(couponCode, context);
+  }
+
   Widget _buildPricingSummary(
     BuildContext context,
-    double totalPrice,
     UserStateProvider userManager,
   ) {
+    final totalPrice = userManager.selectedContractor!.costPerHour! *
+        userManager.taskDurationHours;
+    final effectivePrice = userManager.effectiveTotalPrice;
     return Container(
-      padding: EdgeInsets.all(context.getWidth(16)),
-      decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.priceSummary,
-            style: AppTextStyles.title2(context),
-          ),
-          SizedBox(height: context.getHeight(16)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.hourlyRate,
-                style: AppTextStyles.text(context),
-              ),
-              Text(
-                '\$${userManager.selectedContractor!.costPerHour}/hr',
-                style: AppTextStyles.text(context),
-              ),
-            ],
-          ),
-          SizedBox(height: context.getHeight(8)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.duration,
-                style: AppTextStyles.text(context),
-              ),
-              Text(
-                '${userManager.taskDurationHours} ${userManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}',
-                style: AppTextStyles.text(context),
-              ),
-            ],
-          ),
-          Divider(height: context.getHeight(24)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.totalAmount,
-                style: AppTextStyles.title2(context),
-              ),
-              Text(
-                '\$${totalPrice.toStringAsFixed(2)}',
-                style: AppTextStyles.title2(context).copyWith(
-                  color: AppColors.primaryColor,
+        padding: EdgeInsets.all(context.getWidth(16)),
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.priceSummary,
+              style: AppTextStyles.title2(context),
+            ),
+            SizedBox(height: context.getHeight(16)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.hourlyRate,
+                  style: AppTextStyles.text(context),
                 ),
+                Text(
+                  '\$${userManager.selectedContractor!.costPerHour}/hr',
+                  style: AppTextStyles.text(context),
+                ),
+              ],
+            ),
+            SizedBox(height: context.getHeight(8)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.duration,
+                  style: AppTextStyles.text(context),
+                ),
+                Text(
+                  '${userManager.taskDurationHours} ${userManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}',
+                  style: AppTextStyles.text(context),
+                ),
+              ],
+            ),
+            if (userManager.discountPercentage != null)
+              SizedBox(height: context.getHeight(8)),
+            if (userManager.discountPercentage != null)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.discount,
+                    style: AppTextStyles.text(context),
+                  ),
+                  Text(
+                    '-${(totalPrice * userManager.discountPercentage!).toStringAsFixed(2)} (${(userManager.discountPercentage! * 100).toStringAsFixed(0)}%)',
+                    style: AppTextStyles.text(context)
+                        .copyWith(color: Colors.green),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
-      ),
-    );
+            Divider(height: context.getHeight(24)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.totalAmount,
+                  style: AppTextStyles.title2(context),
+                ),
+                Text(
+                  '\$${effectivePrice.toStringAsFixed(2)}',
+                  style: AppTextStyles.title2(context).copyWith(
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 
   Widget _buildDetailRow(
@@ -371,7 +441,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
         ),
         SizedBox(width: context.getWidth(12)),
         Flexible(
-          // Use Flexible instead of Expanded to allow shrinking
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -395,18 +464,16 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  Widget _buildConfirmButton(BuildContext context) {
+  Widget _buildConfirmButton(
+      BuildContext context, UserStateProvider userManager) {
     return PrimaryButton(
       text: AppLocalizations.of(context)!.confirm,
-      onPressed: () {
-        // Example:
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => PaymentScreen(),
-        //   ),
-        // );
-      },
+      onPressed: userManager.isPaymentProcessing || userManager.isLoading
+          ? () {}
+          : () async {
+              await userManager.createOrder(context);
+            },
+      isLoading: userManager.isPaymentProcessing || userManager.isLoading,
     );
   }
 }

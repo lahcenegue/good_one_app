@@ -45,15 +45,15 @@ class _GalleryViewerPageState extends State<GalleryViewerPage> {
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             title: Text(
-                '${_currentIndex + 1} / ${userManager.selectedContractor!.gallery.length}'),
+                '${_currentIndex + 1} / ${userManager.selectedContractor!.gallery!.length}'),
           ),
           body: PhotoViewGallery.builder(
             pageController: _pageController,
-            itemCount: userManager.selectedContractor!.gallery.length,
+            itemCount: userManager.selectedContractor!.gallery!.length,
             builder: (context, index) {
               return PhotoViewGalleryPageOptions(
                 imageProvider: NetworkImage(
-                    '${ApiEndpoints.imageBaseUrl}/${userManager.selectedContractor!.gallery[index]}'),
+                    '${ApiEndpoints.imageBaseUrl}/${userManager.selectedContractor!.gallery![index]}'),
                 minScale: PhotoViewComputedScale.contained,
                 maxScale: PhotoViewComputedScale.covered * 2,
               );

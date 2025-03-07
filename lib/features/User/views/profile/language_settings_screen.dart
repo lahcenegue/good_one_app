@@ -3,6 +3,7 @@ import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../../Core/Localization/app_localizations.dart';
 import '../../../../Core/Utils/size_config.dart';
 import '../../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
@@ -70,7 +71,7 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
     AppSettingsProvider appSettings,
   ) {
     return Column(
-      children: appSettings.supportedLanguages.map((language) {
+      children: AppLocalization.supportedLanguages.map((language) {
         final isSelected = _selectedLanguageCode == language.code;
 
         return Column(

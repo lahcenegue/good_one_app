@@ -223,7 +223,7 @@ class RegistrationScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            AppLocalizations.of(context)!.alreadyHaveAccount,
+            AppLocalizations.of(context)!.hasAccount,
             style: AppTextStyles.text(context),
           ),
           TextButton(
@@ -231,7 +231,7 @@ class RegistrationScreen extends StatelessWidget {
               Navigator.of(context).pop();
             },
             child: Text(
-              AppLocalizations.of(context)!.signIn,
+              AppLocalizations.of(context)!.login,
               style: AppTextStyles.textButton(context),
             ),
           ),

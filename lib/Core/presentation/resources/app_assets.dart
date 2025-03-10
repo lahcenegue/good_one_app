@@ -39,4 +39,6 @@ abstract class AppAssets {
   static const String distance = '$_iconsPath/distance.png';
   static const String translate = '$_iconsPath/translate.png';
   static const String privancy = '$_iconsPath/privancy.png';
+  static const String logout = '$_iconsPath/logout.png';
+  static const String support = '$_iconsPath/support.png';
 }

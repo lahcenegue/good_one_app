@@ -1,303 +1,302 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import '../Core/infrastructure/websocket/websocket_service.dart';
-import '../Features/Chat/Models/chat_conversation.dart';
-import '../Features/Chat/Models/chat_message.dart';
+import 'package:good_one_app/Core/infrastructure/websocket/websocket_service.dart';
+import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
+import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
 
 class ChatProvider with ChangeNotifier {
-  final WebSocketService _socket = WebSocketService();
-  final scrollController = ScrollController();
+  final WebSocketService _socketService;
+  final ScrollController _scrollController = ScrollController();
 
   List<ChatMessage> _messages = [];
   List<ChatConversation> _conversations = [];
-  bool _isLoading = false;
+  bool _isLoadingConversations = false;
+  bool _isLoadingMessages = false;
   bool _isConnected = false;
+  bool _initialFetchComplete = false;
   String? _error;
   String? _currentChatUserId;
   String? _currentUserId;
 
-  // Getters
+  ChatProvider({WebSocketService? socketService})
+      : _socketService = socketService ?? WebSocketService();
+
   List<ChatMessage> get messages => _messages;
   List<ChatConversation> get conversations => _conversations;
-  bool get isLoading => _isLoading;
+  bool get isLoadingConversations => _isLoadingConversations;
+  bool get isLoadingMessages => _isLoadingMessages;
   bool get isConnected => _isConnected;
+  bool get initialFetchComplete => _initialFetchComplete;
   String? get error => _error;
   String? get currentChatUserId => _currentChatUserId;
   String? get currentUserId => _currentUserId;
-  ScrollController get messageScrollController => scrollController;
+  ScrollController get scrollController => _scrollController;
 
-  // Initialize conversations list using WebSocket
-  Future<void> initializeConversations() async {
-    try {
-      _setLoading(true);
-      _error = null;
-
-      if (!_isConnected || _currentUserId == null) {
-        _error = 'Not connected to chat server';
-        return;
-      }
-
-      // Emit get-chats event to retrieve conversations
-      _socket.emit('get-chats', []);
-    } catch (e) {
-      _error = 'Failed to load conversations: ${e.toString()}';
-      debugPrint('Chat initialization error: $_error');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // Initialize WebSocket and chat
-  Future<bool> initialize(String userId) async {
+  Future<void> initialize(String userId) async {
     _currentUserId = userId;
     try {
       _setupSocketListeners();
-      await _socket.connect();
-      await _socket.waitForConnection();
-      return _isConnected;
+      await _socketService.connect();
+      _isConnected = await _socketService.waitForConnection();
+      if (_isConnected) {
+        await initializeConversations();
+      } else {
+        _setError('Failed to establish WebSocket connection');
+      }
     } catch (e) {
-      _handleError('Connection error: ${e.toString()}');
-      return false;
+      _setError('Initialization error: $e');
+      _setLoadingConversations(false);
     }
   }
 
-  Future<bool> waitForConnection() async {
-    int attempts = 0;
-    const maxAttempts = 10;
-    const timeoutDuration = Duration(seconds: 1);
-
-    while (attempts < maxAttempts && !_isConnected) {
-      if (_socket.isConnected) {
-        _isConnected = true;
-        return true;
-      }
-      await Future.delayed(timeoutDuration);
-      attempts++;
-      debugPrint('Connection attempt $attempts of $maxAttempts');
+  Future<void> initializeConversations() async {
+    if (!_isConnected || _currentUserId == null) {
+      _setError('Not connected or user ID missing');
+      return;
     }
+    _setLoadingConversations(true);
+    _initialFetchComplete = false;
+    try {
+      _socketService.emit('get-chats', []);
+    } catch (e) {
+      _setError('Failed to fetch conversations: $e');
+      _setLoadingConversations(false);
+      _initialFetchComplete = true;
+    }
+  }
 
-    return _isConnected;
+  Future<void> initializeChat(String otherUserId) async {
+    _currentChatUserId = otherUserId;
+    _messages = [];
+    _isLoadingMessages = true;
+    _error = null;
+    try {
+      _socketService.emit('join-room', [otherUserId]);
+      _socketService.emit('get-messages', [otherUserId, 0]);
+      final index =
+          _conversations.indexWhere((c) => c.user.id.toString() == otherUserId);
+      if (index != -1) {
+        _conversations[index] = ChatConversation(
+          user: _conversations[index].user,
+          latestMessage: _conversations[index].latestMessage,
+          time: _conversations[index].time,
+          hasNewMessages: false,
+        );
+        debugPrint(
+            'Chat opened for $otherUserId, hasNewMessages reset to false');
+        notifyListeners();
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    } catch (e) {
+      _setError('Failed to initialize chat: $e');
+    }
+  }
+
+  void sendMessage(String message, String otherUserId) {
+    if (!_isConnected || message.trim().isEmpty) return;
+    final chatMessage = ChatMessage(
+      message: message,
+      userId: _currentUserId!,
+      timestamp: DateTime.now(),
+    );
+    _messages.add(chatMessage);
+    _updateConversation(otherUserId, chatMessage, isSent: true);
+    notifyListeners();
+    _scrollToBottom();
+    _socketService.emit('send-message', [otherUserId, message]);
   }
 
   void _setupSocketListeners() {
-    _socket.onConnected = () {
+    _socketService.onConnected = () {
       _isConnected = true;
       _error = null;
       notifyListeners();
       if (_currentUserId != null) {
-        debugPrint('Emitting init with userId: $_currentUserId');
-        _socket.emit('init', [_currentUserId!]);
-
-// Get initial conversations after connection
-        Future.delayed(const Duration(milliseconds: 500), () {
-          debugPrint('Requesting chats after init');
-          initializeConversations();
-        });
+        _socketService.emit('init', [_currentUserId!]);
       }
     };
 
-    _socket.onDisconnected = () {
+    _socketService.onDisconnected = () {
       _isConnected = false;
-      notifyListeners();
+      _setError('Disconnected from chat server');
+      if (!isDisposed) notifyListeners();
     };
 
-    _socket.onError = (error) {
-      _handleError('WebSocket error: $error');
-    };
+    _socketService.onError = (error) => _setError('WebSocket error: $error');
 
-    _socket.onMessageReceived = (data) {
-      debugPrint('Received message data type: ${data.runtimeType}');
-      debugPrint('Received message data: $data');
-      _handleMessageReceived(data);
-    };
-
-    // Add listener for chats event
-    _socket.on('chats', (data) {
-      _handleChatsReceived(data);
-    });
+    _socketService.on('chats', (data) => _handleChatsReceived(data));
+    _socketService.on('messages', (data) => _handleMessageHistory(data));
+    _socketService.on('receive-message', (data) => _handleSingleMessage(data));
   }
 
   void _handleChatsReceived(dynamic data) {
     try {
-      debugPrint('Processing chats data: $data');
+      List<ChatConversation> newConversations = [];
 
-      // Ensure we have a Map to work with
-      final Map chatData = data is String ? json.decode(data) : data;
-
-      final List<ChatConversation> newConversations = [];
-
-      chatData.forEach((key, value) {
-        try {
-          debugPrint('Processing chat entry: key=$key, value=$value');
-          if (value is Map && value.containsKey('user_info')) {
-            final userInfo = value['user_info'] as Map;
-            final hasNewMessages =
-                value['new_message']?.toString().isNotEmpty ?? false;
-            final latestMessage = value['latest_message']?.toString() ?? '';
-
-            newConversations.add(ChatConversation(
-              user: ChatUser(
-                id: int.tryParse(key) ?? 0,
-                email: '', // Add if available
-                fullName: userInfo['full_name']?.toString() ?? '',
-                picture: userInfo['picture']?.toString() ?? '',
-              ),
-              latestMessage: latestMessage,
-              time: DateTime.now()
-                  .toString(), // Add proper timestamp if available
-              hasNewMessages: hasNewMessages,
-            ));
-            debugPrint(
-                'Successfully added conversation for user: ${userInfo['full_name']}');
-          }
-        } catch (e) {
-          debugPrint('Error processing individual chat: $e');
-        }
-      });
-
-      debugPrint(
-          'Successfully processed ${newConversations.length} conversations');
-      _conversations = newConversations;
-      _setLoading(false);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error processing chats: $e');
-      _handleError('Error processing conversations: $e');
-    }
-  }
-
-  void _handleMessageReceived(dynamic data) {
-    debugPrint('Received message data type: ${data.runtimeType}');
-    debugPrint('Received message data: $data');
-    try {
       if (data is String) {
         data = json.decode(data);
       }
 
-      // Check if this is a chats response
-      if (data is Map &&
-          data.values.any((v) => v is Map && v.containsKey('user_info'))) {
-        debugPrint('Detected chats response, processing...');
-        _handleChatsReceived(data);
-        return;
+      if (data is Map) {
+        newConversations = data.entries.map((entry) {
+          final userInfo = entry.value['user_info'] as Map;
+          return ChatConversation(
+            user: ChatUser(
+              id: int.parse(entry.key),
+              email: '',
+              fullName: userInfo['full_name']?.toString() ?? '',
+              picture: userInfo['picture']?.toString() ?? '',
+            ),
+            latestMessage: entry.value['latest_message']?.toString(),
+            time: DateTime.now().toString(),
+            hasNewMessages:
+                entry.value['new_message']?.toString().isNotEmpty ?? false,
+          );
+        }).toList();
+      } else if (data is List) {
+        newConversations = (data as List).map((item) {
+          final map = item as Map;
+          final userInfo = map['user_info'] as Map? ?? {};
+          return ChatConversation(
+            user: ChatUser(
+              id: int.parse(map['user_id']?.toString() ?? '0'),
+              email: '',
+              fullName: userInfo['full_name']?.toString() ?? '',
+              picture: userInfo['picture']?.toString() ?? '',
+            ),
+            latestMessage: map['latest_message']?.toString(),
+            time: map['time']?.toString() ?? DateTime.now().toString(),
+            hasNewMessages: map['new_message']?.toString().isNotEmpty ?? false,
+          );
+        }).toList();
+      } else {
+        throw Exception('Unexpected data format: ${data.runtimeType}');
       }
 
-      // Handle other message types
-      if (data is Map) {
-        if (data.containsKey('0')) {
-          _handleMessageHistory(data);
-        } else if (data.containsKey('message')) {
-          _handleSingleMessage(data);
-        }
-      }
+      _conversations = newConversations;
+      _initialFetchComplete = true;
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error in _handleMessageReceived: $e');
+      _setError('Error processing conversations: $e');
+      _initialFetchComplete = true;
+    } finally {
+      _setLoadingConversations(false);
     }
   }
 
-  void _handleMessageHistory(Map data) {
-    final List<ChatMessage> messages = [];
-    data.forEach((key, value) {
-      if (value is Map) {
-        try {
-          messages.add(_createChatMessage(value));
-        } catch (e) {
-          debugPrint('Error parsing message: $e');
-        }
+  void _handleMessageHistory(dynamic data) {
+    try {
+      final messageData = data is String ? json.decode(data) : data as Map;
+      List<ChatMessage> newMessages = messageData.entries
+          .map<ChatMessage>((e) => _createChatMessage(e.value))
+          .toList();
+      newMessages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      _messages = newMessages;
+      notifyListeners();
+    } catch (e) {
+      _setError('Error processing message history: $e');
+    } finally {
+      _setLoadingMessages(false);
+    }
+  }
+
+  void _handleSingleMessage(dynamic data) {
+    try {
+      final message = _createChatMessage(data);
+      final senderId = message.userId;
+      debugPrint('Received message from $senderId: ${message.message}');
+      if (_currentChatUserId != null &&
+          senderId != _currentUserId &&
+          !_messages.any((m) =>
+              m.timestamp == message.timestamp &&
+              m.message == message.message)) {
+        _messages.add(message);
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
       }
-    });
-    messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    _messages = messages;
-    _setLoading(false);
-    notifyListeners();
+      _updateConversation(senderId, message, isSent: false);
+      debugPrint('Notifying listeners for new message from $senderId');
+      notifyListeners();
+    } catch (e) {
+      _setError('Error processing message: $e');
+    }
   }
 
-  void _handleSingleMessage(Map data) {
-    final message = _createChatMessage(data);
-    _messages.add(message);
-    notifyListeners();
+  void _updateConversation(String userId, ChatMessage message,
+      {required bool isSent}) {
+    final index =
+        _conversations.indexWhere((c) => c.user.id.toString() == userId);
+    if (index != -1) {
+      _conversations[index] = ChatConversation(
+        user: _conversations[index].user,
+        latestMessage: message.message,
+        time: message.timestamp.toString(),
+        hasNewMessages: !isSent ||
+            _conversations[index]
+                .hasNewMessages, // Set true for received, preserve for sent
+      );
+      debugPrint(
+          'Updated conversation $userId: hasNewMessages = ${_conversations[index].hasNewMessages}');
+    } else {
+      _conversations.add(ChatConversation(
+        user: ChatUser(
+            id: int.parse(userId), email: '', fullName: '', picture: ''),
+        latestMessage: message.message,
+        time: message.timestamp.toString(),
+        hasNewMessages: !isSent,
+      ));
+      debugPrint('Added new conversation $userId: hasNewMessages = ${!isSent}');
+    }
+    _conversations.sort((a, b) => b.time!.compareTo(a.time!));
   }
 
-  ChatMessage _createChatMessage(Map data) {
+  ChatMessage _createChatMessage(dynamic data) {
+    final map = data is String ? json.decode(data) : data as Map;
     return ChatMessage(
-      message: data['message']?.toString() ?? '',
-      userId: data['from_user']?.toString() ?? '',
+      message: map['message']?.toString() ?? '',
+      userId: map['from_user']?.toString() ?? '',
       timestamp: DateTime.fromMillisecondsSinceEpoch(
-          ((data['time'] ?? (DateTime.now().millisecondsSinceEpoch / 1000)) *
-                  1000)
-              .toInt()),
+        ((map['time'] ?? DateTime.now().millisecondsSinceEpoch / 1000) * 1000)
+            .toInt(),
+      ),
     );
   }
 
-  // Initialize chat with specific user
-  Future<void> initializeChat(String otherUserId) async {
-    _currentChatUserId = otherUserId;
-    _messages.clear();
-    _error = null;
-    _setLoading(true);
-    notifyListeners();
-
-    if (!_isConnected) {
-      if (_currentUserId == null || !await initialize(_currentUserId!)) {
-        _handleError('Failed to connect to chat server');
-        return;
-      }
-    }
-
-    debugPrint('Joining room with user: $otherUserId');
-    _socket.emit('join-room', [otherUserId]);
-
-    await Future.delayed(const Duration(milliseconds: 500));
-    _socket.emit('get-messages', [otherUserId, 0]);
-  }
-
-  void sendMessage(String message, String otherUserId) {
-    if (!_isConnected) {
-      _handleError('Not connected to chat server');
-      return;
-    }
-
-    if (message.trim().isEmpty) return;
-
-    debugPrint('Sending message to user: $otherUserId');
-    _socket.emit('send-message', [otherUserId, message]);
-  }
-
-  void loadMoreMessages(String userId, {int? startFrom}) {
-    if (!_isConnected) return;
-    debugPrint('Loading more messages from: $startFrom');
-    _socket.emit('get-messages', [userId, startFrom ?? _messages.length]);
-  }
-
-  // Leave current chat
-  void leaveChat() {
-    if (_currentChatUserId != null && _isConnected) {
-      debugPrint('Leaving room with user: $_currentChatUserId');
-      _socket.emit('leave-room', [_currentChatUserId!]);
-      _currentChatUserId = null;
-      _messages.clear();
-      notifyListeners();
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
-  void _handleError(String errorMessage) {
-    _error = errorMessage;
-    debugPrint(_error);
-    _setLoading(false);
+  void _setLoadingConversations(bool value) {
+    _isLoadingConversations = value;
     notifyListeners();
   }
 
-  void _setLoading(bool value) {
-    _isLoading = value;
+  void _setLoadingMessages(bool value) {
+    _isLoadingMessages = value;
     notifyListeners();
   }
+
+  void _setError(String? error) {
+    _error = error;
+    notifyListeners();
+  }
+
+  bool _disposed = false;
+  bool get isDisposed => _disposed;
 
   @override
   void dispose() {
-    scrollController.dispose();
-    _socket.disconnect();
+    _disposed = true;
+    _scrollController.dispose();
+    _socketService.disconnect();
     super.dispose();
   }
 }

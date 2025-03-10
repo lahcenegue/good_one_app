@@ -21,7 +21,7 @@ class LoginScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              AppLocalizations.of(context)!.signIn,
+              AppLocalizations.of(context)!.login,
               style: AppTextStyles.appBarTitle(context),
             ),
           ),
@@ -76,7 +76,7 @@ class LoginScreen extends StatelessWidget {
           _buildForgotPassword(context),
           SizedBox(height: context.getHeight(20)),
           PrimaryButton(
-            text: AppLocalizations.of(context)!.loginButton,
+            text: AppLocalizations.of(context)!.login,
             isLoading: auth.isLoading,
             onPressed: () => auth.login(context),
           ),

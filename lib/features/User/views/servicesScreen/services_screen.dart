@@ -6,7 +6,7 @@ import '../../../../Core/Navigation/app_routes.dart';
 import '../../../../Core/presentation/resources/app_colors.dart';
 import '../../../../Core/presentation/Widgets/error/error_widget.dart';
 import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Providers/user_state_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
 import '../../Widgets/booking/service_grid_item.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -24,13 +24,13 @@ class _ServicesScreenState extends State<ServicesScreen> {
     super.initState();
     // Refresh services when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserStateProvider>().fetchCategories();
+      context.read<UserManagerProvider>().fetchCategories();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserStateProvider>(
+    return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
         // Handle error state
         if (userManager.error != null) {
@@ -81,7 +81,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
 
   Widget _buildSearchBar(
     BuildContext context,
-    UserStateProvider userManager,
+    UserManagerProvider userManager,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -103,7 +103,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
   }
 
   Widget _buildServicesGrid(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, UserManagerProvider userManager) {
     if (userManager.isLoading && userManager.categories.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }

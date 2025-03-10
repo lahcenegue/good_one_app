@@ -4,6 +4,7 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Features/Chat/Views/chat_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Core/Navigation/app_routes.dart';
@@ -11,7 +12,7 @@ import '../../../Core/infrastructure/api/api_endpoints.dart';
 import '../../../Core/presentation/Theme/app_text_styles.dart';
 import '../../../Core/presentation/Widgets/user_avatar.dart';
 import '../../../Core/presentation/resources/app_assets.dart';
-import '../../../Providers/user_state_provider.dart';
+import '../../../Providers/user_manager_provider.dart';
 import '../Widgets/profile/auth_required_dialog.dart';
 import '../Widgets/gallery_viewer_page.dart';
 import '../models/contractor.dart';
@@ -28,7 +29,7 @@ class ContractorProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserStateProvider>(
+    return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
         final contractor = userManager.selectedContractor;
         return Scaffold(
@@ -72,15 +73,25 @@ class ContractorProfile extends StatelessWidget {
                               builder: (context) => const AuthRequiredDialog(),
                             );
                           } else {
-                            Navigator.pushNamed(
+                            Navigator.push(
                               context,
-                              AppRoutes.chat,
-                              arguments: {
-                                'otherUserId':
-                                    contractor.contractorId!.toString(),
-                                'otherUserName': contractor.fullName,
-                              },
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(
+                                  otherUserId:
+                                      contractor.contractorId!.toString(),
+                                  otherUserName: contractor.fullName!,
+                                ),
+                              ),
                             );
+                            // Navigator.pushNamed(
+                            //   context,
+                            //   AppRoutes.chat,
+                            //   arguments: {
+                            //     'otherUserId':
+                            //         contractor.contractorId!.toString(),
+                            //     'otherUserName': contractor.fullName,
+                            //   },
+                            // );
                           }
                         },
                       ),

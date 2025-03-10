@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:good_one_app/Features/User/models/booking.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../Core/Utils/storage_keys.dart';
 import '../../../Core/infrastructure/api/api_response.dart';
 import '../../../Core/infrastructure/api/api_service.dart';
 import '../../../Core/infrastructure/api/api_endpoints.dart';
+import '../../../Core/infrastructure/storage/storage_manager.dart';
 import '../../../Core/presentation/resources/app_strings.dart';
 import '../models/contractor.dart';
 import '../models/coupom_model.dart';
+import '../models/notification_model.dart';
 import '../models/order_model.dart';
 import '../models/service_category.dart';
 import '../models/user_info.dart';
@@ -16,7 +19,8 @@ import '../models/user_info.dart';
 class UserApi {
   static final _api = ApiService.instance;
 
-  static Future<ApiResponse<UserInfo>> getUserInfo({String? token}) async {
+  static Future<ApiResponse<UserInfo>> getUserInfo() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
     return _api.post<UserInfo>(
       url: ApiEndpoints.me,
       body: {},
@@ -74,7 +78,8 @@ class UserApi {
     );
   }
 
-  static Future<ApiResponse<List<Booking>>> getBookings({String? token}) async {
+  static Future<ApiResponse<List<Booking>>> getBookings() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
     return _api.get<List<Booking>>(
       url: ApiEndpoints.userOrders,
       fromJson: (dynamic response) {
@@ -90,7 +95,8 @@ class UserApi {
   }
 
   static Future<ApiResponse<CouponModel>> checkCoupon(
-      {String? token, required String coupon}) async {
+      {required String coupon}) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
     return _api.post<CouponModel>(
       url: ApiEndpoints.couponsCheck,
       body: {'coupon': coupon},
@@ -117,6 +123,7 @@ class UserApi {
     final body = {
       'amount': amount,
       'currency': currency,
+      //'automatic_payment_methods[enabled]': 'true',
       'payment_method_types[]': 'card',
     };
 
@@ -142,12 +149,68 @@ class UserApi {
     }
   }
 
-  static Future<ApiResponse<Order>> createServiceOrder(
-      {String? token, required OrderRequest orderRequest}) async {
+  static Future<ApiResponse<Order>> createOrder(
+      OrderRequest orderRequest) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
     return _api.post<Order>(
-      url: ApiEndpoints.serviceOrder,
+      url: ApiEndpoints.createOrder,
       body: orderRequest.toJson(),
       fromJson: (json) => Order.fromJson(json),
+      token: token,
+    );
+  }
+
+  static Future<ApiResponse<Order>> receiveOrder(
+      OrderEditRequest orderRequest) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    return _api.post<Order>(
+      url: ApiEndpoints.receiveOrder,
+      body: orderRequest.toJson(),
+      fromJson: (json) => Order.fromJson(json),
+      token: token,
+    );
+  }
+
+  static Future<ApiResponse<Order>> cancelOrder(
+      OrderEditRequest orderEdirRequest) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    return _api.post<Order>(
+      url: ApiEndpoints.cancelOrder,
+      body: orderEdirRequest.toJson(),
+      fromJson: (json) => Order.fromJson(json),
+      token: token,
+    );
+  }
+
+  static Future<ApiResponse<Order>> updateOrder(
+      OrderEditRequest orderEditRequest) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    return _api.post<Order>(
+      url: ApiEndpoints.updateOrder,
+      body: orderEditRequest.toJson(),
+      fromJson: (json) => Order.fromJson(json),
+      token: token,
+    );
+  }
+
+  static Future<ApiResponse<List<NotificationModel>>>
+      fetchNotifications() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    return _api.get<List<NotificationModel>>(
+      url: ApiEndpoints.notifications,
+      fromJson: (dynamic response) {
+        print('Raw notification response: $response');
+        if (response is List) {
+          final parsed = response
+              .map((item) =>
+                  NotificationModel.fromJson(item as Map<String, dynamic>))
+              .where((model) => model.isValid())
+              .toList();
+          print('Parsed notifications: ${parsed.length}');
+          return parsed;
+        }
+        throw Exception('Invalid response format');
+      },
       token: token,
     );
   }

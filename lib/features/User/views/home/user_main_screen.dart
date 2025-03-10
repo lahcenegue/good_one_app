@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../Core/presentation/resources/app_assets.dart';
 import '../../../../Core/presentation/resources/app_colors.dart';
 import '../../../../Core/presentation/Widgets/error/error_widget.dart';
-import '../../../../Providers/user_state_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
 
 import '../booking/booking_screen.dart';
 import '../servicesScreen/services_screen.dart';
@@ -27,13 +27,13 @@ class _UserMainScreenState extends State<UserMainScreen> {
     super.initState();
     // Initialize data when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserStateProvider>().initialize();
+      context.read<UserManagerProvider>().initialize();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserStateProvider>(
+    return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
         // Show loading indicator while initializing
         if (userManager.isLoading && userManager.currentIndex == 0) {
@@ -65,7 +65,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
 
   Widget _buildCurrentScreen(
     BuildContext context,
-    UserStateProvider userManager,
+    UserManagerProvider userManager,
   ) {
     switch (userManager.currentIndex) {
       case 0:
@@ -84,7 +84,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
 
   Widget _buildBottomNavigation(
     BuildContext context,
-    UserStateProvider userManager,
+    UserManagerProvider userManager,
   ) {
     final items = [
       _buildNavItem(

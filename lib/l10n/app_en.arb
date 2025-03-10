@@ -1,40 +1,83 @@
 {
   "@@locale": "en",
-  "@alreadyHaveAccount": {
-    "description": "Text shown before sign in link"
+
+  "@apply": {
+    "description": "Text for the apply button in coupons and offers section"
+  },
+  "@close": {
+    "description": "Text for close button in dialogs"
   },
   "@authError": {
-    "description": "Generic authentication error"
+    "description": "Error message for invalid email or password during authentication"
   },
   "@back": {
-    "description": "Text for back button"
+    "description": "Text for back button to navigate to the previous screen"
   },
   "@bestContractors": {
-    "description": "Label for the best contractors section"
+    "description": "Label for the best contractors section on the home screen"
   },
   "@booking": {
     "description": "Label for booking section or feature"
   },
+  "@bookingConfirmed": {
+    "description": "Message shown when a booking is successfully confirmed"
+  },
   "@bookingDetails": {
     "description": "Section title for booking information"
   },
+  "@bookingSummary": {
+    "description": "Title for the booking summary screen"
+  },
+  "@bookingCancelledSuccessfully": {
+    "description": "Message shown when a booking is successfully cancelled"
+  },
+  "@canceled": {
+    "description": "Status text for canceled bookings"
+  },
+  "@cancel": {
+    "description": "Text for cancel action button"
+  },
+  "@cancelBooking": {
+    "description": "Title for the cancel booking dialog"
+  },
+  "@category": {
+    "description": "Label for category field"
+  },
   "@chooseFromGallery": {
-    "description": "Option to choose from gallery"
+    "description": "Option to choose an image from gallery"
   },
   "@chooseLanguagePrompt": {
     "description": "Prompt message asking user to select language"
   },
+  "@completed": {
+    "description": "Status text for completed bookings"
+  },
   "@confirm": {
     "description": "Text for confirmation button"
   },
-  "@confirmPasswordRequired": {
-    "description": "Error message when confirm password is empty"
+  "@confirmBooking": {
+    "description": "Text for confirm booking button"
+  },
+  "@confirmService": {
+    "description": "Title for the confirm service dialog"
+  },
+  "@couponApplied": {
+    "description": "Message shown when a coupon is applied, with placeholders for coupon code and discount percentage"
+  },
+  "@couponsAndOffers": {
+    "description": "Label for coupons and offers section"
+  },
+  "@creditCard": {
+    "description": "Label for credit card payment method"
   },
   "@createAccount": {
-    "description": "Title for account creation"
+    "description": "Title for account creation screen"
   },
   "@date": {
     "description": "Label for date field"
+  },
+  "@discount": {
+    "description": "Label for discount field in pricing"
   },
   "@duration": {
     "description": "Label for duration field"
@@ -43,40 +86,40 @@
     "description": "Text for edit action"
   },
   "@email": {
-    "description": "Label for email input"
-  },
-  "@emailRequired": {
-    "description": "Error message when email is empty"
+    "description": "Label for email input field"
   },
   "@enterEmail": {
-    "description": "Placeholder for email input"
+    "description": "Placeholder text for email input field"
   },
   "@enterFullName": {
-    "description": "Placeholder for full name input"
+    "description": "Placeholder text for full name input field"
   },
   "@enterPassword": {
-    "description": "Placeholder for password input"
+    "description": "Placeholder text for password input field"
   },
   "@enterPhoneNumber": {
-    "description": "Placeholder for phone number input"
+    "description": "Placeholder text for phone number input field"
   },
-  "@forgotPassword": {
-    "description": "Forgot password link text"
+  "@enterReason": {
+    "description": "Placeholder text for cancellation reason input field"
+  },
+   "@forgotPassword": {
+    "description": "Text for forgot password link"
   },
   "@fullName": {
-    "description": "Label for full name input"
-  },
-  "@fullNameRequired": {
-    "description": "Error message when full name is empty"
+    "description": "Label for full name input field"
   },
   "@generalError": {
-    "description": "General error message"
+    "description": "Generic error message for unexpected issues"
   },
   "@hasAccount": {
-    "description": "Text shown before sign in link"
+    "description": "Text shown before sign in link on sign-up screen"
+  },
+  "@hasServiceBeenReceived": {
+    "description": "Prompt in confirm service dialog asking if the service has been completed"
   },
   "@hello": {
-    "description": "Greeting text"
+    "description": "Greeting text for users"
   },
   "@home": {
     "description": "Label for home screen or section"
@@ -90,11 +133,11 @@
   "@hours": {
     "description": "Plural form of hours for duration"
   },
-  "@imageRequired": {
-    "description": "Error message when image is not selected"
+  "@inProgress": {
+    "description": "Status text for bookings in progress"
   },
-  "@invalidCredentials": {
-    "description": "Error message for invalid credentials"
+  "@invalidCoupon": {
+    "description": "Error message for invalid coupon code"
   },
   "@invalidEmail": {
     "description": "Error message for invalid email format"
@@ -108,29 +151,14 @@
   "@location": {
     "description": "Label for location field or section"
   },
-  "@locationRequired": {
-    "description": "Error message when location is empty"
-  },
   "@login": {
-    "description": "Text for login button"
-  },
-  "@loginButton": {
-    "description": "Login button text"
-  },
-  "@loginError": {
-    "description": "Generic login error message"
-  },
-  "@loginRequired": {
-    "description": "Message indicating login is required"
+    "description": "Text for login button or action"
   },
   "@loginSuccess": {
     "description": "Message shown on successful login"
   },
-  "@loginToAccess": {
-    "description": "Prompt to login for access"
-  },
   "@loginToContinue": {
-    "description": "Prompt to login to continue an action"
+    "description": "Prompt to log in to continue an action or access a feature"
   },
   "@logout": {
     "description": "Text for logout action"
@@ -138,17 +166,17 @@
   "@logoutSuccess": {
     "description": "Message shown on successful logout"
   },
-  "@networkError": {
-    "description": "Network error message"
+    "@networkError": {
+    "description": "Error message for network connectivity issues"
   },
   "@next": {
     "description": "Text for the next button to navigate to the following screen or step"
   },
-  "@nextButton": {
-    "description": "Text for the next button"
-  },
   "@noAccount": {
-    "description": "Text shown before sign up link"
+    "description": "Text shown before sign up link on login screen"
+  },
+  "@noBookings": {
+    "description": "Message shown when no bookings are available"
   },
   "@noContractorSelected": {
     "description": "Error message when no contractor is selected"
@@ -157,7 +185,13 @@
     "description": "Fallback text when no location is specified"
   },
   "@noServicesAvailable": {
-    "description": "Message when no services are available"
+    "description": "Message shown when no services are available"
+  },
+  "@notYet": {
+    "description": "Option in confirm service dialog indicating service is not yet completed"
+  },
+  "@ok": {
+    "description": "Text for OK button in dialogs"
   },
   "@onboardingDesc1": {
     "description": "Description for the first onboarding screen"
@@ -178,46 +212,70 @@
     "description": "Label for services section"
   },
   "@password": {
-    "description": "Label for password input"
-  },
-  "@passwordRequired": {
-    "description": "Error message when password is empty"
+    "description": "Label for password input field"
   },
   "@passwordTooShort": {
-    "description": "Error message for short password"
+    "description": "Error message for password that is too short"
   },
   "@passwordsDoNotMatch": {
-    "description": "Error message when passwords don't match"
+    "description": "Error message when passwords don't match during registration"
   },
-  "@phone": {
-    "description": "Label for phone input"
+  "@paymentFailed": {
+    "description": "Message shown when payment fails"
+  },
+  "@paymentMethods": {
+    "description": "Label for payment methods section"
+  },
+  "@paymentSuccessful": {
+    "description": "Message shown when payment is successful"
   },
   "@phoneNumber": {
-    "description": "Label for phone number input"
+    "description": "Label for phone number input field"
   },
-  "@phoneRequired": {
-    "description": "Error message when phone is empty"
+  "@pleaseSelectPaymentMethod": {
+    "description": "Prompt to select a payment method"
+  },
+  "@price": {
+    "description": "Label for price field"
   },
   "@priceSummary": {
     "description": "Section title for pricing information"
   },
   "@privacyPolicy": {
-    "description": "Label for privacy policy"
+    "description": "Label for privacy policy link or section"
+  },
+  "@proceedToPayment": {
+    "description": "Text for proceed to payment button"
+  },
+  "@processingPayment": {
+    "description": "Message shown while processing payment"
   },
   "@profile": {
     "description": "Label for profile section"
   },
+  "@provider": {
+    "description": "Label for service provider"
+  },
+  "@reasonForCancellation": {
+    "description": "Label for cancellation reason input field"
+  },
+  "@receive": {
+    "description": "Text for receive action button to mark service as completed"
+  },
+  "@received": {
+    "description": "Option in confirm service dialog indicating service is completed"
+  },
   "@rememberMe": {
-    "description": "Remember me checkbox label"
+    "description": "Label for remember me checkbox on login screen"
   },
   "@retypePassword": {
-    "description": "Label for password confirmation input"
+    "description": "Label for password confirmation input field"
+  },
+  "@retry": {
+    "description": "Text for retry button"
   },
   "@save": {
     "description": "Text for save action"
-  },
-  "@savedAddress": {
-    "description": "Label for saved addresses"
   },
   "@schedule": {
     "description": "Label for scheduling action or section"
@@ -229,19 +287,25 @@
     "description": "Text for see all link"
   },
   "@selectImage": {
-    "description": "Label for image selection"
+    "description": "Label for image selection field"
+  },
+  "@selectPaymentMethod": {
+    "description": "Prompt to select a payment method"
   },
   "@selected": {
     "description": "Text indicating something is selected"
   },
-  "@serverError": {
-    "description": "Error message for server issues"
+  "@service": {
+    "description": "Label for service field"
+  },
+  "@servicePrice": {
+    "description": "Label for service price"
+  },
+  "@serviceReceivedSuccessfully": {
+    "description": "Message shown when service is marked as completed successfully"
   },
   "@services": {
-    "description": "Label for services"
-  },
-  "@signIn": {
-    "description": "Title for the login screen"
+    "description": "Label for services section"
   },
   "@signUp": {
     "description": "Title for the registration screen"
@@ -255,216 +319,245 @@
   "@startTime": {
     "description": "Label for start time field"
   },
+  "@status": {
+    "description": "Label for status field"
+  },
   "@storageError": {
-    "description": "Error saving auth data"
+    "description": "Error message for failing to save authentication data"
+  },
+  "@submit": {
+    "description": "Text for submit button in dialogs"
   },
   "@support": {
     "description": "Label for support section"
   },
   "@takePhoto": {
-    "description": "Option to take photo"
+    "description": "Option to take a photo with the camera"
+  },
+  "@time": {
+    "description": "Label for time field"
+  },
+  "@total": {
+    "description": "Label for total price field"
   },
   "@totalAmount": {
-    "description": "Label for total price"
+    "description": "Label for total price in pricing summary"
   },
-  "@welcomeMessage": {
-    "description": "Welcome message before app name"
-  },
-  "@yearsExperience": {
-    "description": "Text for years of experience with placeholder"
-  },
-  "@bookingSummary": {
-    "description": "Title for the booking summary screen"
-  },
-  "@apply": {
-    "description": "Text for the apply button in coupons and offers section"
-  },
-  "@couponsAndOffers": {
-    "description": "Label for coupons and offers section"
+  "@transactionProcessed": {
+    "description": "Message shown after a successful transaction"
   },
   "@typeCouponCodeHere": {
     "description": "Hint text for coupon code input field"
   },
- 
- 
-  "@completed": {
-    "description": "Status text for completed bookings"
-  },
-  "@inProgress": {
-    "description": "Status text for bookings in progress"
-  },
-  "@canceled": {
-    "description": "Status text for canceled bookings"
-  },
-  "@noBookings": {
-    "description": "Message when no bookings are available"
-  },
-  "@service": {
-    "description": "Label for service field"
-  },
-  "@servicePrice": {
-    "description": "Label for service price"
-  },
-  "@provider": {
-    "description": "Label for service provider"
-  },
-  "@receive": {
-    "description": "Text for receive action button"
-  },
-  "@unknownStatus": {
-    "description": "Text for unknown booking status"
+  "@unknownProvider": {
+    "description": "Fallback text for unknown provider"
   },
   "@unknownService": {
     "description": "Fallback text for unknown service"
   },
-  "@unknownProvider": {
-    "description": "Fallback text for unknown provider"
+  "@unknownStatus": {
+    "description": "Text for unknown booking status"
   },
-  "accountDetails": "Account details",
-  "alreadyHaveAccount": "Already have an account?",
+  "@wallet": {
+    "description": "Label for wallet payment method"
+  },
+  "@welcomeMessage": {
+    "description": "Welcome message displayed before app name"
+  },
+  "@yearsExperience": {
+    "description": "Text for years of experience with placeholder for years"
+  },
+
+  "apply": "Apply",
+  "close": "Close",
   "authError": "Invalid email or password",
   "back": "Back",
   "bestContractors": "Best Contractors",
   "booking": "Booking",
+  "bookingConfirmed": "Your booking has been confirmed!",
   "bookingDetails": "Booking Details",
+  "bookingSummary": "Booking Summary",
+  "bookingCancelledSuccessfully": "Booking cancelled successfully!",
+  "canceled": "Canceled",
+  "cancel": "Cancel",
+  "cancelBooking": "Cancel Booking",
+  "category": "Category",
   "chooseFromGallery": "Choose from Gallery",
   "chooseLanguagePrompt": "Choose your language to start",
+  "completed": "Completed",
   "confirm": "Confirm",
-  "confirmPasswordRequired": "Please confirm your password",
+  "confirmBooking": "Confirm Booking",
+  "confirmService": "Confirm Service",
+  "couponApplied": "Coupon: ({coupon}), discount ({discount}%)",
+  "couponsAndOffers": "Coupons & Offers",
+  "creditCard": "Credit Card",
   "createAccount": "Create your account now",
   "date": "Date",
+  "discount": "Discount",
   "duration": "Duration",
   "edit": "Edit",
   "email": "Email",
-  "emailRequired": "Email is required",
-  "enterEmail": "enter your email",
+  "enterEmail": "Enter your email",
   "enterFullName": "Enter your full name",
-  "enterPassword": "enter your password",
+  "enterPassword": "Enter your password",
   "enterPhoneNumber": "Enter your phone number",
-  "forgotPassword": "Forgot your password?",
+  "enterReason": "Enter your reason here...",
+   "forgotPassword": "Forgot your password?",
   "fullName": "Full Name",
-  "fullNameRequired": "Full name is required",
   "generalError": "An error occurred. Please try again",
   "hasAccount": "Already have an account?",
+  "hasServiceBeenReceived": "Has the service been completed?",
   "hello": "Hello",
   "home": "Home",
   "hour": "hour",
   "hourlyRate": "Hourly Rate",
   "hours": "hours",
-  "imageRequired": "Profile picture is required",
-  "invalidCredentials": "Invalid email or password",
+  "inProgress": "In progress",
+  "invalidCoupon": "Invalid coupon code",
   "invalidEmail": "Please enter a valid email address",
   "language": "Language",
   "languageSelectionTitle": "Language selection",
   "location": "Location",
-  "locationRequired": "Your city and Country are required",
   "login": "Log in",
-  "loginButton": "Log in",
-  "loginError": "Invalid email or password",
-  "loginRequired": "Authentication Required",
   "loginSuccess": "Successfully logged in",
-  "loginToAccess": "Login to Access",
-  "loginToContinue": "Please login to continue with this action",
+  "loginToContinue": "Please log in to continue",
   "logout": "Logout",
   "logoutSuccess": "Successfully logged out",
   "networkError": "Network connection error. Please try again",
   "next": "Next",
-  "nextButton": "Next",
   "noAccount": "Don't have an account?",
+  "noBookings": "No bookings",
   "noContractorSelected": "No contractor selected",
   "noLocationSpecified": "No location specified",
   "noServicesAvailable": "No Services Available",
+  "notYet": "Not Yet",
+  "ok": "OK",
   "onboardingDesc1": "Discover quick and easy solutions for all your home needs, from plumbing and electrical to cleaning and renovation. Let us make your home more comfortable.",
   "onboardingDesc2": "We offer a comprehensive range of high-quality, reliable home services, so you can enjoy your time at home without any worries.",
-  "onboardingTitle1": "home services with a professional touch!",
+  "onboardingTitle1": "Home services with a professional touch!",
   "onboardingTitle2": "We're here to make your life easier!",
   "order": "Orders",
   "ourServices": "Our services",
   "password": "Password",
-  "passwordRequired": "Password is required",
   "passwordTooShort": "Password must be at least 6 characters",
   "passwordsDoNotMatch": "Passwords do not match",
-  "phone": "Phone",
+  "paymentFailed": "Payment Failed. Please try again.",
+  "paymentMethods": "Payment Methods",
+  "paymentSuccessful": "Payment Successful!",
   "phoneNumber": "Phone Number",
-  "phoneRequired": "Phone number is required",
+  "pleaseSelectPaymentMethod": "Please select a payment method",
+  "price": "Price",
   "priceSummary": "Price Summary",
   "privacyPolicy": "Privacy and Policy",
+  "proceedToPayment": "Proceed to Payment",
+  "processingPayment": "Processing Payment...",
   "profile": "Profile",
+  "provider": "Provider",
+  "reasonForCancellation": "Reason for Cancellation",
+  "receive": "Receive",
+  "received": "Completed",
   "rememberMe": "Remember me",
   "retypePassword": "Retype Password",
+  "retry": "Retry",
   "save": "Save",
-  "savedAddress": "Saved address",
   "schedule": "Schedule",
   "search": "Search",
   "seeAll": "See all",
   "selectImage": "Profile Picture",
+  "selectPaymentMethod": "Select Payment Method",
   "selected": "Selected",
-  "serverError": "Server error occurred. Please try again",
+  "service": "Service",
+  "servicePrice": "Service price",
+  "serviceReceivedSuccessfully": "Service marked as completed successfully!",
   "services": "Services",
-  "signIn": "Sign In",
   "signUp": "Sign Up",
   "skip": "Skip",
   "startDate": "Start Date",
   "startTime": "Start Time",
+  "status": "Status",
   "storageError": "Failed to save authentication data",
+  "submit": "Submit",
   "support": "Support",
   "takePhoto": "Take Photo",
-  "totalAmount": "Total Amount",
-  "welcomeMessage": "Welcome to",
-  "yearsExperience": "$years Years Experience",
-  "bookingSummary": "Booking Summary",
-  "apply": "Apply",
-  "couponsAndOffers": "Coupons & Offers",
-  "typeCouponCodeHere": "Type your coupon code here...",
-  "completed": "Completed",
-  "inProgress": "In progress",
-  "canceled": "Canceled",
-  "cancel": "Cancel",
-  "noBookings": "No bookings",
-  "service": "Service",
-  "servicePrice": "Service price",
-  "provider": "Provider",
-  "receive": "Receive",
-  "unknownStatus": "Unknown status",
-  "unknownService": "Unknown service",
-  "unknownProvider": "Unknown provider",
-  "loginToViewBookings": "You need to log in to view your bookings.",
-  "pleaseLogin": "Please Log In",
-  "couponApplied": "Coupon {coupon} applied ({discount}%)",
-  "invalidCoupon": "Invalid coupon code",
-  "couponRequired": "Please enter a coupon code",
-  "discount": "Discount" ,
-  "selectPaymentMethod": "Select Payment Method",
-  "paymentMethods": "Payment Methods",
-  "creditCard": "Credit Card",
-  "wallet": "Wallet",
-  "proceedToPayment": "Proceed to Payment",
-  "processingPayment": "Processing Payment...",
-  "paymentSuccessful": "Payment Successful!",
-  "paymentFailed": "Payment Failed. Please try again.",
-  "confirmBooking": "Confirm Booking",
-  "bookingConfirmed": "Your booking has been confirmed!",
-  "ok": "Ok",
-  "pleaseSelectPaymentMethod":"Please slect Payment Method",
-  "close": "Close",
-  "transactionProcessed": "Your transaction has been processed successfully. Your request is now being prepared.",  "time": "Time",
+  "time": "Time",
   "total": "Total",
-  "category": "Category",
-  "status": "Status",
-  "retry": "Retry",
-  "price": "Price",
-  "confirmService": "Confirm Service",
-  "hasServiceBeenReceived": "Has the service been completed?",
-  "notYet": "Not Yet",
-  "received": "Completed",
-  "markedAsNotReceived": "Marked as not completed.",
-  "serviceReceivedSuccessfully": "Service marked as completed successfully!",
-  "errorUpdatingStatus": "Error updating booking status.",
-  "cancelBooking": "Cancel Booking",
-  "reasonForCancellation": "Reason for Cancellation",
-  "enterReason": "Enter your reason here...",
+  "totalAmount": "Total Amount",
+  "transactionProcessed": "Your transaction has been processed successfully. Your request is now being prepared.",
+  "typeCouponCodeHere": "Type your coupon code here...",
+  "unknownProvider": "Unknown provider",
+  "unknownService": "Unknown service",
+  "unknownStatus": "Unknown status",
+  "wallet": "Wallet",
+  "welcomeMessage": "Welcome to",
+  "yearsExperience": "{years} Years Experience",
+  "@reasonRequired": {
+    "description": "Error message when cancellation reason is empty"
+  },
   "reasonRequired": "Please provide a reason for cancellation.",
-  "submit": "Submit",
-  "bookingCancelledSuccessfully": "Booking cancelled successfully!"
 
+  "@couponRequired": {
+    "description": "Error message when coupon code is empty"
+  },
+  "couponRequired": "Please enter a coupon code",
+
+  "@fullNameRequired": {
+    "description": "Error message when full name is empty"
+  },
+  "fullNameRequired": "Full name is required",
+
+  "@emailRequired": {
+    "description": "Error message when email is empty"
+  },
+  "emailRequired": "Email is required",
+
+  "@phoneRequired": {
+    "description": "Error message when phone number is empty"
+  },
+  "phoneRequired": "Phone number is required",
+
+  "@passwordRequired": {
+    "description": "Error message when password is empty"
+  },
+  "passwordRequired": "Password is required",
+
+  "@confirmPasswordRequired": {
+    "description": "Error message when confirm password is empty"
+  },
+  "confirmPasswordRequired": "Please confirm your password",
+
+  "@imageRequired": {
+    "description": "Error message when profile image is not selected"
+  },
+  "imageRequired": "Profile picture is required",
+
+  "@locationRequired": {
+    "description": "Error message when location is empty"
+  },
+  "locationRequired": "Your city and country are required",
+  "@invalidCredentials": {
+    "description": "Error message for invalid email or password during authentication"
+  },
+  "invalidCredentials": "Invalid email or password",
+
+  "@serverError": {
+    "description": "Error message for server-related issues"
+  },
+  "serverError": "Server error occurred. Please try again",
+  "@additionalPaymentRequired": {
+  "description": "Message shown when additional payment is required for modified booking"
+},
+"additionalPaymentRequired": "Additional Payment Required",
+"@additionalHours": {
+  "description": "Label for additional hours in modification"
+},
+"additionalHours": "Additional hours: {hours}",
+"@additionalCost": {
+  "description": "Label for additional cost in modification"
+},
+"additionalCost": "Additional cost: /${cost}",
+
+"selectValidTimeSlot": "Please select a valid future time slot",
+"searchCityOrPlace": "Search City Or Place",
+"confirmThisLocation":"Confirm This Location",
+"selectedLocationOnMap":"Selected Location on Map"
 }

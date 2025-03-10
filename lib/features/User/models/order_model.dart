@@ -1,13 +1,13 @@
 class Order {
   final int totalHours;
-  final int startAt; // Keeping as string since API returns it as string
+  final int startAt;
   final String location;
   final int serviceId;
-  final int? couponId; // Nullable since coupons might not always be applied
-  final int? couponPercentage; // Nullable for same reason
+  final int? couponId;
+  final int? couponPercentage;
   final double price;
   final int status;
-  final String? note; // Nullable as it can be empty
+  final String? note;
   final int userId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -71,7 +71,7 @@ class OrderRequest {
   final String location;
   final int startAt;
   final int totalHours;
-  final String? coupon;
+  String? coupon;
 
   OrderRequest({
     required this.serviceId,
@@ -86,6 +86,32 @@ class OrderRequest {
         'location': location,
         'start_at': startAt,
         'total_hours': totalHours,
-        'coupon': coupon,
+        if (coupon != null) 'coupon': coupon,
       };
+}
+
+class OrderEditRequest {
+  int? orderId;
+  String? location;
+  int? startAt;
+  int? totalHours;
+  String? note;
+
+  OrderEditRequest({
+    this.orderId,
+    this.location,
+    this.startAt,
+    this.totalHours,
+    this.note,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (orderId != null) 'order_id': orderId,
+      if (location != null) 'location': location,
+      if (startAt != null) 'start_at': startAt,
+      if (totalHours != null) 'total_hours': totalHours,
+      if (note != null) 'note': note,
+    };
+  }
 }

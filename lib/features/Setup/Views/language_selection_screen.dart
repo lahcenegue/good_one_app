@@ -110,7 +110,7 @@ class LanguageSelectionScreen extends StatelessWidget {
     return Column(
       children: [
         PrimaryButton(
-          text: AppLocalizations.of(context)!.nextButton,
+          text: AppLocalizations.of(context)!.next,
           onPressed: () async {
             if (context.mounted) {
               await appSettings.handleLanguageSelectionNavigation();

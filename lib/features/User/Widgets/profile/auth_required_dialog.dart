@@ -9,7 +9,7 @@ import '../../../../Core/Navigation/app_routes.dart';
 import '../../../../Core/Navigation/navigation_service.dart';
 import '../../../../Core/Utils/storage_keys.dart';
 import '../../../../Core/infrastructure/storage/storage_manager.dart';
-import '../../../../Providers/user_state_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -22,7 +22,7 @@ class AuthRequiredDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Consumer<UserStateProvider>(builder: (context, userManager, _) {
+      child: Consumer<UserManagerProvider>(builder: (context, userManager, _) {
         return Container(
           width: context.screenWidth * 0.85,
           constraints: BoxConstraints(
@@ -43,7 +43,7 @@ class AuthRequiredDialog extends StatelessWidget {
                 ),
                 SizedBox(height: context.getWidth(20)),
                 Text(
-                  AppLocalizations.of(context)!.loginRequired,
+                  AppLocalizations.of(context)!.loginToContinue,
                   style: AppTextStyles.title2(context),
                 ),
                 SizedBox(height: context.getWidth(10)),
@@ -73,8 +73,8 @@ class AuthRequiredDialog extends StatelessWidget {
                         width: context.getWidth(120),
                         child: PrimaryButton(
                           text: AppLocalizations.of(context)!.login,
-                          onPressed: () {
-                            if (StorageManager.getString(
+                          onPressed: () async {
+                            if (await StorageManager.getString(
                                     StorageKeys.accountTypeKey) ==
                                 null) {
                               NavigationService.navigateToAndReplace(

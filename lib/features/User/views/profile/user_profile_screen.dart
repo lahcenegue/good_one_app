@@ -13,14 +13,14 @@ import '../../../../Core/presentation/Theme/app_text_styles.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../../Providers/user_state_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserStateProvider>(
+    return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
         return Scaffold(
           body: SingleChildScrollView(
@@ -58,7 +58,7 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAuthenticatedHeader(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, UserManagerProvider userManager) {
     final user = userManager.userInfo;
     if (user == null) return const SizedBox.shrink();
 
@@ -177,7 +177,7 @@ class UserProfileScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.loginToAccess,
+                  AppLocalizations.of(context)!.loginToContinue,
                   style: AppTextStyles.title(context),
                 ),
                 SizedBox(height: context.getHeight(40)),
@@ -190,7 +190,7 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileInfo(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, UserManagerProvider userManager) {
     final user = userManager.userInfo;
     if (user == null) return const SizedBox.shrink();
 
@@ -200,7 +200,7 @@ class UserProfileScreen extends StatelessWidget {
         children: [
           _buildInfoItem(
             context,
-            title: AppLocalizations.of(context)!.phone,
+            title: AppLocalizations.of(context)!.phoneNumber,
             value: user.phone.toString(),
           ),
           SizedBox(height: context.getHeight(16)),
@@ -255,31 +255,19 @@ class UserProfileScreen extends StatelessWidget {
 
   Widget _buildAuthenticatedMenuItems(
     BuildContext context,
-    UserStateProvider userManager,
+    UserManagerProvider userManager,
   ) {
     return Column(
       children: [
         _buildMenuItem(
           context,
-          image: AppAssets.profile,
-          title: AppLocalizations.of(context)!.accountDetails,
-          onTap: () {},
-        ),
-        _buildMenuItem(
-          context,
-          image: AppAssets.profile,
-          title: AppLocalizations.of(context)!.savedAddress,
-          onTap: () {},
-        ),
-        _buildMenuItem(
-          context,
-          image: AppAssets.profile,
+          image: AppAssets.support,
           title: AppLocalizations.of(context)!.support,
           onTap: () {},
         ),
         _buildMenuItem(
           context,
-          image: AppAssets.profile,
+          image: AppAssets.logout,
           title: AppLocalizations.of(context)!.logout,
           onTap: () async {
             await userManager.clearAuthData();
@@ -327,7 +315,7 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildLoginButton(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, UserManagerProvider userManager) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: context.getWidth(20),

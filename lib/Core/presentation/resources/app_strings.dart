@@ -11,9 +11,9 @@ abstract class AppStrings {
 
   // Stripe Info
   static String stripeSecretKey =
-      'sk_test_51PwTFRRxXcdOUoWKBzN8Mf5YNuPtGEJUfcsDZ5NbcMN5TDFUzWMQnaFIZU0zwl5r5ynK9RjBYaoktRov2a1jPhtm00u8lCvbVv'; // From dashboard
+      'sk_test_51PwTFRRxXcdOUoWKBzN8Mf5YNuPtGEJUfcsDZ5NbcMN5TDFUzWMQnaFIZU0zwl5r5ynK9RjBYaoktRov2a1jPhtm00u8lCvbVv';
   static String stripePublicKey =
-      'pk_test_51PwTFRRxXcdOUoWK9C7Owj6MF2u9DjQInIm5peKUTsL3pc6ENUJlfFrUZvB9hENfLI2CcQyYy6XRHg7xwjFt6Ttc00zhWQgBth'; // From dashboard
+      'pk_test_51PwTFRRxXcdOUoWK9C7Owj6MF2u9DjQInIm5peKUTsL3pc6ENUJlfFrUZvB9hENfLI2CcQyYy6XRHg7xwjFt6Ttc00zhWQgBth';
   static String stripeAccountId = 'acct_1PwTFRRxXcdOUoWK';
   static String merchantIdentifier = 'merchant.com.example.good_one_app';
 

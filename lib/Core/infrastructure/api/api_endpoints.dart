@@ -20,9 +20,12 @@ abstract class ApiEndpoints {
   static String get bestcontractors => '$baseUrl/api/services';
   static String get contractorsByService => '$baseUrl/api/services/category';
   static String get userOrders => '$baseUrl/api/user/orders';
-  static String get notifications => '$baseUrl/api/notifications';
+  static String get notifications => '$baseUrl/api/user/notifications';
   static String get couponsCheck => '$baseUrl/api/coupons/check';
-  static String get serviceOrder => '$baseUrl/api/service/order';
+  static String get createOrder => '$baseUrl/api/service/order';
+  static String get receiveOrder => '$baseUrl/api/service/order/complete';
+  static String get cancelOrder => '$baseUrl/api/service/order/cancel';
+  static String get updateOrder => '$baseUrl/api/service/order/update';
 
   // Stripe payment Endpoints
   static String get paymentApiUrl =>

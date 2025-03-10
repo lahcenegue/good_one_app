@@ -1,64 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
-
+import 'package:good_one_app/core/utils/size_config.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import '../../../../Providers/booking_manager_provider.dart';
+import '../../../../core/navigation/app_routes.dart';
+import '../../../../core/presentation/theme/app_text_styles.dart';
+import '../../../../core/presentation/widgets/buttons/primary_button.dart';
+import '../../../../core/presentation/resources/app_assets.dart';
+import '../../../../core/presentation/resources/app_colors.dart';
 
-import '../../../../Core/Navigation/app_routes.dart';
-import '../../../../Core/Navigation/navigation_service.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../../Core/presentation/resources/app_assets.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import '../../../../Providers/user_state_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+/// Allows users to select a location for the booking.
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserStateProvider>(
-      builder: (context, userManager, _) {
-        LatLng initialLocation = userManager.selectedLocation ??
-            LatLng(43.6532, -79.3832); // Default to Toronto
-
+    return Consumer<BookingManagerProvider>(
+      builder: (context, bookingManager, _) {
+        final initialLocation = bookingManager.selectedLocation ??
+            const LatLng(43.6532, -79.3832); // Default to Toronto
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              'Location', //TODO translate
-              style: AppTextStyles.appBarTitle(context),
-            ),
+            title: Text(AppLocalizations.of(context)!.location,
+                style: AppTextStyles.appBarTitle(context)),
           ),
-          body: userManager.isLocationSelected
+          body: bookingManager.isLocationSelected
               ? _buildSelectedLocationView(
-                  context, userManager, initialLocation)
-              : _buildSearchLocationView(context, userManager, initialLocation),
+                  context, bookingManager, initialLocation)
+              : _buildSearchLocationView(
+                  context, bookingManager, initialLocation),
         );
       },
     );
   }
 
-  Widget _buildSearchLocationView(
-    BuildContext context,
-    UserStateProvider userManager,
-    LatLng initialLocation,
-  ) {
+  /// Displays the map for searching a location.
+  Widget _buildSearchLocationView(BuildContext context,
+      BookingManagerProvider bookingManager, LatLng initialLocation) {
     return Column(
       children: [
         Expanded(
           child: Stack(
             children: [
               FlutterMap(
-                mapController: userManager.mapController,
+                mapController: bookingManager.mapController,
                 options: MapOptions(
                   initialCenter: initialLocation,
                   initialZoom: 15.0,
                   onMapReady: () {
-                    if (userManager.hasSelectedLocation &&
-                        userManager.selectedLocation != null) {
-                      userManager.mapController
-                          .move(userManager.selectedLocation!, 15.0);
+                    if (bookingManager.isLocationSelected &&
+                        bookingManager.selectedLocation != null) {
+                      bookingManager.mapController
+                          .move(bookingManager.selectedLocation!, 15.0);
                     }
                   },
                 ),
@@ -70,34 +66,25 @@ class LocationScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              Center(
-                child: Icon(
-                  Icons.location_pin,
-                  color: AppColors.primaryColor,
-                  size: context.getAdaptiveSize(40),
-                ),
-              ),
+              const Center(
+                  child: Icon(Icons.location_pin,
+                      color: AppColors.primaryColor, size: 40)),
               Positioned(
                 bottom: context.getHeight(16),
                 right: context.getWidth(16),
                 child: Container(
                   padding: EdgeInsets.all(context.getWidth(8)),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: const BoxDecoration(
+                      color: AppColors.primaryColor, shape: BoxShape.circle),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(8),
-                    onTap: () => userManager.getCurrentLocation(context),
-                    child: Icon(
-                      Icons.my_location,
-                      color: Colors.white,
-                      size: context.getAdaptiveSize(24),
-                    ),
+                    onTap: () => bookingManager.getCurrentLocation(context),
+                    child: const Icon(Icons.my_location,
+                        color: Colors.white, size: 24),
                   ),
                 ),
               ),
-              if (userManager.isLocationScreenLoading)
+              if (bookingManager.isLocationScreenLoading)
                 Positioned.fill(
                   child: Container(
                     color: Colors.black.withOpacity(0.3),
@@ -113,24 +100,23 @@ class LocationScreen extends StatelessWidget {
           child: Column(
             children: [
               TextField(
-                controller: userManager.locationSearchController,
+                controller: bookingManager.locationSearchController,
                 decoration: InputDecoration(
-                  hintText: 'Search city or place...', //TODO trnslate
+                  hintText: AppLocalizations.of(context)!.searchCityOrPlace,
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.search),
-                    onPressed: () => userManager.searchLocation(context),
+                    onPressed: () => bookingManager.searchLocation(context),
                   ),
                 ),
-                onSubmitted: (_) => userManager.searchLocation(context),
+                onSubmitted: (_) => bookingManager.searchLocation(context),
               ),
               SizedBox(height: context.getHeight(12)),
               PrimaryButton(
-                text: 'Confirm This Location', //TODO trnslate
-                onPressed: () async {
-                  await userManager.confirmMapLocation();
-                },
+                text: AppLocalizations.of(context)!.confirmThisLocation,
+                onPressed: () async =>
+                    await bookingManager.confirmMapLocation(),
               ),
               SizedBox(height: context.getHeight(12)),
             ],
@@ -140,26 +126,23 @@ class LocationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSelectedLocationView(
-    BuildContext context,
-    UserStateProvider userManager,
-    LatLng initialLocation,
-  ) {
-    LatLng location = userManager.mapController.camera.center;
-
+  /// Displays the confirmed location with a map marker.
+  Widget _buildSelectedLocationView(BuildContext context,
+      BookingManagerProvider bookingManager, LatLng initialLocation) {
+    final location = bookingManager.mapController.camera.center;
     return Column(
       children: [
         Expanded(
           child: Stack(
             children: [
               FlutterMap(
-                mapController: userManager.mapController,
+                mapController: bookingManager.mapController,
                 options: MapOptions(
                   initialCenter: location,
                   initialZoom: 17.0,
                   onTap: (tapPosition, point) {
-                    userManager.mapController.move(point, 17.0);
-                    userManager.confirmMapLocation(); // Updates address on tap
+                    bookingManager.mapController.move(point, 17.0);
+                    bookingManager.confirmMapLocation();
                   },
                 ),
                 children: [
@@ -172,13 +155,10 @@ class LocationScreen extends StatelessWidget {
                     markers: [
                       Marker(
                         point: location,
-                        width: context.getAdaptiveSize(80),
-                        height: context.getAdaptiveSize(80),
-                        child: Icon(
-                          Icons.location_on,
-                          color: AppColors.primaryColor,
-                          size: context.getAdaptiveSize(40),
-                        ),
+                        width: 80,
+                        height: 80,
+                        child: const Icon(Icons.location_on,
+                            color: AppColors.primaryColor, size: 40),
                       ),
                     ],
                   ),
@@ -190,11 +170,8 @@ class LocationScreen extends StatelessWidget {
                 child: FloatingActionButton(
                   mini: true,
                   backgroundColor: Colors.white,
+                  onPressed: bookingManager.clearLocationSelection,
                   child: const Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: () {
-                    userManager
-                        .clearLocationSelection(); // Reset selection state
-                  },
                 ),
               ),
             ],
@@ -209,12 +186,8 @@ class LocationScreen extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      AppAssets.cityImageLink,
-                      width: context.getAdaptiveSize(60),
-                      height: context.getAdaptiveSize(60),
-                      fit: BoxFit.cover,
-                    ),
+                    child: Image.network(AppAssets.cityImageLink,
+                        width: 60, height: 60, fit: BoxFit.cover),
                   ),
                   SizedBox(width: context.getWidth(16)),
                   SizedBox(
@@ -225,9 +198,10 @@ class LocationScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(
-                          userManager.locationAddress.isNotEmpty
-                              ? userManager.locationAddress
-                              : 'Selected location on map', //TODO translate
+                          bookingManager.locationAddress.isNotEmpty
+                              ? bookingManager.locationAddress
+                              : AppLocalizations.of(context)!
+                                  .selectedLocationOnMap,
                           style: AppTextStyles.title2(context),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -243,16 +217,17 @@ class LocationScreen extends StatelessWidget {
               ),
               SizedBox(height: context.getHeight(20)),
               PrimaryButton(
-                text: 'Next', //TODO translate
+                text: AppLocalizations.of(context)!.next,
                 onPressed: () {
-                  userManager.setLocation(
+                  bookingManager.setLocation(
                     location,
-                    userManager.locationAddress.isNotEmpty
-                        ? userManager.locationAddress
-                        : 'Selected location on map', //TODO translate
+                    bookingManager.locationAddress.isNotEmpty
+                        ? bookingManager.locationAddress
+                        : AppLocalizations.of(context)!.selectedLocationOnMap,
                   );
 
-                  NavigationService.navigateTo(AppRoutes.bookingSummaryScreen);
+                  Navigator.of(context)
+                      .pushNamed(AppRoutes.bookingSummaryScreen);
                 },
               ),
               SizedBox(height: context.getHeight(20)),

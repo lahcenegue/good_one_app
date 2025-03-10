@@ -2,9 +2,12 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'Core/presentation/resources/app_strings.dart';
+import 'Providers/booking_manager_provider.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -18,7 +21,7 @@ import 'Features/auth/Services/token_manager.dart';
 import 'Providers/app_settings_provider.dart';
 import 'Providers/auth_provider.dart';
 import 'Providers/chat_provider.dart';
-import 'Providers/user_state_provider.dart';
+import 'Providers/user_manager_provider.dart';
 import 'Providers/worker_maganer_provider.dart';
 
 Future<void> main() async {
@@ -36,6 +39,13 @@ Future<void> main() async {
   // Initialize TokenManager
   await TokenManager.instance.initialize();
 
+  // Set Stripe publishable key from AppStrings
+  Stripe.publishableKey = AppStrings.stripePublicKey;
+  Stripe.merchantIdentifier = AppStrings.merchantIdentifier;
+  Stripe.urlScheme = 'flutterstripe';
+  await Stripe.instance.applySettings();
+  print('Stripe initialized with publishable key: ${Stripe.publishableKey}');
+
   // Set global HttpOverrides
   HttpOverrides.global = MyHttpOverrides();
 
@@ -51,9 +61,10 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => UserStateProvider()),
+        ChangeNotifierProvider(create: (_) => UserManagerProvider()),
+        ChangeNotifierProvider(create: (_) => BookingManagerProvider()),
         ChangeNotifierProvider(create: (_) => WorkerMaganerProvider()),
-        ChangeNotifierProxyProvider<UserStateProvider, ChatProvider>(
+        ChangeNotifierProxyProvider<UserManagerProvider, ChatProvider>(
           create: (context) => ChatProvider(),
           update: (context, userManager, previous) {
             final chatProvider = previous ?? ChatProvider();

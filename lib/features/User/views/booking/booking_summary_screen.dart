@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/core/utils/size_config.dart';
+import 'package:good_one_app/core/presentation/widgets/buttons/primary_button.dart';
+import 'package:good_one_app/core/presentation/theme/app_text_styles.dart';
+import 'package:good_one_app/core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/core/presentation/widgets/user_avatar.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../Providers/user_state_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../../Core/Navigation/app_routes.dart';
+import '../../../../Providers/booking_manager_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
+
+/// Displays a summary of the booking details and handles order confirmation.
 class BookingSummaryScreen extends StatefulWidget {
   const BookingSummaryScreen({super.key});
 
@@ -27,43 +30,27 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserStateProvider>(
-      builder: (context, userManager, _) {
+    return Consumer2<UserManagerProvider, BookingManagerProvider>(
+      builder: (context, userManager, bookingManager, _) {
         if (userManager.selectedContractor == null) {
           return _buildNoContractorSelected(context);
         }
 
-        final totalPrice = userManager.selectedContractor!.costPerHour! *
-            userManager.taskDurationHours;
-        final effectivePrice = userManager.effectiveTotalPrice;
+        final contractorCost =
+            userManager.selectedContractor!.costPerHour!.toDouble();
+        final totalPrice = contractorCost * bookingManager.taskDurationHours;
+        final effectivePrice =
+            bookingManager.effectiveTotalPrice(contractorCost);
 
         return Scaffold(
           appBar: _buildAppBar(context),
-          body: _buildBody(
-            context,
-            userManager,
-            totalPrice.toDouble(),
-            effectivePrice,
-          ),
+          body: _buildBody(context, bookingManager, totalPrice, effectivePrice),
         );
       },
     );
   }
 
-  Widget _buildNoContractorSelected(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)!.bookingSummary,
-          style: AppTextStyles.appBarTitle(context),
-        ),
-      ),
-      body: const Center(
-        child: Text('No contractor selected'),
-      ),
-    );
-  }
-
+  /// Builds the app bar with a localized title.
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(
@@ -73,7 +60,16 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, UserStateProvider userManager,
+  /// Displays a message when no contractor is selected.
+  Widget _buildNoContractorSelected(BuildContext context) {
+    return Scaffold(
+      appBar: _buildAppBar(context),
+      body: const Center(child: Text('No contractor selected')),
+    );
+  }
+
+  /// Builds the main content of the screen.
+  Widget _buildBody(BuildContext context, BookingManagerProvider bookingManager,
       double totalPrice, double effectivePrice) {
     return SingleChildScrollView(
       child: Padding(
@@ -81,25 +77,28 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildContractorInfo(context, userManager),
+            _buildContractorInfo(context),
             SizedBox(height: context.getHeight(24)),
-            _buildBookingDetails(context, userManager),
+            _buildBookingDetails(context, bookingManager),
             SizedBox(height: context.getHeight(24)),
-            _buildLocationDetails(context, userManager),
+            _buildLocationDetails(context, bookingManager),
             SizedBox(height: context.getHeight(24)),
-            _buildOffersSection(context, userManager),
+            _buildOffersSection(context, bookingManager),
             SizedBox(height: context.getHeight(24)),
-            _buildPricingSummary(context, userManager),
+            _buildPricingSummary(
+                context, bookingManager, totalPrice, effectivePrice),
             SizedBox(height: context.getHeight(32)),
-            _buildConfirmButton(context, userManager),
+            _buildConfirmButton(context, bookingManager),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContractorInfo(
-      BuildContext context, UserStateProvider userManager) {
+  /// Displays contractor information from UserProvider.
+  Widget _buildContractorInfo(BuildContext context) {
+    final userProvider =
+        Provider.of<UserManagerProvider>(context, listen: false);
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -110,7 +109,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
       child: Row(
         children: [
           UserAvatar(
-            picture: userManager.selectedContractor!.picture,
+            picture: userProvider.selectedContractor!.picture,
             size: context.getWidth(60),
           ),
           SizedBox(width: context.getWidth(16)),
@@ -119,29 +118,26 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  userManager.selectedContractor!.fullName!,
+                  userProvider.selectedContractor!.fullName!,
                   style: AppTextStyles.title2(context),
                 ),
                 SizedBox(height: context.getHeight(4)),
                 Text(
-                  userManager.selectedContractor!.service!,
+                  userProvider.selectedContractor!.service!,
                   style: AppTextStyles.text(context),
                 ),
                 SizedBox(height: context.getHeight(4)),
                 Row(
                   children: [
-                    Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                      size: context.getWidth(16),
-                    ),
+                    Icon(Icons.star,
+                        color: Colors.amber, size: context.getWidth(16)),
                     SizedBox(width: context.getWidth(4)),
                     Text(
-                      userManager.selectedContractor!.ratings!.isNotEmpty
-                          ? (userManager.selectedContractor!.ratings!
+                      userProvider.selectedContractor!.ratings!.isNotEmpty
+                          ? (userProvider.selectedContractor!.ratings!
                                       .map((r) => r.rate)
                                       .reduce((a, b) => a + b) /
-                                  userManager
+                                  userProvider
                                       .selectedContractor!.ratings!.length)
                               .toStringAsFixed(1)
                           : '0.0',
@@ -157,8 +153,9 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
+  /// Displays booking details from BookingManagerProvider.
   Widget _buildBookingDetails(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, BookingManagerProvider bookingManager) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -169,38 +166,34 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context)!.bookingDetails,
-            style: AppTextStyles.title2(context),
-          ),
+          Text(AppLocalizations.of(context)!.bookingDetails,
+              style: AppTextStyles.title2(context)),
           SizedBox(height: context.getHeight(16)),
           _buildDetailRow(
-            context,
-            Icons.calendar_today,
-            AppLocalizations.of(context)!.date,
-            userManager.formattedDateTime,
-          ),
+              context,
+              Icons.calendar_today,
+              AppLocalizations.of(context)!.date,
+              bookingManager.formattedDateTime),
           SizedBox(height: context.getHeight(12)),
           _buildDetailRow(
-            context,
-            Icons.access_time,
-            AppLocalizations.of(context)!.startTime,
-            userManager.selectedTime,
-          ),
+              context,
+              Icons.access_time,
+              AppLocalizations.of(context)!.startTime,
+              bookingManager.selectedTime),
           SizedBox(height: context.getHeight(12)),
           _buildDetailRow(
-            context,
-            Icons.timer,
-            AppLocalizations.of(context)!.duration,
-            '${userManager.taskDurationHours} ${userManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}',
-          ),
+              context,
+              Icons.timer,
+              AppLocalizations.of(context)!.duration,
+              '${bookingManager.taskDurationHours} ${bookingManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}'),
         ],
       ),
     );
   }
 
+  /// Displays location details.
   Widget _buildLocationDetails(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, BookingManagerProvider bookingManager) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -211,10 +204,8 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context)!.location,
-            style: AppTextStyles.title2(context),
-          ),
+          Text(AppLocalizations.of(context)!.location,
+              style: AppTextStyles.title2(context)),
           SizedBox(height: context.getHeight(16)),
           Row(
             children: [
@@ -225,16 +216,11 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               ),
               SizedBox(width: context.getWidth(12)),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      userManager.locationAddress.isNotEmpty
-                          ? userManager.locationAddress
-                          : AppLocalizations.of(context)!.noLocationSpecified,
-                      style: AppTextStyles.text(context),
-                    ),
-                  ],
+                child: Text(
+                  bookingManager.locationAddress.isNotEmpty
+                      ? bookingManager.locationAddress
+                      : AppLocalizations.of(context)!.noLocationSpecified,
+                  style: AppTextStyles.text(context),
                 ),
               ),
             ],
@@ -244,8 +230,9 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
+  /// Handles coupon application UI.
   Widget _buildOffersSection(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, BookingManagerProvider bookingManager) {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
@@ -264,10 +251,8 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                 size: context.getWidth(20),
               ),
               SizedBox(width: context.getWidth(8)),
-              Text(
-                AppLocalizations.of(context)!.couponsAndOffers,
-                style: AppTextStyles.title2(context),
-              ),
+              Text(AppLocalizations.of(context)!.couponsAndOffers,
+                  style: AppTextStyles.title2(context)),
             ],
           ),
           SizedBox(height: context.getHeight(12)),
@@ -297,29 +282,30 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                 width: context.getWidth(100),
                 child: SmallPrimaryButton(
                   text: AppLocalizations.of(context)!.apply,
-                  onPressed: userManager.isLoading
+                  onPressed: bookingManager.isLoading
                       ? () {}
-                      : () => _applyCoupon(context, userManager),
-                  isLoading: userManager.isLoading,
+                      : () => _applyCoupon(context, bookingManager),
+                  isLoading: bookingManager.isLoading,
                 ),
               ),
             ],
           ),
-          if (userManager.error != null)
+          if (bookingManager.error != null)
             Padding(
               padding: EdgeInsets.only(top: context.getHeight(8)),
               child: Text(
-                userManager.error!,
+                bookingManager.error!,
                 style: AppTextStyles.text(context).copyWith(color: Colors.red),
               ),
             ),
-          if (userManager.appliedCoupon != null)
+          if (bookingManager.appliedCoupon != null)
             Padding(
               padding: EdgeInsets.only(top: context.getHeight(8)),
               child: Text(
                 AppLocalizations.of(context)!.couponApplied(
-                    userManager.appliedCoupon!,
-                    (userManager.discountPercentage! * 100).toStringAsFixed(0)),
+                    bookingManager.appliedCoupon!,
+                    (bookingManager.discountPercentage! * 100)
+                        .toStringAsFixed(0)),
                 style:
                     AppTextStyles.text(context).copyWith(color: Colors.green),
               ),
@@ -329,134 +315,92 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  void _applyCoupon(BuildContext context, UserStateProvider userManager) {
+  /// Applies a coupon using the provider.
+  void _applyCoupon(
+      BuildContext context, BookingManagerProvider bookingManager) {
     final couponCode = _couponController.text.trim();
-    if (couponCode.isEmpty) {
-      userManager.setError(AppLocalizations.of(context)!.couponRequired);
-      return;
-    }
-    userManager.applyCoupon(couponCode, context);
+    bookingManager.applyCoupon(couponCode, context);
   }
 
+  /// Displays the pricing summary.
   Widget _buildPricingSummary(
-    BuildContext context,
-    UserStateProvider userManager,
-  ) {
-    final totalPrice = userManager.selectedContractor!.costPerHour! *
-        userManager.taskDurationHours;
-    final effectivePrice = userManager.effectiveTotalPrice;
+      BuildContext context,
+      BookingManagerProvider bookingManager,
+      double totalPrice,
+      double effectivePrice) {
+    final userManager =
+        Provider.of<UserManagerProvider>(context, listen: false);
     return Container(
-        padding: EdgeInsets.all(context.getWidth(16)),
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.priceSummary,
-              style: AppTextStyles.title2(context),
-            ),
-            SizedBox(height: context.getHeight(16)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.hourlyRate,
-                  style: AppTextStyles.text(context),
-                ),
-                Text(
-                  '\$${userManager.selectedContractor!.costPerHour}/hr',
-                  style: AppTextStyles.text(context),
-                ),
-              ],
-            ),
+      padding: EdgeInsets.all(context.getWidth(16)),
+      decoration: BoxDecoration(
+        color: AppColors.primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(AppLocalizations.of(context)!.priceSummary,
+              style: AppTextStyles.title2(context)),
+          SizedBox(height: context.getHeight(16)),
+          _buildPriceRow(context, AppLocalizations.of(context)!.hourlyRate,
+              '\$${userManager.selectedContractor!.costPerHour}/hr'),
+          SizedBox(height: context.getHeight(8)),
+          _buildPriceRow(context, AppLocalizations.of(context)!.duration,
+              '${bookingManager.taskDurationHours} ${bookingManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}'),
+          if (bookingManager.discountPercentage != null) ...[
             SizedBox(height: context.getHeight(8)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.duration,
-                  style: AppTextStyles.text(context),
-                ),
-                Text(
-                  '${userManager.taskDurationHours} ${userManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}',
-                  style: AppTextStyles.text(context),
-                ),
-              ],
-            ),
-            if (userManager.discountPercentage != null)
-              SizedBox(height: context.getHeight(8)),
-            if (userManager.discountPercentage != null)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.discount,
-                    style: AppTextStyles.text(context),
-                  ),
-                  Text(
-                    '-${(totalPrice * userManager.discountPercentage!).toStringAsFixed(2)} (${(userManager.discountPercentage! * 100).toStringAsFixed(0)}%)',
-                    style: AppTextStyles.text(context)
-                        .copyWith(color: Colors.green),
-                  ),
-                ],
-              ),
-            Divider(height: context.getHeight(24)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.totalAmount,
-                  style: AppTextStyles.title2(context),
-                ),
-                Text(
-                  '\$${effectivePrice.toStringAsFixed(2)}',
-                  style: AppTextStyles.title2(context).copyWith(
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ],
-            ),
+            _buildPriceRow(context, AppLocalizations.of(context)!.discount,
+                '-${(totalPrice * bookingManager.discountPercentage!).toStringAsFixed(2)} (${(bookingManager.discountPercentage! * 100).toStringAsFixed(0)}%)',
+                textColor: Colors.green),
           ],
-        ));
+          Divider(height: context.getHeight(24)),
+          _buildPriceRow(context, AppLocalizations.of(context)!.totalAmount,
+              '\$${effectivePrice.toStringAsFixed(2)}',
+              titleStyle: AppTextStyles.title2(context),
+              valueStyle: AppTextStyles.title2(context)
+                  .copyWith(color: AppColors.primaryColor)),
+        ],
+      ),
+    );
   }
 
+  /// Reusable price row widget.
+  Widget _buildPriceRow(BuildContext context, String title, String value,
+      {TextStyle? titleStyle, TextStyle? valueStyle, Color? textColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: titleStyle ?? AppTextStyles.text(context)),
+        Text(value,
+            style: valueStyle ??
+                AppTextStyles.text(context).copyWith(color: textColor)),
+      ],
+    );
+  }
+
+  /// Reusable detail row widget.
   Widget _buildDetailRow(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
+      BuildContext context, IconData icon, String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(
-          icon,
-          color: AppColors.primaryColor,
-          size: context.getWidth(24),
-        ),
+        Icon(icon, color: AppColors.primaryColor, size: context.getWidth(24)),
         SizedBox(width: context.getWidth(12)),
         Flexible(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: AppTextStyles.subTitle(context),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-              Text(
-                value,
-                style: AppTextStyles.text(context),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 3,
-                softWrap: true,
-              ),
+              Text(label,
+                  style: AppTextStyles.subTitle(context),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1),
+              Text(value,
+                  style: AppTextStyles.text(context),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
+                  softWrap: true),
             ],
           ),
         ),
@@ -464,16 +408,28 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
+  /// Builds the confirm button with loading state.
   Widget _buildConfirmButton(
-      BuildContext context, UserStateProvider userManager) {
+      BuildContext context, BookingManagerProvider bookingManager) {
+    final userManager =
+        Provider.of<UserManagerProvider>(context, listen: false);
+    final contractorCost = userManager.selectedContractor!.costPerHour ?? 50.0;
     return PrimaryButton(
       text: AppLocalizations.of(context)!.confirm,
-      onPressed: userManager.isPaymentProcessing || userManager.isLoading
-          ? () {}
-          : () async {
-              await userManager.createOrder(context);
-            },
-      isLoading: userManager.isPaymentProcessing || userManager.isLoading,
+      onPressed:
+          (bookingManager.isPaymentProcessing || bookingManager.isLoading)
+              ? () {}
+              : () async {
+                  final success = await bookingManager.createOrder(
+                    context,
+                    userManager.selectedContractor!.serviceId!,
+                    contractorCost.toDouble(),
+                  );
+                  if (success) {
+                    await Navigator.of(context).pushNamed(AppRoutes.userMain);
+                  }
+                },
+      isLoading: bookingManager.isPaymentProcessing,
     );
   }
 }

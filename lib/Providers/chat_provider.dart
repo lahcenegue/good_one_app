@@ -157,7 +157,7 @@ class ChatProvider with ChangeNotifier {
           );
         }).toList();
       } else if (data is List) {
-        newConversations = (data as List).map((item) {
+        newConversations = (data).map((item) {
           final map = item as Map;
           final userInfo = map['user_info'] as Map? ?? {};
           return ChatConversation(

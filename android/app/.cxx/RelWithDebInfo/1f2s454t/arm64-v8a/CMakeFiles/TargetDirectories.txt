@@ -1,0 +1,2 @@
+C:/Users/lahcene/Desktop/My_projects/googe_one/good_one_app/android/app/.cxx/RelWithDebInfo/1f2s454t/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/lahcene/Desktop/My_projects/googe_one/good_one_app/android/app/.cxx/RelWithDebInfo/1f2s454t/arm64-v8a/CMakeFiles/rebuild_cache.dir

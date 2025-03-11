@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/core/navigation/navigation_service.dart';
 import 'package:good_one_app/core/utils/size_config.dart';
 import 'package:good_one_app/core/presentation/widgets/buttons/primary_button.dart';
 import 'package:good_one_app/core/presentation/resources/app_colors.dart';

@@ -185,8 +185,8 @@ class BookingManagerProvider with ChangeNotifier {
       throw Exception(response.error ?? 'Order creation failed');
     } on StripeException catch (e) {
       print('Stripe exception: $e');
-      _setError('Payment failed: ${e.error ?? e.toString()}');
-      _showSnackBar(context, 'Payment failed: ${e.error ?? e.toString()}');
+      _setError('Payment failed: ${e.error}');
+      _showSnackBar(context, 'Payment failed: ${e.error}');
       return false;
     } catch (e) {
       print('General exception: $e');
@@ -544,11 +544,11 @@ class BookingManagerProvider with ChangeNotifier {
     }
   }
 
-  void _syncLocationController() {
-    if (_selectedLocation != null && _locationAddress.isNotEmpty) {
-      _locationSearchController.text = _locationAddress;
-    }
-  }
+  // void _syncLocationController() {
+  //   if (_selectedLocation != null && _locationAddress.isNotEmpty) {
+  //     _locationSearchController.text = _locationAddress;
+  //   }
+  // }
 
   Future<bool> _ensureLocationServiceEnabled(BuildContext context) async {
     final enabled = await Geolocator.isLocationServiceEnabled();

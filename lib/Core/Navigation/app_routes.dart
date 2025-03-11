@@ -8,7 +8,6 @@ import '../../Features/User/views/contractors_by_service.dart';
 import '../../Features/User/views/notifications_screen.dart';
 import '../../Features/User/views/profile/language_settings_screen.dart';
 import '../../Features/auth/views/registration_screen.dart';
-import '../../Features/Chat/Views/chat_screen.dart';
 import '../../Features/Setup/Views/account_type_screen.dart';
 import '../../Features/Setup/Views/language_selection_screen.dart';
 import '../../Features/auth/views/login_screen.dart';

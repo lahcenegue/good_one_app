@@ -19,7 +19,6 @@ import '../models/contractor.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'booking/calender_booking_screen.dart';
 import 'customer_reviews_screen.dart';
 
 class ContractorProfile extends StatelessWidget {
@@ -83,15 +82,6 @@ class ContractorProfile extends StatelessWidget {
                                 ),
                               ),
                             );
-                            // Navigator.pushNamed(
-                            //   context,
-                            //   AppRoutes.chat,
-                            //   arguments: {
-                            //     'otherUserId':
-                            //         contractor.contractorId!.toString(),
-                            //     'otherUserName': contractor.fullName,
-                            //   },
-                            // );
                           }
                         },
                       ),

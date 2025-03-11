@@ -435,7 +435,7 @@ class BookingManagerProvider with ChangeNotifier {
     final now = DateTime.now();
     final start = _buildDateTime(_selectedDay, _selectedTime);
     final end = start.add(Duration(hours: _taskDurationHours));
-    final isTimeValid = start.isAfter(now) && end.hour <= 22 && end.hour >= 6;
+    final isTimeValid = start.isAfter(now) && end.hour <= 24 && end.hour >= 0;
 
     return isTimeValid;
   }

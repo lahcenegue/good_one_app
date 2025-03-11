@@ -96,8 +96,10 @@ class CalendarBookingScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.startTime,
-            style: AppTextStyles.title2(context)),
+        Text(
+          AppLocalizations.of(context)!.startTime,
+          style: AppTextStyles.title2(context),
+        ),
         SizedBox(height: context.getHeight(12)),
         Container(
           decoration: BoxDecoration(

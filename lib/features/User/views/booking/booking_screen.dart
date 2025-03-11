@@ -30,7 +30,10 @@ class BookingScreen extends StatelessWidget {
       builder: (context, bookingManager, child) {
         if (bookingManager.isInitializing) {
           return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
         }
         if (!userManager.isAuthenticated) {
           return _LoginPrompt();
@@ -97,13 +100,17 @@ class _LoginPrompt extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(AppLocalizations.of(context)!.loginToContinue,
-                    style: AppTextStyles.title(context),
-                    textAlign: TextAlign.center),
+                Text(
+                  AppLocalizations.of(context)!.loginToContinue,
+                  style: AppTextStyles.title(context),
+                  textAlign: TextAlign.center,
+                ),
                 SizedBox(height: constraints.maxHeight * 0.04),
-                Text(AppLocalizations.of(context)!.loginToContinue,
-                    style: AppTextStyles.text(context),
-                    textAlign: TextAlign.center),
+                Text(
+                  AppLocalizations.of(context)!.loginToContinue,
+                  style: AppTextStyles.text(context),
+                  textAlign: TextAlign.center,
+                ),
                 SizedBox(height: constraints.maxHeight * 0.06),
                 PrimaryButton(
                   text: AppLocalizations.of(context)!.login,

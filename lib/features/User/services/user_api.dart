@@ -204,7 +204,6 @@ class UserApi {
           final parsed = response
               .map((item) =>
                   NotificationModel.fromJson(item as Map<String, dynamic>))
-              .where((model) => model.isValid())
               .toList();
           print('Parsed notifications: ${parsed.length}');
           return parsed;

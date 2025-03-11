@@ -5,6 +5,8 @@ import '../../Theme/app_text_styles.dart';
 import '../../../Utils/size_config.dart';
 import '../Buttons/primary_button.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class AppErrorWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
@@ -48,7 +50,7 @@ class AppErrorWidget extends StatelessWidget {
             if (onRetry != null) ...[
               SizedBox(height: context.getHeight(16)),
               SmallPrimaryButton(
-                text: AppStrings.retry,
+                text: AppLocalizations.of(context)!.retry,
                 onPressed: onRetry!,
               ),
             ],

@@ -31,7 +31,7 @@ abstract class AppStrings {
   static const String deleted = 'Successfully deleted';
 
   // Button Texts
-  static const String retry = 'Retry';
+
   static const String cancel = 'Cancel';
   static const String confirm = 'Confirm';
   static const String save = 'Save';

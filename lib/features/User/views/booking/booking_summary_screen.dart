@@ -410,7 +410,9 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
   /// Builds the confirm button with loading state.
   Widget _buildConfirmButton(
-      BuildContext context, BookingManagerProvider bookingManager) {
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+  ) {
     final userManager =
         Provider.of<UserManagerProvider>(context, listen: false);
     final contractorCost = userManager.selectedContractor!.costPerHour ?? 50.0;

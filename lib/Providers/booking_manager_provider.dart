@@ -8,13 +8,18 @@ import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/presentation/resources/app_strings.dart';
+import '../Core/Navigation/app_routes.dart';
 import '../Core/Utils/storage_keys.dart';
 import '../Core/infrastructure/storage/storage_manager.dart';
+import '../Core/presentation/Widgets/success_dialog.dart';
 import '../Features/User/models/booking.dart';
 import '../Features/User/models/order_model.dart';
+import '../Features/User/models/rate_model.dart';
 import '../Features/User/services/user_api.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../Features/User/views/service_evaluation_screen.dart';
 
 /// Manages all booking-related state and operations, including location selection.
 class BookingManagerProvider with ChangeNotifier {
@@ -49,6 +54,12 @@ class BookingManagerProvider with ChangeNotifier {
   bool _isInitializing = true;
   TabController? _tabController;
 
+  //Rating State
+  final TextEditingController commentController = TextEditingController();
+  double _rating = 0;
+  bool _isRatingSubmitting = false;
+  String? _ratingError;
+
   // Getters
   List<Booking> get bookings => List.unmodifiable(_bookings);
   bool get isLoading => _isLoading;
@@ -73,6 +84,9 @@ class BookingManagerProvider with ChangeNotifier {
   bool get isInitializing => _isInitializing;
   bool get isAuthenticated => _token != null;
   TabController? get tabController => _tabController;
+  bool get isRatingSubmitting => _isRatingSubmitting;
+  String? get ratingError => _ratingError;
+  double get rating => _rating;
 
   /// Calculates the effective total price based on contractor cost and discount.
   double effectiveTotalPrice(double contractorCost) {
@@ -182,7 +196,32 @@ class BookingManagerProvider with ChangeNotifier {
       print('Order creation response: ${response.data}');
       if (response.success) {
         resetBookingData();
-        _showSnackBar(context, 'Order created successfully');
+        await fetchBookings();
+        if (context.mounted) {
+          await showDialog(
+            context: context,
+            builder: (context) => SuccessDialog(
+              title: AppLocalizations.of(context)!.orderSuccessTitle,
+              description:
+                  AppLocalizations.of(context)!.orderSuccessDescription,
+              confirmText: AppLocalizations.of(context)!.confirm,
+              cancelText: AppLocalizations.of(context)!.close,
+              onConfirm: () {
+                Navigator.of(context).pop();
+
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.userMain,
+                  (Route<dynamic> route) => false,
+                  arguments: 1,
+                );
+              },
+              onCancel: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          );
+        }
+
         return true;
       }
       throw Exception(response.error ?? 'Order creation failed');
@@ -236,24 +275,45 @@ class BookingManagerProvider with ChangeNotifier {
   }
 
   /// Marks an order as received.
-  Future<void> receiveOrder(BuildContext context, int orderId) async {
+  Future<bool> receiveOrder(
+      BuildContext context, BuildContext dialogContext, int orderId) async {
+    print('====== receiveOrder function ');
     _setLoading(true);
     try {
       final orderRequest = OrderEditRequest(orderId: orderId);
-      final response =
-          await UserApi.receiveOrder(orderRequest); // 2 = completed
+      final response = await UserApi.receiveOrder(orderRequest);
       if (response.success) {
         await fetchBookings();
-        _showSnackBar(context, 'Order marked as received');
+        if (dialogContext.mounted) {
+          await Navigator.of(dialogContext).push(
+            MaterialPageRoute(
+              builder: (context) => ServiceEvaluationScreen(
+                serviceId: getServiceIdFromBookingId(orderId),
+              ),
+            ),
+          );
+        }
+
+        return true;
       } else {
         throw Exception(response.error ?? 'Failed to receive order');
       }
     } catch (e) {
       _setError('Error receiving order: $e');
       _showSnackBar(context, 'Failed to receive order: $e');
+      return false;
     } finally {
       _setLoading(false);
     }
+  }
+
+  int getServiceIdFromBookingId(int bookingId) {
+    final booking = _bookings.firstWhere(
+      (booking) => booking.id == bookingId,
+      orElse: () => throw Exception(
+          'Booking with ID $bookingId not found'), // Handle case where booking is not found
+    );
+    return booking.service.id; // Returns the nested service.id
   }
 
   /// Cancels an order with a reason.
@@ -326,6 +386,69 @@ class BookingManagerProvider with ChangeNotifier {
     } finally {
       _setPaymentProcessing(false);
     }
+  }
+
+  //Rate Service
+  Future<bool> rateService(
+    BuildContext context,
+    int serviceId,
+    int rate,
+  ) async {
+    _isRatingSubmitting = true;
+    _ratingError = null;
+    notifyListeners();
+    try {
+      final request = RateServiceRequest(
+        serviceId: serviceId,
+        rate: rate,
+        message: commentController.text.trim(),
+      );
+
+      final response = await UserApi.rateService(request);
+      if (response.success && response.data != null) {
+        await fetchBookings();
+        if (context.mounted) {
+          await showDialog(
+            context: context,
+            builder: (context) => SuccessDialog(
+              title: AppLocalizations.of(context)!.feedbackSuccessTitle,
+              description:
+                  AppLocalizations.of(context)!.feedbackSuccessDescription,
+              confirmText: AppLocalizations.of(context)!.backToBookings,
+              cancelText: AppLocalizations.of(context)!.close,
+              onConfirm: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.userMain,
+                  (Route<dynamic> route) => false,
+                  arguments: 1,
+                );
+              },
+              onCancel: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+            ),
+          );
+        }
+        return true;
+      } else {
+        _ratingError =
+            response.error ?? AppLocalizations.of(context)!.submissionFailed;
+        return false;
+      }
+    } catch (e) {
+      _ratingError = '${AppLocalizations.of(context)!.submissionFailed}: $e';
+      return false;
+    } finally {
+      _isRatingSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  // Setters for Rating and Comment
+  void setRating(double value) {
+    _rating = value;
+    notifyListeners();
   }
 
   // Booking Form Methods
@@ -471,6 +594,7 @@ class BookingManagerProvider with ChangeNotifier {
 
   void _setLoading(bool value) {
     _isLoading = value;
+
     notifyListeners();
   }
 
@@ -546,12 +670,6 @@ class BookingManagerProvider with ChangeNotifier {
       throw Exception('Failed to present payment sheet: $e');
     }
   }
-
-  // void _syncLocationController() {
-  //   if (_selectedLocation != null && _locationAddress.isNotEmpty) {
-  //     _locationSearchController.text = _locationAddress;
-  //   }
-  // }
 
   Future<bool> _ensureLocationServiceEnabled(BuildContext context) async {
     final enabled = await Geolocator.isLocationServiceEnabled();

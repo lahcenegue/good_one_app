@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Features/User/views/service_evaluation_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -71,7 +72,6 @@ class _BookingContentInitializerState extends State<_BookingContentInitializer>
   @override
   void initState() {
     super.initState();
-    // Defer TabController setup until after the build phase
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<BookingManagerProvider>().setupTabController(this);
@@ -144,8 +144,7 @@ class _BookingContentState extends State<_BookingContent> {
 
   void _handleTabChange() {
     if (mounted) {
-      setState(() {}); // Only call setState if mounted
-      print('Tab changed to index: ${widget.tabController.index}');
+      setState(() {});
     }
   }
 
@@ -163,7 +162,9 @@ class _BookingContentState extends State<_BookingContent> {
         _TabBarSection(tabController: widget.tabController),
         Expanded(
           child: bookingManager.isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
               : bookingManager.error != null
                   ? _ErrorState(error: bookingManager.error!)
                   : _BookingList(tabController: widget.tabController),
@@ -220,17 +221,12 @@ class _BookingList extends StatelessWidget {
         .where((booking) => booking.status == currentTabIndex)
         .toList();
 
-    print('Building _BookingList: tabIndex=$currentTabIndex, '
-        'allBookings=${bookingManager.bookings.length}, '
-        'filteredBookings=${filteredBookings.length}, '
-        'filteredIds=${filteredBookings.map((b) => b.id).toList()}, '
-        'bookingStatuses=${bookingManager.bookings.map((b) => b.status).toList()}');
-
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Padding(
         padding: EdgeInsets.all(context.getWidth(16)),
         child: Column(
+          verticalDirection: VerticalDirection.up,
           children: filteredBookings.isEmpty
               ? [const _EmptyState()]
               : filteredBookings
@@ -275,7 +271,8 @@ class _ErrorState extends StatelessWidget {
           children: [
             Text(
               error,
-              style: AppTextStyles.text(context).copyWith(color: Colors.red),
+              style: AppTextStyles.text(context)
+                  .copyWith(color: AppColors.oxblood),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: context.getHeight(16)),
@@ -302,9 +299,6 @@ class BookingCard extends StatelessWidget {
     final bookingManager = context.read<BookingManagerProvider>();
     final (statusColor, statusText) = _getStatusDetails(context);
 
-    print(
-        'Rendering BookingCard id: ${booking.id}, status: ${booking.status}, statusText: $statusText');
-
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -330,8 +324,8 @@ class BookingCard extends StatelessWidget {
               SizedBox(height: context.getHeight(16)),
               _ActionButtons(
                 booking: booking,
-                onReceive: () =>
-                    _showReceiveConfirmationDialog(context, bookingManager),
+                onReceive: () => _showReceiveConfirmationDialog(
+                    context, bookingManager, booking.id),
                 onCancel: () =>
                     _showCancelConfirmationDialog(context, bookingManager),
               ),
@@ -365,29 +359,45 @@ class BookingCard extends StatelessWidget {
   }
 
   void _showReceiveConfirmationDialog(
-      BuildContext context, BookingManagerProvider bookingManager) {
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+    int bookingId,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.confirmService,
-            style: AppTextStyles.title2(context)),
-        content: Text(AppLocalizations.of(context)!.hasServiceBeenReceived,
-            style: AppTextStyles.text(context)),
+        title: Text(
+          AppLocalizations.of(context)!.confirmService,
+          style: AppTextStyles.title2(context),
+        ),
+        content: Text(
+          AppLocalizations.of(context)!.hasServiceBeenReceived,
+          style: AppTextStyles.text(context),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(AppLocalizations.of(context)!.notYet,
-                style:
-                    AppTextStyles.text(context).copyWith(color: Colors.grey)),
+            child: Text(
+              AppLocalizations.of(context)!.notYet,
+              style: AppTextStyles.text(context).copyWith(
+                color: AppColors.hintColor,
+              ),
+            ),
           ),
+
+          // Recive order
           TextButton(
             onPressed: () async {
-              await bookingManager.receiveOrder(context, booking.id);
-              Navigator.of(dialogContext).pop();
+              await bookingManager.receiveOrder(
+                  context, dialogContext, bookingId);
+              Navigator.of(dialogContext)
+                  .pop(); // Close the dialog after success
             },
-            child: Text(AppLocalizations.of(context)!.received,
-                style: AppTextStyles.text(context)
-                    .copyWith(color: AppColors.primaryColor)),
+            child: Text(
+              AppLocalizations.of(context)!.received,
+              style: AppTextStyles.text(context)
+                  .copyWith(color: AppColors.primaryColor),
+            ),
           ),
         ],
       ),
@@ -410,11 +420,12 @@ class _StatusRow extends StatelessWidget {
   final String statusText;
   final VoidCallback onEdit;
 
-  const _StatusRow(
-      {required this.booking,
-      required this.statusColor,
-      required this.statusText,
-      required this.onEdit});
+  const _StatusRow({
+    required this.booking,
+    required this.statusColor,
+    required this.statusText,
+    required this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -438,10 +449,28 @@ class _StatusRow extends StatelessWidget {
             ),
             if (booking.status == 1)
               IconButton(
-                icon: Icon(Icons.edit,
-                    color: AppColors.primaryColor, size: context.getWidth(20)),
+                icon: Icon(
+                  Icons.edit,
+                  color: AppColors.primaryColor,
+                  size: context.getWidth(20),
+                ),
                 onPressed: onEdit,
               ),
+            if (booking.status == 2)
+              IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ServiceEvaluationScreen(
+                            serviceId: booking.service.id),
+                      ),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.rate_review,
+                    color: AppColors.rating,
+                    size: context.getWidth(20),
+                  ))
           ],
         ),
       ],
@@ -561,13 +590,16 @@ class _ActionButtons extends StatelessWidget {
         SizedBox(
           width: context.getWidth(150),
           child: SmallPrimaryButton(
-              text: AppLocalizations.of(context)!.receive,
-              onPressed: onReceive),
+            text: AppLocalizations.of(context)!.receive,
+            onPressed: onReceive,
+          ),
         ),
         SizedBox(
           width: context.getWidth(150),
           child: SmallSecondaryButton(
-              text: AppLocalizations.of(context)!.cancel, onPressed: onCancel),
+            text: AppLocalizations.of(context)!.cancel,
+            onPressed: onCancel,
+          ),
         ),
       ],
     );

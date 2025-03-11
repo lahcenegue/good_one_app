@@ -73,10 +73,7 @@
   "passwordTooShort": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
   "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
   "paymentFailed": "فشل الدفع. حاول مرة أخرى.",
-  "paymentMethods": "طرق الدفع",
-  "paymentSuccessful": "تم الدفع بنجاح!",
   "phoneNumber": "رقم الهاتف",
-  "pleaseSelectPaymentMethod": "يرجى اختيار طريقة دفع",
   "price": "السعر",
   "priceSummary": "ملخص السعر",
   "privacyPolicy": "الخصوصية والسياسة",
@@ -113,7 +110,6 @@
   "time": "الوقت",
   "total": "المجموع",
   "totalAmount": "المبلغ الإجمالي",
-  "transactionProcessed": "تمت معالجة معاملتك بنجاح. طلبك قيد التحضير الآن.",
   "typeCouponCodeHere": "اكتب رمز القسيمة هنا...",
   "unknownProvider": "مقدم خدمة غير معروف",
   "unknownService": "خدمة غير معروفة",
@@ -132,20 +128,24 @@
   "locationRequired": "مدينتك وبلدك مطلوبة",
   "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
   "serverError": "حدث خطأ في الخادم. حاول مرة أخرى",
-  "@additionalPaymentRequired": {
-  "description": "Message shown when additional payment is required for modified booking"
-},
-"additionalPaymentRequired": "مطلوب دفع إضافي",
-"@additionalHours": {
-  "description": "Label for additional hours in modification"
-},
-"additionalHours": "ساعات إضافية: {hours}",
-"@additionalCost": {
-  "description": "Label for additional cost in modification"
-},
-"additionalCost": "تكلفة إضافية: /${cost}",
-"selectValidTimeSlot": "الرجاء تحديد فترة زمنية صالحة",
-"searchCityOrPlace": "البحث عن المدينة أو المكان",
-"confirmThisLocation":"تأكيد هذا الموقع",
-"selectedLocationOnMap":"الموقع المحدد على الخريطة"
+  "additionalPaymentRequired": "مطلوب دفع إضافي",
+  "additionalHours": "ساعات إضافية: {hours}",
+  "additionalCost": "تكلفة إضافية: ${cost}",
+  "selectValidTimeSlot": "الرجاء تحديد فترة زمنية صالحة",
+  "searchCityOrPlace": "البحث عن المدينة أو المكان",
+  "confirmThisLocation":"تأكيد هذا الموقع",
+  "selectedLocationOnMap":"الموقع المحدد على الخريطة",  
+  "orderSuccessTitle": "تم إنشاء الطلب بنجاح",
+  "orderSuccessDescription": "تم تأكيد حجزك. يمكنك عرضه في قائمة الحجوزات الخاصة بك.",
+  "serviceReceivedTitle": "تم استلام الخدمة بنجاح",
+  "serviceReceivedDescription": "تم تسجيل الخدمة كمستلمة. يرجى تقييم تجربتك.",
+  "rateService": "تقييم الخدمة",
+  "feedbackSuccessTitle": "شكرًا على تقييمك!",
+  "feedbackSuccessDescription": "تم إرسال تقييمك بنجاح.",
+  "backToBookings": "العودة إلى الحجوزات",
+  "rateYourExperience": "قيّم تجربتك",
+  "rating": "التقييم",
+  "comment": "تعليق",
+  "commentHint": "شارك رأيك...",
+  "submissionFailed": "فشل في إرسال التقييم"
 }

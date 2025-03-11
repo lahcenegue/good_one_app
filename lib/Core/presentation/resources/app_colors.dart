@@ -19,4 +19,5 @@ abstract class AppColors {
   static const Color error = Color(0xFFDC3545);
   static const Color warning = Color(0xFFFFC107);
   static const Color info = Color(0xFF17A2B8);
+  static const Color rating = Color(0xFFfbdc00);
 }

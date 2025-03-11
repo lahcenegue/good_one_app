@@ -13,6 +13,7 @@ import '../models/contractor.dart';
 import '../models/coupom_model.dart';
 import '../models/notification_model.dart';
 import '../models/order_model.dart';
+import '../models/rate_model.dart';
 import '../models/service_category.dart';
 import '../models/user_info.dart';
 
@@ -210,6 +211,17 @@ class UserApi {
         }
         throw Exception('Invalid response format');
       },
+      token: token,
+    );
+  }
+
+  static Future<ApiResponse<Map<String, dynamic>>> rateService(
+      RateServiceRequest rateRequest) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    return _api.post<Map<String, dynamic>>(
+      url: ApiEndpoints.rateService,
+      body: rateRequest.toJson(),
+      fromJson: (json) => json as Map<String, dynamic>,
       token: token,
     );
   }

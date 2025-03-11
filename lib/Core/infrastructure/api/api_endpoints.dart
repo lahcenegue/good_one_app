@@ -26,6 +26,7 @@ abstract class ApiEndpoints {
   static String get receiveOrder => '$baseUrl/api/service/order/complete';
   static String get cancelOrder => '$baseUrl/api/service/order/cancel';
   static String get updateOrder => '$baseUrl/api/service/order/update';
+  static String get rateService => '$baseUrl/api/service/rate';
 
   // Stripe payment Endpoints
   static String get paymentApiUrl =>

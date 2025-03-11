@@ -167,12 +167,27 @@ class RegistrationScreen extends StatelessWidget {
             keyboardType: TextInputType.emailAddress,
           ),
           SizedBox(height: context.getHeight(16)),
-          if (StorageManager.getString(StorageKeys.accountTypeKey) ==
-              AppStrings.service) ...[
-            SizedBox(height: context.getHeight(16)),
-            _buildLocationFields(context, auth),
-            SizedBox(height: context.getHeight(16)),
-          ],
+          FutureBuilder<String?>(
+              future: StorageManager.getString(StorageKeys.accountTypeKey),
+              builder: (context, snapshot) {
+                final accountType = snapshot.data;
+                if (accountType == AppStrings.service) {
+                  return Column(
+                    children: [
+                      SizedBox(height: context.getHeight(16)),
+                      _buildLocationFields(context, auth),
+                      SizedBox(height: context.getHeight(16)),
+                    ],
+                  );
+                }
+                return SizedBox.shrink();
+              }),
+          // if (StorageManager.getString(StorageKeys.accountTypeKey) ==
+          //     AppStrings.service) ...[
+          //   SizedBox(height: context.getHeight(16)),
+          //   _buildLocationFields(context, auth),
+          //   SizedBox(height: context.getHeight(16)),
+          // ],
           SharedAuthWidgets.buildInputField(
             context,
             controller: auth.phoneController,

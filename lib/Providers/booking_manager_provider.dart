@@ -91,9 +91,12 @@ class BookingManagerProvider with ChangeNotifier {
     _isLoading = true;
     try {
       _token = await StorageManager.getString(StorageKeys.tokenKey);
+
+      notifyListeners();
       print('Token fetched: $_token');
       if (_token != null) {
         print('Calling fetchBookings from initialize');
+
         await fetchBookings();
       } else {
         print('No token, skipping fetchBookings');
@@ -111,7 +114,7 @@ class BookingManagerProvider with ChangeNotifier {
 
   /// Sets up the tab controller for BookingScreen.
   void setupTabController(TickerProvider vsync) {
-    _tabController = TabController(length: 3, vsync: vsync, initialIndex: 1);
+    _tabController = TabController(length: 3, vsync: vsync, initialIndex: 0);
     notifyListeners();
   }
 

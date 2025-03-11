@@ -10,6 +10,7 @@ import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
 import '../../../../Core/presentation/Widgets/Buttons/secondary_button.dart';
 import '../../../../Core/presentation/resources/app_colors.dart';
 import '../../../../Providers/booking_manager_provider.dart';
+import '../../../../Providers/user_manager_provider.dart';
 import '../../../../core/presentation/widgets/user_avatar.dart';
 import '../../models/booking.dart';
 import '../../models/order_model.dart';
@@ -23,18 +24,15 @@ class BookingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userManager = context.watch<UserManagerProvider>();
+
     return Consumer<BookingManagerProvider>(
       builder: (context, bookingManager, child) {
-        print(
-            'Building BookingScreen: isInitializing=${bookingManager.isInitializing}, '
-            'isAuthenticated=${bookingManager.isAuthenticated}, '
-            'tabController=${bookingManager.tabController}');
-
         if (bookingManager.isInitializing) {
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
-        if (!bookingManager.isAuthenticated) {
+        if (!userManager.isAuthenticated) {
           return _LoginPrompt();
         }
         if (bookingManager.tabController == null) {
@@ -134,10 +132,20 @@ class _BookingContentState extends State<_BookingContent> {
   @override
   void initState() {
     super.initState();
-    widget.tabController.addListener(() {
-      setState(() {});
+    widget.tabController.addListener(_handleTabChange);
+  }
+
+  void _handleTabChange() {
+    if (mounted) {
+      setState(() {}); // Only call setState if mounted
       print('Tab changed to index: ${widget.tabController.index}');
-    });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.tabController.removeListener(_handleTabChange); // Clean up listener
+    super.dispose();
   }
 
   @override

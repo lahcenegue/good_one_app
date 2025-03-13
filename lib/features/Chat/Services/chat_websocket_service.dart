@@ -66,6 +66,8 @@ class ChatWebSocketService {
       debugPrint('Received messages: $data');
       if (data is List) {
         onMessagesLoaded(data);
+      } else {
+        onError('Unexpected messages format: ${data.runtimeType}');
       }
     });
 

@@ -214,7 +214,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> register(BuildContext context) async {
+    print('register from register');
     if (!registrationFormKey.currentState!.validate()) return;
+    print('register state is valide');
 
     if (_selectedImage == null) {
       _imageError = AppLocalizations.of(context)!.imageRequired;
@@ -223,6 +225,7 @@ class AuthProvider with ChangeNotifier {
     }
 
     try {
+      print('login to try');
       _setLoading(true);
       _clearErrors();
 
@@ -230,6 +233,12 @@ class AuthProvider with ChangeNotifier {
         StorageManager.getString(StorageKeys.accountTypeKey),
         StorageManager.getString(StorageKeys.fcmTokenKey),
       ]);
+
+      if (accountType == null) {
+        NavigationService.navigateToAndReplace(AppRoutes.accountSelection);
+      }
+
+      print([accountType, deviceToken]);
 
       if (accountType == AppStrings.service) {
         if (selectedCountry == null || selectedCity == null) {
@@ -254,7 +263,7 @@ class AuthProvider with ChangeNotifier {
         city: accountType == AppStrings.service ? selectedCity : null,
       );
 
-      debugPrint('The Device token fron register ${request.deviceToken}');
+      print('The Device token fron register ${request.deviceToken}');
 
       final response = await AuthApi.register(request);
 

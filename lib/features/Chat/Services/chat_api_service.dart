@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import '../../../Core/infrastructure/api/api_endpoints.dart';
-import '../../../Core/infrastructure/api/api_service.dart';
-import '../../../Core/infrastructure/api/api_response.dart';
-import '../Models/chat_conversation.dart';
-import '../Models/chat_message.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_response.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_service.dart';
+import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
+import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
 
 class ChatService {
   final ApiService _api = ApiService.instance;

@@ -105,7 +105,7 @@ class ContractorListItem extends StatelessWidget {
             ),
             SizedBox(width: context.getWidth(4)),
             Text(
-              contractor.rating!.rating.toString(),
+              contractor.rating!.rating.toStringAsFixed(1),
               style: AppTextStyles.text(context),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

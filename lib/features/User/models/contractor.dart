@@ -82,14 +82,14 @@ class Contractor {
 
 // Rating model
 class Rating {
-  final int rating;
+  final double rating;
   final int timesRated;
 
   const Rating({required this.rating, required this.timesRated});
 
   factory Rating.fromJson(Map<String, dynamic> json) {
     return Rating(
-      rating: json['rating'] as int? ?? 0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       timesRated: json['times_rated'] as int? ?? 0, // Updated field name
     );
   }

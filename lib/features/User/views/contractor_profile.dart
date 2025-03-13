@@ -4,7 +4,7 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Features/Chat/Views/chat_screen.dart';
+import 'package:good_one_app/Features/Chat/presentation/screens/chat_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Core/Navigation/app_routes.dart';

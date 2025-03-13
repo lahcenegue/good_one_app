@@ -22,6 +22,8 @@ class AuthApi {
   // Register endpoint
   static Future<ApiResponse<AuthModel>> register(
       RegisterRequest request) async {
+    print(ApiEndpoints.register);
+    print(request.toFields());
     return _api.postMultipart<AuthModel>(
       url: ApiEndpoints.register,
       fields: request.toFields(),

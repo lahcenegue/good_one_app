@@ -5,8 +5,9 @@ import 'package:good_one_app/Core/presentation/Widgets/loading_indicator.dart';
 import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
-import 'package:good_one_app/Features/Chat/Views/chat_screen.dart';
-import 'package:good_one_app/Features/Chat/Widgets/chat_utils.dart';
+import 'package:good_one_app/Features/Chat/presentation/screens/chat_screen.dart';
+import 'package:good_one_app/Features/Chat/presentation/utils/chat_utils.dart';
+
 import 'package:good_one_app/Providers/chat_provider.dart';
 import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +43,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       ),
       body: Consumer<ChatProvider>(
         builder: (context, provider, _) {
+          debugPrint(
+              'UI State - initialFetchComplete: ${provider.initialFetchComplete}, '
+              'isLoadingConversations: ${provider.isLoadingConversations}, '
+              'error: ${provider.error}, conversations.length: ${provider.conversations.length}');
           // Show loading until initial fetch is complete or if explicitly loading
           if (!provider.initialFetchComplete ||
               provider.isLoadingConversations) {

@@ -224,7 +224,10 @@ class RegistrationScreen extends StatelessWidget {
           PrimaryButton(
             text: AppLocalizations.of(context)!.signUp,
             isLoading: auth.isLoading,
-            onPressed: () => auth.register(context),
+            onPressed: () async {
+              print('register');
+              await auth.register(context);
+            },
           ),
         ],
       ),

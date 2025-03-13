@@ -1,5 +1,5 @@
-import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/infrastructure/websocket/websocket_service.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
@@ -43,10 +43,14 @@ class ChatProvider with ChangeNotifier {
         await initializeConversations();
       } else {
         _setError('Failed to establish WebSocket connection');
+        _initialFetchComplete = true;
+        notifyListeners();
       }
     } catch (e) {
       _setError('Initialization error: $e');
       _setLoadingConversations(false);
+      _initialFetchComplete = true;
+      notifyListeners();
     }
   }
 
@@ -59,10 +63,19 @@ class ChatProvider with ChangeNotifier {
     _initialFetchComplete = false;
     try {
       _socketService.emit('get-chats', []);
+      // Wait for a maximum of 5 seconds for the response
+      await Future.delayed(const Duration(seconds: 5)).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw Exception('Timeout waiting for chat conversations');
+        },
+      );
     } catch (e) {
       _setError('Failed to fetch conversations: $e');
-      _setLoadingConversations(false);
+    } finally {
       _initialFetchComplete = true;
+      _setLoadingConversations(false);
+      notifyListeners();
     }
   }
 
@@ -136,7 +149,9 @@ class ChatProvider with ChangeNotifier {
     try {
       List<ChatConversation> newConversations = [];
 
-      if (data is String) {
+      if (data == null) {
+        _conversations = [];
+      } else if (data is String) {
         data = json.decode(data);
       }
 
@@ -182,6 +197,7 @@ class ChatProvider with ChangeNotifier {
     } catch (e) {
       _setError('Error processing conversations: $e');
       _initialFetchComplete = true;
+      notifyListeners();
     } finally {
       _setLoadingConversations(false);
     }
@@ -189,10 +205,24 @@ class ChatProvider with ChangeNotifier {
 
   void _handleMessageHistory(dynamic data) {
     try {
-      final messageData = data is String ? json.decode(data) : data as Map;
-      List<ChatMessage> newMessages = messageData.entries
-          .map<ChatMessage>((e) => _createChatMessage(e.value))
-          .toList();
+      List<ChatMessage> newMessages = [];
+
+      if (data is String) {
+        data = json.decode(data);
+      }
+
+      if (data is Map<String, dynamic>) {
+        newMessages = data.entries
+            .map<ChatMessage>((e) => _createChatMessage(e.value))
+            .toList();
+      } else if (data is List) {
+        newMessages =
+            data.map<ChatMessage>((item) => _createChatMessage(item)).toList();
+      } else {
+        throw Exception(
+            'Unexpected message history format: ${data.runtimeType}');
+      }
+
       newMessages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
       _messages = newMessages;
       notifyListeners();
@@ -240,13 +270,15 @@ class ChatProvider with ChangeNotifier {
       debugPrint(
           'Updated conversation $userId: hasNewMessages = ${_conversations[index].hasNewMessages}');
     } else {
-      _conversations.add(ChatConversation(
-        user: ChatUser(
-            id: int.parse(userId), email: '', fullName: '', picture: ''),
-        latestMessage: message.message,
-        time: message.timestamp.toString(),
-        hasNewMessages: !isSent,
-      ));
+      _conversations.add(
+        ChatConversation(
+          user: ChatUser(
+              id: int.parse(userId), email: '', fullName: '', picture: ''),
+          latestMessage: message.message,
+          time: message.timestamp.toString(),
+          hasNewMessages: !isSent,
+        ),
+      );
       debugPrint('Added new conversation $userId: hasNewMessages = ${!isSent}');
     }
     _conversations.sort((a, b) => b.time!.compareTo(a.time!));

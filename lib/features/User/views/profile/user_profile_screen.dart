@@ -77,37 +77,6 @@ class UserProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Align(
-          //   alignment: Alignment.center,
-          //   child: Container(
-          //     width: context.getAdaptiveSize(120),
-          //     height: context.getAdaptiveSize(120),
-          //     decoration: BoxDecoration(
-          //       color: Colors.white,
-          //       shape: BoxShape.circle,
-          //       border: Border.all(
-          //         width: 4,
-          //         color: Colors.white,
-          //       ),
-          //       image: user?.picture != null
-          //           ? DecorationImage(
-          //               image: NetworkImage(
-          //                 '${ApiEndpoints.imageBaseUrl}/${user!.picture}',
-          //               ),
-          //               fit: BoxFit.cover,
-          //               onError: (_, __) {},
-          //             )
-          //           : null,
-          //     ),
-          //     child: user?.picture == null
-          //         ? Icon(
-          //             Icons.person,
-          //             size: context.getAdaptiveSize(50),
-          //             color: AppColors.primaryColor,
-          //           )
-          //         : null,
-          //   ),
-          // ),
 
           // User Avatar
           Align(

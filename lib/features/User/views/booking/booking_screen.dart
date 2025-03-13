@@ -394,7 +394,7 @@ class BookingCard extends StatelessWidget {
                   .pop(); // Close the dialog after success
             },
             child: Text(
-              AppLocalizations.of(context)!.received,
+              AppLocalizations.of(context)!.confirmComplete,
               style: AppTextStyles.text(context)
                   .copyWith(color: AppColors.primaryColor),
             ),
@@ -579,8 +579,11 @@ class _ActionButtons extends StatelessWidget {
   final VoidCallback onReceive;
   final VoidCallback onCancel;
 
-  const _ActionButtons(
-      {required this.booking, required this.onReceive, required this.onCancel});
+  const _ActionButtons({
+    required this.booking,
+    required this.onReceive,
+    required this.onCancel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -590,7 +593,7 @@ class _ActionButtons extends StatelessWidget {
         SizedBox(
           width: context.getWidth(150),
           child: SmallPrimaryButton(
-            text: AppLocalizations.of(context)!.receive,
+            text: AppLocalizations.of(context)!.completed,
             onPressed: onReceive,
           ),
         ),

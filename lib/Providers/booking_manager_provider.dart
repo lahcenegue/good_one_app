@@ -205,7 +205,6 @@ class BookingManagerProvider with ChangeNotifier {
               description:
                   AppLocalizations.of(context)!.orderSuccessDescription,
               confirmText: AppLocalizations.of(context)!.confirm,
-              cancelText: AppLocalizations.of(context)!.close,
               onConfirm: () {
                 Navigator.of(context).pop();
 
@@ -214,9 +213,6 @@ class BookingManagerProvider with ChangeNotifier {
                   (Route<dynamic> route) => false,
                   arguments: 1,
                 );
-              },
-              onCancel: () {
-                Navigator.of(context).pop();
               },
             ),
           );
@@ -415,7 +411,6 @@ class BookingManagerProvider with ChangeNotifier {
               description:
                   AppLocalizations.of(context)!.feedbackSuccessDescription,
               confirmText: AppLocalizations.of(context)!.backToBookings,
-              cancelText: AppLocalizations.of(context)!.close,
               onConfirm: () {
                 Navigator.of(context).pop(); // Close dialog
                 Navigator.of(context).pushNamedAndRemoveUntil(
@@ -423,9 +418,6 @@ class BookingManagerProvider with ChangeNotifier {
                   (Route<dynamic> route) => false,
                   arguments: 1,
                 );
-              },
-              onCancel: () {
-                Navigator.of(context).pop(); // Close dialog
               },
             ),
           );

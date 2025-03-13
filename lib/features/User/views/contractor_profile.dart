@@ -64,7 +64,7 @@ class ContractorProfile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SmallSecondaryButton(
-                        text: 'message', //TODO translate
+                        text: 'Chat', //TODO translate
                         onPressed: () {
                           if (userManager.token == null) {
                             showDialog(

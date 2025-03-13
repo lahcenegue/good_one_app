@@ -3,26 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
-
-import '../resources/app_assets.dart';
+import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
 
 class SuccessDialog extends StatelessWidget {
   final String title;
   final String description;
   final String confirmText;
-  final String cancelText;
   final VoidCallback onConfirm;
-  final VoidCallback onCancel;
 
   const SuccessDialog({
     super.key,
     required this.title,
     required this.description,
     this.confirmText = 'Confirm',
-    this.cancelText = 'Close',
     required this.onConfirm,
-    required this.onCancel,
   });
 
   @override
@@ -62,24 +56,9 @@ class SuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 24.0),
             // Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                SizedBox(
-                  width: context.getWidth(120),
-                  child: SmallPrimaryButton(
-                    text: confirmText,
-                    onPressed: onConfirm,
-                  ),
-                ),
-                SizedBox(
-                  width: context.getWidth(120),
-                  child: SmallSecondaryButton(
-                    text: cancelText,
-                    onPressed: onCancel,
-                  ),
-                ),
-              ],
+            SmallPrimaryButton(
+              text: confirmText,
+              onPressed: onConfirm,
             ),
           ],
         ),

@@ -214,7 +214,6 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> register(BuildContext context) async {
-    print('register from register');
     if (!registrationFormKey.currentState!.validate()) return;
     print('register state is valide');
 

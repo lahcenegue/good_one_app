@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Features/User/presentation/Widgets/booking/contractor_list_item.dart';
+import 'package:good_one_app/Features/User/presentation/views/contractor_profile.dart';
+import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
-
-import '../../../Providers/user_manager_provider.dart';
-import '../Widgets/booking/contractor_list_item.dart';
-import 'contractor_profile.dart';
 
 class ContractorsByService extends StatefulWidget {
   final int? serviceId;

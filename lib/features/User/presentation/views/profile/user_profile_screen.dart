@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
+import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../../Core/presentation/Widgets/Buttons/secondary_button.dart';
-import '../../../../Core/presentation/Widgets/user_avatar.dart';
-import '../../../../Core/presentation/resources/app_assets.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import '../../../../Core/Navigation/app_routes.dart';
-import '../../../../Core/Navigation/navigation_service.dart';
-import '../../../../Core/Utils/size_config.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import '../../../../Providers/user_manager_provider.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -33,18 +30,12 @@ class UserProfileScreen extends StatelessWidget {
 
                 SizedBox(height: context.getHeight(12)),
 
-                // Profile Info - Only shown when authenticated
-                if (userManager.isAuthenticated) ...[
-                  _buildProfileInfo(context, userManager),
-                  SizedBox(height: context.getHeight(12)),
-                ],
-
-                // Common menu items that don't require authentication
-                _buildCommonMenuItems(context),
-
                 // Authentication-specific menu items
                 if (userManager.token != null)
                   _buildAuthenticatedMenuItems(context, userManager),
+
+                // Common menu items
+                _buildCommonMenuItems(context),
 
                 // Login button for unauthenticated users
                 if (userManager.token == null)
@@ -58,7 +49,9 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAuthenticatedHeader(
-      BuildContext context, UserManagerProvider userManager) {
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     final user = userManager.userInfo;
     if (user == null) return const SizedBox.shrink();
 
@@ -89,21 +82,20 @@ class UserProfileScreen extends StatelessWidget {
           ),
 
           // User Info
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  user.fullName!,
-                  style: AppTextStyles.title(context),
-                ),
-                SizedBox(height: context.getHeight(8)),
-                SmallSecondaryButton(
-                  text: AppLocalizations.of(context)!.edit,
-                  onPressed: () {},
-                )
-              ],
+          Positioned(
+            bottom: context.getHeight(40),
+            child: SizedBox(
+              width: context.screenWidth,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    user.fullName!,
+                    style: AppTextStyles.title(context),
+                  ),
+                ],
+              ),
             ),
           )
         ],
@@ -158,49 +150,6 @@ class UserProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileInfo(
-      BuildContext context, UserManagerProvider userManager) {
-    final user = userManager.userInfo;
-    if (user == null) return const SizedBox.shrink();
-
-    return Padding(
-      padding: EdgeInsets.all(context.getWidth(16)),
-      child: Column(
-        children: [
-          _buildInfoItem(
-            context,
-            title: AppLocalizations.of(context)!.phoneNumber,
-            value: user.phone.toString(),
-          ),
-          SizedBox(height: context.getHeight(16)),
-          _buildInfoItem(
-            context,
-            title: AppLocalizations.of(context)!.location,
-            value: user.location ?? '',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoItem(BuildContext context,
-      {required String title, required String value}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: AppTextStyles.text(context),
-        ),
-        Text(
-          value,
-          style: AppTextStyles.subTitle(context),
-        ),
-      ],
-    );
-  }
-
   Widget _buildCommonMenuItems(BuildContext context) {
     return Column(
       children: [
@@ -228,6 +177,14 @@ class UserProfileScreen extends StatelessWidget {
   ) {
     return Column(
       children: [
+        _buildMenuItem(
+          context,
+          image: AppAssets.profile,
+          title: AppLocalizations.of(context)!.accountDetails,
+          onTap: () {
+            NavigationService.navigateTo(AppRoutes.accountDetails);
+          },
+        ),
         _buildMenuItem(
           context,
           image: AppAssets.support,

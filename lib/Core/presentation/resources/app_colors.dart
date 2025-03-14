@@ -14,10 +14,6 @@ abstract class AppColors {
   // Text Colors
   static const Color hintColor = Color(0xFF6D6D6D);
 
-  // Status Colors
-  static const Color success = Color(0xFF28A745);
-  static const Color error = Color(0xFFDC3545);
-  static const Color warning = Color(0xFFFFC107);
-  static const Color info = Color(0xFF17A2B8);
+  // Other Colors
   static const Color rating = Color(0xFFfbdc00);
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import '../../../../Core/infrastructure/api/api_endpoints.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Core/Utils/size_config.dart';
-import '../../models/service_category.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
+import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Features/User/models/service_category.dart';
 
 class ServiceGridItem extends StatelessWidget {
   final ServiceCategory category;

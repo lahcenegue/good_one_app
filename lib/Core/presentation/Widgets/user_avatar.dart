@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../infrastructure/api/api_endpoints.dart';
-import '../resources/app_colors.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
+import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 
 class UserAvatar extends StatelessWidget {
   final String? picture;

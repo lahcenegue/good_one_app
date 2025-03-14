@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
+import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Features/User/presentation/views/booking/booking_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/home/user_home_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/profile/user_profile_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/servicesScreen/services_screen.dart';
+import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../Core/presentation/resources/app_assets.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import '../../../../Core/presentation/Widgets/error/error_widget.dart';
-import '../../../../Providers/user_manager_provider.dart';
-
-import '../booking/booking_screen.dart';
-import '../servicesScreen/services_screen.dart';
-import 'user_home_screen.dart';
-import '../profile/user_profile_screen.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

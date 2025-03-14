@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
+import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
+import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Features/Chat/presentation/screens/chat_screen.dart';
+import 'package:good_one_app/Features/User/models/contractor.dart';
+import 'package:good_one_app/Features/User/presentation/Widgets/gallery_viewer_page.dart';
+import 'package:good_one_app/Features/User/presentation/Widgets/profile/auth_required_dialog.dart';
+import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
-
-import '../../../Core/Navigation/app_routes.dart';
-import '../../../Core/infrastructure/api/api_endpoints.dart';
-import '../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../Core/presentation/Widgets/user_avatar.dart';
-import '../../../Core/presentation/resources/app_assets.dart';
-import '../../../Providers/user_manager_provider.dart';
-import '../Widgets/profile/auth_required_dialog.dart';
-import '../Widgets/gallery_viewer_page.dart';
-import '../models/contractor.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

@@ -91,7 +91,7 @@
   "schedule": "Schedule",
   "search": "Search",
   "seeAll": "See all",
-  "selectImage": "Profile Picture",
+  "profilePicture": "Profile Picture",
   "selectPaymentMethod": "Select Payment Method",
   "selected": "Selected",
   "service": "Service",
@@ -147,7 +147,14 @@
   "rating": "Rating",
   "comment": "Comment",
   "commentHint": "Share your feedback...",
-  "submissionFailed": "Failed to submit feedback"
-
+  "submissionFailed": "Failed to submit feedback",
+  "accountDetails": "Account Details",
+   "editAccount":"Edit Account",
+   "city":"City",
+   "enterCity":"Enter Your City",
+   "country":"Country",
+   "enterCountry":"Enter Your Country",
+   "update":"Update"
+ 
 
 }

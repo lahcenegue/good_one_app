@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Features/Chat/presentation/screens/conversations_screen.dart';
+import 'package:good_one_app/Features/Onboarding/Views/onbording_view.dart';
+import 'package:good_one_app/Features/Setup/Views/account_type_screen.dart';
+import 'package:good_one_app/Features/Setup/Views/language_selection_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/booking/booking_summary_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/booking/calender_booking_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/booking/location_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/contractors_by_service.dart';
+import 'package:good_one_app/Features/User/presentation/views/home/user_main_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/notifications_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/profile/account_details_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/profile/language_settings_screen.dart';
 import 'package:good_one_app/Features/Worker/views/worker_main_screen.dart';
-import '../../Features/User/views/booking/booking_summary_screen.dart';
-import '../../Features/User/views/booking/calender_booking_screen.dart';
-import '../../Features/User/views/booking/location_screen.dart';
-import '../../Features/User/views/contractors_by_service.dart';
-import '../../Features/User/views/notifications_screen.dart';
-import '../../Features/User/views/profile/language_settings_screen.dart';
-import '../../Features/auth/views/registration_screen.dart';
-import '../../Features/Setup/Views/account_type_screen.dart';
-import '../../Features/Setup/Views/language_selection_screen.dart';
-import '../../Features/auth/views/login_screen.dart';
-import '../../Features/Onboarding/Views/onbording_view.dart';
-import '../../Features/User/views/home/user_main_screen.dart';
+import 'package:good_one_app/Features/auth/views/login_screen.dart';
+import 'package:good_one_app/Features/auth/views/registration_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -32,6 +33,7 @@ class AppRoutes {
   static const String locationScreen = '/locationScreen';
   static const String bookingSummaryScreen = '/bookingSummaryScreen';
   static const String notificationsScreen = '/NotificationsScreen';
+  static const String accountDetails = '/accountDetails';
 
   static const String workerMain = '/workerMainScreen';
 
@@ -60,6 +62,7 @@ class AppRoutes {
       locationScreen: (_) => const LocationScreen(),
       bookingSummaryScreen: (_) => const BookingSummaryScreen(),
       notificationsScreen: (_) => const NotificationsScreen(),
+      accountDetails: (_) => AccountDetailsScreen(),
 
       //
       workerMain: (_) => const WorkerMainScreen(),

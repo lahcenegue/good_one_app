@@ -4,22 +4,20 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Core/infrastructure/storage/storage_manager.dart';
+import 'package:good_one_app/Core/presentation/Widgets/success_dialog.dart';
+import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
+import 'package:good_one_app/Features/User/models/booking.dart';
+import 'package:good_one_app/Features/User/models/order_model.dart';
+import 'package:good_one_app/Features/User/models/rate_model.dart';
+import 'package:good_one_app/Features/User/presentation/views/service_evaluation_screen.dart';
+import 'package:good_one_app/Features/User/services/user_api.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../../core/presentation/resources/app_strings.dart';
-import '../Core/Navigation/app_routes.dart';
-import '../Core/Utils/storage_keys.dart';
-import '../Core/infrastructure/storage/storage_manager.dart';
-import '../Core/presentation/Widgets/success_dialog.dart';
-import '../Features/User/models/booking.dart';
-import '../Features/User/models/order_model.dart';
-import '../Features/User/models/rate_model.dart';
-import '../Features/User/services/user_api.dart';
-
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import '../Features/User/views/service_evaluation_screen.dart';
 
 /// Manages all booking-related state and operations, including location selection.
 class BookingManagerProvider with ChangeNotifier {

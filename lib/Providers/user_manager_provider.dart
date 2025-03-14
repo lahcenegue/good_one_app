@@ -1,13 +1,18 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../Core/Utils/storage_keys.dart';
-import '../Core/infrastructure/storage/storage_manager.dart';
-import '../Features/User/models/contractor.dart';
-import '../Features/User/models/notification_model.dart';
-import '../Features/User/models/service_category.dart';
-import '../Features/User/models/user_info.dart';
-import '../Features/User/services/user_api.dart';
-import '../Features/auth/Services/token_manager.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Core/infrastructure/storage/storage_manager.dart';
+import 'package:good_one_app/Features/User/models/account_edit_request.dart';
+import 'package:good_one_app/Features/User/models/contractor.dart';
+import 'package:good_one_app/Features/User/models/notification_model.dart';
+import 'package:good_one_app/Features/User/models/service_category.dart';
+import 'package:good_one_app/Features/User/models/user_info.dart';
+import 'package:good_one_app/Features/User/services/user_api.dart';
+import 'package:good_one_app/Features/auth/Services/token_manager.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserManagerProvider extends ChangeNotifier {
   // Authentication State
@@ -18,6 +23,19 @@ class UserManagerProvider extends ChangeNotifier {
   // UI State
   int _currentIndex = 0;
   bool _isLoading = false;
+
+  // Form Controllers
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Image
+  File? _selectedImage;
+  String? _imageError;
+  final ImagePicker _picker = ImagePicker();
 
   // Search State
   String _searchQuery = '';
@@ -55,6 +73,14 @@ class UserManagerProvider extends ChangeNotifier {
       List.unmodifiable(_notifications);
   bool get isNotificationLoading => _isNotificationLoading;
   String? get notificationError => _notificationError;
+  String? get imageError => _imageError;
+  File? get selectedImage => _selectedImage;
+  TextEditingController get fullNameController => _fullNameController;
+  TextEditingController get emailController => _emailController;
+  TextEditingController get phoneController => _phoneController;
+  TextEditingController get cityController => _cityController;
+  TextEditingController get countryController => _countryController;
+  TextEditingController get passwordController => _passwordController;
 
   // Constructor
   UserManagerProvider() {
@@ -72,6 +98,7 @@ class UserManagerProvider extends ChangeNotifier {
       _token = await StorageManager.getString(StorageKeys.tokenKey);
       if (_token != null) {
         final userInfoSuccess = await fetchUserInfo();
+        if (userInfoSuccess) _initializeControllers();
 
         if (!userInfoSuccess) {
           final refreshed = await TokenManager.instance.refreshToken();
@@ -149,6 +176,11 @@ class UserManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setImageError(String? message) {
+    _imageError = message;
+    notifyListeners();
+  }
+
   // User Info
   Future<bool> fetchUserInfo() async {
     if (_token == null) return false;
@@ -157,7 +189,6 @@ class UserManagerProvider extends ChangeNotifier {
       final response = await UserApi.getUserInfo();
       if (response.success && response.data != null) {
         _userInfo = response.data;
-        debugPrint('User info fetched: ${_userInfo?.fullName}');
         notifyListeners();
         return true;
       }
@@ -168,6 +199,79 @@ class UserManagerProvider extends ChangeNotifier {
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  void _initializeControllers() {
+    final user = _userInfo;
+    _fullNameController.text = user?.fullName ?? '';
+    _emailController.text = user?.email ?? '';
+    _phoneController.text = user?.phone?.toString() ?? '';
+    _cityController.text = user?.city ?? '';
+    _countryController.text = user?.country ?? '';
+  }
+
+  Future<bool> editAccount(BuildContext context) async {
+    try {
+      _setLoading(true);
+
+      final request = AccountEditRequest(
+        image: _selectedImage,
+        fullName: fullNameController.text == _userInfo!.fullName
+            ? null
+            : fullNameController.text,
+        email: emailController.text == _userInfo!.email
+            ? null
+            : fullNameController.text,
+        city:
+            cityController.text == _userInfo!.city ? null : cityController.text,
+        country: countryController.text == _userInfo!.country
+            ? null
+            : countryController.text,
+        phone: phoneController.text == (_userInfo!.phone.toString())
+            ? null
+            : int.tryParse(phoneController.text),
+        password:
+            passwordController.text.isEmpty ? null : passwordController.text,
+      );
+
+      print(request.fullName);
+
+      final response = await UserApi.editAccount(request);
+      if (response.success && response.data != null) {
+        _userInfo = response.data;
+
+        _initializeControllers();
+        _selectedImage = null;
+        setImageError(null);
+        notifyListeners();
+        return true;
+      }
+      setError('Failed to edit account: ${response.error}');
+      return false;
+    } catch (e) {
+      setError('Exception editing account: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> pickImage(BuildContext context, ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1000,
+        maxHeight: 1000,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        _selectedImage = File(image.path);
+        setImageError(null);
+      }
+    } catch (e) {
+      setImageError(AppLocalizations.of(context)!.generalError);
     }
   }
 

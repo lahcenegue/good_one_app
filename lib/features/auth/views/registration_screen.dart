@@ -57,12 +57,15 @@ class RegistrationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImagePicker(BuildContext context, AuthProvider auth) {
+  Widget _buildImagePicker(
+    BuildContext context,
+    AuthProvider auth,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppLocalizations.of(context)!.selectImage,
+          AppLocalizations.of(context)!.profilePicture,
           style: AppTextStyles.subTitle(context),
         ),
         SizedBox(height: context.getHeight(8)),
@@ -182,12 +185,6 @@ class RegistrationScreen extends StatelessWidget {
                 }
                 return SizedBox.shrink();
               }),
-          // if (StorageManager.getString(StorageKeys.accountTypeKey) ==
-          //     AppStrings.service) ...[
-          //   SizedBox(height: context.getHeight(16)),
-          //   _buildLocationFields(context, auth),
-          //   SizedBox(height: context.getHeight(16)),
-          // ],
           SharedAuthWidgets.buildInputField(
             context,
             controller: auth.phoneController,

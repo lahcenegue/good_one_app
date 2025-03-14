@@ -1,21 +1,21 @@
 import 'dart:convert';
-
-import 'package:good_one_app/Features/User/models/booking.dart';
+import 'package:good_one_app/Features/User/models/account_edit_request.dart';
 import 'package:http/http.dart' as http;
 
-import '../../../Core/Utils/storage_keys.dart';
-import '../../../Core/infrastructure/api/api_response.dart';
-import '../../../Core/infrastructure/api/api_service.dart';
-import '../../../Core/infrastructure/api/api_endpoints.dart';
-import '../../../Core/infrastructure/storage/storage_manager.dart';
-import '../../../Core/presentation/resources/app_strings.dart';
-import '../models/contractor.dart';
-import '../models/coupom_model.dart';
-import '../models/notification_model.dart';
-import '../models/order_model.dart';
-import '../models/rate_model.dart';
-import '../models/service_category.dart';
-import '../models/user_info.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_response.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_service.dart';
+import 'package:good_one_app/Core/infrastructure/storage/storage_manager.dart';
+import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
+import 'package:good_one_app/Features/User/models/booking.dart';
+import 'package:good_one_app/Features/User/models/contractor.dart';
+import 'package:good_one_app/Features/User/models/coupom_model.dart';
+import 'package:good_one_app/Features/User/models/notification_model.dart';
+import 'package:good_one_app/Features/User/models/order_model.dart';
+import 'package:good_one_app/Features/User/models/rate_model.dart';
+import 'package:good_one_app/Features/User/models/service_category.dart';
+import 'package:good_one_app/Features/User/models/user_info.dart';
 
 class UserApi {
   static final _api = ApiService.instance;
@@ -222,6 +222,24 @@ class UserApi {
       url: ApiEndpoints.rateService,
       body: rateRequest.toJson(),
       fromJson: (json) => json as Map<String, dynamic>,
+      token: token,
+    );
+  }
+
+  static Future<ApiResponse<UserInfo>> editAccount(
+      AccountEditRequest request) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+
+    return _api.postMultipart<UserInfo>(
+      url: ApiEndpoints.accountEdit,
+      fields: request.toFields(),
+      files: request.toFiles(),
+      fromJson: (dynamic response) {
+        if (response is Map<String, dynamic>) {
+          return UserInfo.fromJson(response);
+        }
+        throw Exception('Invalid response format');
+      },
       token: token,
     );
   }

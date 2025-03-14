@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-
-import '../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../Core/presentation/Widgets/user_avatar.dart';
-import '../models/contractor.dart';
+import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Features/User/models/contractor.dart';
 
 class CustomerReviewsScreen extends StatelessWidget {
   final Contractor contractor;

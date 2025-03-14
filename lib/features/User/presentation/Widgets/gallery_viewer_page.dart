@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
 import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider/provider.dart';
-
-import '../../../Core/infrastructure/api/api_endpoints.dart';
 
 class GalleryViewerPage extends StatefulWidget {
   final int initialIndex;

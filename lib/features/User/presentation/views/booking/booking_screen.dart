@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Features/User/views/service_evaluation_screen.dart';
+import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
+import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Features/User/models/booking.dart';
+import 'package:good_one_app/Features/User/models/order_model.dart';
+import 'package:good_one_app/Features/User/presentation/views/service_evaluation_screen.dart';
+import 'package:good_one_app/Providers/booking_manager_provider.dart';
+import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../Core/Navigation/app_routes.dart';
-import '../../../../Core/Navigation/navigation_service.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../../Core/presentation/Widgets/Buttons/secondary_button.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import '../../../../Providers/booking_manager_provider.dart';
-import '../../../../Providers/user_manager_provider.dart';
-import '../../../../core/presentation/widgets/user_avatar.dart';
-import '../../models/booking.dart';
-import '../../models/order_model.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -188,7 +187,12 @@ class _TabBarSection extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: AppColors.dimGray, blurRadius: 4)],
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.dimGray,
+            blurRadius: 4,
+          )
+        ],
       ),
       child: TabBar(
         controller: tabController,

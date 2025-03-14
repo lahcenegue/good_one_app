@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Features/User/presentation/Widgets/booking/contractor_list_item.dart';
+import 'package:good_one_app/Features/User/presentation/Widgets/booking/service_grid_item.dart';
+import 'package:good_one_app/Features/User/presentation/views/contractor_profile.dart';
+import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../Core/presentation/Widgets/user_avatar.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import '../../../../Core/presentation/Widgets/error/error_widget.dart';
-import '../../../../Core/Navigation/app_routes.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Core/Navigation/navigation_service.dart';
-import '../../../../Core/Utils/size_config.dart';
-import '../../../../Providers/user_manager_provider.dart';
-import '../../Widgets/booking/contractor_list_item.dart';
-import '../../Widgets/booking/service_grid_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../contractor_profile.dart';
 
 class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
@@ -73,7 +73,11 @@ class UserHomeScreen extends StatelessWidget {
         ),
         SizedBox(width: context.getWidth(10)),
         Expanded(
-          child: _buildUserInfo(context, user?.fullName, user?.location),
+          child: _buildUserInfo(
+            context,
+            user!.fullName,
+            '${user.city}, ${user.country}',
+          ),
         ),
         _buildNotificationIcon(context),
         SizedBox(width: context.getWidth(10)),

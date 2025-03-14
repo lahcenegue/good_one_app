@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Features/User/models/notification_model.dart';
 import 'package:intl/intl.dart';
-import '../../../Core/presentation/Widgets/user_avatar.dart';
-import '../models/notification_model.dart';
 
 class NotificationListItem extends StatelessWidget {
   final NotificationModel notification;

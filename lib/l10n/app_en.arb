@@ -154,7 +154,20 @@
    "enterCity":"Enter Your City",
    "country":"Country",
    "enterCountry":"Enter Your Country",
-   "update":"Update"
+   "update":"Update",
+   "supportHeader": "How Can We Assist You?",
+   "emailSupport": "Email Support",
+   "emailSupportDescription": "Reach out to our team via email for assistance.",
+   "chatSupport": "Live Chat Support",
+   "chatSupportDescription": "Connect with a support agent in real-time.",
+   "whatsappSupport": "Contact via WhatsApp",
+   "whatsappSupportDescription": "Message us on WhatsApp for quick support.",
+   "cancellationPolicy": "Cancellation Policy",
+   "cancellationPolicyDescription": "Review our policy on cancellations and refunds.",
+   "deleteAccount": "Delete Account",
+   "deleteAccountDescription": "Permanently delete your account and data.",
+   "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
+   "delete": "Delete"
  
 
 }

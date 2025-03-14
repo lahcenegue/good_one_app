@@ -11,6 +11,7 @@ import 'package:good_one_app/Features/User/presentation/views/home/user_main_scr
 import 'package:good_one_app/Features/User/presentation/views/notifications_screen.dart';
 import 'package:good_one_app/Features/User/presentation/views/profile/account_details_screen.dart';
 import 'package:good_one_app/Features/User/presentation/views/profile/language_settings_screen.dart';
+import 'package:good_one_app/Features/User/presentation/views/support_screen.dart';
 import 'package:good_one_app/Features/Worker/views/worker_main_screen.dart';
 import 'package:good_one_app/Features/auth/views/login_screen.dart';
 import 'package:good_one_app/Features/auth/views/registration_screen.dart';
@@ -34,6 +35,7 @@ class AppRoutes {
   static const String bookingSummaryScreen = '/bookingSummaryScreen';
   static const String notificationsScreen = '/NotificationsScreen';
   static const String accountDetails = '/accountDetails';
+  static const String supportPage = '/supportPage';
 
   static const String workerMain = '/workerMainScreen';
 
@@ -63,6 +65,7 @@ class AppRoutes {
       bookingSummaryScreen: (_) => const BookingSummaryScreen(),
       notificationsScreen: (_) => const NotificationsScreen(),
       accountDetails: (_) => AccountDetailsScreen(),
+      supportPage: (_) => const SupportPage(),
 
       //
       workerMain: (_) => const WorkerMainScreen(),

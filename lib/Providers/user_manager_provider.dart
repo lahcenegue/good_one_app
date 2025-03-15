@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
-import 'package:good_one_app/Core/infrastructure/storage/storage_manager.dart';
-import 'package:good_one_app/Features/User/models/account_edit_request.dart';
+import 'package:good_one_app/Core/Infrastructure/storage/storage_manager.dart';
+import 'package:good_one_app/Features/Both/Models/account_edit_request.dart';
+import 'package:good_one_app/Features/Both/Models/user_info.dart';
+import 'package:good_one_app/Features/Notifications/Models/notification_model.dart';
 import 'package:good_one_app/Features/User/models/contractor.dart';
-import 'package:good_one_app/Features/User/models/notification_model.dart';
 import 'package:good_one_app/Features/User/models/service_category.dart';
-import 'package:good_one_app/Features/User/models/user_info.dart';
-import 'package:good_one_app/Features/User/services/user_api.dart';
+import 'package:good_one_app/Features/User/Services/user_api.dart';
 import 'package:good_one_app/Features/auth/Services/token_manager.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -215,6 +215,8 @@ class UserManagerProvider extends ChangeNotifier {
     try {
       _setLoading(true);
 
+      print(emailController.text);
+
       final request = AccountEditRequest(
         image: _selectedImage,
         fullName: fullNameController.text == _userInfo!.fullName
@@ -222,7 +224,7 @@ class UserManagerProvider extends ChangeNotifier {
             : fullNameController.text,
         email: emailController.text == _userInfo!.email
             ? null
-            : fullNameController.text,
+            : emailController.text,
         city:
             cityController.text == _userInfo!.city ? null : cityController.text,
         country: countryController.text == _userInfo!.country
@@ -235,7 +237,7 @@ class UserManagerProvider extends ChangeNotifier {
             passwordController.text.isEmpty ? null : passwordController.text,
       );
 
-      print(request.fullName);
+      print(request.email);
 
       final response = await UserApi.editAccount(request);
       if (response.success && response.data != null) {

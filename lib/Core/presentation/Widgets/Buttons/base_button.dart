@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../Utils/size_config.dart';
-import '../../resources/app_colors.dart';
+import '../../Resources/app_colors.dart';
 
 abstract class BaseButton extends StatelessWidget {
   final String text;

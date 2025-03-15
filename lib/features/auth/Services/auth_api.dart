@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../Core/infrastructure/api/api_response.dart';
 import '../../../Core/infrastructure/api/api_service.dart';
 import '../../../Core/infrastructure/api/api_endpoints.dart';
-import '../models/auth_model.dart';
-import '../models/auth_request.dart';
-import '../models/register_request.dart';
+import '../Models/auth_model.dart';
+import '../Models/auth_request.dart';
+import '../Models/register_request.dart';
 
 class AuthApi {
   static final _api = ApiService.instance;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../resources/app_colors.dart';
-import '../../resources/app_strings.dart';
+import '../../Resources/app_colors.dart';
+import '../../Resources/app_strings.dart';
 import '../../Theme/app_text_styles.dart';
 import '../../../Utils/size_config.dart';
 import '../Buttons/primary_button.dart';

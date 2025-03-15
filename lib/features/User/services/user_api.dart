@@ -1,5 +1,8 @@
 import 'dart:convert';
-import 'package:good_one_app/Features/User/models/account_edit_request.dart';
+import 'package:good_one_app/Features/Both/Models/account_edit_request.dart';
+import 'package:good_one_app/Features/Both/Models/user_info.dart';
+import 'package:good_one_app/Features/Notifications/Models/notification_model.dart';
+import 'package:good_one_app/Features/User/Models/coupon_model.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
@@ -10,12 +13,9 @@ import 'package:good_one_app/Core/infrastructure/storage/storage_manager.dart';
 import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
 import 'package:good_one_app/Features/User/models/booking.dart';
 import 'package:good_one_app/Features/User/models/contractor.dart';
-import 'package:good_one_app/Features/User/models/coupom_model.dart';
-import 'package:good_one_app/Features/User/models/notification_model.dart';
 import 'package:good_one_app/Features/User/models/order_model.dart';
 import 'package:good_one_app/Features/User/models/rate_model.dart';
 import 'package:good_one_app/Features/User/models/service_category.dart';
-import 'package:good_one_app/Features/User/models/user_info.dart';
 
 class UserApi {
   static final _api = ApiService.instance;

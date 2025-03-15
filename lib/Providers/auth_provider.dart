@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../Features/auth/models/auth_model.dart';
+import '../Features/auth/Models/auth_model.dart';
 import '../Core/Utils/storage_keys.dart';
 import '../Core/Utils/error_handling/error_handler.dart';
 import '../Core/Utils/error_handling/failures.dart';
@@ -15,11 +15,11 @@ import '../Core/infrastructure/storage/storage_manager.dart';
 import '../Core/presentation/resources/app_strings.dart';
 import '../Features/auth/Services/auth_api.dart';
 import '../Features/auth/Services/token_manager.dart';
-import '../Features/auth/models/auth_request.dart';
+import '../Features/auth/Models/auth_request.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../Features/auth/models/register_request.dart';
+import '../Features/auth/Models/register_request.dart';
 import 'user_manager_provider.dart';
 
 class AuthProvider with ChangeNotifier {

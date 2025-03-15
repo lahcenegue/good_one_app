@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Features/Chat/presentation/screens/conversations_screen.dart';
-import 'package:good_one_app/Features/Onboarding/Views/onbording_view.dart';
-import 'package:good_one_app/Features/Setup/Views/account_type_screen.dart';
-import 'package:good_one_app/Features/Setup/Views/language_selection_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/booking/booking_summary_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/booking/calender_booking_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/booking/location_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/contractors_by_service.dart';
-import 'package:good_one_app/Features/User/presentation/views/home/user_main_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/notifications_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/profile/account_details_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/profile/language_settings_screen.dart';
-import 'package:good_one_app/Features/User/presentation/views/support_screen.dart';
-import 'package:good_one_app/Features/Worker/views/worker_main_screen.dart';
-import 'package:good_one_app/Features/auth/views/login_screen.dart';
-import 'package:good_one_app/Features/auth/views/registration_screen.dart';
+import 'package:good_one_app/Features/Chat/Presentation/screens/conversations_screen.dart';
+import 'package:good_one_app/Features/Onboarding/Presentation/Screens/onbording_view.dart';
+import 'package:good_one_app/Features/Setup/Presentation/Screens/account_type_screen.dart';
+import 'package:good_one_app/Features/Setup/Presentation/Screens/language_selection_screen.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/booking/booking_summary_screen.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/booking/calender_booking_screen.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/booking/location_screen.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/contractors_by_service.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/home/user_main_screen.dart';
+import 'package:good_one_app/Features/Notifications/Presentation/Screens/notifications_screen.dart';
+import 'package:good_one_app/Features/Both/Presentation/Screens/account_details_screen.dart';
+import 'package:good_one_app/Features/Both/Presentation/Screens/language_settings_screen.dart';
+import 'package:good_one_app/Features/Both/Presentation/Screens/support_screen.dart';
+import 'package:good_one_app/Features/Worker/presentation/screens/worker_main_screen.dart';
+import 'package:good_one_app/Features/Auth/Presentation/Screens/login_screen.dart';
+import 'package:good_one_app/Features/Auth/Presentation/Screens/registration_screen.dart';
 
 class AppRoutes {
   AppRoutes._();

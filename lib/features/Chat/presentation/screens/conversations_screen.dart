@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Infrastructure/storage/storage_manager.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
 import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Core/presentation/Widgets/loading_indicator.dart';
 import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
 import 'package:good_one_app/Features/Chat/Presentation/screens/chat_screen.dart';
 import 'package:good_one_app/Features/Chat/Presentation/utils/chat_utils.dart';
 
 import 'package:good_one_app/Providers/chat_provider.dart';
 import 'package:good_one_app/Providers/user_manager_provider.dart';
+import 'package:good_one_app/Providers/worker_maganer_provider.dart';
 import 'package:provider/provider.dart';
 
 class ConversationsScreen extends StatefulWidget {
@@ -27,9 +31,19 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
   }
 
   Future<void> _initialize() async {
-    final userId = context.read<UserManagerProvider>().userInfo?.id.toString();
-    if (userId != null) {
-      await context.read<ChatProvider>().initialize(userId);
+    final type = await StorageManager.getString(StorageKeys.accountTypeKey);
+    if (type == AppStrings.user) {
+      final userId =
+          context.read<UserManagerProvider>().userInfo?.id.toString();
+      if (userId != null) {
+        await context.read<ChatProvider>().initialize(userId);
+      }
+    } else {
+      final workerId =
+          context.read<WorkerManagerProvider>().workerInfo?.id.toString();
+      if (workerId != null) {
+        await context.read<ChatProvider>().initialize(workerId);
+      }
     }
   }
 
@@ -38,8 +52,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: const Text('Messages',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        title: const Text(
+          'Messages', //TOTO
+          style: TextStyle(fontWeight: FontWeight.w600), //TODO
+        ),
       ),
       body: Consumer<ChatProvider>(
         builder: (context, provider, _) {

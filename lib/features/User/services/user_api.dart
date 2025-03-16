@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'package:good_one_app/Features/Both/Models/account_edit_request.dart';
-import 'package:good_one_app/Features/Both/Models/user_info.dart';
-import 'package:good_one_app/Features/Notifications/Models/notification_model.dart';
 import 'package:good_one_app/Features/User/Models/coupon_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,21 +16,6 @@ import 'package:good_one_app/Features/User/models/service_category.dart';
 
 class UserApi {
   static final _api = ApiService.instance;
-
-  static Future<ApiResponse<UserInfo>> getUserInfo() async {
-    final token = await StorageManager.getString(StorageKeys.tokenKey);
-    return _api.post<UserInfo>(
-      url: ApiEndpoints.me,
-      body: {},
-      fromJson: (dynamic response) {
-        if (response is Map<String, dynamic>) {
-          return UserInfo.fromJson(response);
-        }
-        throw Exception('Invalid response format');
-      },
-      token: token,
-    );
-  }
 
   static Future<ApiResponse<List<ServiceCategory>>> getCategories() async {
     return _api.get<List<ServiceCategory>>(
@@ -194,27 +176,6 @@ class UserApi {
     );
   }
 
-  static Future<ApiResponse<List<NotificationModel>>>
-      fetchNotifications() async {
-    final token = await StorageManager.getString(StorageKeys.tokenKey);
-    return _api.get<List<NotificationModel>>(
-      url: ApiEndpoints.notifications,
-      fromJson: (dynamic response) {
-        print('Raw notification response: $response');
-        if (response is List) {
-          final parsed = response
-              .map((item) =>
-                  NotificationModel.fromJson(item as Map<String, dynamic>))
-              .toList();
-          print('Parsed notifications: ${parsed.length}');
-          return parsed;
-        }
-        throw Exception('Invalid response format');
-      },
-      token: token,
-    );
-  }
-
   static Future<ApiResponse<Map<String, dynamic>>> rateService(
       RateServiceRequest rateRequest) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
@@ -222,24 +183,6 @@ class UserApi {
       url: ApiEndpoints.rateService,
       body: rateRequest.toJson(),
       fromJson: (json) => json as Map<String, dynamic>,
-      token: token,
-    );
-  }
-
-  static Future<ApiResponse<UserInfo>> editAccount(
-      AccountEditRequest request) async {
-    final token = await StorageManager.getString(StorageKeys.tokenKey);
-
-    return _api.postMultipart<UserInfo>(
-      url: ApiEndpoints.accountEdit,
-      fields: request.toFields(),
-      files: request.toFiles(),
-      fromJson: (dynamic response) {
-        if (response is Map<String, dynamic>) {
-          return UserInfo.fromJson(response);
-        }
-        throw Exception('Invalid response format');
-      },
       token: token,
     );
   }

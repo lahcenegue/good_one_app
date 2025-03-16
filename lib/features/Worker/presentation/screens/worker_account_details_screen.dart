@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Utils/storage_keys.dart';
-import 'package:good_one_app/Core/infrastructure/storage/storage_manager.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
 import 'package:good_one_app/Features/Both/Models/user_info.dart';
 import 'package:good_one_app/Features/auth/Presentation/Widgets/shared_auth_widgets.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:good_one_app/Providers/worker_maganer_provider.dart';
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class AccountDetailsScreen extends StatelessWidget {
-  AccountDetailsScreen({super.key});
+class WorkerAccountDetailsScreen extends StatelessWidget {
+  WorkerAccountDetailsScreen({super.key});
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
-      builder: (context, userManager, _) {
-        final user = userManager.userInfo;
-        if (user == null) {
+    return Consumer<WorkerManagerProvider>(
+      builder: (context, workerManager, _) {
+        final worker = workerManager.workerInfo;
+        if (worker == null) {
           return const Center(
             child: Text('User data not available'),
           );
@@ -46,21 +45,21 @@ class AccountDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: context.getHeight(20)),
-                _buildImagePicker(context, userManager),
-                if (userManager.imageError != null)
+                _buildImagePicker(context, workerManager),
+                if (workerManager.imageError != null)
                   Padding(
                     padding: EdgeInsets.only(top: context.getHeight(8)),
                     child: Text(
-                      userManager.imageError!,
+                      workerManager.imageError!,
                       style: AppTextStyles.text(context)
                           .copyWith(color: Colors.red),
                     ),
                   ),
                 SizedBox(height: context.getHeight(20)),
-                _buildAccountDetailsForm(context, userManager, user),
-                if (userManager.error != null)
+                _buildAccountDetailsForm(context, workerManager, worker),
+                if (workerManager.error != null)
                   SharedAuthWidgets.buildErrorMessage(
-                      context, userManager.error!),
+                      context, workerManager.error!),
               ],
             ),
           ),
@@ -71,7 +70,7 @@ class AccountDetailsScreen extends StatelessWidget {
 
   Widget _buildImagePicker(
     BuildContext context,
-    UserManagerProvider userManager,
+    WorkerManagerProvider workerManager,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,10 +82,10 @@ class AccountDetailsScreen extends StatelessWidget {
         SizedBox(height: context.getHeight(8)),
         Center(
           child: GestureDetector(
-            onTap: () => _showImagePickerModal(context, userManager),
-            child: userManager.selectedImage == null
+            onTap: () => _showImagePickerModal(context, workerManager),
+            child: workerManager.selectedImage == null
                 ? UserAvatar(
-                    picture: userManager.userInfo?.picture,
+                    picture: workerManager.workerInfo?.picture,
                     size: context.getWidth(120),
                     backgroundColor: AppColors.dimGray,
                     iconColor: AppColors.primaryColor,
@@ -101,9 +100,9 @@ class AccountDetailsScreen extends StatelessWidget {
                         color: AppColors.primaryColor,
                         width: 2,
                       ),
-                      image: userManager.selectedImage != null
+                      image: workerManager.selectedImage != null
                           ? DecorationImage(
-                              image: FileImage(userManager.selectedImage!),
+                              image: FileImage(workerManager.selectedImage!),
                               fit: BoxFit.cover,
                             )
                           : null,
@@ -116,7 +115,9 @@ class AccountDetailsScreen extends StatelessWidget {
   }
 
   void _showImagePickerModal(
-      BuildContext context, UserManagerProvider userManager) {
+    BuildContext context,
+    WorkerManagerProvider workerManager,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -128,7 +129,7 @@ class AccountDetailsScreen extends StatelessWidget {
                 title: Text(AppLocalizations.of(context)!.takePhoto),
                 onTap: () {
                   Navigator.pop(context);
-                  userManager.pickImage(context, ImageSource.camera);
+                  workerManager.pickImage(context, ImageSource.camera);
                 },
               ),
               ListTile(
@@ -136,7 +137,7 @@ class AccountDetailsScreen extends StatelessWidget {
                 title: Text(AppLocalizations.of(context)!.chooseFromGallery),
                 onTap: () {
                   Navigator.pop(context);
-                  userManager.pickImage(context, ImageSource.gallery);
+                  workerManager.pickImage(context, ImageSource.gallery);
                 },
               ),
             ],
@@ -148,7 +149,7 @@ class AccountDetailsScreen extends StatelessWidget {
 
   Widget _buildAccountDetailsForm(
     BuildContext context,
-    UserManagerProvider userManager,
+    WorkerManagerProvider workerManager,
     UserInfo user,
   ) {
     return Form(
@@ -158,7 +159,7 @@ class AccountDetailsScreen extends StatelessWidget {
         children: [
           SharedAuthWidgets.buildInputField(
             context,
-            controller: userManager.fullNameController,
+            controller: workerManager.fullNameController,
             label: AppLocalizations.of(context)!.fullName,
             hintText: AppLocalizations.of(context)!.enterFullName,
             validator: (value) => null,
@@ -166,7 +167,7 @@ class AccountDetailsScreen extends StatelessWidget {
           SizedBox(height: context.getHeight(16)),
           SharedAuthWidgets.buildInputField(
             context,
-            controller: userManager.emailController,
+            controller: workerManager.emailController,
             label: AppLocalizations.of(context)!.email,
             hintText: AppLocalizations.of(context)!.enterEmail,
             validator: (value) {
@@ -180,7 +181,7 @@ class AccountDetailsScreen extends StatelessWidget {
           SizedBox(height: context.getHeight(16)),
           SharedAuthWidgets.buildInputField(
             context,
-            controller: userManager.phoneController,
+            controller: workerManager.phoneController,
             label: AppLocalizations.of(context)!.phoneNumber,
             hintText: AppLocalizations.of(context)!.enterPhoneNumber,
             validator: (value) {
@@ -191,40 +192,27 @@ class AccountDetailsScreen extends StatelessWidget {
             keyboardType: TextInputType.phone,
           ),
           SizedBox(height: context.getHeight(16)),
-          FutureBuilder(
-            future: StorageManager.getString(StorageKeys.accountTypeKey),
-            builder: (context, snapshot) {
-              final accountType = snapshot.data;
-              if (accountType == AppStrings.service) {
-                return Column(
-                  children: [
-                    SharedAuthWidgets.buildInputField(
-                      context,
-                      controller: userManager.cityController,
-                      label: AppLocalizations.of(context)!.city,
-                      hintText: AppLocalizations.of(context)!.enterCity,
-                      validator: (value) => null, // Make city optional
-                    ),
-                    SizedBox(height: context.getHeight(16)),
-                    SharedAuthWidgets.buildInputField(
-                      context,
-                      controller: userManager.countryController,
-                      label: AppLocalizations.of(context)!.country,
-                      hintText: AppLocalizations.of(context)!.enterCountry,
-                      validator: (value) => null, // Make country optional
-                    ),
-                  ],
-                );
-              }
-              return SizedBox.shrink();
-            },
+          SharedAuthWidgets.buildInputField(
+            context,
+            controller: workerManager.cityController,
+            label: AppLocalizations.of(context)!.city,
+            hintText: AppLocalizations.of(context)!.enterCity,
+            validator: (value) => null, // Make city optional
+          ),
+          SizedBox(height: context.getHeight(16)),
+          SharedAuthWidgets.buildInputField(
+            context,
+            controller: workerManager.countryController,
+            label: AppLocalizations.of(context)!.country,
+            hintText: AppLocalizations.of(context)!.enterCountry,
+            validator: (value) => null, // Make country optional
           ),
           SizedBox(height: context.getHeight(24)),
           PrimaryButton(
             text: AppLocalizations.of(context)!.update,
-            isLoading: userManager.isLoading,
+            isLoading: workerManager.isLoading,
             onPressed: () async {
-              await userManager.editAccount(context);
+              await workerManager.editAccount(context);
             },
           ),
         ],

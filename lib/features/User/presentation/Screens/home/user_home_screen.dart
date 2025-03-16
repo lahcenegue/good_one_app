@@ -5,6 +5,7 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/contractor_list_item.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/service_grid_item.dart';
@@ -76,7 +77,6 @@ class UserHomeScreen extends StatelessWidget {
           child: _buildUserInfo(
             context,
             user!.fullName,
-            '${user.city}, ${user.country}',
           ),
         ),
         _buildNotificationIcon(context),
@@ -86,7 +86,10 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUserInfo(BuildContext context, String? name, String? location) {
+  Widget _buildUserInfo(
+    BuildContext context,
+    String? name,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -98,13 +101,6 @@ class UserHomeScreen extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        if (location != null)
-          Text(
-            location,
-            style: AppTextStyles.text(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
       ],
     );
   }
@@ -115,29 +111,14 @@ class UserHomeScreen extends StatelessWidget {
         shape: BoxShape.circle,
         color: AppColors.dimGray,
       ),
-      child: Stack(
-        children: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_outlined,
-            ),
-            onPressed: () {
-              NavigationService.navigateTo(AppRoutes.notificationsScreen);
-            },
-          ),
-          Positioned(
-            right: 8,
-            top: 8,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ],
+      child: IconButton(
+        icon: Image.asset(
+          AppAssets.notification,
+          width: context.getAdaptiveSize(20),
+        ),
+        onPressed: () {
+          NavigationService.navigateTo(AppRoutes.userNotificationsScreen);
+        },
       ),
     );
   }
@@ -149,29 +130,16 @@ class UserHomeScreen extends StatelessWidget {
         shape: BoxShape.circle,
         color: AppColors.dimGray,
       ),
-      child: Stack(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () {
-              if (userManager.userInfo != null) {
-                NavigationService.navigateTo(AppRoutes.conversations);
-              }
-            },
-          ),
-          Positioned(
-            right: 8,
-            top: 8,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ],
+      child: IconButton(
+        icon: Image.asset(
+          AppAssets.message,
+          width: context.getAdaptiveSize(25),
+        ),
+        onPressed: () {
+          if (userManager.userInfo != null) {
+            NavigationService.navigateTo(AppRoutes.conversations);
+          }
+        },
       ),
     );
   }

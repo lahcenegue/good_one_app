@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_profile_screen.dart';
 import 'package:good_one_app/Providers/worker_maganer_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -14,8 +16,26 @@ class WorkerMainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<WorkerMaganerProvider>(
+    return Consumer<WorkerManagerProvider>(
       builder: (context, workerManager, _) {
+        if (workerManager.isLoading) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        if (workerManager.error != null && workerManager.currentIndex == 0) {
+          return Scaffold(
+            body: Center(
+              child: AppErrorWidget(
+                message: workerManager.error!,
+                onRetry: () => workerManager.initialize(),
+              ),
+            ),
+          );
+        }
+
         return Scaffold(
           body: _buildCurrentScreen(context, workerManager),
           bottomNavigationBar: _buildBottomNavigation(context, workerManager),
@@ -26,7 +46,7 @@ class WorkerMainScreen extends StatelessWidget {
 
   Widget _buildCurrentScreen(
     BuildContext context,
-    WorkerMaganerProvider workerManager,
+    WorkerManagerProvider workerManager,
   ) {
     switch (workerManager.currentIndex) {
       case 0:
@@ -36,7 +56,7 @@ class WorkerMainScreen extends StatelessWidget {
       case 2:
         return const Text('Ordres Screen');
       case 3:
-        return const Text('Profile Screen');
+        return const WorkerProfileScreen();
       default:
         return const Text('Home Screen 2');
     }
@@ -44,7 +64,7 @@ class WorkerMainScreen extends StatelessWidget {
 
   Widget _buildBottomNavigation(
     BuildContext context,
-    WorkerMaganerProvider workerManager,
+    WorkerManagerProvider workerManager,
   ) {
     final items = [
       _buildNavItem(

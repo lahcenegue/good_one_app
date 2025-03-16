@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
 import 'package:good_one_app/Core/Infrastructure/storage/storage_manager.dart';
 import 'package:good_one_app/Features/Both/Models/account_edit_request.dart';
 import 'package:good_one_app/Features/Both/Models/user_info.dart';
-import 'package:good_one_app/Features/Notifications/Models/notification_model.dart';
+import 'package:good_one_app/Features/Both/Models/notification_model.dart';
+import 'package:good_one_app/Features/Both/Services/both_api.dart';
 import 'package:good_one_app/Features/User/models/contractor.dart';
 import 'package:good_one_app/Features/User/models/service_category.dart';
 import 'package:good_one_app/Features/User/Services/user_api.dart';
@@ -78,8 +80,6 @@ class UserManagerProvider extends ChangeNotifier {
   TextEditingController get fullNameController => _fullNameController;
   TextEditingController get emailController => _emailController;
   TextEditingController get phoneController => _phoneController;
-  TextEditingController get cityController => _cityController;
-  TextEditingController get countryController => _countryController;
   TextEditingController get passwordController => _passwordController;
 
   // Constructor
@@ -172,7 +172,7 @@ class UserManagerProvider extends ChangeNotifier {
 
   void setError(String? message) {
     _error = message;
-    if (message != null) debugPrint(message);
+    if (message != null) print(message);
     notifyListeners();
   }
 
@@ -186,7 +186,7 @@ class UserManagerProvider extends ChangeNotifier {
     if (_token == null) return false;
     _setLoading(true);
     try {
-      final response = await UserApi.getUserInfo();
+      final response = await BothApi.getUserInfo();
       if (response.success && response.data != null) {
         _userInfo = response.data;
         notifyListeners();
@@ -225,11 +225,6 @@ class UserManagerProvider extends ChangeNotifier {
         email: emailController.text == _userInfo!.email
             ? null
             : emailController.text,
-        city:
-            cityController.text == _userInfo!.city ? null : cityController.text,
-        country: countryController.text == _userInfo!.country
-            ? null
-            : countryController.text,
         phone: phoneController.text == (_userInfo!.phone.toString())
             ? null
             : int.tryParse(phoneController.text),
@@ -239,7 +234,7 @@ class UserManagerProvider extends ChangeNotifier {
 
       print(request.email);
 
-      final response = await UserApi.editAccount(request);
+      final response = await BothApi.editAccount(request);
       if (response.success && response.data != null) {
         _userInfo = response.data;
 
@@ -353,7 +348,7 @@ class UserManagerProvider extends ChangeNotifier {
     _setNotificationError(null);
     try {
       debugPrint('Fetching notifications...');
-      final response = await UserApi.fetchNotifications();
+      final response = await BothApi.fetchNotifications();
       if (response.success && response.data != null) {
         _notifications = response.data!;
         debugPrint('Notifications fetched: ${_notifications.length}');

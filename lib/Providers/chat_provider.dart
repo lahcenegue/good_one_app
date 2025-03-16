@@ -17,7 +17,7 @@ class ChatProvider with ChangeNotifier {
   bool _initialFetchComplete = false;
   String? _error;
   String? _currentChatUserId;
-  String? _currentUserId;
+  String? _currentId;
 
   ChatProvider({WebSocketService? socketService})
       : _socketService = socketService ?? WebSocketService();
@@ -30,11 +30,11 @@ class ChatProvider with ChangeNotifier {
   bool get initialFetchComplete => _initialFetchComplete;
   String? get error => _error;
   String? get currentChatUserId => _currentChatUserId;
-  String? get currentUserId => _currentUserId;
+  String? get currentUserId => _currentId;
   ScrollController get scrollController => _scrollController;
 
-  Future<void> initialize(String userId) async {
-    _currentUserId = userId;
+  Future<void> initialize(String id) async {
+    _currentId = id;
     try {
       _setupSocketListeners();
       await _socketService.connect();
@@ -55,7 +55,7 @@ class ChatProvider with ChangeNotifier {
   }
 
   Future<void> initializeConversations() async {
-    if (!_isConnected || _currentUserId == null) {
+    if (!_isConnected || _currentId == null) {
       _setError('Not connected or user ID missing');
       return;
     }
@@ -112,7 +112,7 @@ class ChatProvider with ChangeNotifier {
     if (!_isConnected || message.trim().isEmpty) return;
     final chatMessage = ChatMessage(
       message: message,
-      userId: _currentUserId!,
+      userId: _currentId!,
       timestamp: DateTime.now(),
     );
     _messages.add(chatMessage);
@@ -127,8 +127,8 @@ class ChatProvider with ChangeNotifier {
       _isConnected = true;
       _error = null;
       notifyListeners();
-      if (_currentUserId != null) {
-        _socketService.emit('init', [_currentUserId!]);
+      if (_currentId != null) {
+        _socketService.emit('init', [_currentId!]);
       }
     };
 
@@ -239,7 +239,7 @@ class ChatProvider with ChangeNotifier {
       final senderId = message.userId;
       debugPrint('Received message from $senderId: ${message.message}');
       if (_currentChatUserId != null &&
-          senderId != _currentUserId &&
+          senderId != _currentId &&
           !_messages.any((m) =>
               m.timestamp == message.timestamp &&
               m.message == message.message)) {

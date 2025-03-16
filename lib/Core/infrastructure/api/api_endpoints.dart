@@ -12,15 +12,17 @@ abstract class ApiEndpoints {
   // Auth Endpoints
   static String get login => '$baseUrl/api/auth/login';
   static String get register => '$baseUrl/api/auth/register';
-  static String get me => '$baseUrl/api/auth/me';
   static String get refreshToken => '$baseUrl/api/auth/refresh';
+
+  // Both Endpoints
+  static String get me => '$baseUrl/api/auth/me';
+  static String get notifications => '$baseUrl/api/user/notifications';
 
   // User Endpoints
   static String get categories => '$baseUrl/api/categories';
   static String get bestcontractors => '$baseUrl/api/services';
   static String get contractorsByService => '$baseUrl/api/services/category';
   static String get userOrders => '$baseUrl/api/user/orders';
-  static String get notifications => '$baseUrl/api/user/notifications';
   static String get couponsCheck => '$baseUrl/api/coupons/check';
   static String get createOrder => '$baseUrl/api/service/order';
   static String get receiveOrder => '$baseUrl/api/service/order/complete';

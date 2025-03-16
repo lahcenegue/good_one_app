@@ -5,7 +5,7 @@ import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/booking/booking_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/home/user_home_screen.dart';
-import 'package:good_one_app/Features/Both/Presentation/Screens/user_profile_screen.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/user_profile_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/services_screen.dart';
 import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +34,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
         // Show loading indicator while initializing
-        if (userManager.isLoading && userManager.currentIndex == 0) {
+        if (userManager.isLoading) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),

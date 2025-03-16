@@ -182,7 +182,7 @@ class UserProfileScreen extends StatelessWidget {
           image: AppAssets.profile,
           title: AppLocalizations.of(context)!.accountDetails,
           onTap: () {
-            NavigationService.navigateTo(AppRoutes.accountDetails);
+            NavigationService.navigateTo(AppRoutes.userAccountDetails);
           },
         ),
         _buildMenuItem(

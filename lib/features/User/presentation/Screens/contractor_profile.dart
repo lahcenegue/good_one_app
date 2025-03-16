@@ -12,7 +12,7 @@ import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Features/Chat/Presentation/Screens/chat_screen.dart';
 import 'package:good_one_app/Features/User/models/contractor.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/gallery_viewer_page.dart';
-import 'package:good_one_app/Features/Both/Presentation/Widgets/auth_required_dialog.dart';
+import 'package:good_one_app/Features/Auth/Widgets/auth_required_dialog.dart';
 import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
 

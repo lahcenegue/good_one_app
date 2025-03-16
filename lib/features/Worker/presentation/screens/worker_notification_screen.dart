@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Providers/worker_maganer_provider.dart';
+import 'package:provider/provider.dart';
+
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Features/Notifications/Models/notification_model.dart';
-import 'package:good_one_app/Features/Notifications/Presentation/Widgets/notification_list_item.dart';
+import 'package:good_one_app/Features/Both/Models/notification_model.dart';
+import 'package:good_one_app/Features/Both/Presentation/Widgets/notification_list_item.dart';
 
-import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:good_one_app/core/presentation/theme/app_text_styles.dart';
-import 'package:provider/provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class NotificationsScreen extends StatelessWidget {
-  const NotificationsScreen({super.key});
+class WorkerNotificationScreen extends StatelessWidget {
+  const WorkerNotificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,20 +24,20 @@ class NotificationsScreen extends StatelessWidget {
           style: AppTextStyles.appBarTitle(context),
         ), //TODO
       ),
-      body: Consumer<UserManagerProvider>(
-        builder: (context, provider, child) {
-          if (provider.isNotificationLoading) {
+      body: Consumer<WorkerManagerProvider>(
+        builder: (context, workerManager, child) {
+          if (workerManager.isNotificationLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
-          if (provider.notificationError != null) {
+          if (workerManager.notificationError != null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    provider.notificationError!,
+                    workerManager.notificationError!,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.text(context).copyWith(
                       color: AppColors.oxblood,
@@ -45,15 +46,15 @@ class NotificationsScreen extends StatelessWidget {
                   SizedBox(height: context.getHeight(16)),
                   SmallPrimaryButton(
                     text: AppLocalizations.of(context)!.retry,
-                    onPressed: () => provider.fetchNotifications(),
+                    onPressed: () => workerManager.fetchNotifications(),
                   ),
                 ],
               ),
             );
           }
           return RefreshIndicator(
-            onRefresh: () => provider.fetchNotifications(),
-            child: _buildNotificationList(provider.notifications, context),
+            onRefresh: () => workerManager.fetchNotifications(),
+            child: _buildNotificationList(workerManager.notifications, context),
           );
         },
       ),
@@ -73,6 +74,7 @@ class NotificationsScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(height: context.getHeight(150)),
                 Icon(
                   Icons.notifications_none,
                   size: context.getAdaptiveSize(64),
@@ -81,13 +83,13 @@ class NotificationsScreen extends StatelessWidget {
                 SizedBox(height: context.getHeight(16)),
                 Text(
                   'No notifications available', //TODO
-                  style: AppTextStyles.title(context),
+                  style: AppTextStyles.subTitle(context),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8),
                 Text(
                   'Pull down to refresh', //TODO
-                  style: AppTextStyles.title(context),
+                  style: AppTextStyles.subTitle(context),
                   textAlign: TextAlign.center,
                 ),
               ],

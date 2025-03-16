@@ -41,4 +41,6 @@ abstract class AppAssets {
   static const String privancy = '$_iconsPath/privancy.png';
   static const String logout = '$_iconsPath/logout.png';
   static const String support = '$_iconsPath/support.png';
+  static const String message = '$_iconsPath/message.png';
+  static const String notification = '$_iconsPath/notification.png';
 }

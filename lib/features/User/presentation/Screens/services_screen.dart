@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
@@ -6,26 +8,11 @@ import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/service_grid_item.dart';
 import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:provider/provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class ServicesScreen extends StatefulWidget {
+class ServicesScreen extends StatelessWidget {
   const ServicesScreen({super.key});
-
-  @override
-  State<ServicesScreen> createState() => _ServicesScreenState();
-}
-
-class _ServicesScreenState extends State<ServicesScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Refresh services when screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserManagerProvider>().fetchCategories();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

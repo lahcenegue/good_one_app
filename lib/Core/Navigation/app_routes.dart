@@ -8,13 +8,15 @@ import 'package:good_one_app/Features/User/Presentation/Screens/booking/calender
 import 'package:good_one_app/Features/User/Presentation/Screens/booking/location_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/contractors_by_service.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/home/user_main_screen.dart';
-import 'package:good_one_app/Features/Notifications/Presentation/Screens/notifications_screen.dart';
-import 'package:good_one_app/Features/Both/Presentation/Screens/account_details_screen.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/user_notifications_screen.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/user_account_details_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/language_settings_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/support_screen.dart';
-import 'package:good_one_app/Features/Worker/presentation/screens/worker_main_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_account_details_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_main_screen.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Screens/login_screen.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Screens/registration_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_notification_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -26,18 +28,24 @@ class AppRoutes {
   static const String register = '/register';
   static const String accountSelection = '/accountSelection';
 
-  static const String userMain = '/userMainScreen';
+  // Both screens
   static const String conversations = '/conversations';
+
+  // User Screens
+  static const String userMain = '/userMainScreen';
   static const String contractorsByService = '/contractorsByService';
   static const String languageSettingsScreen = '/LanguageSettingsScreen';
   static const String calendarBookingScreen = '/calendarBookingScreen';
   static const String locationScreen = '/locationScreen';
   static const String bookingSummaryScreen = '/bookingSummaryScreen';
-  static const String notificationsScreen = '/NotificationsScreen';
-  static const String accountDetails = '/accountDetails';
+  static const String userNotificationsScreen = '/userNotificationsScreen';
+  static const String userAccountDetails = '/userAccountDetails';
   static const String supportPage = '/supportPage';
 
+  // Worker Screens
   static const String workerMain = '/workerMainScreen';
+  static const String workerNotificationsScreen = '/workerNotificationsScreen';
+  static const String workerAccountDetails = '/workerAccountDetails';
 
   // Route Definitions
   static Map<String, WidgetBuilder> define() {
@@ -63,12 +71,14 @@ class AppRoutes {
       calendarBookingScreen: (_) => const CalendarBookingScreen(),
       locationScreen: (_) => const LocationScreen(),
       bookingSummaryScreen: (_) => const BookingSummaryScreen(),
-      notificationsScreen: (_) => const NotificationsScreen(),
-      accountDetails: (_) => AccountDetailsScreen(),
+      userNotificationsScreen: (_) => const UserNotificationsScreen(),
+      userAccountDetails: (_) => UserAccountDetailsScreen(),
       supportPage: (_) => const SupportPage(),
 
-      //
+      // Worker
       workerMain: (_) => const WorkerMainScreen(),
+      workerNotificationsScreen: (_) => const WorkerNotificationScreen(),
+      workerAccountDetails: (_) => WorkerAccountDetailsScreen(),
     };
   }
 

@@ -53,21 +53,21 @@ class UserInfo {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'phone': phone,
-      'type': type,
-      'full_name': fullName,
-      'picture': picture,
-      'email_verified_at': emailVerifiedAt,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-      'active': active,
-      'security_check': securityCheck != null ? (securityCheck! ? 1 : 0) : null,
-      'verified_liscence':
-          verifiedLicense != null ? (verifiedLicense! ? 1 : 0) : null,
-    };
-  }
+  // Map<String, dynamic> toJson() {
+  //   return {
+  //     'id': id,
+  //     'email': email,
+  //     'phone': phone,
+  //     'type': type,
+  //     'full_name': fullName,
+  //     'picture': picture,
+  //     'email_verified_at': emailVerifiedAt,
+  //     'created_at': createdAt,
+  //     'updated_at': updatedAt,
+  //     'active': active,
+  //     'security_check': securityCheck != null ? (securityCheck! ? 1 : 0) : null,
+  //     'verified_liscence':
+  //         verifiedLicense != null ? (verifiedLicense! ? 1 : 0) : null,
+  //   };
+  // }
 }

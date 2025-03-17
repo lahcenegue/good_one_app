@@ -7,6 +7,10 @@ import 'package:good_one_app/Features/Both/Models/account_edit_request.dart';
 import 'package:good_one_app/Features/Both/Models/notification_model.dart';
 import 'package:good_one_app/Features/Both/Models/user_info.dart';
 import 'package:good_one_app/Features/Both/Services/both_api.dart';
+import 'package:good_one_app/Features/Worker/Models/add_image_model.dart';
+import 'package:good_one_app/Features/Worker/Models/category_model.dart';
+import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
+import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
 import 'package:good_one_app/Features/auth/Services/token_manager.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,7 +26,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   int _currentIndex = 0;
   bool _isLoading = false;
 
-  // Form Controllers
+  // Form Controllers for User Info
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -30,7 +34,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Image
+  // User Profile Image Handling
   File? _selectedImage;
   String? _imageError;
   final ImagePicker _picker = ImagePicker();
@@ -40,7 +44,19 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool _isNotificationLoading = false;
   String? _notificationError;
 
-  // Getters
+  // Add Service State
+  List<CategoryModel> _categories = [];
+  CategoryModel? _selectedCategory;
+  SubcategoryModel? _selectedSubcategory;
+  double? _servicePrice;
+  List<AddImageModel> _galleryImages = [];
+  String? _serviceError;
+  bool _isServiceLoading = false;
+
+  // Form controllers for Add Service
+  final TextEditingController _servicePriceController = TextEditingController();
+
+  // Getters for Authentication and User Info
   String? get token => _token;
   UserInfo? get workerInfo => _workerInfo;
   String? get error => _error;
@@ -59,16 +75,30 @@ class WorkerManagerProvider extends ChangeNotifier {
   TextEditingController get countryController => _countryController;
   TextEditingController get passwordController => _passwordController;
 
+  // Getters for Add Service
+  List<CategoryModel> get categories => _categories;
+  CategoryModel? get selectedCategory => _selectedCategory;
+  SubcategoryModel? get selectedSubcategory => _selectedSubcategory;
+  double? get servicePrice => _servicePrice;
+  List<AddImageModel> get galleryImages => _galleryImages;
+  String? get serviceError => _serviceError;
+  bool get isServiceLoading => _isServiceLoading;
+  TextEditingController get servicePriceController => _servicePriceController;
+
   WorkerManagerProvider() {
     initialize();
   }
 
+  // -----------------------------------
   // Initialization
+  // -----------------------------------
+  /// Initializes the provider by loading user data and fetching notifications.
   Future<void> initialize() async {
     await _loadUserData();
     await fetchNotifications();
   }
 
+  /// Loads user data from storage and fetches user info if a token is available.
   Future<void> _loadUserData() async {
     try {
       _token = await StorageManager.getString(StorageKeys.tokenKey);
@@ -91,7 +121,10 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
-  // User Info
+  // -----------------------------------
+  // User Info Management
+  // -----------------------------------
+  /// Fetches user information from the API.
   Future<bool> fetchUserInfo() async {
     if (_token == null) return false;
     _setLoading(true);
@@ -112,6 +145,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
+  /// Edits the user's account details.
   Future<bool> editAccount(BuildContext context) async {
     try {
       _setLoading(true);
@@ -161,6 +195,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
+  /// Picks an image
   Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -172,13 +207,18 @@ class WorkerManagerProvider extends ChangeNotifier {
 
       if (image != null) {
         _selectedImage = File(image.path);
-        setImageError(null);
+        _imageError = null;
+        notifyListeners();
       }
     } catch (e) {
       setImageError(AppLocalizations.of(context)!.generalError);
     }
   }
 
+  // -----------------------------------
+  // Notification Management
+  // -----------------------------------
+  /// Fetches notifications for the user.
   Future<void> fetchNotifications() async {
     _setNotificationLoading(true);
     _setNotificationError(null);
@@ -207,7 +247,111 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
+  // -----------------------------------
+  // Add Service Management (WorkerAddServiceScreen)
+  // -----------------------------------
+  /// Fetches categories and subcategories for the Add Service screen.
+
+  Future<void> fetchCategories() async {
+    _setServiceLoading(true);
+    final response = await WorkerApi.fetchCategories();
+    if (response.success && response.data != null) {
+      _categories = response.data!;
+    } else {
+      _setServiceError(response.error);
+    }
+    _setServiceLoading(false);
+  }
+
+  /// Sets the selected category and resets the subcategory.
+  void setCategory(CategoryModel? category) {
+    _selectedCategory = category;
+    _selectedSubcategory = null;
+    notifyListeners();
+  }
+
+  /// Sets the selected subcategory.
+  void setSubcategory(SubcategoryModel? subcategory) {
+    _selectedSubcategory = subcategory;
+    notifyListeners();
+  }
+
+  /// Updates the service price.
+  void setServicePrice() {
+    _servicePrice = double.tryParse(_servicePriceController.text);
+    notifyListeners();
+  }
+
+  /// Uploads it to the gallery for the service.
+  Future<void> uploadServiceImage(
+    BuildContext context,
+    ImageSource source,
+    String serviceId,
+  ) async {
+    try {
+      _setServiceLoading(true);
+      await pickImage(context, source);
+
+      final request = AddImageRequest(
+        serviceId: serviceId,
+        image: _selectedImage!,
+      );
+      final response = await WorkerApi().addGalleryImage(request);
+
+      if (response.success && response.data != null) {
+        _galleryImages.add(response.data!);
+      } else {
+        _setServiceError(response.error);
+      }
+      _setServiceLoading(false);
+    } catch (e) {
+      _setServiceError('Failed to upload image: $e');
+      _setServiceLoading(false);
+    }
+  }
+
+  /// Removes an image from the gallery using the image ID.
+  Future<void> removeServiceImage(int imageId) async {
+    _setServiceLoading(true);
+    final response = await WorkerApi().removeGalleryImage(imageId);
+    if (response.success && response.data == true) {
+    } else {
+      _setServiceError(response.error);
+    }
+    _setServiceLoading(false);
+  }
+
+  /// Validates all inputs before submitting the service.
+  bool validateServiceInputs() {
+    if (_selectedCategory == null) {
+      _setServiceError('Please select a category.');
+      return false;
+    }
+    if (_selectedSubcategory == null) {
+      _setServiceError('Please select a subcategory.');
+      return false;
+    }
+    if (_servicePrice == null || _servicePrice! <= 0) {
+      _setServiceError('Please enter a valid service price.');
+      return false;
+    }
+    return true;
+  }
+
+  /// Resets all Add Service related state.
+  void resetServiceState() {
+    _selectedCategory = null;
+    _selectedSubcategory = null;
+    _servicePrice = null;
+    _serviceError = null;
+    _servicePriceController.clear();
+    notifyListeners();
+  }
+
+  // -----------------------------------
   // Navigation
+  // -----------------------------------
+  /// Sets the current index for navigation.
   void setCurrentIndex(int index) {
     _currentIndex = index;
     notifyListeners();
@@ -232,6 +376,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     _countryController.text = user?.country ?? '';
   }
 
+  /// Clears all authentication data.
   Future<void> clearAuthData() async {
     _token = null;
     _workerInfo = null;
@@ -242,6 +387,13 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sets the service loading state for Add Service operations.
+  void _setServiceLoading(bool value) {
+    _isServiceLoading = value;
+    notifyListeners();
+  }
+
+  /// Sets a general error message.
   void setError(String? message) {
     _error = message;
     if (message != null) print(message);
@@ -256,6 +408,11 @@ class WorkerManagerProvider extends ChangeNotifier {
   void _setNotificationError(String? message) {
     _notificationError = message;
     if (message != null) debugPrint(message);
+    notifyListeners();
+  }
+
+  void _setServiceError(String? message) {
+    _serviceError = message;
     notifyListeners();
   }
 }

@@ -24,7 +24,7 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
       builder: (context, workerManager, _) {
         final worker = workerManager.workerInfo;
         if (worker == null) {
-          return const Center(
+          return Center(
             child: Text('User data not available'),
           );
         }

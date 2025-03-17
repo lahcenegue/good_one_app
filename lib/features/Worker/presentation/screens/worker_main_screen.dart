@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_profile_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_services_screen.dart';
 import 'package:good_one_app/Providers/worker_maganer_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +53,7 @@ class WorkerMainScreen extends StatelessWidget {
       case 0:
         return const WorkerHomeScreen();
       case 1:
-        return const Text('Services Screen');
+        return const WWorkerServicesScreen();
       case 2:
         return const Text('Ordres Screen');
       case 3:
@@ -78,17 +79,17 @@ class WorkerMainScreen extends StatelessWidget {
       _buildNavItem(
         context: context,
         index: 1,
-        label: AppLocalizations.of(context)!.booking,
-        activeIcon: AppAssets.booking2,
-        inactiveIcon: AppAssets.booking,
+        label: AppLocalizations.of(context)!.services,
+        activeIcon: AppAssets.services2,
+        inactiveIcon: AppAssets.services,
         currentIndex: workerManager.currentIndex,
       ),
       _buildNavItem(
         context: context,
         index: 2,
-        label: AppLocalizations.of(context)!.services,
-        activeIcon: AppAssets.services2,
-        inactiveIcon: AppAssets.services,
+        label: AppLocalizations.of(context)!.booking,
+        activeIcon: AppAssets.booking2,
+        inactiveIcon: AppAssets.booking,
         currentIndex: workerManager.currentIndex,
       ),
       _buildNavItem(

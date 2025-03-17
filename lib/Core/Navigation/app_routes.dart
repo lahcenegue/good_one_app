@@ -13,6 +13,7 @@ import 'package:good_one_app/Features/User/Presentation/Screens/user_account_det
 import 'package:good_one_app/Features/Both/Presentation/Screens/language_settings_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/support_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_account_details_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_add_service_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_main_screen.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Screens/login_screen.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Screens/registration_screen.dart';
@@ -46,6 +47,7 @@ class AppRoutes {
   static const String workerMain = '/workerMainScreen';
   static const String workerNotificationsScreen = '/workerNotificationsScreen';
   static const String workerAccountDetails = '/workerAccountDetails';
+  static const String workerAddService = '/workerAddService';
 
   // Route Definitions
   static Map<String, WidgetBuilder> define() {
@@ -79,6 +81,7 @@ class AppRoutes {
       workerMain: (_) => const WorkerMainScreen(),
       workerNotificationsScreen: (_) => const WorkerNotificationScreen(),
       workerAccountDetails: (_) => WorkerAccountDetailsScreen(),
+      workerAddService: (_) => WorkerAddServiceScreen(),
     };
   }
 

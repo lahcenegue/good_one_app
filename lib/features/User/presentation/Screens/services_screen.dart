@@ -89,7 +89,9 @@ class ServicesScreen extends StatelessWidget {
   }
 
   Widget _buildServicesGrid(
-      BuildContext context, UserManagerProvider userManager) {
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     if (userManager.isLoading && userManager.categories.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }

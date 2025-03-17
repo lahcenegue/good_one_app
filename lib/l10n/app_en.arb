@@ -167,7 +167,8 @@
    "deleteAccount": "Delete Account",
    "deleteAccountDescription": "Permanently delete your account and data.",
    "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
-   "delete": "Delete"
+   "delete": "Delete",
+   "addService": "Add Service"
  
 
 }

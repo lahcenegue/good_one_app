@@ -168,7 +168,31 @@
    "deleteAccountDescription": "Permanently delete your account and data.",
    "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
    "delete": "Delete",
-   "addService": "Add Service"
+   "addService": "Add Service",
+   "editServiceDetails": "Edit Service Details",
+   "selectServiceCategory" : "Select Service Category",
+   "chooseServiceCategory": "Choose Service Category",
+   "selectSubcategory": "Select Subcategory",
+   "chooseSubcategory": "Choose Subcategory",
+   "serviceDescription":"Service Description",
+   "provideDetailedDescription": "Provide Detailed Description",
+   "servicePricePerHour":"Service Price Per Hour",
+   "enterPrice":"Enter Price",
+   "yearsOfExperience":"Years Of Experience",
+   "enterExperienceYears":"Enter Experience Years",
+   "doYouHaveCertificate":"Do You Have Certificate?",
+   "uploadYourCertificate":"Upload Your Certificate",
+   "manageServiceImages":"Manage Service Images",
+   "additionalPhotos":"Additional Photos",
+   "addPhoto":"Add Photo",
+   "allPhotos":"All Photos",
+   "image":"Image",
+   "noOrdersAvailable": "No Orders Available",
+   "myOrders":"My Orders",
+   "noOrdersForThisDate":"No Orders For This Date",
+   "client":"Client",
+   "confirmed":"Confirmed",
+   "somethingWentWrong":"Something Went Wrong"
  
 
 }

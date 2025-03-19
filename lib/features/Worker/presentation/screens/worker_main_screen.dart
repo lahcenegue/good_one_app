@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/my_orders_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_profile_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_services_screen.dart';
 import 'package:good_one_app/Providers/worker_maganer_provider.dart';
@@ -55,7 +56,7 @@ class WorkerMainScreen extends StatelessWidget {
       case 1:
         return const WWorkerServicesScreen();
       case 2:
-        return const Text('Ordres Screen');
+        return const MyOrdersScreen();
       case 3:
         return const WorkerProfileScreen();
       default:
@@ -87,7 +88,7 @@ class WorkerMainScreen extends StatelessWidget {
       _buildNavItem(
         context: context,
         index: 2,
-        label: AppLocalizations.of(context)!.booking,
+        label: AppLocalizations.of(context)!.order,
         activeIcon: AppAssets.booking2,
         inactiveIcon: AppAssets.booking,
         currentIndex: workerManager.currentIndex,

@@ -57,7 +57,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                             text: 'Next',
                             onPressed: () async {
                               final serviceId =
-                                  await workerManager.createNewService();
+                                  await workerManager.createAndEditService();
                               if (serviceId > 0) {
                                 Navigator.pushAndRemoveUntil(
                                   context,

@@ -116,7 +116,7 @@ class SharedAuthWidgets {
     required TextEditingController controller,
     required String label,
     required String hintText,
-    required String? Function(String?) validator,
+    String? Function(String?)? validator,
     TextInputType? keyboardType,
   }) {
     return Column(

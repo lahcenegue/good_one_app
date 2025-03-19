@@ -48,6 +48,7 @@ class AppRoutes {
   static const String workerNotificationsScreen = '/workerNotificationsScreen';
   static const String workerAccountDetails = '/workerAccountDetails';
   static const String workerAddService = '/workerAddService';
+  static const String editService = '/edit-service';
 
   // Route Definitions
   static Map<String, WidgetBuilder> define() {

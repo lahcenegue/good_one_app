@@ -153,7 +153,7 @@ class ContractorProfile extends StatelessWidget {
                 children: [
                   Image.asset(AppAssets.location),
                   Text(
-                    contractor.location!,
+                    '${contractor.city!}, ${contractor.country!}',
                     style: AppTextStyles.text(context),
                   )
                 ],
@@ -219,7 +219,7 @@ class ContractorProfile extends StatelessWidget {
         _serviceBox(
           context,
           AppAssets.distance,
-          contractor.location!,
+          '${contractor.city!}, ${contractor.country!}',
           'Direction',
         ),
       ],

@@ -10,6 +10,7 @@ import 'package:good_one_app/Features/Both/Services/both_api.dart';
 import 'package:good_one_app/Features/Worker/Models/add_image_model.dart';
 import 'package:good_one_app/Features/Worker/Models/category_model.dart';
 import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
+import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
 import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
 import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
@@ -48,6 +49,11 @@ class WorkerManagerProvider extends ChangeNotifier {
 
   // My services
   List<MyServicesModel> _myServices = [];
+
+  // Orders State
+  Map<String, List<MyOrderModel>> _orders = {};
+  bool _isOrdersLoading = false;
+  String? _ordersError;
 
   // Add Service State
   List<CategoryModel> _categories = [];
@@ -95,6 +101,11 @@ class WorkerManagerProvider extends ChangeNotifier {
   TextEditingController get servicePriceController => _servicePriceController;
   TextEditingController get experienceController => _experienceController;
   TextEditingController get descriptionController => _descriptionController;
+
+  // Getters for Orders
+  Map<String, List<MyOrderModel>> get orders => _orders;
+  bool get isOrdersLoading => _isOrdersLoading;
+  String? get ordersError => _ordersError;
 
   WorkerManagerProvider() {
     initialize();
@@ -153,6 +164,23 @@ class WorkerManagerProvider extends ChangeNotifier {
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  // Orders Management
+  Future<void> fetchOrders() async {
+    _setOrdersLoading(true);
+    try {
+      final response = await WorkerApi.fetchOrders();
+      if (response.success && response.data != null) {
+        _orders = response.data!;
+      } else {
+        _setOrdersError(response.error ?? 'Failed to fetch orders');
+      }
+    } catch (e) {
+      _setOrdersError('Exception fetching orders: $e');
+    } finally {
+      _setOrdersLoading(false);
     }
   }
 
@@ -307,8 +335,10 @@ class WorkerManagerProvider extends ChangeNotifier {
   }
 
   /// Create a new service
-  Future<int> createNewService() async {
-    if (!validateServiceInputs()) return 0;
+  Future<int> createAndEditService({bool isEditing = false}) async {
+    if (!validateServiceInputs() && !isEditing) {
+      return 0;
+    }
 
     _setServiceLoading(true);
     try {
@@ -438,6 +468,16 @@ class WorkerManagerProvider extends ChangeNotifier {
 
   void _setNotificationLoading(bool value) {
     _isNotificationLoading = value;
+    notifyListeners();
+  }
+
+  void _setOrdersLoading(bool value) {
+    _isOrdersLoading = value;
+    notifyListeners();
+  }
+
+  void _setOrdersError(String? message) {
+    _ordersError = message;
     notifyListeners();
   }
 

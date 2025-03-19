@@ -7,7 +7,6 @@ class Contractor {
   final num? phone;
   final String? fullName;
   final String? picture;
-  final String? location;
   final int? costPerHour;
   final String? service;
   final int? yearsOfExperience;
@@ -30,7 +29,6 @@ class Contractor {
     this.phone,
     this.fullName,
     this.picture,
-    this.location,
     this.costPerHour,
     this.service,
     this.yearsOfExperience,
@@ -55,7 +53,6 @@ class Contractor {
       phone: json['phone'],
       fullName: json['full_name'] as String?,
       picture: json['picture'] as String?,
-      location: json['location'] as String?,
       costPerHour: json['cost_per_hour'] as int?,
       service: json['service'] as String?,
       yearsOfExperience: json['years_of_experience'] as int?,

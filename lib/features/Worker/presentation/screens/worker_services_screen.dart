@@ -9,6 +9,7 @@ import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/edit_service.dart';
 import 'package:good_one_app/Providers/worker_maganer_provider.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
 import 'package:provider/provider.dart';
@@ -221,7 +222,15 @@ class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
                             width: context.getWidth(100),
                             child: SmallPrimaryButton(
                               text: 'Edit',
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        EditService(service: service),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],

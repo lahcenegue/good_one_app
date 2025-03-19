@@ -18,7 +18,7 @@ import 'package:good_one_app/firebase_options.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_theme.dart';
-import 'package:good_one_app/Core/Presentation/resources/app_strings.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

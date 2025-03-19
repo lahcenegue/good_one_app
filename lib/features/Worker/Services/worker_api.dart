@@ -5,6 +5,8 @@ import 'package:good_one_app/Core/infrastructure/api/api_response.dart';
 import 'package:good_one_app/Core/infrastructure/api/api_service.dart';
 import 'package:good_one_app/Features/Worker/Models/add_image_model.dart';
 import 'package:good_one_app/Features/Worker/Models/category_model.dart';
+import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
+import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
 
 class WorkerApi {
   static final _api = ApiService.instance;
@@ -28,6 +30,28 @@ class WorkerApi {
       return response;
     } catch (e) {
       return ApiResponse.error('Failed to fetch categories: $e');
+    }
+  }
+
+  static Future<ApiResponse<List<MyServicesModel>>> fetchMyServices() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    try {
+      final response = await _api.get<List<MyServicesModel>>(
+        url: ApiEndpoints.getMyService,
+        fromJson: (dynamic json) {
+          if (json is List) {
+            return json
+                .map((item) =>
+                    MyServicesModel.fromJson(item as Map<String, dynamic>))
+                .toList();
+          }
+          throw Exception('Invalid response format');
+        },
+        token: token,
+      );
+      return response;
+    } catch (e) {
+      return ApiResponse.error('Failed to fetch my service: $e');
     }
   }
 
@@ -72,5 +96,23 @@ class WorkerApi {
     } catch (e) {
       return ApiResponse.error('Failed to remove image: $e');
     }
+  }
+
+  static Future<ApiResponse<CreateServiceModel>> createNewService(
+      CreateServiceRequest request) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+
+    return _api.postMultipart(
+      url: ApiEndpoints.createNewService,
+      fields: request.toFields(),
+      files: request.toFiles(),
+      fromJson: (dynamic json) {
+        if (json is Map<String, dynamic>) {
+          return CreateServiceModel.fromJson(json);
+        }
+        throw Exception('feiled to create a service');
+      },
+      token: token,
+    );
   }
 }

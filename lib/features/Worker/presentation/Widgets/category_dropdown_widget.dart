@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 
@@ -32,16 +33,27 @@ class CategoryDropdownWidget<T> extends StatelessWidget {
           SizedBox(height: context.getHeight(8)),
           DropdownButtonFormField<T>(
             decoration: InputDecoration(
-              labelText: hint,
+              hintText: value == null ? hint : '',
               labelStyle: AppTextStyles.text(context),
             ),
             elevation: 0,
             isExpanded: true,
             value: value,
+            icon: Icon(Icons.arrow_drop_down),
+            style: AppTextStyles.text(context),
+            dropdownColor: AppColors.dimGray,
             items: items.map((item) {
               return DropdownMenuItem<T>(
                 value: item,
-                child: Text(item.toString()),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.getAdaptiveSize(4),
+                  ),
+                  child: Text(
+                    item.toString(),
+                    style: AppTextStyles.subTitle(context),
+                  ),
+                ),
               );
             }).toList(),
             onChanged: onChanged,

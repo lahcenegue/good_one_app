@@ -34,6 +34,8 @@ abstract class ApiEndpoints {
   //Worker Endpoints
   static String get addImage => '$baseUrl/api/account/gallary/add';
   static String get removeImage => '$baseUrl/api/account/gallary/remove';
+  static String get createNewService => '$baseUrl/api/service/create';
+  static String get getMyService => '$baseUrl/api/user/services';
 
   // Stripe payment Endpoints
   static String get paymentApiUrl =>

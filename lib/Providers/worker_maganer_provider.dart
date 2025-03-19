@@ -9,6 +9,8 @@ import 'package:good_one_app/Features/Both/Models/user_info.dart';
 import 'package:good_one_app/Features/Both/Services/both_api.dart';
 import 'package:good_one_app/Features/Worker/Models/add_image_model.dart';
 import 'package:good_one_app/Features/Worker/Models/category_model.dart';
+import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
+import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
 import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
 import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
 import 'package:good_one_app/Features/auth/Services/token_manager.dart';
@@ -44,17 +46,22 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool _isNotificationLoading = false;
   String? _notificationError;
 
+  // My services
+  List<MyServicesModel> _myServices = [];
+
   // Add Service State
   List<CategoryModel> _categories = [];
   CategoryModel? _selectedCategory;
   SubcategoryModel? _selectedSubcategory;
-  double? _servicePrice;
   List<AddImageModel> _galleryImages = [];
   String? _serviceError;
   bool _isServiceLoading = false;
+  bool _hasCertificate = false;
 
   // Form controllers for Add Service
   final TextEditingController _servicePriceController = TextEditingController();
+  final TextEditingController _experienceController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   // Getters for Authentication and User Info
   String? get token => _token;
@@ -77,13 +84,17 @@ class WorkerManagerProvider extends ChangeNotifier {
 
   // Getters for Add Service
   List<CategoryModel> get categories => _categories;
+  List<MyServicesModel> get myServices => _myServices;
   CategoryModel? get selectedCategory => _selectedCategory;
   SubcategoryModel? get selectedSubcategory => _selectedSubcategory;
-  double? get servicePrice => _servicePrice;
+
   List<AddImageModel> get galleryImages => _galleryImages;
   String? get serviceError => _serviceError;
   bool get isServiceLoading => _isServiceLoading;
+  bool get hasCertificate => _hasCertificate;
   TextEditingController get servicePriceController => _servicePriceController;
+  TextEditingController get experienceController => _experienceController;
+  TextEditingController get descriptionController => _descriptionController;
 
   WorkerManagerProvider() {
     initialize();
@@ -150,8 +161,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     try {
       _setLoading(true);
 
-      print(emailController.text);
-
       final request = AccountEditRequest(
         image: _selectedImage,
         fullName: fullNameController.text == _workerInfo!.fullName
@@ -172,8 +181,6 @@ class WorkerManagerProvider extends ChangeNotifier {
         password:
             passwordController.text.isEmpty ? null : passwordController.text,
       );
-
-      print(request.email);
 
       final response = await BothApi.editAccount(request);
       if (response.success && response.data != null) {
@@ -248,11 +255,34 @@ class WorkerManagerProvider extends ChangeNotifier {
   }
 
   // -----------------------------------
-  // Add Service Management (WorkerAddServiceScreen)
+  // My Services
+  // -----------------------------------
+  /// Fetches my services
+  Future<void> fetchMyServices() async {
+    _setServiceLoading(true);
+    try {
+      _setServiceLoading(true);
+
+      final response = await WorkerApi.fetchMyServices();
+      if (response.success && response.data != null) {
+        _myServices = response.data!;
+      } else {
+        _setServiceError(response.error);
+      }
+      _setServiceLoading(false);
+    } catch (e) {
+      _setServiceError('Failed to fetch my services: $e');
+      _setServiceLoading(false);
+    }
+  }
+
+  // -----------------------------------
+  // Add Service Management
   // -----------------------------------
   /// Fetches categories and subcategories for the Add Service screen.
 
   Future<void> fetchCategories() async {
+    print('==============fetch categorie==================');
     _setServiceLoading(true);
     final response = await WorkerApi.fetchCategories();
     if (response.success && response.data != null) {
@@ -276,33 +306,62 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Updates the service price.
-  void setServicePrice() {
-    _servicePrice = double.tryParse(_servicePriceController.text);
-    notifyListeners();
+  /// Create a new service
+  Future<int> createNewService() async {
+    if (!validateServiceInputs()) return 0;
+
+    _setServiceLoading(true);
+    try {
+      final request = CreateServiceRequest(
+        category: _selectedCategory!.name,
+        categoryId: _selectedCategory!.id,
+        subCategoryId: _selectedSubcategory!.id,
+        price: double.tryParse(_servicePriceController.text),
+        description: _descriptionController.text,
+        experience: int.tryParse(_experienceController.text),
+        license: _selectedImage,
+      );
+
+      final response = await WorkerApi.createNewService(request);
+      if (response.success && response.data != null) {
+        _setServiceLoading(false);
+        return response.data!.serviceId!;
+      } else {
+        _setServiceLoading(false);
+        _setServiceError(response.error);
+        return 0;
+      }
+    } catch (e) {
+      _setServiceError('Failed to create a new service: $e');
+      _setServiceLoading(false);
+      return 0;
+    }
   }
 
   /// Uploads it to the gallery for the service.
   Future<void> uploadServiceImage(
     BuildContext context,
     ImageSource source,
-    String serviceId,
+    int serviceId,
   ) async {
     try {
       _setServiceLoading(true);
       await pickImage(context, source);
 
-      final request = AddImageRequest(
-        serviceId: serviceId,
-        image: _selectedImage!,
-      );
-      final response = await WorkerApi().addGalleryImage(request);
+      if (_selectedImage != null) {
+        final request = AddImageRequest(
+          serviceId: serviceId,
+          image: _selectedImage!,
+        );
 
-      if (response.success && response.data != null) {
-        _galleryImages.add(response.data!);
-      } else {
-        _setServiceError(response.error);
+        final response = await WorkerApi().addGalleryImage(request);
+        if (response.success && response.data != null) {
+          _galleryImages.add(response.data!);
+        } else {
+          _setServiceError(response.error);
+        }
       }
+
       _setServiceLoading(false);
     } catch (e) {
       _setServiceError('Failed to upload image: $e');
@@ -324,17 +383,29 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Validates all inputs before submitting the service.
   bool validateServiceInputs() {
     if (_selectedCategory == null) {
-      _setServiceError('Please select a category.');
+      _setServiceError('Please select a service category.');
       return false;
     }
     if (_selectedSubcategory == null) {
       _setServiceError('Please select a subcategory.');
       return false;
     }
-    if (_servicePrice == null || _servicePrice! <= 0) {
+    if (_descriptionController.text.isEmpty) {
+      _setServiceError('Please enter a service description.');
+      return false;
+    }
+    if (_servicePriceController.text.isEmpty ||
+        double.tryParse(_servicePriceController.text)! <= 0) {
       _setServiceError('Please enter a valid service price.');
       return false;
     }
+    if (_experienceController.text.isEmpty ||
+        int.tryParse(_experienceController.text)! < 0) {
+      _setServiceError('Please enter valid years of experience.');
+      return false;
+    }
+
+    _setServiceError(null);
     return true;
   }
 
@@ -342,9 +413,12 @@ class WorkerManagerProvider extends ChangeNotifier {
   void resetServiceState() {
     _selectedCategory = null;
     _selectedSubcategory = null;
-    _servicePrice = null;
+    _selectedImage = null;
+    _galleryImages.clear();
     _serviceError = null;
     _servicePriceController.clear();
+    _experienceController.clear();
+    _descriptionController.clear();
     notifyListeners();
   }
 
@@ -390,6 +464,11 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Sets the service loading state for Add Service operations.
   void _setServiceLoading(bool value) {
     _isServiceLoading = value;
+    notifyListeners();
+  }
+
+  void setHasCertificate(bool value) {
+    _hasCertificate = value;
     notifyListeners();
   }
 

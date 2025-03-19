@@ -21,7 +21,7 @@ class AddImageModel {
 }
 
 class AddImageRequest {
-  final String? serviceId;
+  final int? serviceId;
   final File? image;
 
   AddImageRequest({
@@ -31,7 +31,7 @@ class AddImageRequest {
 
   Map<String, String> toFields() {
     return {
-      'service_id': serviceId!,
+      'service_id': serviceId!.toString(),
     };
   }
 

@@ -11,6 +11,7 @@ abstract class StorageKeys {
   static final String languageKey = makeKey('language_key');
   static final String onboardingKey = makeKey('onboarding_completed');
   static final String accountTypeKey = makeKey('account_type');
+  static final String vacationModeKey = makeKey('vacation_modekey');
 
   // Auth Keys
   static final String tokenKey = makeKey('token');

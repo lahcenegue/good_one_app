@@ -192,7 +192,17 @@
    "noOrdersForThisDate":"No Orders For This Date",
    "client":"Client",
    "confirmed":"Confirmed",
-   "somethingWentWrong":"Something Went Wrong"
+   "somethingWentWrong":"Something Went Wrong",
+   "serviceSummary":"Service Summary",
+    "servicesOffered":"Services Offered",
+    "totalOrders":"Total Orders",
+    "pendingOrders":"Pending Orders",
+    "endVacation":"End Vacation",
+    "goOnVacation":"Go On Vacation",
+    "vacationStarted":"Vacation Started",
+    "vacationEnded":"Vacation Ended",
+    "requestProfits":"Request Profits",
+    "profitsRequested":"Rrofits Requested"
  
 
 }

@@ -69,10 +69,10 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                               }
                             },
                           ),
-                          if (workerManager.serviceError != null)
+                          if (workerManager.addServiceError != null)
                             SharedAuthWidgets.buildErrorMessage(
                               context,
-                              workerManager.serviceError!,
+                              workerManager.addServiceError!,
                             ),
                         ],
                       ),

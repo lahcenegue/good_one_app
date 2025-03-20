@@ -45,7 +45,7 @@ class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
                       _buildAddServiceButton(context, workerManager),
                       _buildMyServicesList(context, workerManager),
                       SizedBox(height: context.getHeight(16)),
-                      if (workerManager.serviceError != null)
+                      if (workerManager.error != null)
                         AppErrorWidget(
                           message: workerManager.error!,
                           onRetry: workerManager.fetchMyServices,

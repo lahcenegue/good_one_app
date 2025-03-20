@@ -66,7 +66,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
           appBar: _buildAppBar(context),
           body: workerManager.isOrdersLoading
               ? const Center(child: CircularProgressIndicator())
-              : workerManager.ordersError != null
+              : workerManager.error != null
                   ? _buildErrorState(context, workerManager)
                   : _dates.isEmpty
                       ? Center(

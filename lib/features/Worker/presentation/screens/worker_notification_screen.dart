@@ -31,13 +31,13 @@ class WorkerNotificationScreen extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           }
-          if (workerManager.notificationError != null) {
+          if (workerManager.error != null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    workerManager.notificationError!,
+                    workerManager.error!,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.text(context).copyWith(
                       color: AppColors.oxblood,

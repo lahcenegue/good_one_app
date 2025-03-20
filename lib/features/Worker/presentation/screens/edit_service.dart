@@ -64,9 +64,9 @@ class _EditServiceState extends State<EditService> {
                             },
                             width: context.getWidth(150),
                           ),
-                          if (workerManager.serviceError != null)
+                          if (workerManager.addServiceError != null)
                             AppErrorWidget(
-                              message: workerManager.serviceError!,
+                              message: workerManager.addServiceError!,
                               onRetry: () {},
                             ),
                         ],

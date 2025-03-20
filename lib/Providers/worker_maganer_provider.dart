@@ -29,6 +29,10 @@ class WorkerManagerProvider extends ChangeNotifier {
   int _currentIndex = 0;
   bool _isLoading = false;
 
+  // Vacation Mode State
+  bool _isOnVacation = false;
+  bool _isVacationLoading = false;
+
   // Form Controllers for User Info
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -45,7 +49,6 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Notification Data
   List<NotificationModel> _notifications = [];
   bool _isNotificationLoading = false;
-  String? _notificationError;
 
   // My services
   List<MyServicesModel> _myServices = [];
@@ -53,14 +56,13 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Orders State
   Map<String, List<MyOrderModel>> _orders = {};
   bool _isOrdersLoading = false;
-  String? _ordersError;
 
   // Add Service State
   List<CategoryModel> _categories = [];
   CategoryModel? _selectedCategory;
   SubcategoryModel? _selectedSubcategory;
   List<AddImageModel> _galleryImages = [];
-  String? _serviceError;
+  String? _addServiceError;
   bool _isServiceLoading = false;
   bool _hasCertificate = false;
 
@@ -78,7 +80,6 @@ class WorkerManagerProvider extends ChangeNotifier {
   List<NotificationModel> get notifications =>
       List.unmodifiable(_notifications);
   bool get isNotificationLoading => _isNotificationLoading;
-  String? get notificationError => _notificationError;
   String? get imageError => _imageError;
   File? get selectedImage => _selectedImage;
   TextEditingController get fullNameController => _fullNameController;
@@ -95,7 +96,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   SubcategoryModel? get selectedSubcategory => _selectedSubcategory;
 
   List<AddImageModel> get galleryImages => _galleryImages;
-  String? get serviceError => _serviceError;
+  String? get addServiceError => _addServiceError;
   bool get isServiceLoading => _isServiceLoading;
   bool get hasCertificate => _hasCertificate;
   TextEditingController get servicePriceController => _servicePriceController;
@@ -105,7 +106,10 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Getters for Orders
   Map<String, List<MyOrderModel>> get orders => _orders;
   bool get isOrdersLoading => _isOrdersLoading;
-  String? get ordersError => _ordersError;
+
+  // Getters for Vacation Mode
+  bool get isOnVacation => _isOnVacation;
+  bool get isVacationLoading => _isVacationLoading;
 
   WorkerManagerProvider() {
     initialize();
@@ -118,7 +122,66 @@ class WorkerManagerProvider extends ChangeNotifier {
   Future<void> initialize() async {
     await _loadUserData();
     await fetchNotifications();
+    await fetchMyServices(); // Fetch services for summary
+    await fetchOrders(); // Fetch orders for summary
+    await _loadVacationStatus(); // Load vacation status
   }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Load vacation status from storage (or API if implemented)
+  Future<void> _loadVacationStatus() async {
+    try {
+      final vacationStatus =
+          await StorageManager.getBool(StorageKeys.vacationModeKey) ?? false;
+      _isOnVacation = vacationStatus;
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to load vacation status: $e');
+    }
+  }
+
+  // Toggle vacation mode
+  Future<void> toggleVacationMode() async {
+    _setVacationLoading(true);
+    try {
+      // Simulate API call to toggle vacation mode
+      // In a real app, this would call an API endpoint to update the worker's availability
+      await Future.delayed(
+          const Duration(seconds: 1)); // Simulate network delay
+      _isOnVacation = !_isOnVacation;
+      await StorageManager.setBool(StorageKeys.vacationModeKey, _isOnVacation);
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to toggle vacation mode: $e');
+    } finally {
+      _setVacationLoading(false);
+    }
+  }
+
+  // Request profits (placeholder)
+  Future<void> requestProfits() async {
+    // Placeholder for future implementation
+    debugPrint('Requesting profits...');
+    // In a real app, this would call an API to request profits
+  }
+
+  // Helper methods for summary data
+  int get totalOrders {
+    return _orders.values.fold(0, (sum, orders) => sum + orders.length);
+  }
+
+  int get pendingOrders {
+    return _orders.values.fold(0, (sum, orders) {
+      return sum + orders.where((order) => order.status != 1).length;
+    });
+  }
+
+  void _setVacationLoading(bool value) {
+    _isVacationLoading = value;
+    notifyListeners();
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
 
   /// Loads user data from storage and fetches user info if a token is available.
   Future<void> _loadUserData() async {
@@ -149,6 +212,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Fetches user information from the API.
   Future<bool> fetchUserInfo() async {
     if (_token == null) return false;
+    setError(null);
     _setLoading(true);
     try {
       final response = await BothApi.getUserInfo();
@@ -175,10 +239,10 @@ class WorkerManagerProvider extends ChangeNotifier {
       if (response.success && response.data != null) {
         _orders = response.data!;
       } else {
-        _setOrdersError(response.error ?? 'Failed to fetch orders');
+        setError(response.error ?? 'Failed to fetch orders');
       }
     } catch (e) {
-      _setOrdersError('Exception fetching orders: $e');
+      setError('Exception fetching orders: $e');
     } finally {
       _setOrdersLoading(false);
     }
@@ -256,7 +320,8 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Fetches notifications for the user.
   Future<void> fetchNotifications() async {
     _setNotificationLoading(true);
-    _setNotificationError(null);
+
+    setError(null);
     try {
       debugPrint('Fetching notifications...');
       final response = await BothApi.fetchNotifications();
@@ -272,11 +337,10 @@ class WorkerManagerProvider extends ChangeNotifier {
         }
         notifyListeners();
       } else {
-        _setNotificationError(
-            'Failed to load notifications: ${response.error}');
+        setError('Failed to load notifications: ${response.error}');
       }
     } catch (e) {
-      _setNotificationError('Exception fetching notifications: $e');
+      setError('Exception fetching notifications: $e');
     } finally {
       _setNotificationLoading(false);
     }
@@ -288,6 +352,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Fetches my services
   Future<void> fetchMyServices() async {
     _setServiceLoading(true);
+    setError(null);
     try {
       _setServiceLoading(true);
 
@@ -295,11 +360,11 @@ class WorkerManagerProvider extends ChangeNotifier {
       if (response.success && response.data != null) {
         _myServices = response.data!;
       } else {
-        _setServiceError(response.error);
+        setError(response.error);
       }
       _setServiceLoading(false);
     } catch (e) {
-      _setServiceError('Failed to fetch my services: $e');
+      setError('Failed to fetch my services: $e');
       _setServiceLoading(false);
     }
   }
@@ -316,7 +381,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     if (response.success && response.data != null) {
       _categories = response.data!;
     } else {
-      _setServiceError(response.error);
+      _setAddServiceError(response.error);
     }
     _setServiceLoading(false);
   }
@@ -358,11 +423,11 @@ class WorkerManagerProvider extends ChangeNotifier {
         return response.data!.serviceId!;
       } else {
         _setServiceLoading(false);
-        _setServiceError(response.error);
+        _setAddServiceError(response.error);
         return 0;
       }
     } catch (e) {
-      _setServiceError('Failed to create a new service: $e');
+      _setAddServiceError('Failed to create a new service: $e');
       _setServiceLoading(false);
       return 0;
     }
@@ -388,13 +453,13 @@ class WorkerManagerProvider extends ChangeNotifier {
         if (response.success && response.data != null) {
           _galleryImages.add(response.data!);
         } else {
-          _setServiceError(response.error);
+          _setAddServiceError(response.error);
         }
       }
 
       _setServiceLoading(false);
     } catch (e) {
-      _setServiceError('Failed to upload image: $e');
+      _setAddServiceError('Failed to upload image: $e');
       _setServiceLoading(false);
     }
   }
@@ -405,7 +470,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     final response = await WorkerApi().removeGalleryImage(imageId);
     if (response.success && response.data == true) {
     } else {
-      _setServiceError(response.error);
+      _setAddServiceError(response.error);
     }
     _setServiceLoading(false);
   }
@@ -413,29 +478,29 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Validates all inputs before submitting the service.
   bool validateServiceInputs() {
     if (_selectedCategory == null) {
-      _setServiceError('Please select a service category.');
+      _setAddServiceError('Please select a service category.');
       return false;
     }
     if (_selectedSubcategory == null) {
-      _setServiceError('Please select a subcategory.');
+      _setAddServiceError('Please select a subcategory.');
       return false;
     }
     if (_descriptionController.text.isEmpty) {
-      _setServiceError('Please enter a service description.');
+      _setAddServiceError('Please enter a service description.');
       return false;
     }
     if (_servicePriceController.text.isEmpty ||
         double.tryParse(_servicePriceController.text)! <= 0) {
-      _setServiceError('Please enter a valid service price.');
+      _setAddServiceError('Please enter a valid service price.');
       return false;
     }
     if (_experienceController.text.isEmpty ||
         int.tryParse(_experienceController.text)! < 0) {
-      _setServiceError('Please enter valid years of experience.');
+      _setAddServiceError('Please enter valid years of experience.');
       return false;
     }
 
-    _setServiceError(null);
+    _setAddServiceError(null);
     return true;
   }
 
@@ -445,7 +510,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     _selectedSubcategory = null;
     _selectedImage = null;
     _galleryImages.clear();
-    _serviceError = null;
+    _addServiceError = null;
     _servicePriceController.clear();
     _experienceController.clear();
     _descriptionController.clear();
@@ -473,11 +538,6 @@ class WorkerManagerProvider extends ChangeNotifier {
 
   void _setOrdersLoading(bool value) {
     _isOrdersLoading = value;
-    notifyListeners();
-  }
-
-  void _setOrdersError(String? message) {
-    _ordersError = message;
     notifyListeners();
   }
 
@@ -524,14 +584,8 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setNotificationError(String? message) {
-    _notificationError = message;
-    if (message != null) debugPrint(message);
-    notifyListeners();
-  }
-
-  void _setServiceError(String? message) {
-    _serviceError = message;
+  void _setAddServiceError(String? message) {
+    _addServiceError = message;
     notifyListeners();
   }
 }

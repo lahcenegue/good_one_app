@@ -35,6 +35,7 @@ abstract class ApiEndpoints {
   static String get addImage => '$baseUrl/api/account/gallary/add';
   static String get removeImage => '$baseUrl/api/account/gallary/remove';
   static String get createNewService => '$baseUrl/api/service/create';
+  static String get editNewService => '$baseUrl/api/service/edit';
   static String get getMyService => '$baseUrl/api/user/services';
   static String get serviceOrders => '$baseUrl/api/service/orders';
 

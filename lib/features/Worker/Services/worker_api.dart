@@ -76,12 +76,12 @@ class WorkerApi {
   }
 
   /// Removes an image from the gallery.
-  Future<ApiResponse<bool>> removeGalleryImage(int imageId) async {
+  Future<ApiResponse<bool>> removeGalleryImage(String imageName) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
     try {
       final response = await _api.post<bool>(
         url: ApiEndpoints.removeImage,
-        body: {'id': imageId},
+        body: {'filename': imageName},
         fromJson: (dynamic json) {
           if (json is int) {
             return true;
@@ -100,11 +100,13 @@ class WorkerApi {
   }
 
   static Future<ApiResponse<CreateServiceModel>> createNewService(
-      CreateServiceRequest request) async {
+      bool isEditing, CreateServiceRequest request) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
 
     return _api.postMultipart(
-      url: ApiEndpoints.createNewService,
+      url: isEditing
+          ? ApiEndpoints.editNewService
+          : ApiEndpoints.createNewService,
       fields: request.toFields(),
       files: request.toFiles(),
       fromJson: (dynamic json) {

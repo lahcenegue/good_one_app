@@ -20,15 +20,17 @@ class CreateServiceRequest {
   final String? description;
   final int? experience;
   final File? license;
+  final int? serviceId;
 
   CreateServiceRequest({
-    required this.category,
-    required this.categoryId,
-    required this.subCategoryId,
-    required this.price,
-    required this.description,
-    required this.experience,
+    this.category,
+    this.categoryId,
+    this.subCategoryId,
+    this.price,
+    this.description,
+    this.experience,
     this.license,
+    this.serviceId,
   });
 
   Map<String, String> toFields() {
@@ -50,6 +52,9 @@ class CreateServiceRequest {
     }
     if (experience != null) {
       fields['years_of_experience'] = experience!.toString();
+    }
+    if (serviceId != null) {
+      fields['service_id'] = serviceId!.toString();
     }
 
     return fields;

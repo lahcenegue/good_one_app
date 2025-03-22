@@ -54,7 +54,7 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
                       style: AppTextStyles.text(context)
                           .copyWith(color: Colors.red),
                     ),
-                  ),
+                  ), //TODO cjange widget
                 SizedBox(height: context.getHeight(20)),
                 _buildAccountDetailsForm(context, workerManager, worker),
                 if (workerManager.error != null)

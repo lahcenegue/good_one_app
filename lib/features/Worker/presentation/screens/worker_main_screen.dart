@@ -39,7 +39,7 @@ class WorkerMainScreen extends StatelessWidget {
         }
 
         return Scaffold(
-          body: _buildCurrentScreen(context, workerManager),
+          body: SafeArea(child: _buildCurrentScreen(context, workerManager)),
           bottomNavigationBar: _buildBottomNavigation(context, workerManager),
         );
       },

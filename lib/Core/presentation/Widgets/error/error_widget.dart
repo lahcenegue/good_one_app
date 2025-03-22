@@ -10,17 +10,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class AppErrorWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
-  final bool showIcon;
-  final Color? iconColor;
-  final double? iconSize;
 
   const AppErrorWidget({
     super.key,
     required this.message,
     this.onRetry,
-    this.showIcon = true,
-    this.iconColor,
-    this.iconSize,
   });
 
   @override
@@ -32,14 +26,12 @@ class AppErrorWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (showIcon) ...[
-              Icon(
-                Icons.error_outline,
-                size: iconSize ?? context.getWidth(48),
-                color: iconColor ?? AppColors.oxblood,
-              ),
-              SizedBox(height: context.getHeight(16)),
-            ],
+            Icon(
+              Icons.error_outline,
+              size: context.getWidth(48),
+              color: AppColors.oxblood,
+            ),
+            SizedBox(height: context.getHeight(16)),
             Text(
               message,
               textAlign: TextAlign.center,
@@ -78,12 +70,10 @@ class AppErrorWidget extends StatelessWidget {
   factory AppErrorWidget.custom({
     required String message,
     VoidCallback? onRetry,
-    bool showIcon = true,
   }) {
     return AppErrorWidget(
       message: message,
       onRetry: onRetry,
-      showIcon: showIcon,
     );
   }
 }

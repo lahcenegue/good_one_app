@@ -125,7 +125,7 @@ class AddImagesScreen extends StatelessWidget {
                                           color: AppColors.primaryColor,
                                         ),
                                         onPressed: () => workerManager
-                                            .removeServiceImage(image.id!),
+                                            .removeServiceImage(image.image!),
                                       ),
                                     );
                                   },

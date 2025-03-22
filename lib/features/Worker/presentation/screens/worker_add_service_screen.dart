@@ -74,6 +74,8 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                               context,
                               workerManager.addServiceError!,
                             ),
+
+                          //TODO
                         ],
                       ),
                     ),
@@ -172,7 +174,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
     return Column(
       children: [
         Text(
-          'Upload Your Certificate',
+          AppLocalizations.of(context)!.uploadYourCertificate,
           style: AppTextStyles.title2(context),
         ),
         SizedBox(height: context.getHeight(8)),

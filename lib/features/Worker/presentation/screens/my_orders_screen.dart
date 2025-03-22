@@ -3,6 +3,8 @@ import 'package:good_one_app/Core/Infrastructure/api/api_endpoints.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/secondary_button.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Error/error_widget.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
 import 'package:good_one_app/Providers/worker_maganer_provider.dart';
@@ -67,7 +69,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
           body: workerManager.isOrdersLoading
               ? const Center(child: CircularProgressIndicator())
               : workerManager.error != null
-                  ? _buildErrorState(context, workerManager)
+                  ? AppErrorWidget(
+                      message: AppLocalizations.of(context)!.somethingWentWrong,
+                      onRetry: workerManager.fetchOrders,
+                    )
                   : _dates.isEmpty
                       ? Center(
                           child: Text(
@@ -96,61 +101,16 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.primaryColor),
-        onPressed: () => Navigator.pop(context),
-      ),
+      automaticallyImplyLeading: false,
       title: Text(
         AppLocalizations.of(context)!.myOrders,
-        style: AppTextStyles.appBarTitle(context)
-            .copyWith(color: AppColors.primaryColor),
-      ),
-      backgroundColor: Colors.white,
-      elevation: 0,
-    );
-  }
-
-  Widget _buildErrorState(
-      BuildContext context, WorkerManagerProvider workerManager) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: context.getAdaptiveSize(60),
-            height: context.getAdaptiveSize(60),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.red, width: 2),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 40,
-              ),
-            ),
-          ),
-          SizedBox(height: context.getHeight(16)),
-          Text(
-            AppLocalizations.of(context)!.somethingWentWrong,
-            style: AppTextStyles.subTitle(context),
-          ),
-          SizedBox(height: context.getHeight(16)),
-          PrimaryButton(
-            text: AppLocalizations.of(context)!.retry,
-            onPressed: workerManager.fetchOrders,
-            width: context.getWidth(150),
-            height: context.getHeight(50),
-          ),
-        ],
+        style: AppTextStyles.appBarTitle(context),
       ),
     );
   }
 
   Widget _buildTabBar(BuildContext context) {
     return Container(
-      color: Colors.white,
       padding: EdgeInsets.symmetric(vertical: context.getAdaptiveSize(8)),
       child: TabBar(
         controller: _tabController,
@@ -158,8 +118,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
         indicatorColor: AppColors.primaryColor,
         labelColor: AppColors.primaryColor,
         unselectedLabelColor: AppColors.hintColor,
-        labelStyle: AppTextStyles.subTitle(context)
-            .copyWith(fontWeight: FontWeight.bold),
+        labelStyle: AppTextStyles.subTitle(context),
         unselectedLabelStyle: AppTextStyles.subTitle(context),
         tabs: _dates.map((date) {
           final dateTime = DateTime.parse(date);
@@ -170,15 +129,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               children: [
                 Text(dayOfWeek),
                 Text(dayOfMonth),
-                if (_tabController?.index == _dates.indexOf(date))
-                  Container(
-                    width: context.getAdaptiveSize(8),
-                    height: context.getAdaptiveSize(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
               ],
             ),
           );
@@ -217,45 +167,24 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.service,
-                      style: AppTextStyles.subTitle(context),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        // Navigate to order details screen (to be implemented)
-                      },
-                      child: Text(
-                        AppLocalizations.of(context)!.seeAll,
-                        style: AppTextStyles.text(context).copyWith(
-                          color: AppColors.primaryColor,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: context.getHeight(4)),
-                Text(
-                  order.service,
-                  style: AppTextStyles.title(context).copyWith(fontSize: 18),
-                ),
-                SizedBox(height: context.getHeight(8)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          AppLocalizations.of(context)!.service,
+                          style: AppTextStyles.subTitle(context),
+                        ),
+                        SizedBox(height: context.getHeight(4)),
                         Text(
                           AppLocalizations.of(context)!.servicePrice,
                           style: AppTextStyles.subTitle(context),
                         ),
                         SizedBox(height: context.getHeight(4)),
                         Text(
-                          '\$${order.costPerHour}/hr',
-                          style: AppTextStyles.text(context)
-                              .copyWith(fontWeight: FontWeight.bold),
+                          AppLocalizations.of(context)!.totalAmount,
+                          style: AppTextStyles.title(context).copyWith(
+                            fontSize: 20,
+                          ),
                         ),
                       ],
                     ),
@@ -263,20 +192,29 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          AppLocalizations.of(context)!.totalAmount,
+                          order.service,
+                          style: AppTextStyles.subTitle(context),
+                        ),
+                        SizedBox(height: context.getHeight(4)),
+                        Text(
+                          '\$${order.costPerHour}',
                           style: AppTextStyles.subTitle(context),
                         ),
                         SizedBox(height: context.getHeight(4)),
                         Text(
                           '\$${order.totalPrice}',
-                          style: AppTextStyles.text(context)
-                              .copyWith(fontWeight: FontWeight.bold),
+                          style: AppTextStyles.price(context),
                         ),
                       ],
                     ),
                   ],
                 ),
                 SizedBox(height: context.getHeight(16)),
+                Text(
+                  AppLocalizations.of(context)!.client,
+                  style: AppTextStyles.title2(context),
+                ),
+                SizedBox(height: context.getHeight(8)),
                 Row(
                   children: [
                     ClipRRect(
@@ -300,11 +238,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(context)!.client,
-                            style: AppTextStyles.subTitle(context),
-                          ),
-                          SizedBox(height: context.getHeight(4)),
-                          Text(
                             order.user.fullName,
                             style: AppTextStyles.text(context)
                                 .copyWith(fontWeight: FontWeight.bold),
@@ -319,28 +252,20 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                         ],
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: context.getAdaptiveSize(12),
-                        vertical: context.getAdaptiveSize(6),
-                      ),
-                      decoration: BoxDecoration(
-                        color: order.status == 1
-                            ? Colors.red.withOpacity(0.1)
-                            : Colors.green.withOpacity(0.1),
-                        borderRadius:
-                            BorderRadius.circular(context.getAdaptiveSize(8)),
-                      ),
-                      child: Text(
-                        order.status == 1
-                            ? AppLocalizations.of(context)!.canceled
-                            : AppLocalizations.of(context)!.confirmed,
-                        style: AppTextStyles.text(context).copyWith(
-                          color: order.status == 1 ? Colors.red : Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  ],
+                ),
+                SizedBox(height: context.getHeight(16)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SmallSecondaryButton(
+                      text: 'details',
+                      onPressed: () {},
                     ),
+                    SmallPrimaryButton(
+                      text: AppLocalizations.of(context)!.canceled,
+                      onPressed: () {},
+                    )
                   ],
                 ),
               ],

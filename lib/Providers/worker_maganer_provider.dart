@@ -65,6 +65,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   String? _addServiceError;
   bool _isServiceLoading = false;
   bool _hasCertificate = false;
+  int? _editingServiceId;
 
   // Form controllers for Add Service
   final TextEditingController _servicePriceController = TextEditingController();
@@ -189,7 +190,7 @@ class WorkerManagerProvider extends ChangeNotifier {
       _token = await StorageManager.getString(StorageKeys.tokenKey);
       if (_token != null) {
         final userInfoSuccess = await fetchUserInfo();
-        if (userInfoSuccess) _initializeControllers();
+        if (userInfoSuccess) _initializeUsersControllers();
 
         if (!userInfoSuccess) {
           final refreshed = await TokenManager.instance.refreshToken();
@@ -278,7 +279,7 @@ class WorkerManagerProvider extends ChangeNotifier {
       if (response.success && response.data != null) {
         _workerInfo = response.data;
 
-        _initializeControllers();
+        _initializeUsersControllers();
         _selectedImage = null;
         setImageError(null);
         notifyListeners();
@@ -406,8 +407,10 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
 
     _setServiceLoading(true);
+
     try {
       final request = CreateServiceRequest(
+        serviceId: _editingServiceId,
         category: _selectedCategory!.name,
         categoryId: _selectedCategory!.id,
         subCategoryId: _selectedSubcategory!.id,
@@ -417,7 +420,7 @@ class WorkerManagerProvider extends ChangeNotifier {
         license: _selectedImage,
       );
 
-      final response = await WorkerApi.createNewService(request);
+      final response = await WorkerApi.createNewService(isEditing, request);
       if (response.success && response.data != null) {
         _setServiceLoading(false);
         return response.data!.serviceId!;
@@ -465,10 +468,11 @@ class WorkerManagerProvider extends ChangeNotifier {
   }
 
   /// Removes an image from the gallery using the image ID.
-  Future<void> removeServiceImage(int imageId) async {
+  Future<void> removeServiceImage(String imageName) async {
     _setServiceLoading(true);
-    final response = await WorkerApi().removeGalleryImage(imageId);
+    final response = await WorkerApi().removeGalleryImage(imageName);
     if (response.success && response.data == true) {
+      galleryImages.removeWhere((image) => image.image == imageName);
     } else {
       _setAddServiceError(response.error);
     }
@@ -541,13 +545,24 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _initializeControllers() {
+  void _initializeUsersControllers() {
     final user = _workerInfo;
     _fullNameController.text = user?.fullName ?? '';
     _emailController.text = user?.email ?? '';
     _phoneController.text = user?.phone?.toString() ?? '';
     _cityController.text = user?.city ?? '';
     _countryController.text = user?.country ?? '';
+  }
+
+  void initializeServiceControlles(MyServicesModel service) {
+    _editingServiceId = service.id;
+    _descriptionController.text = service.about;
+    _servicePriceController.text = service.costPerHour.toString();
+    _experienceController.text = service.yearsOfExperience.toString();
+    setHasCertificate(service.hasCertificate == 0 ? false : true);
+    _galleryImages =
+        List.from(service.gallary.map((img) => AddImageModel(image: img)));
+    notifyListeners();
   }
 
   /// Clears all authentication data.
@@ -567,8 +582,18 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setHasCertificate(bool value) {
-    _hasCertificate = value;
+  void setHasCertificate(bool? value) {
+    _hasCertificate = value ?? false;
+    notifyListeners();
+  }
+
+  set selectedImage(File? value) {
+    _selectedImage = value;
+    notifyListeners();
+  }
+
+  set galleryImages(List<AddImageModel> value) {
+    _galleryImages = value;
     notifyListeners();
   }
 

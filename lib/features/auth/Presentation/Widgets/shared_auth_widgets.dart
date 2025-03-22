@@ -26,12 +26,15 @@ class SharedAuthWidgets {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
     Widget? suffixIcon,
+    int? minLines,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
       validator: validator,
+      minLines: minLines ?? 1,
+      maxLines: minLines == null ? 1 : minLines + 1,
       decoration: InputDecoration(
         hintText: hintText,
         suffixIcon: suffixIcon,
@@ -118,6 +121,7 @@ class SharedAuthWidgets {
     required String hintText,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    int? minLines,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,13 +131,12 @@ class SharedAuthWidgets {
           style: AppTextStyles.subTitle(context),
         ),
         SizedBox(height: context.getHeight(8)),
-        buildTextField(
-          context,
-          controller: controller,
-          hintText: hintText,
-          keyboardType: keyboardType,
-          validator: validator,
-        ),
+        buildTextField(context,
+            controller: controller,
+            hintText: hintText,
+            keyboardType: keyboardType,
+            validator: validator,
+            minLines: minLines ?? 1),
       ],
     );
   }

@@ -8,6 +8,7 @@ class MyServicesModel {
   final int active;
   final List<String> gallary;
   final Subcategory subcategory;
+  final int? hasCertificate;
 
   MyServicesModel({
     required this.id,
@@ -18,6 +19,7 @@ class MyServicesModel {
     required this.active,
     required this.gallary,
     required this.subcategory,
+    this.hasCertificate,
   });
 
   factory MyServicesModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class MyServicesModel {
       gallary: List<String>.from(json['gallary'] as List<dynamic>),
       subcategory:
           Subcategory.fromJson(json['subcategory'] as Map<String, dynamic>),
+      hasCertificate: json['verified_liscence'] as int?,
     );
   }
 }

@@ -6,9 +6,9 @@ class AddImageModel {
   final int? id;
 
   AddImageModel({
-    required this.image,
-    required this.serviceId,
-    required this.id,
+    this.image,
+    this.serviceId,
+    this.id,
   });
 
   factory AddImageModel.fromJson(Map<String, dynamic> json) {

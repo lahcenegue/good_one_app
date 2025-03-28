@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../../../Core/Utils/size_config.dart';
-import '../../Models/language_option.dart';
+
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Features/Setup/Models/language_option.dart';
 
 class LanguageOptionTile extends StatelessWidget {
   final LanguageOption option;

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 
 class SharedAuthWidgets {
   static Widget buildLogo(BuildContext context) {

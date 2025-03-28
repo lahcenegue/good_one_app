@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../../Core/presentation/Widgets/Buttons/primary_button.dart';
-import '../../../../Core/presentation/Widgets/Buttons/secondary_button.dart';
-import '../../../../Core/presentation/resources/app_assets.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Core/Utils/size_config.dart';
-import '../../../../Providers/app_settings_provider.dart';
-import '../../Models/onboard_model.dart';
-import '../widgets/dot_indicator.dart';
-import '../widgets/onboard_content.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/secondary_button.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Features/Onboarding/Models/onboard_model.dart';
+import 'package:good_one_app/Features/Onboarding/Presentation/Widgets/dot_indicator.dart';
+import 'package:good_one_app/Features/Onboarding/Presentation/Widgets/onboard_content.dart';
+import 'package:good_one_app/Providers/Both/app_settings_provider.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OnBordingView extends StatelessWidget {
   const OnBordingView({super.key});

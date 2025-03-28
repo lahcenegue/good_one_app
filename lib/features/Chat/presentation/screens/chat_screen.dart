@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
-import 'package:good_one_app/Core/presentation/Widgets/loading_indicator.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
-import 'package:good_one_app/Providers/chat_provider.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:provider/provider.dart';
+
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final String otherUserId;

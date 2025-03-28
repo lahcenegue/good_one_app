@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
-import 'package:good_one_app/Features/Both/Models/notification_model.dart';
-
 import 'package:intl/intl.dart';
+
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Features/Both/Models/notification_model.dart';
 
 class NotificationListItem extends StatelessWidget {
   final NotificationModel notification;

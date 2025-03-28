@@ -1,4 +1,4 @@
-import '../../Config/app_config.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
 
 abstract class ApiEndpoints {
   const ApiEndpoints._(); // Private constructor to prevent instantiation

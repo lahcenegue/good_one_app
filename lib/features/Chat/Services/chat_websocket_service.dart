@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../Core/infrastructure/websocket/websocket_service.dart';
+import 'package:good_one_app/Core/Infrastructure/Websocket/websocket_service.dart';
 
 class ChatWebSocketService {
   final WebSocketService _socket = WebSocketService();

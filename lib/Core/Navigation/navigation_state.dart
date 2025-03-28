@@ -1,7 +1,7 @@
-import '../Utils/storage_keys.dart';
-import '../infrastructure/storage/storage_manager.dart';
-import '../presentation/resources/app_strings.dart';
-import 'app_routes.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
 
 class NavigationState {
   final bool isFirstLaunch;

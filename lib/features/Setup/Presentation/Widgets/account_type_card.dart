@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../Core/presentation/Widgets/Buttons/secondary_button.dart';
-import '../../Models/account_type.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/secondary_button.dart';
+import 'package:good_one_app/Features/Setup/Models/account_type.dart';
 
 class AccountTypeCard extends StatelessWidget {
   final String title;

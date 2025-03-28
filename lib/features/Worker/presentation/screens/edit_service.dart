@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Infrastructure/api/api_endpoints.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
+import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
-
 import 'package:good_one_app/Features/Worker/Models/category_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
 import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/category_dropdown_widget.dart';
-import 'package:good_one_app/Providers/worker_maganer_provider.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditService extends StatefulWidget {

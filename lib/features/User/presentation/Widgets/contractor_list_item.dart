@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
+
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Features/User/models/contractor.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Features/User/Models/contractor.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContractorListItem extends StatelessWidget {
   final Contractor contractor;
-  final VoidCallback onFavorite;
   final VoidCallback? onTap;
 
   const ContractorListItem({
     super.key,
     required this.contractor,
-    required this.onFavorite,
     required this.onTap,
   });
 
@@ -43,7 +42,6 @@ class ContractorListItem extends StatelessWidget {
             _buildContractorImage(context),
             SizedBox(width: context.getWidth(12)),
             Expanded(child: _buildContractorInfo(context)),
-            _buildFavoriteButton(context),
           ],
         ),
       ),
@@ -119,18 +117,6 @@ class ContractorListItem extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildFavoriteButton(BuildContext context) {
-    //TODO
-    return IconButton(
-      onPressed: onFavorite,
-      icon: Icon(
-        Icons.bookmark,
-        color: AppColors.hintColor,
-        size: context.getAdaptiveSize(24),
-      ),
     );
   }
 }

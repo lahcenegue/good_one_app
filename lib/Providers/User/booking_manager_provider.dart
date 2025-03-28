@@ -4,18 +4,19 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:good_one_app/Core/Navigation/app_routes.dart';
-import 'package:good_one_app/Core/Utils/storage_keys.dart';
-import 'package:good_one_app/Core/Infrastructure/storage/storage_manager.dart';
-import 'package:good_one_app/Core/presentation/Widgets/success_dialog.dart';
-import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
-import 'package:good_one_app/Features/User/models/booking.dart';
-import 'package:good_one_app/Features/User/models/order_model.dart';
-import 'package:good_one_app/Features/User/models/rate_model.dart';
-import 'package:good_one_app/Features/User/Presentation/Screens/service_evaluation_screen.dart';
-import 'package:good_one_app/Features/User/Services/user_api.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/success_dialog.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
+import 'package:good_one_app/Features/User/Models/booking.dart';
+import 'package:good_one_app/Features/User/Models/order_model.dart';
+import 'package:good_one_app/Features/User/Models/rate_model.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/service_evaluation_screen.dart';
+import 'package:good_one_app/Features/User/Services/user_api.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

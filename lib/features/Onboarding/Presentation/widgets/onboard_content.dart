@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
 
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
 
 class OnBoardContent extends StatelessWidget {
   final String image;

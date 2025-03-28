@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../Core/infrastructure/api/api_response.dart';
-import '../../../Core/infrastructure/api/api_service.dart';
-import '../../../Core/infrastructure/api/api_endpoints.dart';
-import '../Models/auth_model.dart';
-import '../Models/auth_request.dart';
-import '../Models/register_request.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_service.dart';
+import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
+import 'package:good_one_app/Features/Auth/Models/register_request.dart';
+import 'package:good_one_app/Features/Auth/Models/auth_request.dart';
 
 class AuthApi {
   static final _api = ApiService.instance;

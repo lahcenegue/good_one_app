@@ -20,7 +20,6 @@ class Contractor {
   final String? city;
   final String? country;
   final Subcategory? subcategory; // No longer required
-  final bool? isFavorite;
 
   const Contractor({
     this.serviceId,
@@ -42,7 +41,6 @@ class Contractor {
     this.city,
     this.country,
     this.subcategory,
-    this.isFavorite = false,
   });
 
   factory Contractor.fromJson(Map<String, dynamic> json) {

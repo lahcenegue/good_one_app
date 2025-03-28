@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
-import '../../../../Core/Utils/storage_keys.dart';
-import '../../../../Core/infrastructure/storage/storage_manager.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Core/Utils/size_config.dart';
-import '../../../../Providers/auth_provider.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
+import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
+import 'package:good_one_app/Providers/Both/auth_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import '../Widgets/shared_auth_widgets.dart';
 
 class RegistrationScreen extends StatelessWidget {
   const RegistrationScreen({super.key});

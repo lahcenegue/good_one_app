@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
 
-import '../Core/Config/app_config.dart';
-import '../Core/Utils/storage_keys.dart';
-import '../Core/Localization/locale_manager.dart';
-import '../Core/Navigation/app_routes.dart';
-import '../Core/Navigation/navigation_service.dart';
-import '../Core/Navigation/navigation_state.dart';
-import '../Core/infrastructure/Services/notification_service.dart';
-import '../Core/infrastructure/storage/storage_manager.dart';
-import '../Features/Setup/Models/account_type.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Localization/locale_manager.dart';
+import 'package:good_one_app/Core/Infrastructure/Services/notification_service.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Navigation/navigation_state.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Features/Setup/Models/account_type.dart';
 
 class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
   final LocaleManager _localeManager;

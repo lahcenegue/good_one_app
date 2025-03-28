@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Screens/my_orders_screen.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_profile_screen.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_services_screen.dart';
-import 'package:good_one_app/Providers/worker_maganer_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/my_orders_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_home_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_profile_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_services_screen.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 
-import '../../../../Core/presentation/resources/app_assets.dart';
-import '../../../../Core/presentation/resources/app_colors.dart';
-import 'worker_home_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WorkerMainScreen extends StatelessWidget {
   const WorkerMainScreen({super.key});
@@ -24,16 +23,6 @@ class WorkerMainScreen extends StatelessWidget {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        if (workerManager.error != null && workerManager.currentIndex == 0) {
-          return Scaffold(
-            body: Center(
-              child: AppErrorWidget(
-                message: workerManager.error!,
-                onRetry: () => workerManager.initialize(),
-              ),
             ),
           );
         }

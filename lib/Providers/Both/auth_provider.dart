@@ -1,26 +1,21 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 
-import '../Features/auth/Models/auth_model.dart';
-import '../Core/Utils/storage_keys.dart';
-import '../Core/Utils/error_handling/error_handler.dart';
-import '../Core/Utils/error_handling/failures.dart';
-import '../Core/Navigation/app_routes.dart';
-import '../Core/Navigation/navigation_service.dart';
-
-import '../Core/infrastructure/storage/storage_manager.dart';
-import '../Core/presentation/resources/app_strings.dart';
-import '../Features/auth/Services/auth_api.dart';
-import '../Features/auth/Services/token_manager.dart';
-import '../Features/auth/Models/auth_request.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Utils/Error/error_handler.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Features/Auth/Models/register_request.dart';
+import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
+import 'package:good_one_app/Features/Auth/Models/auth_request.dart';
+import 'package:good_one_app/Core/Utils/Error/failures.dart';
+import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
+import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import '../Features/auth/Models/register_request.dart';
-import 'user_manager_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isInitialized = false;
@@ -169,20 +164,12 @@ class AuthProvider with ChangeNotifier {
         deviceToken: deviceToken!,
       );
 
-      debugPrint('The Device token fron login ${request.deviceToken}');
-
       final response = await AuthApi.login(request);
 
       if (response.success) {
         _authData = response.data;
+        _clearFormData();
         await _saveAuthData();
-
-        // Update UserManagerProvider with new token
-        if (context.mounted) {
-          await context
-              .read<UserManagerProvider>()
-              .updateToken(_authData!.accessToken);
-        }
 
         _setLoading(false);
 
@@ -270,11 +257,8 @@ class AuthProvider with ChangeNotifier {
         _authData = response.data;
         await _saveAuthData();
 
-        if (context.mounted) {
-          await context
-              .read<UserManagerProvider>()
-              .updateToken(_authData!.accessToken);
-        }
+        await StorageManager.setString(
+            StorageKeys.tokenKey, _authData!.accessToken);
 
         _setLoading(false);
         if (accountType == AppStrings.service) {
@@ -297,20 +281,22 @@ class AuthProvider with ChangeNotifier {
     try {
       _setLoading(true);
       _clearErrors();
-
-      await TokenManager.instance.clearToken();
-
-      // Clear UserManagerProvider data
-      if (context.mounted) {
-        await context.read<UserManagerProvider>().clearData();
-      }
-
       _clearFormData();
+
+      clearData();
     } catch (e) {
       _handleError(e);
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> clearData() async {
+    await StorageManager.remove(StorageKeys.tokenKey);
+    await StorageManager.remove(StorageKeys.accountTypeKey);
+    await StorageManager.remove(StorageKeys.refreshTokenKey);
+
+    await TokenManager.instance.clearToken();
   }
 
   // Private Helper Methods

@@ -1,39 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
-import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/booking/booking_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/home/user_home_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/user_profile_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/services_screen.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class UserMainScreen extends StatefulWidget {
+class UserMainScreen extends StatelessWidget {
   const UserMainScreen({super.key});
-
-  @override
-  State<UserMainScreen> createState() => _UserMainScreenState();
-}
-
-class _UserMainScreenState extends State<UserMainScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Initialize data when screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserManagerProvider>().initialize();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        // Show loading indicator while initializing
         if (userManager.isLoading) {
           return const Scaffold(
             body: Center(
@@ -42,17 +27,6 @@ class _UserMainScreenState extends State<UserMainScreen> {
           );
         }
 
-        // Show error widget if there's an error
-        if (userManager.error != null && userManager.currentIndex == 0) {
-          return Scaffold(
-            body: Center(
-              child: AppErrorWidget(
-                message: userManager.error!,
-                onRetry: () => userManager.initialize(),
-              ),
-            ),
-          );
-        }
         return Scaffold(
           body: _buildCurrentScreen(context, userManager),
           bottomNavigationBar: _buildBottomNavigation(context, userManager),
@@ -86,6 +60,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
   ) {
     final items = [
       _buildNavItem(
+        context: context,
         index: 0,
         label: AppLocalizations.of(context)!.home,
         activeIcon: AppAssets.home2,
@@ -93,6 +68,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
         currentIndex: userManager.currentIndex,
       ),
       _buildNavItem(
+        context: context,
         index: 1,
         label: AppLocalizations.of(context)!.booking,
         activeIcon: AppAssets.booking2,
@@ -100,6 +76,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
         currentIndex: userManager.currentIndex,
       ),
       _buildNavItem(
+        context: context,
         index: 2,
         label: AppLocalizations.of(context)!.services,
         activeIcon: AppAssets.services2,
@@ -107,6 +84,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
         currentIndex: userManager.currentIndex,
       ),
       _buildNavItem(
+        context: context,
         index: 3,
         label: AppLocalizations.of(context)!.profile,
         activeIcon: AppAssets.profile2,
@@ -126,6 +104,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
   }
 
   BottomNavigationBarItem _buildNavItem({
+    required BuildContext context,
     required int index,
     required String label,
     required String activeIcon,

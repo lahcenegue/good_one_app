@@ -1,18 +1,18 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
-import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
-import 'package:good_one_app/Core/Infrastructure/storage/storage_manager.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/Features/Both/Models/account_edit_request.dart';
 import 'package:good_one_app/Features/Both/Models/user_info.dart';
 import 'package:good_one_app/Features/Both/Models/notification_model.dart';
 import 'package:good_one_app/Features/Both/Services/both_api.dart';
-import 'package:good_one_app/Features/User/models/contractor.dart';
-import 'package:good_one_app/Features/User/models/service_category.dart';
+import 'package:good_one_app/Features/User/Models/contractor.dart';
+import 'package:good_one_app/Features/User/Models/service_category.dart';
 import 'package:good_one_app/Features/User/Services/user_api.dart';
-import 'package:good_one_app/Features/auth/Services/token_manager.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -84,53 +84,20 @@ class UserManagerProvider extends ChangeNotifier {
 
   // Constructor
   UserManagerProvider() {
-    _initialize();
+    initialize();
   }
 
   // Initialization
-  Future<void> _initialize() async {
-    await _loadUserData();
-    await fetchNotifications();
-  }
-
-  Future<void> _loadUserData() async {
-    try {
-      _token = await StorageManager.getString(StorageKeys.tokenKey);
-      if (_token != null) {
-        final userInfoSuccess = await fetchUserInfo();
-        if (userInfoSuccess) _initializeControllers();
-
-        if (!userInfoSuccess) {
-          final refreshed = await TokenManager.instance.refreshToken();
-          if (refreshed) {
-            _token = TokenManager.instance.token;
-            await fetchUserInfo();
-          } else {
-            await clearAuthData();
-          }
-        }
-      }
-      await _fetchPublicData();
-    } catch (e) {
-      setError('Failed to load user data: $e');
-    }
-  }
-
-  // State Management
-  void setCurrentIndex(int index) {
-    _currentIndex = index;
-    notifyListeners();
-  }
-
   Future<void> initialize() async {
     setError(null);
     _setLoading(true);
     try {
+      _token = await StorageManager.getString(StorageKeys.tokenKey);
       if (_token != null) {
         await Future.wait(
           [
+            _loadUserData(),
             _fetchPublicData(),
-            fetchUserInfo(),
             fetchNotifications(),
           ],
         );
@@ -144,18 +111,37 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateToken(String newToken) async {
-    _token = newToken;
-    await StorageManager.setString(StorageKeys.tokenKey, newToken);
-    await _loadUserData();
+  Future<void> _loadUserData() async {
+    try {
+      final userInfoSuccess = await fetchUserInfo();
+
+      if (userInfoSuccess) {
+        _initializeControllers();
+      } else {
+        final refreshed = await TokenManager.instance.refreshToken();
+        if (refreshed) {
+          _token = TokenManager.instance.token;
+          await fetchUserInfo();
+          await _fetchPublicData();
+        } else {
+          await clearData();
+          await _fetchPublicData();
+          _currentIndex = 3;
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      setError('Failed to load user data: $e');
+    }
+  }
+
+  // State Management
+  void setCurrentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
   }
 
   Future<void> clearData() async {
-    await clearAuthData();
-    await _fetchPublicData();
-  }
-
-  Future<void> clearAuthData() async {
     _token = null;
     _userInfo = null;
     await StorageManager.remove(StorageKeys.tokenKey);
@@ -183,19 +169,24 @@ class UserManagerProvider extends ChangeNotifier {
 
   // User Info
   Future<bool> fetchUserInfo() async {
+    print('============== fetch user info ==================');
+
     if (_token == null) return false;
+
     _setLoading(true);
     try {
       final response = await BothApi.getUserInfo();
+
       if (response.success && response.data != null) {
         _userInfo = response.data;
         notifyListeners();
         return true;
+      } else {
+        setError('Failed to fetch user info');
+        return false;
       }
-      setError('Failed to fetch user info: ${response.error}');
-      return false;
     } catch (e) {
-      setError('Exception fetching user info: $e');
+      setError('Exception fetching user info');
       return false;
     } finally {
       _setLoading(false);
@@ -343,6 +334,16 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
+  void setSelectedContractor(Contractor contractor) {
+    _selectedContractor = contractor;
+    notifyListeners();
+  }
+
+  void clearSelectedContractor() {
+    _selectedContractor = null;
+    notifyListeners();
+  }
+
   Future<void> fetchNotifications() async {
     _setNotificationLoading(true);
     _setNotificationError(null);
@@ -370,16 +371,6 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
-  void setSelectedContractor(Contractor contractor) {
-    _selectedContractor = contractor;
-    notifyListeners();
-  }
-
-  void clearSelectedContractor() {
-    _selectedContractor = null;
-    notifyListeners();
-  }
-
   void updateSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
@@ -394,16 +385,6 @@ class UserManagerProvider extends ChangeNotifier {
     final query = _contractorsByServiceSearch.toLowerCase();
     return contractor.fullName!.toLowerCase().contains(query) ||
         contractor.service!.toLowerCase().contains(query);
-  }
-
-  List<Contractor> get filteredBestContractors {
-    if (_searchQuery.isEmpty) return List.unmodifiable(_bestContractors);
-    final query = _searchQuery.toLowerCase();
-    return _bestContractors
-        .where((c) =>
-            c.fullName!.toLowerCase().contains(query) ||
-            c.service!.toLowerCase().contains(query))
-        .toList();
   }
 
   void _setNotificationLoading(bool value) {

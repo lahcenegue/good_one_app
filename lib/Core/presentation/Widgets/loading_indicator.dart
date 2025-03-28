@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 
 class LoadingIndicator extends StatelessWidget {
-  //TODO
-  final String? message;
-
-  const LoadingIndicator({super.key, this.message});
+  const LoadingIndicator({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          if (message != null) ...[
-            const SizedBox(height: 16),
-            Text(message!, style: const TextStyle(fontSize: 16)),
-          ],
-        ],
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(
+          AppColors.primaryColor,
+        ),
       ),
     );
   }

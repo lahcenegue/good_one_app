@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Navigation/app_routes.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Providers/booking_manager_provider.dart';
-import 'package:good_one_app/core/utils/size_config.dart';
-import 'package:good_one_app/core/presentation/widgets/buttons/primary_button.dart';
-import 'package:good_one_app/core/presentation/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Providers/User/booking_manager_provider.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-/// Allows users to select booking date, time, and duration.
 class CalendarBookingScreen extends StatelessWidget {
   const CalendarBookingScreen({super.key});
 

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
-import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
-import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/contractor_list_item.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/service_grid_item.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/contractor_profile.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -49,7 +51,7 @@ class UserHomeScreen extends StatelessWidget {
                   SizedBox(height: context.getHeight(20)),
                   _buildServicesSection(context, userManager),
                   SizedBox(height: context.getHeight(20)),
-                  _buildContractorsSection(context, userManager),
+                  _buildBestContractorsSection(context, userManager),
                 ],
               ),
             ),
@@ -59,7 +61,10 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, UserManagerProvider userManager) {
+  Widget _buildHeader(
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     if (!userManager.isAuthenticated) {
       return const SizedBox.shrink();
     }
@@ -236,8 +241,10 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContractorsSection(
-      BuildContext context, UserManagerProvider userManager) {
+  Widget _buildBestContractorsSection(
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     return Column(
       children: [
         Row(
@@ -260,23 +267,23 @@ class UserHomeScreen extends StatelessWidget {
         ),
         SizedBox(height: context.getHeight(10)),
         if (userManager.isLoading && userManager.bestContractors.isEmpty)
-          const Center(child: CircularProgressIndicator())
+          const LoadingIndicator()
         else
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: userManager.filteredBestContractors.length,
+            itemCount: userManager.bestContractors.length,
             itemBuilder: (context, index) {
               return ContractorListItem(
-                contractor: userManager.filteredBestContractors[index],
-                onFavorite: () {},
-                onTap: () {
+                contractor: userManager.bestContractors[index],
+                onTap: () async {
                   userManager.setSelectedContractor(
-                      userManager.filteredBestContractors[index]);
-                  Navigator.push(
+                      userManager.bestContractors[index]);
+
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ContractorProfile(),
+                      builder: (context) => ContractorProfile(),
                     ),
                   );
                 },

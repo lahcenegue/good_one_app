@@ -202,7 +202,26 @@
     "vacationStarted":"Vacation Started",
     "vacationEnded":"Vacation Ended",
     "requestProfits":"Request Profits",
-    "profitsRequested":"Rrofits Requested"
- 
+    "profitsRequested":"Rrofits Requested",
+    "onVacation": "On Vacation",
+    "available":"Available",
+    "returnToWork":"Return To Work",
+    "securityCheck":"Security Check",
+    "securityCheckCompleted":"Security Check Completed",
+    "securityCheckPending":"Security Check Pending",
+    "completeSecurityCheck":"Complete Security Check",
+    "ordersDetails":"Order Details",
+    "orderSummary":"Order Summary",
+    "createdAt":"Created At",
+    "totalHours":"Total Hours",
+    "costPerHour":"Cost Per Hour",
+    "totalPrice":"Total Price",
+    "customerInformation":"Customer Information",
+    "note":"Note",
+    "deliveryLocation":"Delivery Location",
+    "complete":"Complete",
+    "pending":"Pending",
+    "unknown":"Unknown",
+    "fetchOrdersFailed":"Fetch Orders Failed"
 
 }

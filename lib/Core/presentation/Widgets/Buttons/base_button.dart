@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../Utils/size_config.dart';
-import '../../Resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
 
 abstract class BaseButton extends StatelessWidget {
   final String text;
@@ -47,6 +47,7 @@ abstract class BaseButton extends StatelessWidget {
   Widget buildButtonText(BuildContext context) {
     return Text(
       text,
+      textAlign: TextAlign.center,
       style: TextStyle(
         color: textColor,
         fontSize: context.getAdaptiveSize(16),

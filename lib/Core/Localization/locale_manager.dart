@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../Utils/storage_keys.dart';
-import '../infrastructure/storage/storage_manager.dart';
-import 'app_localizations.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Localization/app_localizations.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
 
 class LocaleManager {
   const LocaleManager();

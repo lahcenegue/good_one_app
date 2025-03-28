@@ -1,10 +1,11 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Models/auth_model.dart';
-import 'auth_api.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
+import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
 
 class TokenManager {
   static final TokenManager _instance = TokenManager._internal();
@@ -26,10 +27,11 @@ class TokenManager {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
+    await StorageManager.init();
+
     try {
       debugPrint('Initializing TokenManager...');
-      final storage = await SharedPreferences.getInstance();
-      final authData = storage.getString('authData');
+      final authData = await StorageManager.getString('authData');
 
       if (authData != null) {
         debugPrint('Found stored auth data');
@@ -81,14 +83,16 @@ class TokenManager {
   }
 
   Future<void> setToken(AuthModel authModel) async {
-    debugPrint('Setting new token: ${authModel.accessToken}');
     _currentAuth = authModel;
     _tokenController.add(authModel);
 
     try {
-      final storage = await SharedPreferences.getInstance();
-      await storage.setString('authData', jsonEncode(authModel.toJson()));
-      debugPrint('Token saved to storage');
+      await StorageManager.setString(
+          StorageKeys.tokenKey, authModel.accessToken);
+      await StorageManager.setString(
+        'authData',
+        jsonEncode(authModel.toJson()),
+      );
     } catch (e) {
       debugPrint('Error saving token: $e');
     }
@@ -100,8 +104,7 @@ class TokenManager {
     _tokenController.add(null);
 
     try {
-      final storage = await SharedPreferences.getInstance();
-      await storage.remove('authData');
+      await StorageManager.remove('authData');
       debugPrint('Token cleared from storage');
     } catch (e) {
       debugPrint('Error clearing token: $e');

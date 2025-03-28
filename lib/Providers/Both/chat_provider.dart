@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/infrastructure/websocket/websocket_service.dart';
+
+import 'package:good_one_app/Core/Infrastructure/Websocket/websocket_service.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
 

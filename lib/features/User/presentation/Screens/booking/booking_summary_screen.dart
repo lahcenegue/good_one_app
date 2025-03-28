@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Navigation/app_routes.dart';
-import 'package:good_one_app/Providers/booking_manager_provider.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:good_one_app/core/utils/size_config.dart';
-import 'package:good_one_app/core/presentation/widgets/buttons/primary_button.dart';
-import 'package:good_one_app/core/presentation/theme/app_text_styles.dart';
-import 'package:good_one_app/core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/core/presentation/widgets/user_avatar.dart';
 import 'package:provider/provider.dart';
+
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Providers/User/booking_manager_provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Displays a summary of the booking details and handles order confirmation.

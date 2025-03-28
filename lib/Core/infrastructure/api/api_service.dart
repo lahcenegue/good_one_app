@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-
-import '../../Config/app_config.dart';
-import 'api_response.dart';
-import '../../presentation/resources/app_strings.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();

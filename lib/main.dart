@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
+import 'package:good_one_app/Providers/Worker/orders_manager_provider.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'package:good_one_app/Providers/app_settings_provider.dart';
-import 'package:good_one_app/Providers/auth_provider.dart';
-import 'package:good_one_app/Providers/chat_provider.dart';
-import 'package:good_one_app/Providers/booking_manager_provider.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:good_one_app/Providers/worker_maganer_provider.dart';
+import 'package:good_one_app/Providers/Both/app_settings_provider.dart';
+import 'package:good_one_app/Providers/Both/auth_provider.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
+import 'package:good_one_app/Providers/User/booking_manager_provider.dart';
 
-import 'package:good_one_app/Core/Infrastructure/storage/storage_manager.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/firebase_options.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
@@ -62,6 +63,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserManagerProvider()),
         ChangeNotifierProvider(create: (_) => BookingManagerProvider()),
         ChangeNotifierProvider(create: (_) => WorkerManagerProvider()),
+        ChangeNotifierProvider(create: (_) => OrdersManagerProvider()),
         ChangeNotifierProxyProvider<UserManagerProvider, ChatProvider>(
           create: (context) => ChatProvider(),
           update: (context, userManager, previous) {

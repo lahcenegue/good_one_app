@@ -8,11 +8,10 @@ class UserInfo {
   final String? emailVerifiedAt;
   final String? createdAt;
   final String? updatedAt;
-  final int? active;
   final bool? securityCheck;
-  final bool? verifiedLicense;
   final String? country;
   final String? city;
+  final dynamic active;
 
   UserInfo({
     required this.id,
@@ -26,7 +25,6 @@ class UserInfo {
     required this.updatedAt,
     required this.active,
     required this.securityCheck,
-    required this.verifiedLicense,
     required this.country,
     required this.city,
   });
@@ -42,32 +40,13 @@ class UserInfo {
       emailVerifiedAt: json['email_verified_at'] as String?,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
-      active: json['active'] as int?,
       securityCheck:
           json['security_check'] != null ? json['security_check'] == 1 : null,
-      verifiedLicense: json['verified_liscence'] != null
-          ? json['verified_liscence'] == 1
-          : null,
       country: json['country'] as String? ?? '',
       city: json['city'] as String? ?? '',
+      active: json['active'] is bool
+          ? json['active']
+          : (json['active'] is int ? json['active'] == 1 : null),
     );
   }
-
-  // Map<String, dynamic> toJson() {
-  //   return {
-  //     'id': id,
-  //     'email': email,
-  //     'phone': phone,
-  //     'type': type,
-  //     'full_name': fullName,
-  //     'picture': picture,
-  //     'email_verified_at': emailVerifiedAt,
-  //     'created_at': createdAt,
-  //     'updated_at': updatedAt,
-  //     'active': active,
-  //     'security_check': securityCheck != null ? (securityCheck! ? 1 : 0) : null,
-  //     'verified_liscence':
-  //         verifiedLicense != null ? (verifiedLicense! ? 1 : 0) : null,
-  //   };
-  // }
 }

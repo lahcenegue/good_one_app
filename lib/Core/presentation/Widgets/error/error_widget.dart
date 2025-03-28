@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../Resources/app_colors.dart';
-import '../../Resources/app_strings.dart';
-import '../../Theme/app_text_styles.dart';
-import '../../../Utils/size_config.dart';
-import '../Buttons/primary_button.dart';
+
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

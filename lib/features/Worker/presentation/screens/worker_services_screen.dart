@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Infrastructure/api/api_endpoints.dart';
+import 'package:provider/provider.dart';
+
+import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Error/error_widget.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/edit_service.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Screens/edit_service.dart';
-import 'package:good_one_app/Providers/worker_maganer_provider.dart';
-import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
-import 'package:provider/provider.dart';
 
 class WWorkerServicesScreen extends StatefulWidget {
   const WWorkerServicesScreen({super.key});
@@ -39,20 +39,21 @@ class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
           appBar: _buildAppBar(context),
           body: workerManager.isServiceLoading
               ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _buildAddServiceButton(context, workerManager),
-                      _buildMyServicesList(context, workerManager),
-                      SizedBox(height: context.getHeight(16)),
-                      if (workerManager.error != null)
-                        AppErrorWidget(
-                          message: workerManager.error!,
-                          onRetry: workerManager.fetchMyServices,
-                        )
-                    ],
-                  ),
-                ),
+              : workerManager.error != null
+                  ? AppErrorWidget(
+                      message: workerManager.error!,
+                      onRetry: workerManager.fetchMyServices,
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _buildAddServiceButton(context, workerManager),
+                          _buildMyServicesList(context, workerManager),
+                          SizedBox(height: context.getHeight(16)),
+                        ],
+                      ),
+                    ),
         );
       },
     );
@@ -74,16 +75,12 @@ class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
   ) {
     return Padding(
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          SmallPrimaryButton(
-            text: AppLocalizations.of(context)!.addService,
-            onPressed: () {
-              NavigationService.navigateTo(AppRoutes.workerAddService);
-            },
-          ),
-        ],
+      child: PrimaryButton(
+        width: context.getWidth(160),
+        text: AppLocalizations.of(context)!.addService,
+        onPressed: () {
+          NavigationService.navigateTo(AppRoutes.workerAddService);
+        },
       ),
     );
   }
@@ -113,12 +110,19 @@ class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
         final service = workerManager.myServices[index];
         final hasImage = service.gallary.isNotEmpty;
 
-        return Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(context.getAdaptiveSize(12)),
-          ),
+        return Container(
           margin: EdgeInsets.only(bottom: context.getHeight(16)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.hintColor.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: Padding(
             padding: EdgeInsets.all(context.getWidth(16)),
             child: Row(

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
+import 'package:good_one_app/Providers/Both/auth_provider.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../Core/Navigation/app_routes.dart';
-import '../../../../Core/presentation/Theme/app_text_styles.dart';
-import '../../../../Core/Navigation/navigation_service.dart';
-import '../../../../Core/Utils/size_config.dart';
-import '../../../../Providers/auth_provider.dart';
-import '../Widgets/shared_auth_widgets.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

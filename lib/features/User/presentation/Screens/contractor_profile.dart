@@ -1,35 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/customer_reviews_screen.dart';
+import 'package:provider/provider.dart';
+
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
-import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
-import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/secondary_button.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Features/Chat/Presentation/Screens/chat_screen.dart';
-import 'package:good_one_app/Features/User/models/contractor.dart';
+import 'package:good_one_app/Features/User/Models/contractor.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/gallery_viewer_page.dart';
 import 'package:good_one_app/Features/Auth/Widgets/auth_required_dialog.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'customer_reviews_screen.dart';
-
 class ContractorProfile extends StatelessWidget {
+  //final Contractor contractor;
   const ContractorProfile({
     super.key,
+    //required this.contractor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        final contractor = userManager.selectedContractor;
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -47,17 +48,21 @@ class ContractorProfile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildContractorInfo(context, contractor!),
+                  _buildContractorInfo(
+                      context, userManager.selectedContractor!),
                   SizedBox(height: context.getHeight(20)),
-                  _buildChecked(context, contractor),
+                  _buildChecked(context, userManager.selectedContractor!),
                   SizedBox(height: context.getHeight(20)),
-                  _buildServiceInfo(context, contractor),
+                  _buildServiceInfo(context, userManager.selectedContractor!),
                   SizedBox(height: context.getHeight(20)),
-                  _buildServiceDescription(context, contractor),
+                  _buildServiceDescription(
+                      context, userManager.selectedContractor!),
                   SizedBox(height: context.getHeight(20)),
-                  _buildServiceGallery(context, contractor),
+                  _buildServiceGallery(
+                      context, userManager.selectedContractor!),
                   SizedBox(height: context.getHeight(20)),
-                  _buildCostomersReviews(context, contractor),
+                  _buildCostomersReviews(
+                      context, userManager.selectedContractor!),
                   SizedBox(height: context.getHeight(20)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -75,9 +80,11 @@ class ContractorProfile extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ChatScreen(
-                                  otherUserId:
-                                      contractor.contractorId!.toString(),
-                                  otherUserName: contractor.fullName!,
+                                  otherUserId: userManager
+                                      .selectedContractor!.contractorId!
+                                      .toString(),
+                                  otherUserName:
+                                      userManager.selectedContractor!.fullName!,
                                 ),
                               ),
                             );
@@ -153,7 +160,7 @@ class ContractorProfile extends StatelessWidget {
                 children: [
                   Image.asset(AppAssets.location),
                   Text(
-                    '${contractor.city!}, ${contractor.country!}',
+                    '${contractor.city}, ${contractor.country}',
                     style: AppTextStyles.text(context),
                   )
                 ],
@@ -219,7 +226,7 @@ class ContractorProfile extends StatelessWidget {
         _serviceBox(
           context,
           AppAssets.distance,
-          '${contractor.city!}, ${contractor.country!}',
+          '${contractor.city}, ${contractor.country}',
           'Direction',
         ),
       ],

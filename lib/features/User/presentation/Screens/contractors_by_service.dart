@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/contractor_list_item.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/contractor_profile.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
+
 import 'package:provider/provider.dart';
 
 class ContractorsByService extends StatefulWidget {
@@ -91,13 +93,11 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
       itemBuilder: (context, index) {
         return ContractorListItem(
           contractor: filteredContractors[index],
-          onFavorite: () {},
           onTap: () {
-            userManager.setSelectedContractor(filteredContractors[index]);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const ContractorProfile(),
+                builder: (context) => ContractorProfile(),
               ),
             );
           },

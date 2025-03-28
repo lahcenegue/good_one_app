@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Navigation/app_routes.dart';
-import 'package:good_one_app/Core/Navigation/navigation_service.dart';
-import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/secondary_button.dart';
-import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Features/User/models/booking.dart';
-import 'package:good_one_app/Features/User/models/order_model.dart';
-import 'package:good_one_app/Features/User/Presentation/Screens/service_evaluation_screen.dart';
-import 'package:good_one_app/Providers/booking_manager_provider.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/secondary_button.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Features/User/Models/booking.dart';
+import 'package:good_one_app/Features/User/Models/order_model.dart';
+import 'package:good_one_app/Features/User/Presentation/Screens/service_evaluation_screen.dart';
+import 'package:good_one_app/Providers/User/booking_manager_provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -161,9 +163,7 @@ class _BookingContentState extends State<_BookingContent> {
         _TabBarSection(tabController: widget.tabController),
         Expanded(
           child: bookingManager.isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
+              ? LoadingIndicator()
               : bookingManager.error != null
                   ? _ErrorState(error: bookingManager.error!)
                   : _BookingList(tabController: widget.tabController),

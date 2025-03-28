@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
-import 'package:good_one_app/Core/infrastructure/api/api_response.dart';
-import 'package:good_one_app/Core/infrastructure/api/api_service.dart';
+
+import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_service.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
 

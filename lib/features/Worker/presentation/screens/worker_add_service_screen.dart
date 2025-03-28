@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Screens/add_images_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -10,8 +9,9 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Features/Worker/Models/category_model.dart';
 import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/category_dropdown_widget.dart';
-import 'package:good_one_app/Features/auth/Presentation/Widgets/shared_auth_widgets.dart';
-import 'package:good_one_app/Providers/worker_maganer_provider.dart';
+import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/add_images_screen.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

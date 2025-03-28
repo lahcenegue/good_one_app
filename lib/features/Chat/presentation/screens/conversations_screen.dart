@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Infrastructure/storage/storage_manager.dart';
+import 'package:provider/provider.dart';
+
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
-import 'package:good_one_app/Core/presentation/Widgets/error/error_widget.dart';
-import 'package:good_one_app/Core/presentation/Widgets/loading_indicator.dart';
-import 'package:good_one_app/Core/presentation/Widgets/user_avatar.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
-import 'package:good_one_app/Features/Chat/Presentation/screens/chat_screen.dart';
-import 'package:good_one_app/Features/Chat/Presentation/utils/chat_utils.dart';
-
-import 'package:good_one_app/Providers/chat_provider.dart';
-import 'package:good_one_app/Providers/user_manager_provider.dart';
-import 'package:good_one_app/Providers/worker_maganer_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:good_one_app/Features/Chat/Presentation/Screens/chat_screen.dart';
+import 'package:good_one_app/Features/Chat/Presentation/Utils/chat_utils.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -66,7 +66,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
           // Show loading until initial fetch is complete or if explicitly loading
           if (!provider.initialFetchComplete ||
               provider.isLoadingConversations) {
-            return const LoadingIndicator(message: 'Loading conversations...');
+            return const LoadingIndicator();
           }
           if (provider.error != null) {
             return AppErrorWidget.custom(

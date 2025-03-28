@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../Resources/app_colors.dart';
-import '../../../Utils/size_config.dart';
-import 'base_button.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/base_button.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
 
 class PrimaryButton extends BaseButton {
   const PrimaryButton({

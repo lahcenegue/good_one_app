@@ -1,18 +1,18 @@
 import 'dart:convert';
-import 'package:good_one_app/Features/User/Models/coupon_model.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
-import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
-import 'package:good_one_app/Core/infrastructure/api/api_response.dart';
-import 'package:good_one_app/Core/infrastructure/api/api_service.dart';
-import 'package:good_one_app/Core/infrastructure/storage/storage_manager.dart';
-import 'package:good_one_app/Core/presentation/resources/app_strings.dart';
-import 'package:good_one_app/Features/User/models/booking.dart';
-import 'package:good_one_app/Features/User/models/contractor.dart';
-import 'package:good_one_app/Features/User/models/order_model.dart';
-import 'package:good_one_app/Features/User/models/rate_model.dart';
-import 'package:good_one_app/Features/User/models/service_category.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_service.dart';
+import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
+import 'package:good_one_app/Features/User/Models/booking.dart';
+import 'package:good_one_app/Features/User/Models/contractor.dart';
+import 'package:good_one_app/Features/User/Models/order_model.dart';
+import 'package:good_one_app/Features/User/Models/rate_model.dart';
+import 'package:good_one_app/Features/User/Models/service_category.dart';
+import 'package:good_one_app/Features/User/Models/coupon_model.dart';
 
 class UserApi {
   static final _api = ApiService.instance;

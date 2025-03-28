@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:good_one_app/Core/Navigation/app_routes.dart';
-import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
-import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Core/presentation/resources/app_assets.dart';
-import 'package:good_one_app/Core/presentation/resources/app_colors.dart';
-import 'package:good_one_app/Providers/booking_manager_provider.dart';
-import 'package:good_one_app/core/utils/size_config.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Providers/User/booking_manager_provider.dart';
+import 'package:good_one_app/Core/Utils/size_config.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

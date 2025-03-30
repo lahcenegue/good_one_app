@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Features/User/Models/order_model.dart';
 
 import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
 import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OrdersManagerProvider extends ChangeNotifier {
   String? _error;
@@ -127,5 +132,85 @@ class OrdersManagerProvider extends ChangeNotifier {
     }
 
     return DateFormat('MMM dd, yyyy - HH:mm').format(dateTime);
+  }
+
+  Future<void> cancelOrder(
+      BuildContext context, int orderId, String reason) async {
+    if (reason.isEmpty) {
+      setError('Cancellation reason is required');
+      return;
+    }
+    _setOrdersLoading(true);
+    try {
+      final orderRequest = OrderEditRequest(
+        orderId: orderId,
+        note: reason,
+      );
+      final response = await WorkerApi.cancelOrder(orderRequest);
+      if (response.success) {
+        await fetchOrders();
+        await NavigationService.navigateToAndReplace(
+          AppRoutes.workerMain,
+          arguments: 2,
+        );
+      } else {
+        throw Exception(response.error ?? 'Failed to cancel order');
+      }
+    } catch (e) {
+      setError('Error canceling order: $e');
+    } finally {
+      _setOrdersLoading(false);
+    }
+  }
+
+  Future<void> completeOrder(
+    BuildContext context,
+    int orderId,
+  ) async {
+    _setOrdersLoading(true);
+    try {
+      final orderRequest = OrderEditRequest(orderId: orderId);
+      final response = await WorkerApi.completeOrder(orderRequest);
+      if (response.success) {
+        await fetchOrders();
+        await NavigationService.navigateToAndReplace(
+          AppRoutes.workerMain,
+          arguments: 2,
+        );
+      }
+    } catch (e) {
+      setError('Error complete order: $e');
+    } finally {
+      _setOrdersLoading(false);
+    }
+  }
+
+  // Helper to get status text
+  String getStatusText(BuildContext context, int status) {
+    switch (status) {
+      case 1:
+        return AppLocalizations.of(context)!.pending;
+      case 2:
+        return AppLocalizations.of(context)!.completed;
+      case 3:
+        return AppLocalizations.of(context)!.canceled;
+      default:
+        return AppLocalizations.of(context)!.unknown;
+    }
+  }
+
+  // Helper to get status color
+  Color getStatusColor(int status) {
+    switch (status) {
+      case 1:
+        return Colors.red;
+      case 2:
+        return Colors.green;
+      case 3:
+        return Colors.grey;
+
+      default:
+        return Colors.grey;
+    }
   }
 }

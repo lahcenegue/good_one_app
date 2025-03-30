@@ -137,12 +137,19 @@ class _OrdersContentState extends State<OrdersContent> {
       children: [
         _buildTabBar(context, ordersManager),
         Expanded(
-          child: TabBarView(
-            controller: ordersManager.tabController,
-            children: ordersManager.dates.map((date) {
-              return _buildOrdersList(
-                  context, ordersManager.orders[date] ?? []);
-            }).toList(),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              print('Refresh triggered'); // Debug log
+              await ordersManager.fetchOrders();
+            },
+            child: TabBarView(
+              controller: widget.tabController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: ordersManager.dates.map((date) {
+                return _buildOrdersList(
+                    context, ordersManager.orders[date] ?? []);
+              }).toList(),
+            ),
           ),
         ),
       ],
@@ -154,40 +161,52 @@ class _OrdersContentState extends State<OrdersContent> {
     OrdersManagerProvider ordersManager,
   ) {
     return Container(
-      padding: EdgeInsets.all(context.getAdaptiveSize(4)),
-      height: context.getHeight(70),
+      padding: EdgeInsets.symmetric(vertical: context.getAdaptiveSize(10)),
       color: AppColors.dimGray,
       child: TabBar(
         controller: ordersManager.tabController,
         isScrollable: true,
-        indicatorWeight: context.getAdaptiveSize(7),
-        indicator: BoxDecoration(
-          color: AppColors.primaryColor,
-          borderRadius: BorderRadius.circular(context.getAdaptiveSize(6)),
-        ),
+        indicatorWeight: 0,
+        indicator: BoxDecoration(),
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
-        labelPadding:
-            EdgeInsets.symmetric(vertical: context.getAdaptiveSize(6)),
         tabs: ordersManager.dates.map((date) {
           final dateTime = DateTime.parse(date);
           final dayOfWeek = DateFormat('EEE').format(dateTime).toUpperCase();
           final dayOfMonth = DateFormat('d').format(dateTime);
 
           return Tab(
-            child: Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: context.getAdaptiveSize(6)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(dayOfWeek),
-                  Text(
-                    dayOfMonth,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+            child: Builder(
+              builder: (BuildContext context) {
+                final isSelected = ordersManager.tabController!.index ==
+                    ordersManager.dates.indexOf(date);
+
+                return Container(
+                  height: 70,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.getAdaptiveSize(4),
+                    vertical: context.getAdaptiveSize(2),
                   ),
-                ],
-              ),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primaryColor : Colors.white,
+                    borderRadius:
+                        BorderRadius.circular(context.getAdaptiveSize(5)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        dayOfWeek,
+                      ),
+                      Text(
+                        dayOfMonth,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           );
         }).toList(),
@@ -199,39 +218,58 @@ class _OrdersContentState extends State<OrdersContent> {
     BuildContext context,
     List<MyOrderModel> orders,
   ) {
-    if (orders.isEmpty) {
-      return Center(
-        child: Text(
-          AppLocalizations.of(context)!.noOrdersForThisDate,
-          style: AppTextStyles.subTitle(context)
-              .copyWith(color: AppColors.hintColor),
+    final ordersManager = context.read<OrdersManagerProvider>();
+    return RefreshIndicator(
+      onRefresh: () => ordersManager.fetchOrders(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+          child: Column(
+            children: [
+              if (orders.isEmpty)
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: Center(
+                    child: Text(
+                      AppLocalizations.of(context)!.noOrdersForThisDate,
+                      style: AppTextStyles.subTitle(context)
+                          .copyWith(color: AppColors.hintColor),
+                    ),
+                  ),
+                )
+              else
+                ...orders.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final order = entry.value;
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OrderDetailsPage(order: order),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index < orders.length - 1
+                            ? context.getHeight(16)
+                            : 0,
+                      ),
+                      child: _orderBox(context, ordersManager, order),
+                    ),
+                  );
+                }),
+            ],
+          ),
         ),
-      );
-    }
-
-    return ListView.separated(
-      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-      itemCount: orders.length,
-      separatorBuilder: (context, index) =>
-          SizedBox(height: context.getHeight(16)),
-      itemBuilder: (context, index) {
-        final order = orders[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => OrderDetailsPage(order: order),
-              ),
-            );
-          },
-          child: _orderBox(context, order),
-        );
-      },
+      ),
     );
   }
 
-  Widget _orderBox(BuildContext context, MyOrderModel order) {
+  Widget _orderBox(BuildContext context, OrdersManagerProvider orderManager,
+      MyOrderModel order) {
     return Container(
       padding: EdgeInsets.all(context.getAdaptiveSize(12)),
       decoration: BoxDecoration(
@@ -277,14 +315,16 @@ class _OrdersContentState extends State<OrdersContent> {
                         vertical: context.getHeight(4),
                       ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(order.status).withOpacity(0.1),
+                        color: orderManager
+                            .getStatusColor(order.status)
+                            .withOpacity(0.1),
                         borderRadius:
                             BorderRadius.circular(context.getAdaptiveSize(12)),
                       ),
                       child: Text(
-                        _getStatusText(order.status),
+                        orderManager.getStatusText(context, order.status),
                         style: AppTextStyles.text(context).copyWith(
-                          color: _getStatusColor(order.status),
+                          color: orderManager.getStatusColor(order.status),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -348,34 +388,6 @@ class _OrdersContentState extends State<OrdersContent> {
     );
   }
 
-  // Helper to get status text
-  String _getStatusText(int status) {
-    switch (status) {
-      case 0:
-        return AppLocalizations.of(context)!.canceled;
-      case 1:
-        return AppLocalizations.of(context)!.pending;
-      case 2:
-        return AppLocalizations.of(context)!.completed;
-      default:
-        return AppLocalizations.of(context)!.unknown;
-    }
-  }
-
-  // Helper to get status color
-  Color _getStatusColor(int status) {
-    switch (status) {
-      case 0:
-        return Colors.red;
-      case 1:
-        return Colors.orange;
-      case 2:
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
   String _formatTimestamp(dynamic timestamp) {
     DateTime dateTime;
     if (timestamp is int) {
@@ -386,329 +398,3 @@ class _OrdersContentState extends State<OrdersContent> {
     return DateFormat('MMM dd, HH:mm').format(dateTime);
   }
 }
-
-// class MyOrdersScreen extends StatefulWidget {
-//   const MyOrdersScreen({super.key});
-
-//   @override
-//   State<MyOrdersScreen> createState() => _MyOrdersScreenState();
-// }
-
-// class _MyOrdersScreenState extends State<MyOrdersScreen>
-//     with SingleTickerProviderStateMixin {
-//   @override
-//   void initState() {
-//     super.initState();
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       if (mounted) {
-//         context.read<OrdersManagerProvider>().initializeTabController(this);
-//       }
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer<OrdersManagerProvider>(
-//       builder: (context, ordersManager, _) {
-//         return Scaffold(
-//           appBar: _buildAppBar(context),
-//           body: ordersManager.isOrdersLoading
-//               ? _buildLoadingState(context)
-//               : ordersManager.error != null
-//                   ? _buildErrorState(context, ordersManager)
-//                   : ordersManager.dates.isEmpty
-//                       ? _buildEmptyState(context)
-//                       : _buildOrdersContent(context, ordersManager),
-//         );
-//       },
-//     );
-//   }
-
-//   // Loading State
-//   Widget _buildLoadingState(BuildContext context) {
-//     return Center(
-//       child: CircularProgressIndicator(
-//         valueColor: AlwaysStoppedAnimation<Color>(
-//           AppColors.primaryColor,
-//         ),
-//       ),
-//     );
-//   }
-
-// // Error State
-//   Widget _buildErrorState(
-//       BuildContext context, OrdersManagerProvider ordersManager) {
-//     return AppErrorWidget(
-//       message: AppLocalizations.of(context)!.somethingWentWrong,
-//       onRetry: () async {
-//         await ordersManager.fetchOrders();
-//         ordersManager.updateTabController(this);
-//       },
-//     );
-//   }
-
-//   // Empty State
-//   Widget _buildEmptyState(BuildContext context) {
-//     return Center(
-//       child: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           Icon(
-//             Icons.inbox,
-//             size: context.getAdaptiveSize(80),
-//             color: AppColors.hintColor,
-//           ),
-//           SizedBox(height: context.getHeight(16)),
-//           Text(
-//             AppLocalizations.of(context)!.noOrdersAvailable,
-//             style: AppTextStyles.subTitle(context)
-//                 .copyWith(color: AppColors.hintColor),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   // Main Orders Content with TabBar
-//   Widget _buildOrdersContent(
-//     BuildContext context,
-//     OrdersManagerProvider ordersManager,
-//   ) {
-//     return Column(
-//       children: [
-//         _buildTabBar(context, ordersManager),
-//         Expanded(
-//           child: TabBarView(
-//             controller: ordersManager.tabController,
-//             children: ordersManager.dates.map((date) {
-//               return _buildOrdersList(
-//                   context, ordersManager.orders[date] ?? []);
-//             }).toList(),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-
-//   Widget _buildTabBar(
-//     BuildContext context,
-//     OrdersManagerProvider ordersManager,
-//   ) {
-//     return Container(
-//       padding: EdgeInsets.all(context.getAdaptiveSize(4)),
-//       height: context.getHeight(76),
-//       color: AppColors.dimGray,
-//       child: TabBar(
-//         controller: ordersManager.tabController,
-//         isScrollable: true,
-//         indicatorWeight: context.getAdaptiveSize(8),
-//         indicator: BoxDecoration(
-//           color: AppColors.primaryColor,
-//           borderRadius: BorderRadius.circular(context.getAdaptiveSize(8)),
-//         ),
-//         dividerColor: Colors.transparent,
-//         labelColor: Colors.white,
-//         labelPadding:
-//             EdgeInsets.symmetric(vertical: context.getAdaptiveSize(8)),
-//         tabs: ordersManager.dates.map((date) {
-//           final dateTime = DateTime.parse(date);
-//           final dayOfWeek = DateFormat('EEE').format(dateTime).toUpperCase();
-//           final dayOfMonth = DateFormat('d').format(dateTime);
-
-//           return Tab(
-//             child: Padding(
-//               padding:
-//                   EdgeInsets.symmetric(horizontal: context.getAdaptiveSize(4)),
-//               child: Column(
-//                 mainAxisSize: MainAxisSize.min,
-//                 children: [
-//                   Text(dayOfWeek),
-//                   Text(dayOfMonth),
-//                 ],
-//               ),
-//             ),
-//           );
-//         }).toList(),
-//       ),
-//     );
-//   }
-
-//   Widget _buildOrdersList(BuildContext context, List<MyOrderModel> orders) {
-//     if (orders.isEmpty) {
-//       return Center(
-//         child: Text(
-//           AppLocalizations.of(context)!.noOrdersForThisDate,
-//           style: AppTextStyles.subTitle(context)
-//               .copyWith(color: AppColors.hintColor),
-//         ),
-//       );
-//     }
-
-//     return ListView.separated(
-//       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-//       itemCount: orders.length,
-//       separatorBuilder: (context, index) =>
-//           SizedBox(height: context.getHeight(16)),
-//       itemBuilder: (context, index) {
-//         final order = orders[index];
-//         return GestureDetector(
-//           onTap: () {
-//             Navigator.push(
-//               context,
-//               MaterialPageRoute(
-//                 builder: (context) => OrderDetailsPage(order: order),
-//               ),
-//             );
-//           },
-//           child: _orderBox(context, order),
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _orderBox(BuildContext context, MyOrderModel order) {
-//     return Container(
-//       padding: EdgeInsets.all(context.getAdaptiveSize(12)),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
-//         boxShadow: [
-//           BoxShadow(
-//             color: AppColors.hintColor.withOpacity(0.1),
-//             blurRadius: 10,
-//             offset: const Offset(0, 4),
-//           ),
-//         ],
-//       ),
-//       child: Row(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           // Avatar
-//           UserAvatar(
-//             picture: order.user.picture,
-//             size: context.getAdaptiveSize(50),
-//           ),
-//           SizedBox(width: context.getWidth(10)),
-
-//           // Order Details
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   order.user.fullName,
-//                   style: AppTextStyles.title2(context),
-//                 ),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Text(
-//                       order.service,
-//                       style: AppTextStyles.subTitle(context),
-//                     ),
-//                     Container(
-//                       padding: EdgeInsets.symmetric(
-//                         horizontal: context.getWidth(8),
-//                         vertical: context.getHeight(4),
-//                       ),
-//                       decoration: BoxDecoration(
-//                         color: _getStatusColor(order.status).withOpacity(0.1),
-//                         borderRadius:
-//                             BorderRadius.circular(context.getAdaptiveSize(12)),
-//                       ),
-//                       child: Text(
-//                         _getStatusText(order.status),
-//                         style: AppTextStyles.text(context).copyWith(
-//                           color: _getStatusColor(order.status),
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 SizedBox(height: context.getHeight(4)),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Text(
-//                       AppLocalizations.of(context)!.location,
-//                       style: AppTextStyles.subTitle(context),
-//                     ),
-//                     SizedBox(
-//                       width: context.getWidth(120),
-//                       child: Text(
-//                         order.location,
-//                         style: AppTextStyles.text(context),
-//                         maxLines: 1,
-//                         overflow: TextOverflow.ellipsis,
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 SizedBox(height: context.getHeight(8)),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Text(
-//                       AppLocalizations.of(context)!.startTime,
-//                       style: AppTextStyles.subTitle(context),
-//                     ),
-//                     Text(
-//                       _formatTimestamp(order.startAt),
-//                       style: AppTextStyles.text(context)
-//                           .copyWith(color: AppColors.hintColor),
-//                     ),
-//                   ],
-//                 ),
-//                 SizedBox(height: context.getHeight(12)),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Text(
-//                       '${AppLocalizations.of(context)!.totalAmount}:',
-//                       style: AppTextStyles.title2(context),
-//                     ),
-//                     Text(
-//                       ' \$${order.totalPrice}',
-//                       style: AppTextStyles.title2(context)
-//                           .copyWith(color: AppColors.primaryColor),
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   // Helper to get status text
-//   String _getStatusText(int status) {
-//     switch (status) {
-//       case 0:
-//         return AppLocalizations.of(context)!.canceled;
-//       case 1:
-//         return AppLocalizations.of(context)!.pending;
-//       case 2:
-//         return AppLocalizations.of(context)!.completed;
-//       default:
-//         return AppLocalizations.of(context)!.unknown;
-//     }
-//   }
-
-//   // Helper to get status color
-//   Color _getStatusColor(int status) {
-//     switch (status) {
-//       case 0:
-//         return Colors.red;
-//       case 1:
-//         return Colors.orange;
-//       case 2:
-//         return Colors.green;
-//       default:
-//         return Colors.grey;
-//     }
-//   }
-
-// }

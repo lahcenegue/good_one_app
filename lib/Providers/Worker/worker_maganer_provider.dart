@@ -59,6 +59,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool _isServiceLoading = false;
   bool _hasCertificate = false;
   int? _editingServiceId;
+  int? _active;
 
   // Form controllers for Add Service
   final TextEditingController _servicePriceController = TextEditingController();
@@ -93,6 +94,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   String? get addServiceError => _addServiceError;
   bool get isServiceLoading => _isServiceLoading;
   bool get hasCertificate => _hasCertificate;
+  int? get avtice => _active;
   TextEditingController get servicePriceController => _servicePriceController;
   TextEditingController get experienceController => _experienceController;
   TextEditingController get descriptionController => _descriptionController;
@@ -129,11 +131,28 @@ class WorkerManagerProvider extends ChangeNotifier {
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  // Load vacation status from storage (or API if implemented)
+  // Load vacation status from storage
 
-  // Request profits (placeholder)
-  Future<void> requestProfits() async {
-    debugPrint('Requesting profits...');
+  Future<void> changeAccountState(int accountState) async {
+    if (_token == null) return;
+    setError(null);
+    _setLoading(true);
+    try {
+      final response = await WorkerApi.changeAccountState(accountState);
+      if (response.success) {
+        await Future.wait([
+          fetchWorkerInfo(),
+          fetchMyServices(),
+        ]);
+      } else {
+        setError(response.error ?? 'Failed to change account state.');
+        _setLoading(false);
+      }
+    } catch (e) {
+      setError('Exception fetching user info: $e');
+    } finally {
+      _setLoading(false);
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -343,18 +362,22 @@ class WorkerManagerProvider extends ChangeNotifier {
     try {
       final request = CreateServiceRequest(
         serviceId: _editingServiceId,
-        category: _selectedCategory!.name,
-        categoryId: _selectedCategory!.id,
-        subCategoryId: _selectedSubcategory!.id,
+        category: _selectedCategory?.name,
+        categoryId: _selectedCategory?.id,
+        subCategoryId: _selectedSubcategory?.id,
         price: double.tryParse(_servicePriceController.text),
-        description: _descriptionController.text,
+        description: _descriptionController.text.isEmpty
+            ? null
+            : _descriptionController.text,
         experience: int.tryParse(_experienceController.text),
         license: _selectedImage,
+        active: _active,
       );
 
       final response = await WorkerApi.createNewService(isEditing, request);
       if (response.success && response.data != null) {
         _setServiceLoading(false);
+        await fetchMyServices();
         return response.data!.serviceId!;
       } else {
         _setServiceLoading(false);
@@ -366,6 +389,21 @@ class WorkerManagerProvider extends ChangeNotifier {
       _setServiceLoading(false);
       return 0;
     }
+  }
+
+  void setServiceId(int id) {
+    _editingServiceId = id;
+    notifyListeners();
+  }
+
+  void setActive(bool value) {
+    if (value == true) {
+      _active = 1;
+    } else {
+      _active = 0;
+    }
+
+    notifyListeners();
   }
 
   /// Uploads it to the gallery for the service.

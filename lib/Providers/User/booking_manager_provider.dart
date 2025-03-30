@@ -271,7 +271,10 @@ class BookingManagerProvider with ChangeNotifier {
 
   /// Marks an order as received.
   Future<bool> receiveOrder(
-      BuildContext context, BuildContext dialogContext, int orderId) async {
+    BuildContext context,
+    BuildContext dialogContext,
+    int orderId,
+  ) async {
     print('====== receiveOrder function ');
     _setLoading(true);
     try {

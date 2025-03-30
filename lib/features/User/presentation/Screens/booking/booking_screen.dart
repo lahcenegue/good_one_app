@@ -398,7 +398,7 @@ class BookingCard extends StatelessWidget {
                   .pop(); // Close the dialog after success
             },
             child: Text(
-              AppLocalizations.of(context)!.confirmComplete,
+              AppLocalizations.of(context)!.confirm,
               style: AppTextStyles.text(context)
                   .copyWith(color: AppColors.primaryColor),
             ),

@@ -14,22 +14,8 @@ import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.da
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class WWorkerServicesScreen extends StatefulWidget {
+class WWorkerServicesScreen extends StatelessWidget {
   const WWorkerServicesScreen({super.key});
-
-  @override
-  State<WWorkerServicesScreen> createState() => _WWorkerServicesScreenState();
-}
-
-class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<WorkerManagerProvider>(context, listen: false)
-          .fetchMyServices();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,23 +23,26 @@ class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
       builder: (context, workerManager, _) {
         return Scaffold(
           appBar: _buildAppBar(context),
-          body: workerManager.isServiceLoading
-              ? const Center(child: CircularProgressIndicator())
-              : workerManager.error != null
-                  ? AppErrorWidget(
-                      message: workerManager.error!,
-                      onRetry: workerManager.fetchMyServices,
-                    )
-                  : SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _buildAddServiceButton(context, workerManager),
-                          _buildMyServicesList(context, workerManager),
-                          SizedBox(height: context.getHeight(16)),
-                        ],
+          body: RefreshIndicator(
+            onRefresh: workerManager.fetchMyServices,
+            child: workerManager.isServiceLoading
+                ? const Center(child: CircularProgressIndicator())
+                : workerManager.error != null
+                    ? AppErrorWidget(
+                        message: workerManager.error!,
+                        onRetry: workerManager.fetchMyServices,
+                      )
+                    : SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _buildAddServiceButton(context, workerManager),
+                            _buildMyServicesList(context, workerManager),
+                            SizedBox(height: context.getHeight(16)),
+                          ],
+                        ),
                       ),
-                    ),
+          ),
         );
       },
     );
@@ -125,122 +114,151 @@ class _WWorkerServicesScreenState extends State<WWorkerServicesScreen> {
           ),
           child: Padding(
             padding: EdgeInsets.all(context.getWidth(16)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
               children: [
-                ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(context.getAdaptiveSize(16)),
-                  child: hasImage
-                      ? Image.network(
-                          '${ApiEndpoints.imageBaseUrl}/${service.gallary.first}',
-                          width: context.getWidth(100),
-                          height: context.getWidth(120),
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                            width: context.getWidth(80),
-                            height: context.getWidth(80),
-                            color: AppColors.dimGray,
-                            child: Icon(
-                              Icons.broken_image,
-                              color: AppColors.hintColor,
-                              size: context.getAdaptiveSize(40),
-                            ),
-                          ),
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              width: context.getWidth(80),
-                              height: context.getWidth(80),
-                              color: AppColors.dimGray,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          (loadingProgress.expectedTotalBytes ??
-                                              1)
-                                      : null,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Active',
+                      style: AppTextStyles.title2(context),
+                    ),
+                    Switch(
+                      value: service.active == 1,
+                      onChanged: (value) async {
+                        workerManager.setServiceId(service.id);
+                        workerManager.setActive(value);
+                        await workerManager.createAndEditService(
+                            isEditing: true);
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: context.getHeight(18),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(context.getAdaptiveSize(16)),
+                      child: hasImage
+                          ? Image.network(
+                              '${ApiEndpoints.imageBaseUrl}/${service.gallary.first}',
+                              width: context.getWidth(100),
+                              height: context.getWidth(120),
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                width: context.getWidth(80),
+                                height: context.getWidth(80),
+                                color: AppColors.dimGray,
+                                child: Icon(
+                                  Icons.broken_image,
+                                  color: AppColors.hintColor,
+                                  size: context.getAdaptiveSize(40),
                                 ),
                               ),
-                            );
-                          },
-                        )
-                      : Container(
-                          width: context.getWidth(100),
-                          height: context.getWidth(120),
-                          color: AppColors.dimGray,
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: AppColors.hintColor,
-                            size: context.getAdaptiveSize(40),
-                          ),
-                        ),
-                ),
-                SizedBox(width: context.getWidth(16)),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        service.service,
-                        style: AppTextStyles.title(context).copyWith(
-                          fontSize: context.getAdaptiveSize(18),
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                      SizedBox(height: context.getHeight(4)),
-                      Text(service.subcategory.name,
-                          style: AppTextStyles.subTitle(context)),
-                      SizedBox(height: context.getHeight(8)),
-                      Row(
-                        children: [
-                          Text(
-                            '\$${service.costPerHour}/hr',
-                            style: AppTextStyles.text(context).copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          SizedBox(width: context.getWidth(16)),
-                          Text(
-                            '${service.yearsOfExperience} years exp',
-                            style: AppTextStyles.text(context),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: context.getHeight(8)),
-                      Text(
-                        service.about,
-                        style: AppTextStyles.text(context),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: context.getHeight(24)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            width: context.getWidth(100),
-                            child: SmallPrimaryButton(
-                              text: 'Edit',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        EditService(service: service),
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  width: context.getWidth(80),
+                                  height: context.getWidth(80),
+                                  color: AppColors.dimGray,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  (loadingProgress
+                                                          .expectedTotalBytes ??
+                                                      1)
+                                              : null,
+                                    ),
                                   ),
                                 );
                               },
+                            )
+                          : Container(
+                              width: context.getWidth(100),
+                              height: context.getWidth(120),
+                              color: AppColors.dimGray,
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: AppColors.hintColor,
+                                size: context.getAdaptiveSize(40),
+                              ),
                             ),
+                    ),
+                    SizedBox(width: context.getWidth(16)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            service.service,
+                            style: AppTextStyles.title(context).copyWith(
+                              fontSize: context.getAdaptiveSize(18),
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          SizedBox(height: context.getHeight(4)),
+                          Text(service.subcategory.name,
+                              style: AppTextStyles.subTitle(context)),
+                          SizedBox(height: context.getHeight(8)),
+                          Row(
+                            children: [
+                              Text(
+                                '\$${service.costPerHour}/hr',
+                                style: AppTextStyles.text(context).copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              SizedBox(width: context.getWidth(16)),
+                              Text(
+                                '${service.yearsOfExperience} years exp',
+                                style: AppTextStyles.text(context),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: context.getHeight(8)),
+                          Text(
+                            service.about,
+                            style: AppTextStyles.text(context),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: context.getHeight(24)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: context.getWidth(100),
+                                child: SmallPrimaryButton(
+                                  text: 'Edit',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            EditService(service: service),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),

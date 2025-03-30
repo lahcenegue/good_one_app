@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,8 +25,8 @@ class WorkerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<WorkerManagerProvider, OrdersManagerProvider>(
       builder: (context, workerManager, ordersManager, _) {
-        if (workerManager.isLoading && workerManager.workerInfo == null) {
-          return const Center(child: CircularProgressIndicator());
+        if (workerManager.isLoading && ordersManager.isOrdersLoading) {
+          return LoadingIndicator();
         }
 
         if (workerManager.error != null) {
@@ -36,7 +37,10 @@ class WorkerHomeScreen extends StatelessWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: workerManager.initialize,
+          onRefresh: () async {
+            await workerManager.initialize();
+            await ordersManager.initialize();
+          },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(
@@ -329,7 +333,9 @@ class WorkerHomeScreen extends StatelessWidget {
 
   // Vacation Mode Toggle
   Widget _buildVacationToggle(
-      BuildContext context, WorkerManagerProvider workerManager) {
+    BuildContext context,
+    WorkerManagerProvider workerManager,
+  ) {
     return Padding(
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
       child: Column(
@@ -337,21 +343,21 @@ class WorkerHomeScreen extends StatelessWidget {
           Row(
             children: [
               Icon(
-                workerManager.workerInfo!.active!
+                !workerManager.workerInfo!.active
                     ? Icons.beach_access
                     : Icons.work,
-                color: workerManager.workerInfo!.active!
+                color: !workerManager.workerInfo!.active
                     ? AppColors.primaryColor
                     : Colors.green,
                 size: context.getAdaptiveSize(24),
               ),
               SizedBox(width: context.getWidth(10)),
               Text(
-                workerManager.workerInfo!.active!
+                !workerManager.workerInfo!.active
                     ? AppLocalizations.of(context)!.onVacation
                     : AppLocalizations.of(context)!.available,
                 style: AppTextStyles.subTitle(context).copyWith(
-                  color: workerManager.workerInfo!.active!
+                  color: !workerManager.workerInfo!.active
                       ? AppColors.primaryColor
                       : Colors.green,
                 ),
@@ -360,10 +366,14 @@ class WorkerHomeScreen extends StatelessWidget {
           ),
           SizedBox(height: context.getHeight(12)),
           PrimaryButton(
-            text: workerManager.workerInfo!.active!
+            text: !workerManager.workerInfo!.active
                 ? AppLocalizations.of(context)!.returnToWork
                 : AppLocalizations.of(context)!.goOnVacation,
-            onPressed: () async {},
+            onPressed: () async {
+              print(workerManager.workerInfo!.active);
+              await workerManager
+                  .changeAccountState(workerManager.workerInfo!.active ? 0 : 1);
+            },
           ),
         ],
       ),

@@ -65,7 +65,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header with Order ID
-                  _buildHeader(),
+                  _buildHeader(orderManager),
                   SizedBox(height: context.getHeight(16)),
 
                   // Order Summary Section
@@ -73,7 +73,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   SizedBox(height: context.getHeight(24)),
 
                   // Customer Info Section
-                  _buildCustomerInfoSection(),
+                  _buildChatWithCustomerSection(),
 
                   _buildNoteSection(),
                   SizedBox(height: context.getHeight(24)),
@@ -83,7 +83,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   SizedBox(height: context.getHeight(24)),
 
                   // Action Buttons
-                  _buildActionButtons(),
+                  widget.order.status == 3
+                      ? SizedBox.shrink()
+                      : _buildActionButtons(orderManager),
                   SizedBox(height: context.getHeight(16)),
                 ],
               ),
@@ -103,7 +105,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(OrdersManagerProvider orderManager) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -120,13 +122,15 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             vertical: context.getHeight(6),
           ),
           decoration: BoxDecoration(
-            color: _getStatusColor(widget.order.status).withOpacity(0.1),
+            color: orderManager
+                .getStatusColor(widget.order.status)
+                .withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            _getStatusText(widget.order.status),
+            orderManager.getStatusText(context, widget.order.status),
             style: AppTextStyles.subTitle(context).copyWith(
-              color: _getStatusColor(widget.order.status),
+              color: orderManager.getStatusColor(widget.order.status),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -174,7 +178,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   // Customer Info Section
-  Widget _buildCustomerInfoSection() {
+  Widget _buildChatWithCustomerSection() {
     return Container(
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
       decoration: BoxDecoration(
@@ -186,7 +190,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            AppLocalizations.of(context)!.customerInformation,
+            AppLocalizations.of(context)!.chatWithCustomer,
             style: AppTextStyles.title2(context),
           ),
           SizedBox(height: context.getHeight(12)),
@@ -280,9 +284,23 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              AppLocalizations.of(context)!.deliveryLocation,
-              style: AppTextStyles.title2(context),
+            SizedBox(
+              width: context.screenWidth - context.getAdaptiveSize(120),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.deliveryLocation,
+                    style: AppTextStyles.title2(context),
+                  ),
+                  SizedBox(height: context.getHeight(5)),
+                  Text(
+                    widget.order.location,
+                    style: AppTextStyles.text(context),
+                  ),
+                ],
+              ),
             ),
             GestureDetector(
               onTap: _launchGoogleMaps,
@@ -313,29 +331,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             child: _buildMapWidget(orderManager),
           ),
         ),
-        SizedBox(height: context.getHeight(12)),
-        Text(
-          widget.order.location,
-          style:
-              AppTextStyles.text(context).copyWith(color: AppColors.hintColor),
-        ),
-      ],
-    );
-  }
-
-  // Action Buttons
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SmallSecondaryButton(
-          text: AppLocalizations.of(context)!.cancel,
-          onPressed: () {},
-        ),
-        SmallPrimaryButton(
-          text: AppLocalizations.of(context)!.complete,
-          onPressed: () {},
-        )
       ],
     );
   }
@@ -403,31 +398,119 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  // Helper to get status text
-  String _getStatusText(int status) {
-    switch (status) {
-      case 0:
-        return AppLocalizations.of(context)!.canceled;
-      case 1:
-        return AppLocalizations.of(context)!.pending;
-      case 2:
-        return AppLocalizations.of(context)!.completed;
-      default:
-        return AppLocalizations.of(context)!.unknown;
-    }
+  // Action Buttons
+  Widget _buildActionButtons(OrdersManagerProvider orderManager) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SmallSecondaryButton(
+          text: AppLocalizations.of(context)!.cancel,
+          onPressed: () {
+            _showCancelOrderDialog(orderManager);
+          },
+        ),
+        SmallPrimaryButton(
+          text: AppLocalizations.of(context)!.complete,
+          onPressed: () {
+            _showCompleteOrderDialog(orderManager);
+          },
+        )
+      ],
+    );
   }
 
-  // Helper to get status color
-  Color _getStatusColor(int status) {
-    switch (status) {
-      case 0:
-        return Colors.red;
-      case 1:
-        return Colors.orange;
-      case 2:
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
+  void _showCancelOrderDialog(OrdersManagerProvider orderManager) {
+    final reasonController = TextEditingController();
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.cancelOrder,
+                style: AppTextStyles.title2(context)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(AppLocalizations.of(context)!.reasonForCancellation,
+                    style: AppTextStyles.text(context)),
+                SizedBox(height: context.getHeight(8)),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.enterReason,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade300)),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: context.getWidth(12),
+                        vertical: context.getHeight(8)),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(AppLocalizations.of(context)!.close,
+                    style: AppTextStyles.text(context)
+                        .copyWith(color: Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final reason = reasonController.text.trim();
+                  if (reason.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                            AppLocalizations.of(context)!.reasonRequired)));
+                    return;
+                  }
+                  await orderManager.cancelOrder(
+                      context, widget.order.id, reason);
+                },
+                child: Text(AppLocalizations.of(context)!.submit,
+                    style: AppTextStyles.text(context)
+                        .copyWith(color: AppColors.primaryColor)),
+              ),
+            ],
+          );
+        });
+  }
+
+  void _showCompleteOrderDialog(OrdersManagerProvider orderManager) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.completed,
+                style: AppTextStyles.title2(context)),
+            content: Text(AppLocalizations.of(context)!.hasServiceBeenReceived,
+                style: AppTextStyles.text(context)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  AppLocalizations.of(context)!.notYet,
+                  style:
+                      AppTextStyles.text(context).copyWith(color: Colors.grey),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await orderManager.completeOrder(
+                    context,
+                    widget.order.id,
+                  );
+                },
+                child: Text(AppLocalizations.of(context)!.confirm,
+                    style: AppTextStyles.text(context)
+                        .copyWith(color: AppColors.primaryColor)),
+              ),
+            ],
+          );
+        });
   }
 }

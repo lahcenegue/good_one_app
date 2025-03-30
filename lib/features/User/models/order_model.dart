@@ -1,17 +1,17 @@
 class Order {
+  final int id;
   final int totalHours;
   final int startAt;
-  final String location;
+  final String? note;
+  final int status;
+  final int userId;
   final int serviceId;
+  final String location;
   final int? couponId;
   final int? couponPercentage;
   final double price;
-  final int status;
-  final String? note;
-  final int userId;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final int id;
 
   Order({
     required this.totalHours,

@@ -21,6 +21,7 @@ class CreateServiceRequest {
   final int? experience;
   final File? license;
   final int? serviceId;
+  final int? active;
 
   CreateServiceRequest({
     this.category,
@@ -31,6 +32,7 @@ class CreateServiceRequest {
     this.experience,
     this.license,
     this.serviceId,
+    this.active,
   });
 
   Map<String, String> toFields() {
@@ -55,6 +57,9 @@ class CreateServiceRequest {
     }
     if (serviceId != null) {
       fields['service_id'] = serviceId!.toString();
+    }
+    if (active != null) {
+      fields['active'] = active!.toString();
     }
 
     return fields;

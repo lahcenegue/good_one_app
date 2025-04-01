@@ -1,6 +1,5 @@
 class MyServicesModel {
   final int id;
-
   final double costPerHour;
   final String service;
   final int yearsOfExperience;

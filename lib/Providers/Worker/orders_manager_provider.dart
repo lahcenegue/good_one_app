@@ -4,6 +4,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Features/User/Models/order_model.dart';
+import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
 
 import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
 import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
@@ -28,6 +29,10 @@ class OrdersManagerProvider extends ChangeNotifier {
   String? get error => _error;
   TabController? get tabController => _tabController;
   List<String> get dates => _dates;
+  int get totalOrders =>
+      _orders.values.fold(0, (sum, list) => sum + list.length);
+  int get pendingOrders => _orders.values
+      .fold(0, (sum, list) => sum + list.where((o) => o.status == 1).length);
 
   MapController get mapController => _mapController;
   LatLng? get customerLatLng => _customerLatLng;
@@ -77,14 +82,13 @@ class OrdersManagerProvider extends ChangeNotifier {
   }
 
   // Helper methods for summary data
-  int get totalOrders {
-    return _orders.values.fold(0, (sum, orders) => sum + orders.length);
-  }
+  List<ChartData> getRequestStatusChartData() {
+    final completedOrders = totalOrders - pendingOrders;
 
-  int get pendingOrders {
-    return _orders.values.fold(0, (sum, orders) {
-      return sum + orders.where((order) => order.status == 1).length;
-    });
+    return [
+      ChartData('Pending', pendingOrders, Colors.orange),
+      ChartData('Completed', completedOrders, Colors.green),
+    ].where((item) => item.value > 0).toList();
   }
 
   void _setOrdersLoading(bool value) {

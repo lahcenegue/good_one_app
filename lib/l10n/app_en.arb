@@ -222,6 +222,16 @@
     "complete":"Complete",
     "pending":"Pending",
     "unknown":"Unknown",
-    "fetchOrdersFailed":"Fetch Orders Failed"
+    "fetchOrdersFailed":"Fetch Orders Failed",
+    "requestStatus":"Request Status",
+    "servicesProvided":"Services Provided",
+    "visible":"Visible",
+    "inactive":"Inactive",
+    "requestWithdrawal": "Request Withdrawal",
+    "checkWithdrawalStatus": "'Check Withdrawal Status'",
+    "bankAccount": "'Bank Account'",
+    "fillAllFields": "Please fill all fields",
+    "withdrawalRequested": "Withdrawal request submitted",
+    "withdrawalStatus": "Withdrawal Status"
 
 }

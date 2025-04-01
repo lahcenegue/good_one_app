@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Features/Worker/Models/balance_model.dart';
+import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -24,6 +26,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Authentication State
   String? _token;
   UserInfo? _workerInfo;
+  BalanceModel? _balance;
   String? _error;
 
   // UI State
@@ -69,6 +72,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Getters for Authentication and User Info
   String? get token => _token;
   UserInfo? get workerInfo => _workerInfo;
+  BalanceModel? get balance => _balance;
   String? get error => _error;
   int get currentIndex => _currentIndex;
   bool get isLoading => _isLoading;
@@ -83,6 +87,8 @@ class WorkerManagerProvider extends ChangeNotifier {
   TextEditingController get cityController => _cityController;
   TextEditingController get countryController => _countryController;
   TextEditingController get passwordController => _passwordController;
+
+  String? get withdrawalStatus => 'Pending';
 
   // Getters for Add Service
   List<CategoryModel> get categories => _categories;
@@ -130,9 +136,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////////
   // Load vacation status from storage
-
   Future<void> changeAccountState(int accountState) async {
     if (_token == null) return;
     setError(null);
@@ -146,7 +150,6 @@ class WorkerManagerProvider extends ChangeNotifier {
         ]);
       } else {
         setError(response.error ?? 'Failed to change account state.');
-        _setLoading(false);
       }
     } catch (e) {
       setError('Exception fetching user info: $e');
@@ -155,7 +158,22 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////////
+  Future<void> getMyBalance() async {
+    if (_token == null) return;
+    setError(null);
+    _setLoading(true);
+    try {
+      final response = await WorkerApi.getMyBalance();
+      if (response.success && response.data != null) {
+        _balance = response.data!;
+        notifyListeners();
+      }
+    } catch (e) {
+      setError('Exception fetch my balance: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
 
   /// Loads user data from storage and fetches user info if a token is available.
   Future<void> _loadWorkerData() async {
@@ -165,6 +183,7 @@ class WorkerManagerProvider extends ChangeNotifier {
       if (_token != null) {
         final userInfoSuccess = await fetchWorkerInfo();
         if (userInfoSuccess) {
+          await getMyBalance();
           _initializeUsersControllers();
         } else {
           final refreshed = await TokenManager.instance.refreshToken();
@@ -319,6 +338,14 @@ class WorkerManagerProvider extends ChangeNotifier {
       setError('Failed to fetch my services: $e');
       _setServiceLoading(false);
     }
+  }
+
+  List<ServiceChartData> getServicesChartData() {
+    final totalServices = myServices.length;
+    final visibleServices =
+        myServices.where((service) => service.active == 1).length;
+    final hiddenServices = totalServices - visibleServices;
+    return [ServiceChartData('Services', visibleServices, hiddenServices)];
   }
 
   // -----------------------------------

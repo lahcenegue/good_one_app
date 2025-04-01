@@ -5,6 +5,7 @@ import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
 import 'package:good_one_app/Core/Infrastructure/Api/api_service.dart';
 import 'package:good_one_app/Features/User/Models/order_model.dart';
 import 'package:good_one_app/Features/Worker/Models/add_image_model.dart';
+import 'package:good_one_app/Features/Worker/Models/balance_model.dart';
 import 'package:good_one_app/Features/Worker/Models/category_model.dart';
 import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
@@ -104,7 +105,7 @@ class WorkerApi {
       bool isEditing, CreateServiceRequest request) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
 
-    return _api.postMultipart(
+    return await _api.postMultipart(
       url: isEditing
           ? ApiEndpoints.editNewService
           : ApiEndpoints.createNewService,
@@ -165,7 +166,7 @@ class WorkerApi {
   static Future<ApiResponse<Order>> cancelOrder(
       OrderEditRequest orderEdirRequest) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
-    return _api.post<Order>(
+    return await _api.post<Order>(
       url: ApiEndpoints.cancelOrder,
       body: orderEdirRequest.toJson(),
       fromJson: (json) => Order.fromJson(json),
@@ -176,7 +177,7 @@ class WorkerApi {
   static Future<ApiResponse<Order>> completeOrder(
       OrderEditRequest orderRequest) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
-    return _api.post<Order>(
+    return await _api.post<Order>(
       url: ApiEndpoints.receiveOrder,
       body: orderRequest.toJson(),
       fromJson: (json) => Order.fromJson(json),
@@ -186,7 +187,7 @@ class WorkerApi {
 
   static Future<ApiResponse<bool>> changeAccountState(int accountState) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
-    return _api.post(
+    return await _api.post(
       url: ApiEndpoints.changeAccountState,
       body: {'active': accountState},
       fromJson: (dynamic json) {
@@ -197,5 +198,23 @@ class WorkerApi {
       },
       token: token,
     );
+  }
+
+  static Future<ApiResponse<BalanceModel>> getMyBalance() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    try {
+      return await _api.get(
+        url: ApiEndpoints.balance,
+        fromJson: (dynamic json) {
+          if (json is Map<String, dynamic>) {
+            return BalanceModel.fromJson(json);
+          }
+          throw Exception('Invalid balance response format');
+        },
+        token: token,
+      );
+    } catch (e) {
+      return ApiResponse.error('Failed to fetch my balance: $e');
+    }
   }
 }

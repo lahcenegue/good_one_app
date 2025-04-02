@@ -19,6 +19,7 @@ import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_main_sc
 import 'package:good_one_app/Features/Auth/Presentation/Screens/login_screen.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Screens/registration_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_notification_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_status_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -49,7 +50,8 @@ class AppRoutes {
   static const String workerNotificationsScreen = '/workerNotificationsScreen';
   static const String workerAccountDetails = '/workerAccountDetails';
   static const String workerAddService = '/workerAddService';
-  static const String editService = '/edit-service';
+  static const String editService = '/editService';
+  static const String withdrawalStatusScreen = '/withdrawalStatus';
 
   // Route Definitions
   static Map<String, WidgetBuilder> define() {
@@ -84,6 +86,7 @@ class AppRoutes {
       workerNotificationsScreen: (_) => const WorkerNotificationScreen(),
       workerAccountDetails: (_) => WorkerAccountDetailsScreen(),
       workerAddService: (_) => WorkerAddServiceScreen(),
+      withdrawalStatusScreen: (_) => WithdrawalStatusScreen(),
     };
   }
 

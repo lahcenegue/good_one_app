@@ -145,8 +145,14 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.hintColor.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.hintColor.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

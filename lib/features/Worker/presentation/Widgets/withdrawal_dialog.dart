@@ -41,7 +41,7 @@ class _WithdrawalDialogState extends State<WithdrawalDialog>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              AppLocalizations.of(context)!.requestWithdrawal,
+              AppLocalizations.of(context)!.withdrawal,
               style: AppTextStyles.title2(context)
                   .copyWith(fontWeight: FontWeight.bold),
             ),

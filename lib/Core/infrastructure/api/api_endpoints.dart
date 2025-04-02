@@ -40,6 +40,9 @@ abstract class ApiEndpoints {
   static String get serviceOrders => '$baseUrl/api/service/orders';
   static String get changeAccountState => '$baseUrl/api/account/change_state';
   static String get balance => '$baseUrl/api/user/balance';
+  static String get withdrawReauest => '$baseUrl/api/user/balance/withdraw';
+  static String get withdrawStatus =>
+      '$baseUrl/api/user/balance/withdraw/requests';
 
   // Stripe payment Endpoints
   static String get paymentApiUrl =>

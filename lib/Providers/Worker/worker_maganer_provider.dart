@@ -37,7 +37,8 @@ class WorkerManagerProvider extends ChangeNotifier {
   //
   BalanceModel? _balance;
   bool _isBankSelected = true;
-  List<WithdrawalRequest> _withdrawalRequests = <WithdrawalRequest>[];
+  WithdrawalModel? _withdrawalModel;
+  List<WithdrawStatus>? _withdrawStatus;
 
   // Form Controllers
   final TextEditingController _fullNameController = TextEditingController();
@@ -48,6 +49,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   final TextEditingController _passwordController = TextEditingController();
 
   //
+  final TextEditingController _ammountController = TextEditingController();
   final TextEditingController _transitController = TextEditingController();
   final TextEditingController _institutionController = TextEditingController();
   final TextEditingController _accountController = TextEditingController();
@@ -94,7 +96,8 @@ class WorkerManagerProvider extends ChangeNotifier {
   File? get selectedImage => _selectedImage;
 
   bool get isBankSelected => _isBankSelected;
-  List<WithdrawalRequest> get withdrawalRequests => _withdrawalRequests;
+  WithdrawalModel? get withdrawalModel => _withdrawalModel;
+  List<WithdrawStatus>? get withdrawStatus => _withdrawStatus;
 
   TextEditingController get fullNameController => _fullNameController;
   TextEditingController get emailController => _emailController;
@@ -118,6 +121,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool get isServiceLoading => _isServiceLoading;
   bool get hasCertificate => _hasCertificate;
   int? get avtice => _active;
+  TextEditingController get amountController => _ammountController;
   TextEditingController get servicePriceController => _servicePriceController;
   TextEditingController get experienceController => _experienceController;
   TextEditingController get descriptionController => _descriptionController;
@@ -192,30 +196,61 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
-  // TODO ارسال الفوائد
-  Future<void> requestWithdrawal() async {}
+  Future<bool> requestWithdrawal() async {
+    if (_token == null) return false;
+    setError(null);
+    _setLoading(true);
+    try {
+      final request = WithdrawalRequest(
+        amount: double.tryParse(_ammountController.text),
+        method: _isBankSelected ? 'bank' : 'interac',
+        name: _fullNameController.text,
+        transit: int.tryParse(_transitController.text),
+        institution: int.tryParse(_institutionController.text),
+        account: int.tryParse(_accountController.text),
+        email: _emailController.text,
+      );
 
-  // TODO التححق من حالة ارسال الفوائد
-  Future<void> fetchWithdrawalRequests() async {
-    // Placeholder: Replace with actual API endpoint
-    // This is a mock implementation since the API isn't specified
-    _withdrawalRequests = [
-      WithdrawalRequest(
-        amount: 100.0,
-        sendDate: DateTime.now().subtract(Duration(days: 2)),
-        status: 'Sent',
-      ),
-      WithdrawalRequest(
-        amount: 50.0,
-        sendDate: DateTime.now().subtract(Duration(days: 1)),
-        status: 'Waiting to Send',
-      ),
-      WithdrawalRequest(
-        amount: 75.0,
-        sendDate: DateTime.now(),
-        status: 'Request Received',
-      ),
-    ];
+      final response = await WorkerApi.withdrawRequest(request);
+      if (response.success) {
+        _withdrawalModel = response.data;
+        _setLoading(false);
+        setError(null);
+        notifyListeners();
+        return true;
+      } else {
+        setError('Failed to withdraw');
+        _setLoading(false);
+        return false;
+      }
+    } catch (e) {
+      _setLoading(false);
+      setError('Failed to withdraw');
+      return false;
+    }
+  }
+
+  Future<bool> fetchWithdrawalStatus() async {
+    if (_token == null) return false;
+    setError(null);
+    _setLoading(true);
+    try {
+      final response = await WorkerApi.withdrawStatus();
+      if (response.success && response.data != null) {
+        _withdrawStatus = response.data;
+        notifyListeners();
+        _setLoading(false);
+        return true;
+      } else {
+        setError('failed to fetching withdraw status');
+        _setLoading(false);
+        return false;
+      }
+    } catch (e) {
+      setError('Exception fetching withdraw status');
+      _setLoading(false);
+      return false;
+    }
   }
 
   void setBankSelected(bool bankSelected) {

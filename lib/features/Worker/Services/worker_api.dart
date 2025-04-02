@@ -10,6 +10,7 @@ import 'package:good_one_app/Features/Worker/Models/category_model.dart';
 import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
+import 'package:good_one_app/Features/Worker/Models/withdrawal_model.dart';
 
 class WorkerApi {
   static final _api = ApiService.instance;
@@ -215,6 +216,38 @@ class WorkerApi {
       );
     } catch (e) {
       return ApiResponse.error('Failed to fetch my balance: $e');
+    }
+  }
+
+  static Future<ApiResponse<WithdrawalModel>> withdrawRequest(
+      WithdrawalRequest withdrawalRequest) async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    return await _api.post<WithdrawalModel>(
+      url: ApiEndpoints.withdrawReauest,
+      body: withdrawalRequest.toJson(),
+      fromJson: (json) => WithdrawalModel.fromJson(json),
+      token: token,
+    );
+  }
+
+  static Future<ApiResponse<List<WithdrawStatus>>> withdrawStatus() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    try {
+      final response = await _api.get<List<WithdrawStatus>>(
+        url: ApiEndpoints.withdrawStatus,
+        fromJson: (dynamic json) {
+          if (json is Map<String, dynamic> && json.containsKey('requests')) {
+            final List<dynamic> requests = json['requests'];
+            return requests.map((e) => WithdrawStatus.fromJson(e)).toList();
+          }
+          return [];
+        },
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      return ApiResponse.error('Failed to fetch withdraw status');
     }
   }
 }

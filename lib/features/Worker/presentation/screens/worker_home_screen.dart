@@ -5,7 +5,6 @@ import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/orders_status_chart.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/services_status_chart.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_dialog.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_status_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
@@ -186,7 +185,7 @@ class WorkerHomeScreen extends StatelessWidget {
             children: [
               Flexible(
                 child: PrimaryButton(
-                  text: AppLocalizations.of(context)!.requestWithdrawal,
+                  text: AppLocalizations.of(context)!.withdrawal,
                   onPressed: () =>
                       _showWithdrawalDialog(context, workerManager),
                 ),
@@ -194,8 +193,12 @@ class WorkerHomeScreen extends StatelessWidget {
               SizedBox(width: context.getWidth(12)),
               Flexible(
                 child: SecondaryButton(
-                  text: AppLocalizations.of(context)!.checkWithdrawalStatus,
-                  onPressed: () => _showStatusDialog(context, workerManager),
+                  text: AppLocalizations.of(context)!.status,
+                  onPressed: () async {
+                    NavigationService.navigateTo(
+                      AppRoutes.withdrawalStatusScreen,
+                    );
+                  },
                 ),
               ),
             ],
@@ -212,16 +215,6 @@ class WorkerHomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => WithdrawalDialog(workerManager: workerManager),
-    );
-  }
-
-  void _showStatusDialog(
-    BuildContext context,
-    WorkerManagerProvider workerManager,
-  ) {
-    showDialog(
-      context: context,
-      builder: (_) => WithdrawalStatusDialog(workerManager: workerManager),
     );
   }
 

@@ -227,15 +227,18 @@
     "servicesProvided":"Services Provided",
     "visible":"Visible",
     "inactive":"Inactive",
-    "requestWithdrawal": "Request Withdrawal",
-    "checkWithdrawalStatus": "'Check Withdrawal Status'",
-    "bankAccount": "'Bank Account'",
+    "withdrawal": "Withdraw",
+       "bankAccount": "'Bank Account'",
     "fillAllFields": "Please fill all fields",
     "withdrawalRequested": "Withdrawal request submitted",
     "withdrawalStatus": "Withdrawal Status",
     "transit":"Transit",
     "institution":"Institution",
     "account":"Account",
-    "noWithdrawalRequests":"No Withdrawal Requests"
+    "noWithdrawalRequests":"No Withdrawal Requests",
+    "statusSent":"Sent",
+    "statusWaitingToSend":"Waiting to Send",
+    "statusRequestReceived":"Request Received"
+
 
 }

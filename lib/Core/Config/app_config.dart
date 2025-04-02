@@ -16,6 +16,10 @@ class AppConfig {
   /// The base url for Stripe payment
   static const String stripeApiBase = 'https://api.stripe.com/v1';
 
+  /// The url for secure
+  static const String securLink =
+      'https://secure.tritoncanada.ca/Eiv/InitiateEiv?id=7f0439e9-8dc2-8d6f-31c0-8856543a7367';
+
   /// The default locale for the app, set to English ('en').
   static const String defaultLocale = 'en';
 

@@ -232,6 +232,10 @@
     "bankAccount": "'Bank Account'",
     "fillAllFields": "Please fill all fields",
     "withdrawalRequested": "Withdrawal request submitted",
-    "withdrawalStatus": "Withdrawal Status"
+    "withdrawalStatus": "Withdrawal Status",
+    "transit":"Transit",
+    "institution":"Institution",
+    "account":"Account",
+    "noWithdrawalRequests":"No Withdrawal Requests"
 
 }

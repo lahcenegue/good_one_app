@@ -3,6 +3,7 @@ import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Features/Worker/Models/balance_model.dart';
 import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
+import 'package:good_one_app/Features/Worker/Models/withdrawal_model.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -26,20 +27,30 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Authentication State
   String? _token;
   UserInfo? _workerInfo;
-  BalanceModel? _balance;
+
   String? _error;
 
   // UI State
   int _currentIndex = 0;
   bool _isLoading = false;
 
-  // Form Controllers for User Info
+  //
+  BalanceModel? _balance;
+  bool _isBankSelected = true;
+  List<WithdrawalRequest> _withdrawalRequests = <WithdrawalRequest>[];
+
+  // Form Controllers
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  //
+  final TextEditingController _transitController = TextEditingController();
+  final TextEditingController _institutionController = TextEditingController();
+  final TextEditingController _accountController = TextEditingController();
 
   // User Profile Image Handling
   File? _selectedImage;
@@ -81,6 +92,10 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool get isNotificationLoading => _isNotificationLoading;
   String? get imageError => _imageError;
   File? get selectedImage => _selectedImage;
+
+  bool get isBankSelected => _isBankSelected;
+  List<WithdrawalRequest> get withdrawalRequests => _withdrawalRequests;
+
   TextEditingController get fullNameController => _fullNameController;
   TextEditingController get emailController => _emailController;
   TextEditingController get phoneController => _phoneController;
@@ -88,7 +103,9 @@ class WorkerManagerProvider extends ChangeNotifier {
   TextEditingController get countryController => _countryController;
   TextEditingController get passwordController => _passwordController;
 
-  String? get withdrawalStatus => 'Pending';
+  TextEditingController get transitController => _transitController;
+  TextEditingController get institutionController => _institutionController;
+  TextEditingController get accountController => _accountController;
 
   // Getters for Add Service
   List<CategoryModel> get categories => _categories;
@@ -173,6 +190,37 @@ class WorkerManagerProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  // TODO ارسال الفوائد
+  Future<void> requestWithdrawal() async {}
+
+  // TODO التححق من حالة ارسال الفوائد
+  Future<void> fetchWithdrawalRequests() async {
+    // Placeholder: Replace with actual API endpoint
+    // This is a mock implementation since the API isn't specified
+    _withdrawalRequests = [
+      WithdrawalRequest(
+        amount: 100.0,
+        sendDate: DateTime.now().subtract(Duration(days: 2)),
+        status: 'Sent',
+      ),
+      WithdrawalRequest(
+        amount: 50.0,
+        sendDate: DateTime.now().subtract(Duration(days: 1)),
+        status: 'Waiting to Send',
+      ),
+      WithdrawalRequest(
+        amount: 75.0,
+        sendDate: DateTime.now(),
+        status: 'Request Received',
+      ),
+    ];
+  }
+
+  void setBankSelected(bool bankSelected) {
+    _isBankSelected = bankSelected;
+    notifyListeners();
   }
 
   /// Loads user data from storage and fetches user info if a token is available.
@@ -605,5 +653,20 @@ class WorkerManagerProvider extends ChangeNotifier {
   void _setAddServiceError(String? message) {
     _addServiceError = message;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _cityController.dispose();
+    _countryController.dispose();
+    _passwordController.dispose();
+    _transitController.dispose();
+    _institutionController.dispose();
+    _accountController.dispose();
+
+    super.dispose();
   }
 }

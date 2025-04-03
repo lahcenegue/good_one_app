@@ -93,19 +93,19 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.receipt_long_outlined, // More relevant icon
+              Icons.receipt_long_outlined,
               size: context.getAdaptiveSize(60),
               color: AppColors.hintColor.withValues(alpha: 0.7),
             ),
             SizedBox(height: context.getHeight(20)),
             Text(
-              'no Recent Withdrawals', // Use localization
+              'no Recent Withdrawals',
               style: AppTextStyles.title2(context),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: context.getHeight(8)),
             Text(
-              'check BackLater For Updates', // Use localization
+              'check BackLater For Updates',
               style: AppTextStyles.subTitle(context),
               textAlign: TextAlign.center,
             ),

@@ -92,9 +92,26 @@ class _OrdersContentInitializerState extends State<OrdersContentInitializer>
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: Padding(
+          padding: EdgeInsets.all(context.getAdaptiveSize(32)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.home_repair_service_rounded,
+                size: context.getAdaptiveSize(60),
+                color: AppColors.hintColor.withValues(alpha: 0.7),
+              ),
+              SizedBox(height: context.getHeight(20)),
+              Text(
+                AppLocalizations.of(context)!.noOrdersAvailable,
+                style: AppTextStyles.subTitle(context),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

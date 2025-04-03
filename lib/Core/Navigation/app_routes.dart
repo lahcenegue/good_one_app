@@ -21,7 +21,7 @@ import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_main_sc
 import 'package:good_one_app/Features/Auth/Presentation/Screens/login_screen.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Screens/registration_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_notification_screen.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_status_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/withdrawal_status_screen.dart';
 
 class AppRoutes {
   AppRoutes._();

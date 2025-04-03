@@ -80,11 +80,24 @@ class WWorkerServicesScreen extends StatelessWidget {
     WorkerManagerProvider workerManager,
   ) {
     if (workerManager.myServices.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.all(context.getAdaptiveSize(20)),
-        child: Text(
-          AppLocalizations.of(context)!.noServicesAvailable,
-          style: AppTextStyles.subTitle(context),
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(context.getAdaptiveSize(32)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.assignment_outlined,
+                size: context.getAdaptiveSize(60),
+                color: AppColors.hintColor.withValues(alpha: 0.7),
+              ),
+              SizedBox(height: context.getHeight(20)),
+              Text(
+                AppLocalizations.of(context)!.noServicesAvailable,
+                style: AppTextStyles.subTitle(context),
+              ),
+            ],
+          ),
         ),
       );
     }

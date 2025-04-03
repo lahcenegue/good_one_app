@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -58,8 +59,7 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
                 SizedBox(height: context.getHeight(20)),
                 _buildAccountDetailsForm(context, workerManager, worker),
                 if (workerManager.error != null)
-                  SharedAuthWidgets.buildErrorMessage(
-                      context, workerManager.error!),
+                  AppErrorWidget(message: workerManager.error!),
               ],
             ),
           ),
@@ -185,8 +185,9 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
             label: AppLocalizations.of(context)!.phoneNumber,
             hintText: AppLocalizations.of(context)!.enterPhoneNumber,
             validator: (value) {
-              if (int.tryParse(value!) == null)
+              if (int.tryParse(value!) == null) {
                 return 'Please enter a valid phone number';
+              }
               return null;
             },
             keyboardType: TextInputType.phone,

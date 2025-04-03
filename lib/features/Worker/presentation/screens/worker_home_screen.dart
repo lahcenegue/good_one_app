@@ -342,12 +342,14 @@ class WorkerHomeScreen extends StatelessWidget {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.generalError),
-          backgroundColor: AppColors.primaryColor,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.generalError),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        );
+      }
     }
   }
 }

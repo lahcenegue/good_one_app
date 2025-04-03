@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
@@ -54,16 +53,18 @@ class AppErrorWidget extends StatelessWidget {
   }
 
   // Factory constructor for common error states
-  factory AppErrorWidget.network({VoidCallback? onRetry}) {
+  factory AppErrorWidget.network(
+      {required BuildContext context, VoidCallback? onRetry}) {
     return AppErrorWidget(
-      message: AppStrings.networkError,
+      message: AppLocalizations.of(context)!.networkError,
       onRetry: onRetry,
     );
   }
 
-  factory AppErrorWidget.general({VoidCallback? onRetry}) {
+  factory AppErrorWidget.general(
+      {required BuildContext context, VoidCallback? onRetry}) {
     return AppErrorWidget(
-      message: AppStrings.generalError,
+      message: AppLocalizations.of(context)!.generalError,
       onRetry: onRetry,
     );
   }

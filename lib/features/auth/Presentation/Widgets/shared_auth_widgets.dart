@@ -43,41 +43,41 @@ class SharedAuthWidgets {
     );
   }
 
-  static Widget buildErrorMessage(BuildContext context, String message) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        vertical: context.getHeight(16),
-      ),
-      padding: EdgeInsets.all(context.getWidth(12)),
-      decoration: BoxDecoration(
-        color: AppColors.oxblood.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.oxblood,
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: AppColors.oxblood,
-            size: context.getWidth(24),
-          ),
-          SizedBox(width: context.getWidth(12)),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.text(context).copyWith(
-                color: AppColors.oxblood,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // static Widget buildErrorMessage(BuildContext context, String message) {
+  //   return Container(
+  //     margin: EdgeInsets.symmetric(
+  //       vertical: context.getHeight(16),
+  //     ),
+  //     padding: EdgeInsets.all(context.getWidth(12)),
+  //     decoration: BoxDecoration(
+  //       color: AppColors.oxblood.withOpacity(0.1),
+  //       borderRadius: BorderRadius.circular(8),
+  //       border: Border.all(
+  //         color: AppColors.oxblood,
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Icon(
+  //           Icons.error_outline,
+  //           color: AppColors.oxblood,
+  //           size: context.getWidth(24),
+  //         ),
+  //         SizedBox(width: context.getWidth(12)),
+  //         Expanded(
+  //           child: Text(
+  //             message,
+  //             style: AppTextStyles.text(context).copyWith(
+  //               color: AppColors.oxblood,
+  //             ),
+  //             textAlign: TextAlign.center,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   static Widget buildPasswordField(
     BuildContext context, {

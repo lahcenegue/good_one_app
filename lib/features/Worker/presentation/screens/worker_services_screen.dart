@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/general_box.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
@@ -99,169 +100,151 @@ class WWorkerServicesScreen extends StatelessWidget {
         final service = workerManager.myServices[index];
         final hasImage = service.gallary.isNotEmpty;
 
-        return Container(
-          margin: EdgeInsets.only(bottom: context.getHeight(16)),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.hintColor.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+        return GeneralBox(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Active',
+                    style: AppTextStyles.title2(context),
+                  ),
+                  Switch(
+                    value: service.active == 1,
+                    onChanged: (value) async {
+                      workerManager.setServiceId(service.id);
+                      workerManager.setActive(value);
+                      await workerManager.createAndEditService(isEditing: true);
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(context.getWidth(16)),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Active',
-                      style: AppTextStyles.title2(context),
-                    ),
-                    Switch(
-                      value: service.active == 1,
-                      onChanged: (value) async {
-                        workerManager.setServiceId(service.id);
-                        workerManager.setActive(value);
-                        await workerManager.createAndEditService(
-                            isEditing: true);
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: context.getHeight(18),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(context.getAdaptiveSize(16)),
-                      child: hasImage
-                          ? Image.network(
-                              '${ApiEndpoints.imageBaseUrl}/${service.gallary.first}',
-                              width: context.getWidth(100),
-                              height: context.getWidth(120),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Container(
-                                width: context.getWidth(80),
-                                height: context.getWidth(80),
-                                color: AppColors.dimGray,
-                                child: Icon(
-                                  Icons.broken_image,
-                                  color: AppColors.hintColor,
-                                  size: context.getAdaptiveSize(40),
-                                ),
-                              ),
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  width: context.getWidth(80),
-                                  height: context.getWidth(80),
-                                  color: AppColors.dimGray,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  (loadingProgress
-                                                          .expectedTotalBytes ??
-                                                      1)
-                                              : null,
-                                    ),
-                                  ),
-                                );
-                              },
-                            )
-                          : Container(
-                              width: context.getWidth(100),
-                              height: context.getWidth(120),
+              SizedBox(
+                height: context.getHeight(18),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        BorderRadius.circular(context.getAdaptiveSize(16)),
+                    child: hasImage
+                        ? Image.network(
+                            '${ApiEndpoints.imageBaseUrl}/${service.gallary.first}',
+                            width: context.getWidth(100),
+                            height: context.getWidth(120),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                              width: context.getWidth(80),
+                              height: context.getWidth(80),
                               color: AppColors.dimGray,
                               child: Icon(
-                                Icons.image_not_supported,
+                                Icons.broken_image,
                                 color: AppColors.hintColor,
                                 size: context.getAdaptiveSize(40),
                               ),
                             ),
-                    ),
-                    SizedBox(width: context.getWidth(16)),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            service.service,
-                            style: AppTextStyles.title(context).copyWith(
-                              fontSize: context.getAdaptiveSize(18),
-                              color: AppColors.primaryColor,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                width: context.getWidth(80),
+                                height: context.getWidth(80),
+                                color: AppColors.dimGray,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            (loadingProgress
+                                                    .expectedTotalBytes ??
+                                                1)
+                                        : null,
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            width: context.getWidth(100),
+                            height: context.getWidth(120),
+                            color: AppColors.dimGray,
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: AppColors.hintColor,
+                              size: context.getAdaptiveSize(40),
                             ),
                           ),
-                          SizedBox(height: context.getHeight(4)),
-                          Text(service.subcategory.name,
-                              style: AppTextStyles.subTitle(context)),
-                          SizedBox(height: context.getHeight(8)),
-                          Row(
-                            children: [
-                              Text(
-                                '\$${service.costPerHour}/hr',
-                                style: AppTextStyles.text(context).copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              SizedBox(width: context.getWidth(16)),
-                              Text(
-                                '${service.yearsOfExperience} years exp',
-                                style: AppTextStyles.text(context),
-                              ),
-                            ],
+                  ),
+                  SizedBox(width: context.getWidth(16)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          service.service,
+                          style: AppTextStyles.title(context).copyWith(
+                            fontSize: context.getAdaptiveSize(18),
+                            color: AppColors.primaryColor,
                           ),
-                          SizedBox(height: context.getHeight(8)),
-                          Text(
-                            service.about,
-                            style: AppTextStyles.text(context),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: context.getHeight(24)),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              SizedBox(
-                                width: context.getWidth(100),
-                                child: SmallPrimaryButton(
-                                  text: 'Edit',
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            EditService(service: service),
-                                      ),
-                                    );
-                                  },
-                                ),
+                        ),
+                        SizedBox(height: context.getHeight(4)),
+                        Text(service.subcategory.name,
+                            style: AppTextStyles.subTitle(context)),
+                        SizedBox(height: context.getHeight(8)),
+                        Row(
+                          children: [
+                            Text(
+                              '\$${service.costPerHour}/hr',
+                              style: AppTextStyles.text(context).copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                            SizedBox(width: context.getWidth(16)),
+                            Text(
+                              '${service.yearsOfExperience} years exp',
+                              style: AppTextStyles.text(context),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: context.getHeight(8)),
+                        Text(
+                          service.about,
+                          style: AppTextStyles.text(context),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: context.getHeight(24)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: context.getWidth(100),
+                              child: SmallPrimaryButton(
+                                text: 'Edit',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditService(service: service),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         );
       },

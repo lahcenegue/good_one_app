@@ -12,6 +12,7 @@ class AuthApi {
 
   // Login endpoint
   static Future<ApiResponse<AuthModel>> login(AuthRequest request) async {
+    print(ApiEndpoints.login);
     return _api.post<AuthModel>(
       url: ApiEndpoints.login,
       body: request.toJson(),

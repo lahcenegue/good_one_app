@@ -26,6 +26,8 @@ class WorkerProfileScreen extends StatelessWidget {
                 _buildHeader(context, workerManager),
                 SizedBox(height: context.getHeight(12)),
                 _buildMenuItems(context, workerManager),
+                SizedBox(height: context.getHeight(8)),
+                _buildLogoutButton(context, workerManager),
               ],
             ),
           ),
@@ -36,9 +38,9 @@ class WorkerProfileScreen extends StatelessWidget {
 
   Widget _buildHeader(
     BuildContext context,
-    WorkerManagerProvider WorkerManager,
+    WorkerManagerProvider workerManager,
   ) {
-    final worker = WorkerManager.workerInfo;
+    final worker = workerManager.workerInfo;
     if (worker == null) return const SizedBox.shrink();
 
     return SizedBox(
@@ -52,7 +54,7 @@ class WorkerProfileScreen extends StatelessWidget {
               width: double.infinity,
               height: context.getHeight(150),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.2),
+                color: AppColors.primaryColor.withValues(alpha: 0.2),
               ),
             ),
           ),
@@ -125,17 +127,6 @@ class WorkerProfileScreen extends StatelessWidget {
           title: AppLocalizations.of(context)!.privacyPolicy,
           onTap: () {},
         ),
-        _buildMenuItem(
-          context,
-          image: AppAssets.logout,
-          title: AppLocalizations.of(context)!.logout,
-          onTap: () async {
-            await workerManager.clearData();
-            if (context.mounted) {
-              NavigationService.navigateToAndReplace(AppRoutes.userMain);
-            }
-          },
-        ),
       ],
     );
   }
@@ -170,6 +161,46 @@ class WorkerProfileScreen extends StatelessWidget {
           size: context.getAdaptiveSize(15),
         ),
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(
+    BuildContext context,
+    WorkerManagerProvider workerManager,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: AppColors.dimGray,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: context.getHeight(25)),
+          ListTile(
+            leading: Image.asset(
+              AppAssets.logout,
+              color: AppColors.primaryColor,
+              width: context.getAdaptiveSize(30),
+            ),
+            title: Text(
+              AppLocalizations.of(context)!.logout,
+              style: AppTextStyles.title2(context).copyWith(
+                color: AppColors.primaryColor,
+              ),
+            ),
+            onTap: () async {
+              await workerManager.clearData();
+              if (context.mounted) {
+                NavigationService.navigateToAndReplace(AppRoutes.userMain);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

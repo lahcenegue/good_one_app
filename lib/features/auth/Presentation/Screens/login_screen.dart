@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
@@ -37,8 +38,7 @@ class LoginScreen extends StatelessWidget {
                   context,
                   auth,
                 ),
-                if (auth.error != null)
-                  SharedAuthWidgets.buildErrorMessage(context, auth.error!),
+                if (auth.error != null) AppErrorWidget(message: auth.error!),
                 _buildSignUpSection(context),
               ],
             ),

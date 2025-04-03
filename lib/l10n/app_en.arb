@@ -37,7 +37,6 @@
   "enterReason": "Enter your reason here...",
   "forgotPassword": "Forgot your password?",
   "fullName": "Full Name",
-  "generalError": "An error occurred. Please try again",
   "hasAccount": "Already have an account?",
   "hasServiceBeenReceived": "Has the service been completed?",
   "hello": "Hello",
@@ -56,7 +55,7 @@
   "loginToContinue": "Please log in to continue",
   "logout": "Logout",
   "logoutSuccess": "Successfully logged out",
-  "networkError": "Network connection error. Please try again",
+  "networkError": "Please check your internet connection and try again",
   "next": "Next",
   "noAccount": "Don't have an account?",
   "noBookings": "No bookings",
@@ -238,7 +237,30 @@
     "noWithdrawalRequests":"No Withdrawal Requests",
     "statusSent":"Sent",
     "statusWaitingToSend":"Waiting to Send",
-    "statusRequestReceived":"Request Received"
+    "statusRequestReceived":"Request Received",
+    "generalError":"Something went wrong. Please try again.",
+    "sessionExpired":"The session is Expired",
+    "subtotal":"Subtotal",
+    "cancellationPolicyForCustomers":"Cancellation Policy for Customers",
+    "cancellationPolicyForServiceProviders":"Cancellation Policy for Service Providers",
+    "generalRules":"General Rules",
+    "termsAndConditions":"Terms and Conditions",
+    "introduction":"introduction",
+    "definitions":"Definitions",
+    "userEligibility":"User Eligibility",
+    "accountRegistrationAndUse":"Account Registration and Use",
+    "communicationAndPrivacy":"Communication and Privacy",
+    "paymentsAndTransactions":"Payments and Transactions",
+    "serviceProviderRequirements":"Service Provider Requirements",
+    "advertisingPolicy":"Advertising Policy",
+    "prohibitedActivities":"Prohibited Activities",
+    "disputeResolution":"Dispute Resolution",
+    "terminationAndSuspension":"Termination and Suspension",
+    "liabilityAndDisclaimers":"Liability and Disclaimers",
+    "changesToTerms":"Changes to Terms",
+    "contactInformation":"Contact Information",
+    "termsAndConditionsDescription":"View the terms and conditions of using the Good One app."
+   
 
 
 }

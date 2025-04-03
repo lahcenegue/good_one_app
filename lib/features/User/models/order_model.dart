@@ -71,6 +71,7 @@ class OrderRequest {
   final String location;
   final int startAt;
   final int totalHours;
+  final String region;
   String? coupon;
 
   OrderRequest({
@@ -78,6 +79,7 @@ class OrderRequest {
     required this.location,
     required this.startAt,
     required this.totalHours,
+    required this.region,
     this.coupon,
   });
 
@@ -86,6 +88,7 @@ class OrderRequest {
         'location': location,
         'start_at': startAt,
         'total_hours': totalHours,
+        'region': region,
         if (coupon != null) 'coupon': coupon,
       };
 }

@@ -3,17 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
   ApiService._internal();
 
-  /// The default timeout duration for API requests, from AppConfig.
   final Duration _timeout = AppConfig.apiTimeout;
 
   static ApiService get instance => _instance;
@@ -33,16 +30,16 @@ class ApiService {
       } catch (e) {
         if (e is TimeoutException && retryCount < maxRetries) {
           retryCount++;
-          print('Retry attempt $retryCount for network timeout');
+
           await Future.delayed(
               Duration(seconds: 1 * retryCount)); // Exponential backoff
           continue;
         }
-        print('API request failed after retries: $e');
-        return ApiResponse.error(AppStrings.networkError);
+
+        return ApiResponse.error('API request failed after retries');
       }
     }
-    return ApiResponse.error(AppStrings.networkError);
+    return ApiResponse.error('API request failed after retries');
   }
 
   Map<String, String> _getHeaders(String? token) {
@@ -58,7 +55,6 @@ class ApiService {
       headers['Authorization'] = 'Bearer $token';
     }
 
-    print('Request Headers: $headers');
     return headers;
   }
 
@@ -68,9 +64,6 @@ class ApiService {
     required T Function(dynamic) fromJson,
     String? token,
   }) async {
-    print('POST Request to: $url');
-    print('Request Body: $body');
-
     return _executeRequest<T>(
       requestFunction: (currentToken) => http
           .post(
@@ -89,8 +82,6 @@ class ApiService {
     required T Function(dynamic) fromJson,
     String? token,
   }) async {
-    debugPrint('GET Request to: $url');
-
     return _executeRequest<T>(
       requestFunction: (currentToken) => http
           .get(
@@ -110,9 +101,6 @@ class ApiService {
     required T Function(dynamic) fromJson,
     String? token,
   }) async {
-    print('Multipart POST Request to: $url');
-    print('Fields: $fields');
-
     Future<http.Response> multipartRequest(String? currentToken) async {
       final request = http.MultipartRequest('POST', Uri.parse(url))
         ..headers.addAll(_getHeaders(currentToken))
@@ -141,8 +129,6 @@ class ApiService {
   ) async {
     try {
       final dynamic decodedBody = jsonDecode(response.body);
-      debugPrint('API Response Status Code: ${response.statusCode}');
-      debugPrint('API Response Body: $decodedBody');
 
       // First check if it's a successful response (200-299)
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -159,8 +145,7 @@ class ApiService {
 
       // Check for token expiration first
       if (_isTokenExpired(response)) {
-        print('Token expired or invalid detected');
-        return ApiResponse.error(AppStrings.sessionExpired);
+        return ApiResponse.error('Token expired or invalid detected');
       }
 
       // Handle other errors
@@ -185,17 +170,15 @@ class ApiService {
           case 501:
           case 502:
           case 503:
-            return ApiResponse.error(AppStrings.serverError);
+            return ApiResponse.error('Server error. Please try again later.');
           default:
-            return ApiResponse.error(
-                message.isEmpty ? AppStrings.generalError : message);
+            return ApiResponse.error('Something went wrong. Please try again.');
         }
       }
 
-      return ApiResponse.error(AppStrings.generalError);
+      return ApiResponse.error('Something went wrong. Please try again.');
     } catch (e) {
-      print('Response processing error: $e');
-      return ApiResponse.error(AppStrings.generalError);
+      return ApiResponse.error('Something went wrong. Please try again.');
     }
   }
 
@@ -211,7 +194,6 @@ class ApiService {
       }
       return false;
     } catch (e) {
-      print('Error checking token expiration: $e');
       return false;
     }
   }

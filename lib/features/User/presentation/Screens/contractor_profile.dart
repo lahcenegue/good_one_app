@@ -21,10 +21,8 @@ import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContractorProfile extends StatelessWidget {
-  //final Contractor contractor;
   const ContractorProfile({
     super.key,
-    //required this.contractor,
   });
 
   @override
@@ -140,7 +138,7 @@ class ContractorProfile extends StatelessWidget {
                     style: AppTextStyles.text(context),
                   ),
                   SizedBox(width: context.getWidth(5)),
-                  contractor.securityCheck == 0
+                  contractor.securityCheck == 1
                       ? Image.asset(
                           AppAssets.security,
                           width: context.getWidth(15),
@@ -176,7 +174,7 @@ class ContractorProfile extends StatelessWidget {
     BuildContext context,
     Contractor contractor,
   ) {
-    if (contractor.verifiedLicense == 0) {
+    if (contractor.verifiedLicense == 1) {
       return SizedBox(
         child: Row(
           children: [

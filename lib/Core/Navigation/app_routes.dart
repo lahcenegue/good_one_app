@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Features/Both/Presentation/Screens/cancellation_policy_screen.dart';
+import 'package:good_one_app/Features/Both/Presentation/Screens/terms_and_conditions_screen.dart';
 
 import 'package:good_one_app/Features/Chat/Presentation/Screens/conversations_screen.dart';
 import 'package:good_one_app/Features/Onboarding/Presentation/Screens/onbording_view.dart';
@@ -33,6 +35,9 @@ class AppRoutes {
 
   // Both screens
   static const String conversations = '/conversations';
+  static const String supportPage = '/supportPage';
+  static const String cancellationPolicy = '/cancellationPolicy';
+  static const String termsAndConditions = '/termsAndConditionsScreen';
 
   // User Screens
   static const String userMain = '/userMainScreen';
@@ -43,7 +48,6 @@ class AppRoutes {
   static const String bookingSummaryScreen = '/bookingSummaryScreen';
   static const String userNotificationsScreen = '/userNotificationsScreen';
   static const String userAccountDetails = '/userAccountDetails';
-  static const String supportPage = '/supportPage';
 
   // Worker Screens
   static const String workerMain = '/workerMainScreen';
@@ -64,7 +68,6 @@ class AppRoutes {
       register: (_) => const RegistrationScreen(),
       accountSelection: (_) => const AccountTypeSelectionOverlay(),
 
-      conversations: (_) => const ConversationsScreen(),
       contractorsByService: (context) {
         final args =
             ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
@@ -79,7 +82,6 @@ class AppRoutes {
       bookingSummaryScreen: (_) => const BookingSummaryScreen(),
       userNotificationsScreen: (_) => const UserNotificationsScreen(),
       userAccountDetails: (_) => UserAccountDetailsScreen(),
-      supportPage: (_) => const SupportPage(),
 
       // Worker
       workerMain: (_) => const WorkerMainScreen(),
@@ -87,6 +89,12 @@ class AppRoutes {
       workerAccountDetails: (_) => WorkerAccountDetailsScreen(),
       workerAddService: (_) => WorkerAddServiceScreen(),
       withdrawalStatusScreen: (_) => WithdrawalStatusScreen(),
+
+      //Both
+      conversations: (_) => const ConversationsScreen(),
+      supportPage: (_) => const SupportPage(),
+      cancellationPolicy: (_) => CancellationPolicyScreen(),
+      termsAndConditions: (_) => TermsAndConditionsScreen(),
     };
   }
 

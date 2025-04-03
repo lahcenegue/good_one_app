@@ -12,8 +12,23 @@ import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class UserMainScreen extends StatelessWidget {
+class UserMainScreen extends StatefulWidget {
   const UserMainScreen({super.key});
+
+  @override
+  State<UserMainScreen> createState() => _UserMainScreenState();
+}
+
+class _UserMainScreenState extends State<UserMainScreen> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userManager =
+          Provider.of<UserManagerProvider>(context, listen: false);
+      await userManager.initialize();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/general_box.dart';
 
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
@@ -22,21 +23,7 @@ class ContractorListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(
-          context.getWidth(10),
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+      child: GeneralBox(
         child: Row(
           children: [
             _buildContractorImage(context),
@@ -49,24 +36,9 @@ class ContractorListItem extends StatelessWidget {
   }
 
   Widget _buildContractorImage(BuildContext context) {
-    return Container(
-      width: context.getWidth(88),
-      height: context.getWidth(96),
-      decoration: BoxDecoration(
-        color: AppColors.dimGray,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: UserAvatar(
-        picture: contractor.picture,
-        size: context.getWidth(88),
-      ),
+    return UserAvatar(
+      picture: contractor.picture,
+      size: context.getWidth(90),
     );
   }
 

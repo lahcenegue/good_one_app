@@ -1,41 +1,52 @@
-import '../../presentation/resources/app_strings.dart';
+// import 'package:flutter/widgets.dart';
 
-abstract class Failure implements Exception {
-  final String message;
-  final String? code;
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-  const Failure({
-    required this.message,
-    this.code,
-  });
+// abstract class Failure implements Exception {
+//   final BuildContext context;
+//   final String message;
+//   final String? code;
 
-  @override
-  String toString() => message;
-}
+//   const Failure({
+//     required this.context,
+//     required this.message,
+//     this.code,
+//   });
 
-class NetworkFailure extends Failure {
-  const NetworkFailure({super.message = AppStrings.networkError, super.code});
-}
+//   @override
+//   String toString() => message;
+// }
 
-class AuthFailure extends Failure {
-  const AuthFailure({super.message = AppStrings.authError, super.code});
-}
+// class NetworkFailure extends Failure {
+//   NetworkFailure({required super.context, String? message, super.code})
+//       : super(
+//           message: message ?? AppLocalizations.of(context)!.networkError,
+//         );
+// }
 
-class ValidationFailure extends Failure {
-  final Map<String, String> errors;
+// class AuthFailure extends Failure {
+//   AuthFailure({required super.context, String? message, super.code})
+//       : super(
+//           message: message ?? AppLocalizations.of(context)!.authError,
+//         );
+// }
 
-  const ValidationFailure({
-    required super.message,
-    required this.errors,
-    super.code,
-  });
+// class ValidationFailure extends Failure {
+//   final Map<String, String> errors;
 
-  // Helper method to get first error message
-  String get firstError => errors.values.first;
+//   const ValidationFailure({
+//     required super.message,
+//     required this.errors,
+//     super.code,
+//     required super.context,
+//   });
 
-  // Helper method to check if a field has error
-  bool hasError(String field) => errors.containsKey(field);
+//   // Helper method to get first error message
+//   String get firstError => errors.values.first;
 
-  // Helper method to get error for a field
-  String? getError(String field) => errors[field];
-}
+//   // Helper method to check if a field has error
+//   bool hasError(String field) => errors.containsKey(field);
+
+//   // Helper method to get error for a field
+//   String? getError(String field) => errors[field];
+// }

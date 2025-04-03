@@ -20,6 +20,9 @@ class AppConfig {
   static const String securLink =
       'https://secure.tritoncanada.ca/Eiv/InitiateEiv?id=7f0439e9-8dc2-8d6f-31c0-8856543a7367';
 
+  /// WhatsApp number
+  static const String whatsAppNumber = '+1(306)3511781';
+
   /// The default locale for the app, set to English ('en').
   static const String defaultLocale = 'en';
 
@@ -28,9 +31,6 @@ class AppConfig {
 
   /// Minimum length for passwords.
   static const int minPasswordLength = 4;
-
-  /// Maximum length for passwords.
-  static const int maxPasswordLength = 20;
 
   /// Prefix for storage keys to avoid naming conflicts.
   static const String storagePrefix = 'good_one_';

@@ -17,6 +17,7 @@ abstract class ApiEndpoints {
   // Both Endpoints
   static String get me => '$baseUrl/api/auth/me';
   static String get notifications => '$baseUrl/api/user/notifications';
+  static String get taxes => '$baseUrl/api/taxes';
 
   // User Endpoints
   static String get categories => '$baseUrl/api/categories';

@@ -39,8 +39,9 @@ class UserProfileScreen extends StatelessWidget {
                 _buildCommonMenuItems(context),
 
                 // Login button for unauthenticated users
-                if (userManager.token == null)
-                  _buildLoginButton(context, userManager),
+                userManager.token == null
+                    ? _buildLoginButton(context, userManager)
+                    : _buildLogoutButton(context, userManager),
               ],
             ),
           ),
@@ -67,7 +68,7 @@ class UserProfileScreen extends StatelessWidget {
               width: double.infinity,
               height: context.getHeight(150),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.2),
+                color: AppColors.primaryColor.withValues(alpha: 0.2),
               ),
             ),
           ),
@@ -115,7 +116,7 @@ class UserProfileScreen extends StatelessWidget {
               width: double.infinity,
               height: context.getHeight(150),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.2),
+                color: AppColors.primaryColor.withValues(alpha: 0.2),
               ),
             ),
           ),
@@ -194,17 +195,6 @@ class UserProfileScreen extends StatelessWidget {
             NavigationService.navigateTo(AppRoutes.supportPage);
           },
         ),
-        _buildMenuItem(
-          context,
-          image: AppAssets.logout,
-          title: AppLocalizations.of(context)!.logout,
-          onTap: () async {
-            await userManager.clearData();
-            if (context.mounted) {
-              NavigationService.navigateToAndReplace(AppRoutes.userMain);
-            }
-          },
-        ),
       ],
     );
   }
@@ -255,6 +245,46 @@ class UserProfileScreen extends StatelessWidget {
         onPressed: () {
           NavigationService.navigateTo(AppRoutes.accountSelection);
         },
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: AppColors.dimGray,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: context.getHeight(25)),
+          ListTile(
+            leading: Image.asset(
+              AppAssets.logout,
+              color: AppColors.primaryColor,
+              width: context.getAdaptiveSize(30),
+            ),
+            title: Text(
+              AppLocalizations.of(context)!.logout,
+              style: AppTextStyles.title2(context).copyWith(
+                color: AppColors.primaryColor,
+              ),
+            ),
+            onTap: () async {
+              await userManager.clearData();
+              if (context.mounted) {
+                NavigationService.navigateToAndReplace(AppRoutes.userMain);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

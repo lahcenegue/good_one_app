@@ -79,10 +79,10 @@ class CalendarBookingScreen extends StatelessWidget {
               selectedDecoration: const BoxDecoration(
                   color: AppColors.primaryColor, shape: BoxShape.circle),
               todayDecoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.2),
+                  color: AppColors.primaryColor.withValues(alpha: 0.2),
                   shape: BoxShape.circle),
-              weekendTextStyle:
-                  TextStyle(color: AppColors.primaryColor.withOpacity(0.5)),
+              weekendTextStyle: TextStyle(
+                  color: AppColors.primaryColor.withValues(alpha: 0.5)),
             ),
             onDaySelected: bookingManager.onDaySelected,
           ),
@@ -248,9 +248,10 @@ class CalendarBookingScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.05),
+        color: AppColors.primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
+        border:
+            Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
-import 'package:good_one_app/Core/Utils/Error/error_handler.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
 import 'package:good_one_app/Features/Auth/Models/register_request.dart';
 import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
 import 'package:good_one_app/Features/Auth/Models/auth_request.dart';
-import 'package:good_one_app/Core/Utils/Error/failures.dart';
 import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
@@ -23,7 +22,6 @@ class AuthProvider with ChangeNotifier {
   // Authentication State
   AuthModel? _authData;
   bool _isLoading = false;
-  Failure? _failure;
   String? _error;
 
   String? selectedCountry;
@@ -55,12 +53,12 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuth => _authData?.accessToken != null;
   String? get token => _authData?.accessToken;
-  Failure? get failure => _failure;
   String? get error => _error;
   bool get obscurePassword => _obscurePassword;
   bool get obscureConfirmPassword => _obscureConfirmPassword;
   File? get selectedImage => _selectedImage;
   String? get imageError => _imageError;
+
   List<String> get availableCities {
     return selectedCountry != null
         ? AppStrings.citiesByCountry[selectedCountry] ?? []
@@ -117,7 +115,7 @@ class AuthProvider with ChangeNotifier {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context)!.passwordRequired;
     }
-    if (value.length < 4) {
+    if (value.length < AppConfig.minPasswordLength) {
       return AppLocalizations.of(context)!.passwordTooShort;
     }
     return null;
@@ -166,12 +164,17 @@ class AuthProvider with ChangeNotifier {
 
       final response = await AuthApi.login(request);
 
+      print(response.success);
+
       if (response.success) {
+        print('response is succes');
         _authData = response.data;
         _clearFormData();
         await _saveAuthData();
 
         _setLoading(false);
+
+        print(accountType);
 
         if (accountType == AppStrings.service) {
           await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
@@ -180,6 +183,7 @@ class AuthProvider with ChangeNotifier {
         }
       } else {
         _error = response.error;
+        print(_error);
         notifyListeners();
       }
     } catch (e) {
@@ -257,14 +261,14 @@ class AuthProvider with ChangeNotifier {
         _authData = response.data;
         await _saveAuthData();
 
-        await StorageManager.setString(
-            StorageKeys.tokenKey, _authData!.accessToken);
-
         _setLoading(false);
         if (accountType == AppStrings.service) {
           await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
         } else {
-          await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+          await NavigationService.navigateToAndReplace(
+            AppRoutes.userMain,
+            arguments: 0,
+          );
         }
       } else {
         _error = response.error;
@@ -325,12 +329,11 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _saveAuthData() async {
     try {
+      print('try to save auth data');
       await TokenManager.instance.setToken(_authData!);
     } catch (e) {
-      throw const AuthFailure(
-        message: 'Failed to save authentication data',
-        code: 'storage_error',
-      );
+      print('Failed to save authentication data');
+      throw Exception('Failed to save authentication data');
     }
   }
 
@@ -342,47 +345,41 @@ class AuthProvider with ChangeNotifier {
   void _clearErrors() {
     _imageError = null;
     _error = null;
-    _failure = null;
     notifyListeners();
   }
 
-  void _handleError(dynamic error, [BuildContext? context]) {
-    if (error is AuthFailure) {
-      _failure = error;
-      _error = _getLocalizedErrorMessage(error.code, context);
-    } else {
-      _failure = ErrorHandler.handleException(error);
-      _error = _getLocalizedErrorMessage(_failure?.code, context);
-    }
-
+  void _handleError(dynamic error) {
+    _error = error.toString();
+    print(_error);
     notifyListeners();
   }
 
-  String? _getLocalizedErrorMessage(String? errorCode,
-      [BuildContext? context]) {
-    if (context == null) return null;
+  // String? _getLocalizedErrorMessage(String? errorCode,
+  //     [BuildContext? context]) {
+  //   if (context == null) return null;
 
-    switch (errorCode) {
-      case 'auth_error':
-        return AppLocalizations.of(context)!.authError;
-      case 'network_error':
-        return AppLocalizations.of(context)!.networkError;
-      case 'storage_error':
-        return AppLocalizations.of(context)!.storageError;
-      case 'invalid_credentials':
-        return AppLocalizations.of(context)!.invalidCredentials;
-      case 'invalid_response':
-        return AppLocalizations.of(context)!.serverError;
-      default:
-        return _failure?.message ?? AppLocalizations.of(context)!.generalError;
-    }
-  }
+  //   switch (errorCode) {
+  //     case 'auth_error':
+  //       return AppLocalizations.of(context)!.authError;
+  //     case 'network_error':
+  //       return AppLocalizations.of(context)!.networkError;
+  //     case 'storage_error':
+  //       return AppLocalizations.of(context)!.storageError;
+  //     case 'invalid_credentials':
+  //       return AppLocalizations.of(context)!.invalidCredentials;
+  //     case 'invalid_response':
+  //       return AppLocalizations.of(context)!.serverError;
+  //     default:
+  //       return _failure?.message ?? AppLocalizations.of(context)!.generalError;
+  //   }
+  // }
 
   void _clearFormData() {
     emailController.clear();
     passwordController.clear();
     _obscurePassword = true;
     notifyListeners();
+    print('clear form data');
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/general_box.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -141,6 +142,11 @@ class _BookingContentState extends State<_BookingContent> {
   void initState() {
     super.initState();
     widget.tabController.addListener(_handleTabChange);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final bookingManager =
+          Provider.of<BookingManagerProvider>(context, listen: false);
+      await bookingManager.initialize();
+    });
   }
 
   void _handleTabChange() {
@@ -303,12 +309,7 @@ class BookingCard extends StatelessWidget {
     final bookingManager = context.read<BookingManagerProvider>();
     final (statusColor, statusText) = _getStatusDetails(context);
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(context.getAdaptiveSize(12)),
-      ),
-      margin: EdgeInsets.only(bottom: context.getHeight(16)),
+    return GeneralBox(
       child: Padding(
         padding: EdgeInsets.all(context.getWidth(16)),
         child: Column(
@@ -394,8 +395,10 @@ class BookingCard extends StatelessWidget {
             onPressed: () async {
               await bookingManager.receiveOrder(
                   context, dialogContext, bookingId);
-              Navigator.of(dialogContext)
-                  .pop(); // Close the dialog after success
+              if (context.mounted) {
+                Navigator.of(dialogContext)
+                    .pop(); // Close the dialog after success
+              }
             },
             child: Text(
               AppLocalizations.of(context)!.confirm,
@@ -595,14 +598,14 @@ class _ActionButtons extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         SizedBox(
-          width: context.getWidth(150),
+          width: context.getWidth(120),
           child: SmallPrimaryButton(
             text: AppLocalizations.of(context)!.completed,
             onPressed: onReceive,
           ),
         ),
         SizedBox(
-          width: context.getWidth(150),
+          width: context.getWidth(120),
           child: SmallSecondaryButton(
             text: AppLocalizations.of(context)!.cancel,
             onPressed: onCancel,

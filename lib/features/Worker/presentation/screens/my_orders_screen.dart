@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/general_box.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -270,19 +271,7 @@ class _OrdersContentState extends State<OrdersContent> {
 
   Widget _orderBox(BuildContext context, OrdersManagerProvider orderManager,
       MyOrderModel order) {
-    return Container(
-      padding: EdgeInsets.all(context.getAdaptiveSize(12)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.hintColor.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GeneralBox(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -374,7 +363,7 @@ class _OrdersContentState extends State<OrdersContent> {
                       style: AppTextStyles.title2(context),
                     ),
                     Text(
-                      ' \$${order.totalPrice}',
+                      ' \$${order.totalPrice.toStringAsFixed(2)}',
                       style: AppTextStyles.title2(context)
                           .copyWith(color: AppColors.primaryColor),
                     ),

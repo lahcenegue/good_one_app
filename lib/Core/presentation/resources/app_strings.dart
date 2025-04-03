@@ -17,24 +17,13 @@ abstract class AppStrings {
   static String stripeAccountId = 'acct_1PwTFRRxXcdOUoWK';
   static String merchantIdentifier = 'merchant.com.example.good_one_app';
 
-  // Error Messages
-  static const String serverError = 'Server error. Please try again later.';
-  static const String generalError = 'Something went wrong. Please try again.';
-  static const String networkError = 'Please check your internet connection.';
-  static const String timeoutError = 'Request timeout. Please try again.';
-  static const String authError = 'Authentication failed. Please login again.';
-  static const String sessionExpired = 'The session is Expired';
-
-  // Success Messages
-  static const String saved = 'Successfully saved';
-  static const String updated = 'Successfully updated';
-  static const String deleted = 'Successfully deleted';
-
-  // Button Texts
-
-  static const String cancel = 'Cancel';
-  static const String confirm = 'Confirm';
-  static const String save = 'Save';
+  // // Error Messages
+  // static const String serverError = 'Server error. Please try again later.';
+  // static const String generalError = 'Something went wrong. Please try again.';
+  // static const String networkError = 'Please check your internet connection.';
+  // static const String timeoutError = 'Request timeout. Please try again.';
+  // static const String authError = 'Authentication failed. Please login again.';
+  // static const String sessionExpired = 'The session is Expired';
 
   static List<String> countries = [
     'Canada',
@@ -57,6 +46,22 @@ abstract class AppStrings {
       'Ottawa',
     ],
   };
+
+  static const List<String> validRegions = [
+    'Alberta',
+    'British Columbia',
+    'Manitoba',
+    'New Brunswick',
+    'Newfoundland and Labrador',
+    'Northwest Territories',
+    'Nova Scotia',
+    'Nunavut',
+    'Ontario',
+    'Prince Edward Island',
+    'Québec',
+    'Saskatchewan',
+    'Yukon',
+  ];
 
   static List<int> availableDurations = [1, 2, 3, 4, 5, 6, 7, 8];
   static const List<String> timeSlots = [

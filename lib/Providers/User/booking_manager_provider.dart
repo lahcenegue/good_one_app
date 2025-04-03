@@ -4,6 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:good_one_app/Features/Both/Models/tax_model.dart';
+import 'package:good_one_app/Features/Both/Services/both_api.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -26,6 +28,7 @@ class BookingManagerProvider with ChangeNotifier {
   List<Booking> _bookings = [];
   bool _isLoading = false;
   String? _error;
+  String? _couponError;
 
   // Booking Form State
   DateTime _selectedDay = DateTime.now();
@@ -40,8 +43,14 @@ class BookingManagerProvider with ChangeNotifier {
       TextEditingController();
   LatLng? _selectedLocation;
   String _locationAddress = '';
+  String? _region;
   bool _isLocationScreenLoading = false;
   bool _isLocationSelected = false;
+
+  // Tax State
+  TaxModel? _taxInfo;
+  bool _isTaxLoading = false;
+  String? _taxError;
 
   // Payment and Coupon State
   String? _appliedCoupon;
@@ -63,6 +72,7 @@ class BookingManagerProvider with ChangeNotifier {
   List<Booking> get bookings => List.unmodifiable(_bookings);
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get couponError => _couponError;
   DateTime get selectedDay => _selectedDay;
   DateTime get focusedDay => _focusedDay;
   String get selectedTime => _selectedTime;
@@ -72,6 +82,10 @@ class BookingManagerProvider with ChangeNotifier {
       _locationSearchController;
   LatLng? get selectedLocation => _selectedLocation;
   String get locationAddress => _locationAddress;
+  String? get region => _region;
+  TaxModel? get taxInfo => _taxInfo;
+  bool get isTaxLoading => _isTaxLoading;
+  String? get taxError => _taxError;
   bool get isLocationScreenLoading => _isLocationScreenLoading;
   bool get isLocationSelected => _isLocationSelected;
   String get formattedDateTime => _formatBookingDateTime();
@@ -87,19 +101,47 @@ class BookingManagerProvider with ChangeNotifier {
   String? get ratingError => _ratingError;
   double get rating => _rating;
 
-  /// Calculates the effective total price based on contractor cost and discount.
-  double effectiveTotalPrice(double contractorCost) {
-    return (1 - (_discountPercentage ?? 0.0)) *
-        _taskDurationHours *
-        contractorCost;
+  /// Calculates the base price (service price * hours).
+  double basePrice(double contractorCost) {
+    return _taskDurationHours * contractorCost;
+  }
+
+  /// Calculates the effective price after applying the discount.
+  double effectivePrice(double contractorCost) {
+    return (1 - (_discountPercentage ?? 0.0)) * basePrice(contractorCost);
+  }
+
+  /// Calculates the final price including taxes and fees.
+  double finalPrice(double contractorCost) {
+    if (_taxInfo == null) return effectivePrice(contractorCost);
+
+    double price = effectivePrice(contractorCost);
+
+    // Add region taxes (as a percentage of the effective price)
+    final taxAmount = price * (_taxInfo!.regionTaxes / 100);
+    price += taxAmount;
+
+    // Add platform fees percentage (if not 0)
+    if (_taxInfo!.platformFeesPercentage != 0) {
+      final platformFeePercentage =
+          price * (_taxInfo!.platformFeesPercentage / 100);
+      price += platformFeePercentage;
+    }
+
+    // Add platform fees (if not 0)
+    if (_taxInfo!.platformFees != 0) {
+      price += _taxInfo!.platformFees;
+    }
+
+    return price;
   }
 
   BookingManagerProvider() {
-    _initialize();
+    initialize();
   }
 
   /// Initializes provider state.
-  Future<void> _initialize() async {
+  Future<void> initialize() async {
     print('Starting initialization');
     _isLoading = true;
     try {
@@ -121,6 +163,31 @@ class BookingManagerProvider with ChangeNotifier {
       print('Finalizing initialization');
       _isInitializing = false;
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Fetches taxes based on the region.
+  Future<void> fetchTaxes(String region) async {
+    print('====== fetch taxes ======');
+    _isTaxLoading = true;
+    _taxError = null;
+    notifyListeners();
+    try {
+      final response = await BothApi.fetchTaxes(region);
+      print(" ====== response succes: ${response.success}");
+      if (response.success && response.data != null) {
+        _taxInfo = response.data;
+        print('Tax info fetched: ${_taxInfo!.toJson()}');
+      } else {
+        _taxError =
+            'Failed to fetch taxes: ${response.error ?? "Unknown error"}';
+      }
+    } catch (e) {
+      print('FetchTaxes error: $e');
+      _taxError = 'Error fetching taxes: $e';
+    } finally {
+      _isTaxLoading = false;
       notifyListeners();
     }
   }
@@ -167,9 +234,13 @@ class BookingManagerProvider with ChangeNotifier {
         'Starting order creation with serviceId: $serviceId, cost: $contractorCost');
     _setPaymentProcessing(true);
     try {
-      final amount =
-          (effectiveTotalPrice(contractorCost) * 100).toInt().toString();
+      if (_region == null) {
+        throw Exception('Region not determined. Please select a location.');
+      }
+
+      final amount = (finalPrice(contractorCost) * 100).toInt().toString();
       print('Calculated amount for payment: $amount cents');
+
       final paymentResponse =
           await UserApi.createPaymentIntent(amount: amount, currency: 'CAD');
       print('Payment Intent Response: ${paymentResponse.data}');
@@ -185,6 +256,7 @@ class BookingManagerProvider with ChangeNotifier {
       final orderRequest = OrderRequest(
         serviceId: serviceId,
         location: _locationAddress,
+        region: _region!,
         startAt: getTimestamp(_selectedDay, _selectedTime),
         totalHours: _taskDurationHours,
         coupon: _appliedCoupon,
@@ -223,12 +295,16 @@ class BookingManagerProvider with ChangeNotifier {
     } on StripeException catch (e) {
       print('Stripe exception: $e');
       _setError('Payment failed: ${e.error}');
-      _showSnackBar(context, 'Payment failed: ${e.error}');
+      if (context.mounted) {
+        _showSnackBar(context, 'Payment failed: ${e.error}');
+      }
       return false;
     } catch (e) {
       print('General exception: $e');
       _setError('Order creation failed: $e');
-      _showSnackBar(context, 'Failed to create order: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Failed to create order: $e');
+      }
       return false;
     } finally {
       _setPaymentProcessing(false);
@@ -239,7 +315,8 @@ class BookingManagerProvider with ChangeNotifier {
   /// Applies a coupon code.
   Future<void> applyCoupon(String couponCode, BuildContext context) async {
     if (couponCode.isEmpty) {
-      _setError('Coupon code is required');
+      _couponError = 'Coupon code is required';
+      notifyListeners();
       return;
     }
     _setLoading(true);
@@ -250,20 +327,24 @@ class BookingManagerProvider with ChangeNotifier {
         _appliedCoupon = couponCode;
         _discountPercentage = response.data!.percentage.toDouble() / 100;
 
-        _setError(null);
+        _couponError = null;
+        notifyListeners();
       } else {
         _appliedCoupon = null;
         _discountPercentage = null;
         if (context.mounted) {
-          _setError(
-              response.error ?? AppLocalizations.of(context)!.invalidCoupon);
+          _couponError =
+              response.error ?? AppLocalizations.of(context)!.invalidCoupon;
         }
+        notifyListeners();
       }
     } catch (e) {
       _appliedCoupon = null;
       _discountPercentage = null;
-      _setError('Error applying coupon: $e');
-      _showSnackBar(context, AppLocalizations.of(context)!.invalidCoupon);
+      _couponError = 'Error applying coupon';
+      if (context.mounted) {
+        _showSnackBar(context, AppLocalizations.of(context)!.invalidCoupon);
+      }
     } finally {
       _setLoading(false);
     }
@@ -298,7 +379,10 @@ class BookingManagerProvider with ChangeNotifier {
       }
     } catch (e) {
       _setError('Error receiving order: $e');
-      _showSnackBar(context, 'Failed to receive order: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Failed to receive order: $e');
+      }
+
       return false;
     } finally {
       _setLoading(false);
@@ -327,13 +411,17 @@ class BookingManagerProvider with ChangeNotifier {
       final response = await UserApi.cancelOrder(orderRequest);
       if (response.success) {
         await fetchBookings();
-        _showSnackBar(context, 'Order canceled successfully');
+        if (context.mounted) {
+          _showSnackBar(context, 'Order canceled successfully');
+        }
       } else {
         throw Exception(response.error ?? 'Failed to cancel order');
       }
     } catch (e) {
       _setError('Error canceling order: $e');
-      _showSnackBar(context, 'Failed to cancel order: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Failed to cancel order: $e');
+      }
     } finally {
       _setLoading(false);
     }
@@ -347,13 +435,17 @@ class BookingManagerProvider with ChangeNotifier {
       final response = await UserApi.updateOrder(request);
       if (response.success) {
         await fetchBookings();
-        _showSnackBar(context, 'Order modified successfully');
+        if (context.mounted) {
+          _showSnackBar(context, 'Order modified successfully');
+        }
         return true;
       }
       throw Exception(response.error ?? 'Failed to modify order');
     } catch (e) {
       _setError('Error modifying order: $e');
-      _showSnackBar(context, 'Failed to modify order: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Failed to modify order: $e');
+      }
       return false;
     } finally {
       _setLoading(false);
@@ -379,7 +471,9 @@ class BookingManagerProvider with ChangeNotifier {
       return await modifyOrder(context, orderId, request);
     } catch (e) {
       _setError('Payment for modification failed: $e');
-      _showSnackBar(context, 'Payment failed: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Payment failed: $e');
+      }
       return false;
     } finally {
       _setPaymentProcessing(false);
@@ -426,12 +520,16 @@ class BookingManagerProvider with ChangeNotifier {
         }
         return true;
       } else {
-        _ratingError =
-            response.error ?? AppLocalizations.of(context)!.submissionFailed;
+        if (context.mounted) {
+          _ratingError =
+              response.error ?? AppLocalizations.of(context)!.submissionFailed;
+        }
         return false;
       }
     } catch (e) {
-      _ratingError = '${AppLocalizations.of(context)!.submissionFailed}: $e';
+      if (context.mounted) {
+        _ratingError = '${AppLocalizations.of(context)!.submissionFailed}: $e';
+      }
       return false;
     } finally {
       _isRatingSubmitting = false;
@@ -474,7 +572,9 @@ class BookingManagerProvider with ChangeNotifier {
     _setLocationLoading(true);
     try {
       if (!await _ensureLocationServiceEnabled(context)) return;
-      if (!await _ensureLocationPermissionGranted(context)) return;
+      if (context.mounted) {
+        if (!await _ensureLocationPermissionGranted(context)) return;
+      }
 
       final position = await Geolocator.getCurrentPosition();
       final newLocation = LatLng(position.latitude, position.longitude);
@@ -482,7 +582,9 @@ class BookingManagerProvider with ChangeNotifier {
       await _reverseGeocode(newLocation);
     } catch (e) {
       _setError('Error getting location: $e');
-      _showSnackBar(context, 'Error getting location: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Error getting location: $e');
+      }
     } finally {
       _setLocationLoading(false);
     }
@@ -504,11 +606,15 @@ class BookingManagerProvider with ChangeNotifier {
         await _reverseGeocode(newLocation);
       } else {
         _setError('Location not found.');
-        _showSnackBar(context, 'Location not found');
+        if (context.mounted) {
+          _showSnackBar(context, 'Location not found');
+        }
       }
     } catch (e) {
       _setError('Error searching location: $e');
-      _showSnackBar(context, 'Error searching location: $e');
+      if (context.mounted) {
+        _showSnackBar(context, 'Error searching location: $e');
+      }
     } finally {
       _setLocationLoading(false);
     }
@@ -576,6 +682,8 @@ class BookingManagerProvider with ChangeNotifier {
     _isLocationSelected = false;
     _appliedCoupon = null;
     _discountPercentage = null;
+    _region = null;
+    _taxInfo = null;
     notifyListeners();
   }
 
@@ -668,7 +776,9 @@ class BookingManagerProvider with ChangeNotifier {
   Future<bool> _ensureLocationServiceEnabled(BuildContext context) async {
     final enabled = await Geolocator.isLocationServiceEnabled();
     if (!enabled) {
-      _showSnackBar(context, 'Location services are disabled');
+      if (context.mounted) {
+        _showSnackBar(context, 'Location services are disabled');
+      }
     }
     return enabled;
   }
@@ -678,12 +788,18 @@ class BookingManagerProvider with ChangeNotifier {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        _showSnackBar(context, 'Location permissions denied');
+        if (context.mounted) {
+          _showSnackBar(context, 'Location permissions denied');
+        }
+
         return false;
       }
     }
     if (permission == LocationPermission.deniedForever) {
-      _showSnackBar(context, 'Location permissions permanently denied');
+      if (context.mounted) {
+        _showSnackBar(context, 'Location permissions permanently denied');
+      }
+
       return false;
     }
     return true;
@@ -702,6 +818,17 @@ class BookingManagerProvider with ChangeNotifier {
           place.country
         ].where((e) => e != null && e.isNotEmpty).join(', ');
         _locationSearchController.text = _locationAddress;
+        final administrativeArea = place.administrativeArea ?? '';
+        _region = administrativeArea;
+        print(
+            'Determined region: $_region for administrativeArea: $administrativeArea');
+
+        // Fetch taxes for the determined region
+        if (_region != null && _region!.isNotEmpty) {
+          print('===== region in not null ======');
+          await fetchTaxes(_region!);
+        }
+
         notifyListeners();
       } else {
         _setError('No address found for this location.');

@@ -46,9 +46,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not launch Google Maps.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch Google Maps.')),
+        );
+      }
     }
   }
 
@@ -124,7 +126,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           decoration: BoxDecoration(
             color: orderManager
                 .getStatusColor(widget.order.status)
-                .withOpacity(0.1),
+                .withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -148,7 +150,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.hintColor.withOpacity(0.1),
+            color: AppColors.hintColor.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -190,7 +192,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.hintColor.withOpacity(0.2)),
+        border: Border.all(color: AppColors.hintColor.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +230,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 child: Container(
                   padding: EdgeInsets.all(context.getAdaptiveSize(10)),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withOpacity(0.1),
+                    color: AppColors.primaryColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
@@ -257,7 +259,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppColors.primaryColor.withOpacity(0.5),
+                color: AppColors.primaryColor.withValues(alpha: 0.5),
               ),
             ),
             child: Column(
@@ -313,7 +315,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               child: Container(
                 padding: EdgeInsets.all(context.getAdaptiveSize(10)),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -330,7 +332,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           height: context.getHeight(250),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.hintColor.withOpacity(0.2)),
+            border:
+                Border.all(color: AppColors.hintColor.withValues(alpha: 0.2)),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),

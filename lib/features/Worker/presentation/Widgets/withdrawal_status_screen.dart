@@ -95,7 +95,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
             Icon(
               Icons.receipt_long_outlined, // More relevant icon
               size: context.getAdaptiveSize(60),
-              color: AppColors.hintColor.withOpacity(0.7),
+              color: AppColors.hintColor.withValues(alpha: 0.7),
             ),
             SizedBox(height: context.getHeight(20)),
             Text(
@@ -135,7 +135,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
         borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.hintColor.withOpacity(0.1),
+            color: AppColors.hintColor.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -169,7 +169,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
             ],
           ),
           SizedBox(height: context.getHeight(8)),
-          Divider(color: AppColors.primaryColor.withOpacity(0.5)),
+          Divider(color: AppColors.primaryColor.withValues(alpha: 0.5)),
           SizedBox(height: context.getHeight(8)),
           // Date Section with Icon
           Row(
@@ -242,9 +242,9 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
         vertical: context.getHeight(6),
       ),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: statusColor.withOpacity(0.5)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.5)),
       ),
       child: Text(
         statusText,

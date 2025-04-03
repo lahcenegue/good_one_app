@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/general_box.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
@@ -39,13 +40,20 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
         final contractorCost =
             userManager.selectedContractor!.costPerHour!.toDouble();
-        final totalPrice = contractorCost * bookingManager.taskDurationHours;
-        final effectivePrice =
-            bookingManager.effectiveTotalPrice(contractorCost);
+        final basePrice = bookingManager.basePrice(contractorCost);
+        final effectivePrice = bookingManager.effectivePrice(contractorCost);
+
+        final finalPrice = bookingManager.finalPrice(contractorCost);
 
         return Scaffold(
           appBar: _buildAppBar(context),
-          body: _buildBody(context, bookingManager, totalPrice, effectivePrice),
+          body: _buildBody(
+            context,
+            bookingManager,
+            basePrice,
+            effectivePrice,
+            finalPrice,
+          ),
         );
       },
     );
@@ -65,13 +73,20 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   Widget _buildNoContractorSelected(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: const Center(child: Text('No contractor selected')),
+      body: Center(
+        child: Text('No contractor selected'),
+      ),
     );
   }
 
   /// Builds the main content of the screen.
-  Widget _buildBody(BuildContext context, BookingManagerProvider bookingManager,
-      double totalPrice, double effectivePrice) {
+  Widget _buildBody(
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+    double basePrice,
+    double effectivePrice,
+    double finalPrice,
+  ) {
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(context.getWidth(16)),
@@ -87,7 +102,12 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
             _buildOffersSection(context, bookingManager),
             SizedBox(height: context.getHeight(24)),
             _buildPricingSummary(
-                context, bookingManager, totalPrice, effectivePrice),
+              context,
+              bookingManager,
+              basePrice,
+              effectivePrice,
+              finalPrice,
+            ),
             SizedBox(height: context.getHeight(32)),
             _buildConfirmButton(context, bookingManager),
           ],
@@ -100,13 +120,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   Widget _buildContractorInfo(BuildContext context) {
     final userProvider =
         Provider.of<UserManagerProvider>(context, listen: false);
-    return Container(
-      padding: EdgeInsets.all(context.getWidth(16)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+    return GeneralBox(
       child: Row(
         children: [
           UserAvatar(
@@ -130,8 +144,11 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                 SizedBox(height: context.getHeight(4)),
                 Row(
                   children: [
-                    Icon(Icons.star,
-                        color: Colors.amber, size: context.getWidth(16)),
+                    Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                      size: context.getWidth(16),
+                    ),
                     SizedBox(width: context.getWidth(4)),
                     Text(
                       userProvider.selectedContractor!.ratings!.isNotEmpty
@@ -156,14 +173,10 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
   /// Displays booking details from BookingManagerProvider.
   Widget _buildBookingDetails(
-      BuildContext context, BookingManagerProvider bookingManager) {
-    return Container(
-      padding: EdgeInsets.all(context.getWidth(16)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+  ) {
+    return GeneralBox(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -194,14 +207,10 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
   /// Displays location details.
   Widget _buildLocationDetails(
-      BuildContext context, BookingManagerProvider bookingManager) {
-    return Container(
-      padding: EdgeInsets.all(context.getWidth(16)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+  ) {
+    return GeneralBox(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -233,14 +242,10 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
   /// Handles coupon application UI.
   Widget _buildOffersSection(
-      BuildContext context, BookingManagerProvider bookingManager) {
-    return Container(
-      padding: EdgeInsets.all(context.getWidth(16)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+  ) {
+    return GeneralBox(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -252,8 +257,10 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                 size: context.getWidth(20),
               ),
               SizedBox(width: context.getWidth(8)),
-              Text(AppLocalizations.of(context)!.couponsAndOffers,
-                  style: AppTextStyles.title2(context)),
+              Text(
+                AppLocalizations.of(context)!.couponsAndOffers,
+                style: AppTextStyles.title2(context),
+              ),
             ],
           ),
           SizedBox(height: context.getHeight(12)),
@@ -291,12 +298,13 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               ),
             ],
           ),
-          if (bookingManager.error != null)
+          if (bookingManager.couponError != null)
             Padding(
               padding: EdgeInsets.only(top: context.getHeight(8)),
               child: Text(
-                bookingManager.error!,
-                style: AppTextStyles.text(context).copyWith(color: Colors.red),
+                bookingManager.couponError!,
+                style: AppTextStyles.text(context)
+                    .copyWith(color: AppColors.primaryColor),
               ),
             ),
           if (bookingManager.appliedCoupon != null)
@@ -327,16 +335,32 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   Widget _buildPricingSummary(
       BuildContext context,
       BookingManagerProvider bookingManager,
-      double totalPrice,
-      double effectivePrice) {
+      double basePrice,
+      double effectivePrice,
+      double finalPrice) {
     final userManager =
         Provider.of<UserManagerProvider>(context, listen: false);
+    final taxInfo = bookingManager.taxInfo;
+
+    // Calculate individual components for display
+    final discountAmount = bookingManager.discountPercentage != null
+        ? basePrice * bookingManager.discountPercentage!
+        : 0.0;
+    final taxAmount =
+        taxInfo != null ? effectivePrice * (taxInfo.regionTaxes / 100) : 0.0;
+    final platformFeePercentageAmount =
+        taxInfo != null && taxInfo.platformFeesPercentage != 0
+            ? effectivePrice * (taxInfo.platformFeesPercentage / 100)
+            : 0.0;
+    final platformFeeFixed = taxInfo?.platformFees ?? 0.0;
+
     return Container(
       padding: EdgeInsets.all(context.getWidth(16)),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.05),
+        color: AppColors.primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
+        border:
+            Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,15 +373,35 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
           SizedBox(height: context.getHeight(8)),
           _buildPriceRow(context, AppLocalizations.of(context)!.duration,
               '${bookingManager.taskDurationHours} ${bookingManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}'),
+          SizedBox(height: context.getHeight(8)),
+          _buildPriceRow(context, AppLocalizations.of(context)!.subtotal,
+              '\$${basePrice.toStringAsFixed(2)}'),
           if (bookingManager.discountPercentage != null) ...[
             SizedBox(height: context.getHeight(8)),
             _buildPriceRow(context, AppLocalizations.of(context)!.discount,
-                '-${(totalPrice * bookingManager.discountPercentage!).toStringAsFixed(2)} (${(bookingManager.discountPercentage! * 100).toStringAsFixed(0)}%)',
+                '-${discountAmount.toStringAsFixed(2)} (${(bookingManager.discountPercentage! * 100).toStringAsFixed(0)}%)',
                 textColor: Colors.green),
+          ],
+          if (taxInfo != null) ...[
+            SizedBox(height: context.getHeight(8)),
+            _buildPriceRow(context, 'Region Taxes (${taxInfo.regionTaxes}%)',
+                '\$${taxAmount.toStringAsFixed(2)}'),
+            if (taxInfo.platformFeesPercentage != 0) ...[
+              SizedBox(height: context.getHeight(8)),
+              _buildPriceRow(
+                  context,
+                  'Platform Fee (${taxInfo.platformFeesPercentage}%)',
+                  '\$${platformFeePercentageAmount.toStringAsFixed(2)}'),
+            ],
+            if (taxInfo.platformFees != 0) ...[
+              SizedBox(height: context.getHeight(8)),
+              _buildPriceRow(context, 'Platform Fee (Fixed)',
+                  '\$${platformFeeFixed.toStringAsFixed(2)}'),
+            ],
           ],
           Divider(height: context.getHeight(24)),
           _buildPriceRow(context, AppLocalizations.of(context)!.totalAmount,
-              '\$${effectivePrice.toStringAsFixed(2)}',
+              '\$${finalPrice.toStringAsFixed(2)}',
               titleStyle: AppTextStyles.title2(context),
               valueStyle: AppTextStyles.title2(context)
                   .copyWith(color: AppColors.primaryColor)),
@@ -367,8 +411,14 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   }
 
   /// Reusable price row widget.
-  Widget _buildPriceRow(BuildContext context, String title, String value,
-      {TextStyle? titleStyle, TextStyle? valueStyle, Color? textColor}) {
+  Widget _buildPriceRow(
+    BuildContext context,
+    String title,
+    String value, {
+    TextStyle? titleStyle,
+    TextStyle? valueStyle,
+    Color? textColor,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -382,12 +432,20 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
   /// Reusable detail row widget.
   Widget _buildDetailRow(
-      BuildContext context, IconData icon, String label, String value) {
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, color: AppColors.primaryColor, size: context.getWidth(24)),
+        Icon(
+          icon,
+          color: AppColors.primaryColor,
+          size: context.getWidth(24),
+        ),
         SizedBox(width: context.getWidth(12)),
         Flexible(
           child: Column(
@@ -429,7 +487,9 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                     contractorCost.toDouble(),
                   );
                   if (success) {
-                    await Navigator.of(context).pushNamed(AppRoutes.userMain);
+                    if (context.mounted) {
+                      await Navigator.of(context).pushNamed(AppRoutes.userMain);
+                    }
                   }
                 },
       isLoading: bookingManager.isPaymentProcessing,

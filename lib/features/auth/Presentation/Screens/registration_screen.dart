@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -45,8 +46,7 @@ class RegistrationScreen extends StatelessWidget {
                 _buildImagePicker(context, auth),
                 SizedBox(height: context.getHeight(20)),
                 _buildRegistrationForm(context, auth),
-                if (auth.error != null)
-                  SharedAuthWidgets.buildErrorMessage(context, auth.error!),
+                if (auth.error != null) AppErrorWidget(message: auth.error!),
                 _buildLoginSection(context),
               ],
             ),

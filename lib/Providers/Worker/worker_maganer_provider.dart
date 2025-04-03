@@ -372,7 +372,9 @@ class WorkerManagerProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      setImageError(AppLocalizations.of(context)!.generalError);
+      if (context.mounted) {
+        setImageError(AppLocalizations.of(context)!.generalError);
+      }
     }
   }
 
@@ -440,6 +442,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     print('==============fetch categorie==================');
     _setServiceLoading(true);
     final response = await WorkerApi.fetchCategories();
+
     if (response.success && response.data != null) {
       _categories = response.data!;
     } else {

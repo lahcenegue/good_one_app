@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -59,21 +60,21 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                               final serviceId =
                                   await workerManager.createAndEditService();
                               if (serviceId > 0) {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => AddImagesScreen(
-                                          serviceId: serviceId)),
-                                  (Route<dynamic> route) => false,
-                                );
+                                if (context.mounted) {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => AddImagesScreen(
+                                            serviceId: serviceId)),
+                                    (Route<dynamic> route) => false,
+                                  );
+                                }
                               }
                             },
                           ),
                           if (workerManager.addServiceError != null)
-                            SharedAuthWidgets.buildErrorMessage(
-                              context,
-                              workerManager.addServiceError!,
-                            ),
+                            AppErrorWidget(
+                                message: workerManager.addServiceError!),
 
                           //TODO
                         ],

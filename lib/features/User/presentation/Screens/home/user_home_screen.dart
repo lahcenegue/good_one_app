@@ -24,6 +24,10 @@ class UserHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
+        if (userManager.isLoading) {
+          return LoadingIndicator();
+        }
+
         if (userManager.error != null) {
           return AppErrorWidget(
             message: userManager.error!,
@@ -269,10 +273,12 @@ class UserHomeScreen extends StatelessWidget {
         if (userManager.isLoading && userManager.bestContractors.isEmpty)
           const LoadingIndicator()
         else
-          ListView.builder(
+          ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: userManager.bestContractors.length,
+            separatorBuilder: (context, index) =>
+                SizedBox(height: context.getHeight(10)),
             itemBuilder: (context, index) {
               return ContractorListItem(
                 contractor: userManager.bestContractors[index],

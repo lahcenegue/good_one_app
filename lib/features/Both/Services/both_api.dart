@@ -6,6 +6,7 @@ import 'package:good_one_app/Core/Utils/storage_keys.dart';
 
 import 'package:good_one_app/Features/Both/Models/account_edit_request.dart';
 import 'package:good_one_app/Features/Both/Models/notification_model.dart';
+import 'package:good_one_app/Features/Both/Models/tax_model.dart';
 import 'package:good_one_app/Features/Both/Models/user_info.dart';
 
 class BothApi {
@@ -62,6 +63,19 @@ class BothApi {
         throw Exception('Invalid response format');
       },
       token: token,
+    );
+  }
+
+  static Future<ApiResponse<TaxModel>> fetchTaxes(String region) async {
+    return _api.get<TaxModel>(
+      url: '${ApiEndpoints.taxes}?region=$region',
+      fromJson: (dynamic response) {
+        print('Raw taxes response: $response');
+        if (response is Map<String, dynamic>) {
+          return TaxModel.fromJson(response);
+        }
+        throw Exception('Invalid response format');
+      },
     );
   }
 }

@@ -356,8 +356,9 @@ class UserManagerProvider extends ChangeNotifier {
         if (_notifications.isEmpty) {
           debugPrint('No valid notifications returned after parsing');
         } else {
-          _notifications.forEach(
-              (n) => debugPrint('Notification: ${n.userName}, ${n.action}'));
+          for (var n in _notifications) {
+            debugPrint('Notification: ${n.userName}, ${n.action}');
+          }
         }
         notifyListeners();
       } else {

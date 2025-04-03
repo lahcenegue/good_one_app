@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:clipboard/clipboard.dart';
 
@@ -57,6 +60,15 @@ class SupportPage extends StatelessWidget {
             ),
             _buildSupportOption(
               context,
+              icon: Icons
+                  .description_outlined, // Appropriate icon for Terms and Conditions
+              title: AppLocalizations.of(context)!.termsAndConditions,
+              subtitle:
+                  AppLocalizations.of(context)!.termsAndConditionsDescription,
+              onTap: () => _viewTermsAndConditions(context),
+            ),
+            _buildSupportOption(
+              context,
               icon: Icons.policy_outlined,
               title: AppLocalizations.of(context)!.cancellationPolicy,
               subtitle:
@@ -89,10 +101,10 @@ class SupportPage extends StatelessWidget {
         margin: EdgeInsets.only(bottom: context.getHeight(16)),
         padding: EdgeInsets.all(context.getWidth(16)),
         decoration: BoxDecoration(
-          color: AppColors.dimGray.withOpacity(0.1),
+          color: AppColors.dimGray.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.primaryColor.withOpacity(0.2),
+            color: AppColors.primaryColor.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -168,10 +180,12 @@ class SupportPage extends StatelessWidget {
         } else {
           print('mailto URI failed, copying to clipboard');
           await FlutterClipboard.copy(supportEmail);
-          _showErrorSnackBar(
-            context,
-            ' Email copied to clipboard: $supportEmail',
-          );
+          if (context.mounted) {
+            _showErrorSnackBar(
+              context,
+              ' Email copied to clipboard: $supportEmail',
+            );
+          }
         }
       }
     } catch (e) {
@@ -194,16 +208,12 @@ class SupportPage extends StatelessWidget {
 
   // Function to start a support chat (placeholder)
   void _startSupportChat(BuildContext context) {
-    // Replace with actual chat implementation (e.g., navigate to a chat screen)
     _showErrorSnackBar(context, 'Chat support is not yet implemented');
-    // Example navigation:
-    // Navigator.pushNamed(context, AppRoutes.chatSupport);
   }
 
   // Function to contact support via WhatsApp
   void _contactViaWhatsApp(BuildContext context) async {
-    final String phoneNumber =
-        '+1(306)3511781'; // Replace with your support WhatsApp number
+    final String phoneNumber = AppConfig.whatsAppNumber;
     final String message = 'Hello, I need support with my account.';
     final Uri whatsappUri = Uri.parse(
       'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}',
@@ -212,20 +222,25 @@ class SupportPage extends StatelessWidget {
       if (await canLaunchUrl(whatsappUri)) {
         await launchUrl(whatsappUri);
       } else {
-        _showErrorSnackBar(context, 'Unable to open WhatsApp');
+        if (context.mounted) {
+          _showErrorSnackBar(context, 'Unable to open WhatsApp');
+        }
       }
     } catch (e) {
-      _showErrorSnackBar(context, 'Error opening WhatsApp: $e');
+      if (context.mounted) {
+        _showErrorSnackBar(context, 'Error opening WhatsApp: $e');
+      }
     }
   }
 
   // Function to view cancellation policy (placeholder)
-  void _viewCancellationPolicy(BuildContext context) {
-    // Replace with actual navigation to cancellation policy page
-    _showErrorSnackBar(
-        context, 'Cancellation policy page is not yet implemented');
-    // Example navigation:
-    // Navigator.pushNamed(context, AppRoutes.cancellationPolicy);
+  void _viewCancellationPolicy(BuildContext context) async {
+    await NavigationService.navigateTo(AppRoutes.cancellationPolicy);
+  }
+
+  // Function to view terms and conditions
+  void _viewTermsAndConditions(BuildContext context) async {
+    await NavigationService.navigateTo(AppRoutes.termsAndConditions);
   }
 
   // Function to delete account

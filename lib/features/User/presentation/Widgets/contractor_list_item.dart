@@ -81,7 +81,7 @@ class ContractorListItem extends StatelessWidget {
             ),
             SizedBox(width: context.getWidth(4)),
             Text(
-              "(${contractor.orders} ${AppLocalizations.of(context)!.order})",
+              "(${contractor.orders} ${AppLocalizations.of(context)!.orders})",
               style: AppTextStyles.text(context).copyWith(fontSize: 10),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Core/presentation/Theme/app_text_styles.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
@@ -8,13 +10,14 @@ import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_conversation.dart';
 import 'package:good_one_app/Features/Chat/Presentation/Screens/chat_screen.dart';
 import 'package:good_one_app/Features/Chat/Presentation/Utils/chat_utils.dart';
 import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -32,7 +35,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
 
   Future<void> _initialize() async {
     final type = await StorageManager.getString(StorageKeys.accountTypeKey);
-    if (type == AppStrings.user) {
+    if (type == AppConfig.user) {
       final userId =
           context.read<UserManagerProvider>().userInfo?.id.toString();
       if (userId != null) {
@@ -52,18 +55,11 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: const Text(
-          'Messages', //TOTO
-          style: TextStyle(fontWeight: FontWeight.w600), //TODO
-        ),
+        title: Text(AppLocalizations.of(context)!.messages,
+            style: AppTextStyles.appBarTitle(context)),
       ),
       body: Consumer<ChatProvider>(
         builder: (context, provider, _) {
-          debugPrint(
-              'UI State - initialFetchComplete: ${provider.initialFetchComplete}, '
-              'isLoadingConversations: ${provider.isLoadingConversations}, '
-              'error: ${provider.error}, conversations.length: ${provider.conversations.length}');
-          // Show loading until initial fetch is complete or if explicitly loading
           if (!provider.initialFetchComplete ||
               provider.isLoadingConversations) {
             return const LoadingIndicator();
@@ -118,7 +114,8 @@ class _ConversationTile extends StatelessWidget {
       title: Text(conversation.user.fullName,
           style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(
-        conversation.latestMessage ?? 'No messages yet',
+        conversation.latestMessage ??
+            AppLocalizations.of(context)!.noMessagesYet,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -135,7 +132,7 @@ class _ConversationTile extends StatelessWidget {
                 color: AppColors.primaryColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text('NEW',
+              child: Text(AppLocalizations.of(context)!.newMessage,
                   style: TextStyle(color: Colors.white, fontSize: 10)),
             ),
         ],
@@ -156,9 +153,9 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.chat_bubble_outline,
               size: context.getAdaptiveSize(64), color: Colors.grey[400]),
           const SizedBox(height: 16),
-          const Text('No conversations yet',
+          Text(AppLocalizations.of(context)!.noConversations,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-          const Text('Start a new conversation',
+          Text(AppLocalizations.of(context)!.startNewConversation,
               style: TextStyle(fontSize: 14, color: Colors.grey)),
         ],
       ),

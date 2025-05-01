@@ -182,7 +182,7 @@ class _EditServiceState extends State<EditService>
       label: label,
       hintText: hintText,
       keyboardType: keyboardType,
-      validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+      validator: (value) => value?.isEmpty ?? true ? 'Required' : null, //TODO
       minLines: minLines ?? 1,
     );
   }
@@ -264,7 +264,7 @@ class _EditServiceState extends State<EditService>
               ),
               child: Center(
                 child: Text(
-                  'No images yet. Add some!',
+                  'No images yet. Add some!', //TODO
                   style: AppTextStyles.subTitle(context),
                 ),
               ),

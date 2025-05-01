@@ -669,7 +669,9 @@ class _CancelConfirmationDialog extends StatelessWidget {
               return;
             }
             await bookingManager.cancelOrder(context, booking.id, reason);
-            Navigator.of(context).pop();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
           },
           child: Text(AppLocalizations.of(context)!.submit,
               style: AppTextStyles.text(context)
@@ -729,7 +731,10 @@ class _ModifyBookingDialogState extends State<_ModifyBookingDialog> {
         selectedDay.isBefore(firstDate) ? firstDate : selectedDay;
 
     return AlertDialog(
-      title: Text('Modify Booking', style: AppTextStyles.title2(context)),
+      title: Text(
+        AppLocalizations.of(context)!.modifyBooking,
+        style: AppTextStyles.title2(context),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -875,14 +880,15 @@ class _ModifyBookingDialogState extends State<_ModifyBookingDialog> {
 
                   if (!startDateTime.isAfter(now)) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Start time must be in the future')));
+                        content: Text(
+                            AppLocalizations.of(context)!.startTimeFuture)));
                     setState(() => isSubmitting = false);
                     return;
                   }
                   if (endDateTime.hour > 22 || endDateTime.hour < 6) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content:
-                            Text('End time must be between 6:00 and 22:00')));
+                        content: Text(
+                            AppLocalizations.of(context)!.endTimeBetween)));
                     setState(() => isSubmitting = false);
                     return;
                   }
@@ -910,7 +916,9 @@ class _ModifyBookingDialogState extends State<_ModifyBookingDialog> {
                       : await widget.bookingManager.modifyOrder(
                           context, widget.booking.id, orderEditRequest);
 
-                  if (success) Navigator.of(context).pop();
+                  if (success) {
+                    Navigator.of(context).pop();
+                  }
                   setState(() => isSubmitting = false);
                 },
           child: isSubmitting

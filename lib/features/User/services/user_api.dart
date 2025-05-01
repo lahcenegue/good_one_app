@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
@@ -6,7 +7,6 @@ import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
 import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
 import 'package:good_one_app/Core/Infrastructure/Api/api_service.dart';
 import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Features/User/Models/booking.dart';
 import 'package:good_one_app/Features/User/Models/contractor.dart';
 import 'package:good_one_app/Features/User/Models/order_model.dart';
@@ -84,7 +84,6 @@ class UserApi {
       url: ApiEndpoints.couponsCheck,
       body: {'coupon': coupon},
       fromJson: (dynamic response) {
-        print('UserApi.checkCoupon fromJson input: $response');
         if (response is Map<String, dynamic>) {
           return CouponModel.fromJson(response);
         }
@@ -99,7 +98,7 @@ class UserApi {
     required String currency,
   }) async {
     final headers = {
-      'Authorization': 'Bearer ${AppStrings.stripeSecretKey}',
+      'Authorization': 'Bearer ${AppConfig.stripeSecretKey}',
       'Content-Type': 'application/x-www-form-urlencoded',
     };
 
@@ -118,7 +117,6 @@ class UserApi {
       );
 
       final decodedBody = jsonDecode(response.body);
-      print('Payment Intent Response: $decodedBody');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return ApiResponse.success(decodedBody);
@@ -127,7 +125,6 @@ class UserApi {
             'Failed to create payment intent');
       }
     } catch (e) {
-      print('Error creating payment intent: $e');
       return ApiResponse.error('Failed to create payment intent: $e');
     }
   }

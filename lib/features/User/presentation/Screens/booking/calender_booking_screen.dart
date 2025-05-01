@@ -93,7 +93,9 @@ class CalendarBookingScreen extends StatelessWidget {
 
   /// Builds the time selection grid.
   Widget _buildTimeSelection(
-      BuildContext context, BookingManagerProvider bookingManager) {
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -187,7 +189,7 @@ class CalendarBookingScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Task Duration', //TODO
+          AppLocalizations.of(context)!.taskDuration,
           style: AppTextStyles.title2(context),
         ),
         SizedBox(height: context.getHeight(12)),
@@ -224,7 +226,7 @@ class CalendarBookingScreen extends StatelessWidget {
                                 : AppColors.dimGray),
                       ),
                       child: Text(
-                        '$hours ${hours == 1 ? 'hour' : 'hours'}',
+                        '$hours ${hours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}',
                         style: TextStyle(
                           color: isSelected ? Colors.white : Colors.black87,
                           fontWeight:
@@ -257,7 +259,7 @@ class CalendarBookingScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Booking Summary',
+            AppLocalizations.of(context)!.bookingSummary,
             style: AppTextStyles.title2(context)
                 .copyWith(color: AppColors.primaryColor),
           ),

@@ -93,7 +93,6 @@ class TokenManager {
         'authData',
         jsonEncode(authModel.toJson()),
       );
-      print('set token save data ${_currentAuth!.accessToken}');
     } catch (e) {
       debugPrint('Error saving token: $e');
     }

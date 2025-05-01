@@ -51,13 +51,12 @@ class BothApi {
     return _api.get<List<NotificationModel>>(
       url: ApiEndpoints.notifications,
       fromJson: (dynamic response) {
-        print('Raw notification response: $response');
         if (response is List) {
           final parsed = response
               .map((item) =>
                   NotificationModel.fromJson(item as Map<String, dynamic>))
               .toList();
-          print('Parsed notifications: ${parsed.length}');
+
           return parsed;
         }
         throw Exception('Invalid response format');
@@ -70,7 +69,6 @@ class BothApi {
     return _api.get<TaxModel>(
       url: '${ApiEndpoints.taxes}?region=$region',
       fromJson: (dynamic response) {
-        print('Raw taxes response: $response');
         if (response is Map<String, dynamic>) {
           return TaxModel.fromJson(response);
         }

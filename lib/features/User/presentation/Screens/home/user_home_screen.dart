@@ -175,7 +175,9 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildServicesSection(
-      BuildContext context, UserManagerProvider userManager) {
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     return Column(
       children: [
         _buildSectionHeader(
@@ -184,7 +186,7 @@ class UserHomeScreen extends StatelessWidget {
           onSeeAll: () => userManager.setCurrentIndex(2),
         ),
         if (userManager.isLoading && userManager.categories.isEmpty)
-          const Center(child: CircularProgressIndicator())
+          LoadingIndicator()
         else
           _buildServicesGrid(context, userManager),
       ],
@@ -217,7 +219,9 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildServicesGrid(
-      BuildContext context, UserManagerProvider userManager) {
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

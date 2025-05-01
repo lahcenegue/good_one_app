@@ -8,7 +8,7 @@ class RegisterRequest {
   final String? city;
   final String? country;
   final String type;
-  final File image;
+  final File? image;
   final String deviceToken;
 
   RegisterRequest({
@@ -19,7 +19,7 @@ class RegisterRequest {
     this.city,
     this.country,
     required this.type,
-    required this.image,
+    this.image,
     required this.deviceToken,
   });
 
@@ -40,8 +40,10 @@ class RegisterRequest {
   }
 
   Map<String, File> toFiles() {
-    return {
-      'picture': image,
-    };
+    final files = <String, File>{};
+    if (image != null) {
+      files['picture'] = image!;
+    }
+    return files;
   }
 }

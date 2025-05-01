@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -40,7 +41,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
         return Scaffold(
           appBar: _buildAppBar(context),
           body: workerManager.isServiceLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? LoadingIndicator()
               : Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(context.getAdaptiveSize(16)),
@@ -55,7 +56,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                           _buildServiceDetailsStep(workerManager),
                           SizedBox(height: context.getHeight(32)),
                           PrimaryButton(
-                            text: 'Next',
+                            text: AppLocalizations.of(context)!.next,
                             onPressed: () async {
                               final serviceId =
                                   await workerManager.createAndEditService();
@@ -75,8 +76,6 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                           if (workerManager.addServiceError != null)
                             AppErrorWidget(
                                 message: workerManager.addServiceError!),
-
-                          //TODO
                         ],
                       ),
                     ),
@@ -96,19 +95,21 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
     );
   }
 
-  Widget _buildServiceDetailsStep(WorkerManagerProvider workerManager) {
+  Widget _buildServiceDetailsStep(
+    WorkerManagerProvider workerManager,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: context.getHeight(16)),
         Text(
-          'Define Your Service Expertise',
+          AppLocalizations.of(context)!.defineYourServiceExpertise,
           style: AppTextStyles.title2(context),
         ),
         SizedBox(height: context.getHeight(16)),
         CategoryDropdownWidget<CategoryModel>(
-          label: 'Select Service Category',
-          hint: 'Choose a service category',
+          label: AppLocalizations.of(context)!.selectServiceCategory,
+          hint: AppLocalizations.of(context)!.chooseServiceCategory,
           value: workerManager.selectedCategory,
           items: workerManager.categories,
           onChanged: (category) {
@@ -117,8 +118,8 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
         ),
         SizedBox(height: context.getHeight(16)),
         CategoryDropdownWidget<SubcategoryModel>(
-          label: 'Select Subcategory',
-          hint: 'Choose a subcategory',
+          label: AppLocalizations.of(context)!.selectSubcategory,
+          hint: AppLocalizations.of(context)!.chooseSubcategory,
           value: workerManager.selectedSubcategory,
           items: workerManager.selectedCategory?.subcategories ?? [],
           onChanged: (subcategory) {
@@ -129,41 +130,50 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
         SharedAuthWidgets.buildInputField(
           context,
           controller: workerManager.descriptionController,
-          label: 'Service Description',
-          hintText: 'Provide a detailed description',
-          validator: (value) =>
-              value!.isEmpty ? 'Description is required' : null,
+          label: AppLocalizations.of(context)!.serviceDescription,
+          hintText: AppLocalizations.of(context)!.provideDetailedDescription,
+          validator: (value) => value!.isEmpty
+              ? AppLocalizations.of(context)!.descriptionRequired
+              : null,
           keyboardType: TextInputType.text,
         ),
         SizedBox(height: context.getHeight(16)),
         SharedAuthWidgets.buildInputField(
           context,
           controller: workerManager.servicePriceController,
-          label: 'Service Price (per hour)',
-          hintText: 'Enter price',
-          validator: (value) => value!.isEmpty ? 'Price is required' : null,
+          label: AppLocalizations.of(context)!.servicePricePerHour,
+          hintText: AppLocalizations.of(context)!.enterPrice,
+          validator: (value) => value!.isEmpty
+              ? AppLocalizations.of(context)!.priceRequired
+              : null,
           keyboardType: TextInputType.number,
         ),
         SizedBox(height: context.getHeight(16)),
         SharedAuthWidgets.buildInputField(
           context,
           controller: workerManager.experienceController,
-          label: 'Years of Experience',
-          hintText: 'Enter your experience years',
-          validator: (value) =>
-              value!.isEmpty ? 'Experience is required' : null,
+          label: AppLocalizations.of(context)!.yearsOfExperience,
+          hintText: AppLocalizations.of(context)!.enterExperienceYears,
+          validator: (value) => value!.isEmpty
+              ? AppLocalizations.of(context)!.experienceRequired
+              : null,
           keyboardType: TextInputType.number,
         ),
         SizedBox(height: context.getHeight(16)),
-        CheckboxListTile(
-          title: Text("Do you possess a certificate for this service?"),
-          value: workerManager.hasCertificate,
-          onChanged: (value) {
-            workerManager.setHasCertificate(value!);
-          },
-        ),
-        if (workerManager.hasCertificate)
-          _buildLicenseCertificate(context, workerManager),
+        if (workerManager.selectedCategory?.hasLiscence == false)
+          Column(
+            children: [
+              CheckboxListTile(
+                title: Text(AppLocalizations.of(context)!.doYouHaveCertificate),
+                value: workerManager.hasCertificate,
+                onChanged: (value) {
+                  workerManager.setHasCertificate(value!);
+                },
+              ),
+              if (workerManager.hasCertificate)
+                _buildLicenseCertificate(context, workerManager),
+            ],
+          ),
       ],
     );
   }

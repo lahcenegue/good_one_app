@@ -158,7 +158,6 @@ class UserManagerProvider extends ChangeNotifier {
 
   void setError(String? message) {
     _error = message;
-    if (message != null) print(message);
     notifyListeners();
   }
 
@@ -169,8 +168,6 @@ class UserManagerProvider extends ChangeNotifier {
 
   // User Info
   Future<bool> fetchUserInfo() async {
-    print('============== fetch user info ==================');
-
     if (_token == null) return false;
 
     _setLoading(true);
@@ -206,8 +203,6 @@ class UserManagerProvider extends ChangeNotifier {
     try {
       _setLoading(true);
 
-      print(emailController.text);
-
       final request = AccountEditRequest(
         image: _selectedImage,
         fullName: fullNameController.text == _userInfo!.fullName
@@ -222,8 +217,6 @@ class UserManagerProvider extends ChangeNotifier {
         password:
             passwordController.text.isEmpty ? null : passwordController.text,
       );
-
-      print(request.email);
 
       final response = await BothApi.editAccount(request);
       if (response.success && response.data != null) {
@@ -259,7 +252,9 @@ class UserManagerProvider extends ChangeNotifier {
         setImageError(null);
       }
     } catch (e) {
-      setImageError(AppLocalizations.of(context)!.generalError);
+      if (context.mounted) {
+        setImageError(AppLocalizations.of(context)!.generalError);
+      }
     }
   }
 
@@ -281,7 +276,6 @@ class UserManagerProvider extends ChangeNotifier {
         _categories
           ..clear()
           ..addAll(response.data!);
-        print('Categories fetched: ${_categories.length}');
         notifyListeners();
       } else {
         setError('Failed to fetch categories: ${response.error}');
@@ -301,7 +295,6 @@ class UserManagerProvider extends ChangeNotifier {
         _bestContractors
           ..clear()
           ..addAll(response.data!);
-        print('Best contractors fetched: ${_bestContractors.length}');
         notifyListeners();
       } else {
         setError('Failed to fetch contractors: ${response.error}');

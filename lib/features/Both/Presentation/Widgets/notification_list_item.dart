@@ -6,6 +6,8 @@ import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Features/Both/Models/notification_model.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class NotificationListItem extends StatelessWidget {
   final NotificationModel notification;
 
@@ -15,7 +17,7 @@ class NotificationListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeString = notification.createdAt != null
         ? DateFormat('h:mm a').format(notification.createdAt!.toLocal())
-        : 'Unknown time'; //TODO
+        : AppLocalizations.of(context)!.unknownTime;
 
     return Card(
       elevation: 0,

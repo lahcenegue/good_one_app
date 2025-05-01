@@ -439,7 +439,6 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Fetches categories and subcategories for the Add Service screen.
 
   Future<void> fetchCategories() async {
-    print('==============fetch categorie==================');
     _setServiceLoading(true);
     final response = await WorkerApi.fetchCategories();
 
@@ -679,7 +678,6 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Sets a general error message.
   void setError(String? message) {
     _error = message;
-    if (message != null) print(message);
     notifyListeners();
   }
 

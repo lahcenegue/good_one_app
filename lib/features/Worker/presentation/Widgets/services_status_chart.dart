@@ -43,7 +43,7 @@ class ServicesStatusChart extends StatelessWidget {
           ),
           SizedBox(height: context.getHeight(6)),
           Text(
-            'Total Services: ${workerManager.myServices.length} (Visible: $totalVisible, Inactive: $totalHidden)',
+            '${AppLocalizations.of(context)!.totalServices}: ${workerManager.myServices.length} (${AppLocalizations.of(context)!.visible}: $totalVisible, ${AppLocalizations.of(context)!.inactive}: $totalHidden)',
             style: AppTextStyles.text(context),
           ),
           SizedBox(height: context.getHeight(8)),

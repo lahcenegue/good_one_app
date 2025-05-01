@@ -22,10 +22,14 @@ class WorkerApi {
         url: ApiEndpoints.categories,
         fromJson: (dynamic json) {
           if (json is List) {
-            return json
+            final categories = json
                 .map((item) =>
                     CategoryModel.fromJson(item as Map<String, dynamic>))
                 .toList();
+            // for (var category in categories) {
+            //   print(category.toDebugString());
+            // }
+            return categories;
           }
           throw Exception('Invalid response format');
         },
@@ -129,8 +133,6 @@ class WorkerApi {
       final response = await _api.get<Map<String, List<MyOrderModel>>>(
         url: ApiEndpoints.serviceOrders,
         fromJson: (dynamic json) {
-          print(
-              'fetchOrders fromJson input: $json (type: ${json.runtimeType})');
           // Ensure json is a Map
           if (json is Map) {
             // Cast to Map<String, dynamic> to ensure keys are strings
@@ -159,7 +161,6 @@ class WorkerApi {
       );
       return response;
     } catch (e) {
-      print('fetchOrders error: $e');
       return ApiResponse.error('Failed to fetch orders: $e');
     }
   }

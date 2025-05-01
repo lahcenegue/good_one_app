@@ -157,7 +157,6 @@ class _OrdersContentState extends State<OrdersContent> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              print('Refresh triggered'); // Debug log
               await ordersManager.fetchOrders();
             },
             child: TabBarView(

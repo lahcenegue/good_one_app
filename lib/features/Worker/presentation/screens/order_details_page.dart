@@ -16,7 +16,6 @@ import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-// Main StatefulWidget for the Order Details page
 class OrderDetailsPage extends StatefulWidget {
   final MyOrderModel order;
 
@@ -48,7 +47,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch Google Maps.')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.notLaunchGoogleMaps)),
         );
       }
     }
@@ -112,7 +112,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Order #${widget.order.id}',
+          '${AppLocalizations.of(context)!.order} #${widget.order.id}',
           style: AppTextStyles.title(context).copyWith(
             color: AppColors.primaryColor,
             fontWeight: FontWeight.bold,
@@ -377,7 +377,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       return Center(child: Text(orderManager.error!));
     }
     if (orderManager.customerLatLng == null) {
-      return const Center(child: Text('Unable to load map.'));
+      return Center(child: Text(AppLocalizations.of(context)!.unableLoadMap));
     }
 
     return FlutterMap(

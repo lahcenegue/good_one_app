@@ -26,7 +26,9 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
         final worker = workerManager.workerInfo;
         if (worker == null) {
           return Center(
-            child: Text('User data not available'),
+            child: Text(
+              AppLocalizations.of(context)!.userDataNotAvailable,
+            ),
           );
         }
 
@@ -55,7 +57,7 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
                       style: AppTextStyles.text(context)
                           .copyWith(color: Colors.red),
                     ),
-                  ), //TODO cjange widget
+                  ), //TODO change widget
                 SizedBox(height: context.getHeight(20)),
                 _buildAccountDetailsForm(context, workerManager, worker),
                 if (workerManager.error != null)
@@ -172,7 +174,7 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
             hintText: AppLocalizations.of(context)!.enterEmail,
             validator: (value) {
               if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value!)) {
-                return 'Please enter a valid email';
+                return AppLocalizations.of(context)!.invalidEmail;
               }
               return null;
             },
@@ -186,7 +188,7 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
             hintText: AppLocalizations.of(context)!.enterPhoneNumber,
             validator: (value) {
               if (int.tryParse(value!) == null) {
-                return 'Please enter a valid phone number';
+                return AppLocalizations.of(context)!.invalidPhone;
               }
               return null;
             },

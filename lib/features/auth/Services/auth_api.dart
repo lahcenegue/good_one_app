@@ -12,7 +12,6 @@ class AuthApi {
 
   // Login endpoint
   static Future<ApiResponse<AuthModel>> login(AuthRequest request) async {
-    print(ApiEndpoints.login);
     return _api.post<AuthModel>(
       url: ApiEndpoints.login,
       body: request.toJson(),
@@ -23,7 +22,6 @@ class AuthApi {
   // Register endpoint
   static Future<ApiResponse<AuthModel>> register(
       RegisterRequest request) async {
-    print(request.toFields());
     return _api.postMultipart<AuthModel>(
       url: ApiEndpoints.register,
       fields: request.toFields(),

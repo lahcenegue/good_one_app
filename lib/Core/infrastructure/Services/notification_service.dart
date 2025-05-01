@@ -22,7 +22,6 @@ class NotificationService {
     await _setupMessageHandlers();
 
     _fcmToken = await _firebaseMessaging.getToken();
-    print('FCM Token: $_fcmToken');
     await StorageManager.setString(StorageKeys.fcmTokenKey, _fcmToken!);
 
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
@@ -34,12 +33,11 @@ class NotificationService {
   }
 
   Future<void> _requestPermission() async {
-    final settings = await _firebaseMessaging.requestPermission(
+    await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-    print('Notification permission status: ${settings.authorizationStatus}');
   }
 
   Future<void> _setupLocalNotifications() async {

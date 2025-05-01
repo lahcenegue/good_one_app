@@ -35,7 +35,7 @@ class AddImagesScreen extends StatelessWidget {
                     children: [
                       SizedBox(height: context.getHeight(8)),
                       Text(
-                        'Please upload unique images to attract customers',
+                        AppLocalizations.of(context)!.uploadImages,
                         style: AppTextStyles.subTitle(context),
                       ),
                       SizedBox(height: context.getHeight(20)),
@@ -59,13 +59,13 @@ class AddImagesScreen extends StatelessWidget {
                             ),
                             SizedBox(height: context.getHeight(8)),
                             Text(
-                              'Additional photos of the service',
+                              AppLocalizations.of(context)!.additionalPhotos,
                               style: AppTextStyles.subTitle(context),
                               textAlign: TextAlign.center,
                             ),
                             SizedBox(height: context.getHeight(8)),
                             Text(
-                              'You can choose more than one image for the service',
+                              AppLocalizations.of(context)!.chooseMoreImage,
                               style: AppTextStyles.text(context),
                               textAlign: TextAlign.center,
                             ),
@@ -74,7 +74,7 @@ class AddImagesScreen extends StatelessWidget {
                               width: context.getWidth(200),
                               height: context.getHeight(45),
                               child: PrimaryButton(
-                                text: 'Add photo',
+                                text: AppLocalizations.of(context)!.addimages,
                                 onPressed: () => _showImagePickerModal(
                                   context,
                                   workerManager,
@@ -91,7 +91,7 @@ class AddImagesScreen extends StatelessWidget {
                               children: [
                                 SizedBox(height: context.getHeight(24)),
                                 Text(
-                                  'All photos',
+                                  AppLocalizations.of(context)!.addimages,
                                   style: AppTextStyles.title2(context),
                                 ),
                                 SizedBox(height: context.getHeight(16)),
@@ -119,7 +119,8 @@ class AddImagesScreen extends StatelessWidget {
                                           );
                                         },
                                       ),
-                                      title: Text('Image ${index + 1}'),
+                                      title: Text(
+                                          '${AppLocalizations.of(context)!.image} ${index + 1}'),
                                       trailing: IconButton(
                                         icon: const Icon(
                                           Icons.delete,
@@ -136,7 +137,7 @@ class AddImagesScreen extends StatelessWidget {
                           : SizedBox.shrink(),
                       SizedBox(height: context.getHeight(32)),
                       PrimaryButton(
-                        text: 'Next',
+                        text: AppLocalizations.of(context)!.next,
                         onPressed: () {
                           NavigationService.navigateToAndReplace(
                               AppRoutes.workerMain);
@@ -153,7 +154,7 @@ class AddImagesScreen extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(
-        'add images',
+        AppLocalizations.of(context)!.addimages,
         style: AppTextStyles.appBarTitle(context),
       ),
     );

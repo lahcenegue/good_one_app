@@ -66,7 +66,7 @@ class ContractorProfile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SmallSecondaryButton(
-                        text: 'Chat', //TODO translate
+                        text: AppLocalizations.of(context)!.chat,
                         onPressed: () {
                           if (userManager.token == null) {
                             showDialog(
@@ -90,7 +90,7 @@ class ContractorProfile extends StatelessWidget {
                         },
                       ),
                       SmallPrimaryButton(
-                        text: 'Book', //TODO translate
+                        text: AppLocalizations.of(context)!.book,
                         onPressed: () {
                           if (userManager.token == null) {
                             showDialog(
@@ -151,7 +151,7 @@ class ContractorProfile extends StatelessWidget {
                 style: AppTextStyles.title2(context),
               ),
               Text(
-                '${contractor.costPerHour} \$ /hr',
+                '${contractor.costPerHour} \$ /${AppLocalizations.of(context)!.hour}',
                 style: AppTextStyles.price(context),
               ),
               Row(
@@ -184,7 +184,7 @@ class ContractorProfile extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                'Confird ${contractor.service} (With Lisence)',
+                '${AppLocalizations.of(context)!.confird} ${contractor.service} (${AppLocalizations.of(context)!.withLisence})',
                 style: AppTextStyles.textButton(context),
               ),
             )
@@ -207,25 +207,25 @@ class ContractorProfile extends StatelessWidget {
           context,
           AppAssets.experience,
           contractor.yearsOfExperience.toString(),
-          'Years exp',
+          AppLocalizations.of(context)!.yearsOfExperience,
         ),
         _serviceBox(
           context,
           AppAssets.rating,
           contractor.ratings!.length.toString(),
-          'Rating',
+          AppLocalizations.of(context)!.rating,
         ),
         _serviceBox(
           context,
           AppAssets.clients,
           contractor.orders.toString(),
-          'Clients',
+          AppLocalizations.of(context)!.clients,
         ),
         _serviceBox(
           context,
           AppAssets.distance,
           '${contractor.city}, ${contractor.country}',
-          'Direction',
+          AppLocalizations.of(context)!.location,
         ),
       ],
     );
@@ -237,37 +237,37 @@ class ContractorProfile extends StatelessWidget {
     String info,
     String title,
   ) {
-    return Column(
-      children: [
-        Container(
-          width: context.getWidth(72),
-          height: context.getWidth(72),
-          decoration: BoxDecoration(
-            color: AppColors.dimGray,
-            borderRadius: BorderRadius.circular(context.getWidth(8)),
-          ),
-          child: Center(
-            child: Image.asset(
-              icon,
-              width: context.getWidth(28),
+    return SizedBox(
+      width: context.getWidth(80),
+      child: Column(
+        children: [
+          Container(
+            width: context.getWidth(72),
+            height: context.getWidth(72),
+            decoration: BoxDecoration(
+              color: AppColors.dimGray,
+              borderRadius: BorderRadius.circular(context.getWidth(8)),
+            ),
+            child: Center(
+              child: Image.asset(
+                icon,
+                width: context.getWidth(30),
+              ),
             ),
           ),
-        ),
-        SizedBox(height: context.getHeight(5)),
-        SizedBox(
-          width: context.getWidth(72),
-          child: Text(
+          SizedBox(height: context.getHeight(4)),
+          Text(
             info,
             textAlign: TextAlign.center,
             style: AppTextStyles.title2(context),
           ),
-        ),
-        SizedBox(height: context.getHeight(5)),
-        Text(
-          title,
-          style: AppTextStyles.text(context),
-        ),
-      ],
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.text(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -280,7 +280,7 @@ class ContractorProfile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'About',
+          AppLocalizations.of(context)!.about,
           style: AppTextStyles.title2(context),
         ),
         SizedBox(height: context.getHeight(10)),
@@ -307,13 +307,13 @@ class ContractorProfile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Photo albums',
+              AppLocalizations.of(context)!.photoAlbum,
               style: AppTextStyles.title2(context),
             ),
             TextButton(
               onPressed: () => _showFullGallery(context, 0),
               child: Text(
-                'See all',
+                AppLocalizations.of(context)!.seeAll,
                 style: AppTextStyles.textButton(context),
               ),
             ),
@@ -415,7 +415,7 @@ class ContractorProfile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Customer reviews',
+              AppLocalizations.of(context)!.customerReviews,
               style: AppTextStyles.title2(context),
             ),
             TextButton(
@@ -429,7 +429,7 @@ class ContractorProfile extends StatelessWidget {
                 );
               },
               child: Text(
-                'See all',
+                AppLocalizations.of(context)!.seeAll,
                 style: AppTextStyles.textButton(context),
               ),
             ),

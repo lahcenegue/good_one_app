@@ -42,7 +42,6 @@ class OrdersManagerProvider extends ChangeNotifier {
   }
 
   Future<void> initialize() async {
-    print('initialize orders manager =====');
     await fetchOrders();
   }
 
@@ -97,9 +96,7 @@ class OrdersManagerProvider extends ChangeNotifier {
   }
 
   void setError(String? message) {
-    print('error ========== $message');
     _error = message;
-    if (message != null) print(message);
     notifyListeners();
   }
 

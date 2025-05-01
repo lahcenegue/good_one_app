@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/cancellation_policy_screen.dart';
+import 'package:good_one_app/Features/Both/Presentation/Screens/privacy_policy_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/terms_and_conditions_screen.dart';
 
 import 'package:good_one_app/Features/Chat/Presentation/Screens/conversations_screen.dart';
@@ -38,6 +39,7 @@ class AppRoutes {
   static const String supportPage = '/supportPage';
   static const String cancellationPolicy = '/cancellationPolicy';
   static const String termsAndConditions = '/termsAndConditionsScreen';
+  static const String privacyPolicy = '/privacyPolicy';
 
   // User Screens
   static const String userMain = '/userMainScreen';
@@ -93,8 +95,9 @@ class AppRoutes {
       //Both
       conversations: (_) => const ConversationsScreen(),
       supportPage: (_) => const SupportPage(),
-      cancellationPolicy: (_) => CancellationPolicyScreen(),
-      termsAndConditions: (_) => TermsAndConditionsScreen(),
+      cancellationPolicy: (_) => const CancellationPolicyScreen(),
+      termsAndConditions: (_) => const TermsAndConditionsScreen(),
+      privacyPolicy: (_) => const PrivacyPolicyScreen(),
     };
   }
 

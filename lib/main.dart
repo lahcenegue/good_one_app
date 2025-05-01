@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/orders_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
@@ -19,7 +20,6 @@ import 'package:good_one_app/firebase_options.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_theme.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -40,8 +40,8 @@ Future<void> main() async {
   await TokenManager.instance.initialize();
 
   // Set Stripe publishable key from AppStrings
-  Stripe.publishableKey = AppStrings.stripePublicKey;
-  Stripe.merchantIdentifier = AppStrings.merchantIdentifier;
+  Stripe.publishableKey = AppConfig.stripePublicKey;
+  Stripe.merchantIdentifier = AppConfig.merchantIdentifier;
   Stripe.urlScheme = 'flutterstripe';
   await Stripe.instance.applySettings();
 

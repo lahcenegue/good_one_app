@@ -69,7 +69,6 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
       return _buildEmptyState(context);
     }
 
-    // Use ListView.separated for automatic dividers or spacing
     return RefreshIndicator(
       onRefresh: () => workerManager.fetchWithdrawalStatus(),
       child: ListView.separated(
@@ -99,13 +98,13 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
             ),
             SizedBox(height: context.getHeight(20)),
             Text(
-              'no Recent Withdrawals',
+              AppLocalizations.of(context)!.noRecentWithdrawals,
               style: AppTextStyles.title2(context),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: context.getHeight(8)),
             Text(
-              'check BackLater For Updates',
+              AppLocalizations.of(context)!.checkBackLaterUpdates,
               style: AppTextStyles.subTitle(context),
               textAlign: TextAlign.center,
             ),
@@ -153,7 +152,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Amount', // Use localization
+                    AppLocalizations.of(context)!.amount,
                     style: AppTextStyles.title2(context),
                   ),
                   SizedBox(height: context.getHeight(4)),
@@ -164,8 +163,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                 ],
               ),
               // Status Chip
-              _buildStatusChip(
-                  context, request.status ?? -1), // Handle null status
+              _buildStatusChip(context, request.status ?? -1),
             ],
           ),
           SizedBox(height: context.getHeight(8)),
@@ -285,267 +283,3 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
     }
   }
 }
-
-// class WithdrawalStatusScreen extends StatefulWidget {
-//   const WithdrawalStatusScreen({
-//     super.key,
-//   });
-
-//   @override
-//   State<WithdrawalStatusScreen> createState() => _WithdrawalStatusScreenState();
-// }
-
-// class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen>
-//     with SingleTickerProviderStateMixin {
-//   late AnimationController _animationController;
-//   late Animation<double> _fadeAnimation;
-
-//   @override
-//   void initState() {
-//     _animationController = AnimationController(
-//       vsync: this,
-//       duration: Duration(milliseconds: 800),
-//     );
-//     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-//       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-//     );
-//     _animationController.forward();
-//     WidgetsBinding.instance.addPostFrameCallback((_) async {
-//       final workerManager =
-//           Provider.of<WorkerManagerProvider>(context, listen: false);
-//       await workerManager.fetchWithdrawalStatus();
-//     });
-//     super.initState();
-//   }
-
-//   @override
-//   void dispose() {
-//     _animationController.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer<WorkerManagerProvider>(
-//       builder: (context, workerManager, _) {
-//         final requests = workerManager.withdrawStatus ?? [];
-
-//         if (workerManager.isLoading) {
-//           return Scaffold(
-//             body: LoadingIndicator(),
-//           );
-//         }
-//         return Scaffold(
-//           appBar: _buildAppBar(context, workerManager),
-//           body: SafeArea(
-//             child: FadeTransition(
-//               opacity: _fadeAnimation,
-//               child: _buildContent(context, requests),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   PreferredSizeWidget _buildAppBar(
-//     BuildContext context,
-//     WorkerManagerProvider workerManager,
-//   ) {
-//     return AppBar(
-//         title: Text(
-//           AppLocalizations.of(context)!.withdrawalStatus,
-//           style: AppTextStyles.appBarTitle(context),
-//         ),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.refresh),
-//             onPressed: () async {
-//               await workerManager.fetchWithdrawalStatus();
-//             },
-//           ),
-//         ]);
-//   }
-
-//   Widget _buildContent(BuildContext context, List<WithdrawStatus> requests) {
-//     return requests.isEmpty
-//         ? _buildEmptyState(context)
-//         : _buildWithdrawalList(context, requests);
-//   }
-
-//   Widget _buildEmptyState(BuildContext context) {
-//     return Center(
-//       child: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           Icon(
-//             Icons.history_toggle_off,
-//             size: context.getAdaptiveSize(64),
-//             color: Colors.white70,
-//           ),
-//           SizedBox(height: context.getHeight(16)),
-//           Text(
-//             'No recent withdrawal requests',
-//             style: AppTextStyles.subTitle(context).copyWith(
-//               color: Colors.white70,
-//               fontSize: 18,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildWithdrawalList(
-//     BuildContext context,
-//     List<WithdrawStatus> requests,
-//   ) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text(
-//           'Withdrawal History',
-//           style: AppTextStyles.title(context).copyWith(
-//             color: Colors.white,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//         SizedBox(height: context.getHeight(16)),
-//         Expanded(
-//           child: ListView.builder(
-//             itemCount: requests.length,
-//             itemBuilder: (context, index) {
-//               final request = requests[index];
-//               return _buildWithdrawalCard(context, request, index);
-//             },
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-
-//   Widget _buildWithdrawalCard(
-//       BuildContext context, WithdrawStatus request, int index) {
-//     return Card(
-//       elevation: 4,
-//       margin: EdgeInsets.only(bottom: context.getHeight(16)),
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(16),
-//       ),
-//       child: Container(
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(16),
-//           gradient: LinearGradient(
-//             begin: Alignment.topLeft,
-//             end: Alignment.bottomRight,
-//             colors: [
-//               Colors.white,
-//               Colors.grey.shade100,
-//             ],
-//           ),
-//         ),
-//         child: Padding(
-//           padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-//           child: Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Row(
-//                     children: [
-//                       Icon(
-//                         Icons.monetization_on,
-//                         color: AppColors.oxblood,
-//                         size: context.getAdaptiveSize(24),
-//                       ),
-//                       SizedBox(width: context.getWidth(8)),
-//                       Text(
-//                         '\$${request.amount!.toStringAsFixed(2)}',
-//                         style: AppTextStyles.subTitle(context).copyWith(
-//                           color: AppColors.oxblood,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                   SizedBox(height: context.getHeight(8)),
-//                   Text(
-//                     DateFormat('MMM dd, yyyy').format(
-//                       DateTime.parse(request.createdAt!).toLocal(),
-//                     ),
-//                     style: AppTextStyles.text(context).copyWith(
-//                       color: Colors.grey.shade600,
-//                     ),
-//                   ),
-//                   if (request.email != null) ...[
-//                     SizedBox(height: context.getHeight(4)),
-//                     Text(
-//                       'To: ${request.email}',
-//                       style: AppTextStyles.text(context).copyWith(
-//                         color: Colors.grey.shade600,
-//                         fontSize: 12,
-//                       ),
-//                     ),
-//                   ],
-//                 ],
-//               ),
-//               _buildStatusChip(context, request.status!),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildStatusChip(BuildContext context, int status) {
-//     final statusString = _getStatusString(status);
-//     final statusColor = _getStatusColor(status);
-
-//     return Container(
-//       padding: EdgeInsets.symmetric(
-//         horizontal: context.getWidth(12),
-//         vertical: context.getHeight(6),
-//       ),
-//       decoration: BoxDecoration(
-//         color: statusColor.withOpacity(0.1),
-//         borderRadius: BorderRadius.circular(20),
-//         border: Border.all(color: statusColor.withOpacity(0.5)),
-//       ),
-//       child: Text(
-//         statusString,
-//         style: AppTextStyles.text(context).copyWith(
-//           color: statusColor,
-//           fontWeight: FontWeight.bold,
-//           fontSize: 12,
-//         ),
-//       ),
-//     );
-//   }
-
-//   Color _getStatusColor(int status) {
-//     switch (status) {
-//       case 2:
-//         return Colors.green;
-//       case 1:
-//         return Colors.orange;
-//       case 0:
-//         return Colors.blue;
-//       default:
-//         return Colors.black;
-//     }
-//   }
-
-//   String _getStatusString(int status) {
-//     switch (status) {
-//       case 2:
-//         return 'Sent';
-//       case 1:
-//         return 'Waiting to Send';
-//       case 0:
-//         return 'Request Received';
-//       default:
-//         return 'Sent';
-//     }
-//   }
-// }

@@ -12,7 +12,6 @@ import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
 import 'package:good_one_app/Features/Auth/Models/auth_request.dart';
 import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -61,7 +60,7 @@ class AuthProvider with ChangeNotifier {
 
   List<String> get availableCities {
     return selectedCountry != null
-        ? AppStrings.citiesByCountry[selectedCountry] ?? []
+        ? AppConfig.citiesByCountry[selectedCountry] ?? []
         : [];
   }
 
@@ -164,26 +163,20 @@ class AuthProvider with ChangeNotifier {
 
       final response = await AuthApi.login(request);
 
-      print(response.success);
-
       if (response.success) {
-        print('response is succes');
         _authData = response.data;
         _clearFormData();
         await _saveAuthData();
 
         _setLoading(false);
 
-        print(accountType);
-
-        if (accountType == AppStrings.service) {
+        if (accountType == AppConfig.service) {
           await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
         } else {
           await NavigationService.navigateToAndReplace(AppRoutes.userMain);
         }
       } else {
         _error = response.error;
-        print(_error);
         notifyListeners();
       }
     } catch (e) {
@@ -206,16 +199,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> register(BuildContext context) async {
     if (!registrationFormKey.currentState!.validate()) return;
-    print('register state is valide');
-
-    if (_selectedImage == null) {
-      _imageError = AppLocalizations.of(context)!.imageRequired;
-      notifyListeners();
-      return;
-    }
 
     try {
-      print('login to try');
       _setLoading(true);
       _clearErrors();
 
@@ -228,9 +213,7 @@ class AuthProvider with ChangeNotifier {
         NavigationService.navigateToAndReplace(AppRoutes.accountSelection);
       }
 
-      print([accountType, deviceToken]);
-
-      if (accountType == AppStrings.service) {
+      if (accountType == AppConfig.service) {
         if (selectedCountry == null || selectedCity == null) {
           if (context.mounted) {
             _error = AppLocalizations.of(context)!.locationRequired;
@@ -242,27 +225,26 @@ class AuthProvider with ChangeNotifier {
       }
 
       final request = RegisterRequest(
-        image: _selectedImage!,
+        image: _selectedImage,
         fullName: fullNameController.text.trim(),
         email: emailController.text.trim(),
         phone: phoneController.text.trim(),
         password: passwordController.text,
         type: accountType!,
         deviceToken: deviceToken ?? '',
-        country: accountType == AppStrings.service ? selectedCountry : null,
-        city: accountType == AppStrings.service ? selectedCity : null,
+        country: accountType == AppConfig.service ? selectedCountry : null,
+        city: accountType == AppConfig.service ? selectedCity : null,
       );
-
-      print('The Device token fron register ${request.deviceToken}');
 
       final response = await AuthApi.register(request);
 
       if (response.success) {
         _authData = response.data;
+        _clearFormData();
         await _saveAuthData();
 
         _setLoading(false);
-        if (accountType == AppStrings.service) {
+        if (accountType == AppConfig.service) {
           await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
         } else {
           await NavigationService.navigateToAndReplace(
@@ -329,10 +311,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _saveAuthData() async {
     try {
-      print('try to save auth data');
       await TokenManager.instance.setToken(_authData!);
     } catch (e) {
-      print('Failed to save authentication data');
       throw Exception('Failed to save authentication data');
     }
   }
@@ -350,7 +330,6 @@ class AuthProvider with ChangeNotifier {
 
   void _handleError(dynamic error) {
     _error = error.toString();
-    print(_error);
     notifyListeners();
   }
 
@@ -375,11 +354,14 @@ class AuthProvider with ChangeNotifier {
   // }
 
   void _clearFormData() {
+    _obscurePassword = true;
+    _selectedImage = null;
+    fullNameController.clear;
     emailController.clear();
     passwordController.clear();
-    _obscurePassword = true;
+    phoneController.clear;
+
     notifyListeners();
-    print('clear form data');
   }
 
   @override

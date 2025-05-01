@@ -88,11 +88,11 @@ class WorkerHomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${AppLocalizations.of(context)!.hello}, ${worker?.fullName ?? 'Worker'}',
+                '${AppLocalizations.of(context)!.hello}, ${worker?.fullName ?? AppLocalizations.of(context)!.worker}',
                 style: AppTextStyles.title2(context),
               ),
               Text(
-                '${worker?.city ?? 'Unknown'}, ${worker?.country ?? 'Unknown'}',
+                '${worker?.city ?? AppLocalizations.of(context)!.unknown}, ${worker?.country ?? AppLocalizations.of(context)!.unknown}',
                 style: AppTextStyles.text(context),
               ),
             ],

@@ -77,6 +77,13 @@ class SupportPage extends StatelessWidget {
             ),
             _buildSupportOption(
               context,
+              icon: Icons.privacy_tip_outlined,
+              title: AppLocalizations.of(context)!.privacyPolicy,
+              subtitle: AppLocalizations.of(context)!.privacyPolicyDescription,
+              onTap: () => _viewPrivacyPolicy(context),
+            ),
+            _buildSupportOption(
+              context,
               icon: Icons.delete_forever_outlined,
               title: AppLocalizations.of(context)!.deleteAccount,
               subtitle: AppLocalizations.of(context)!.deleteAccountDescription,
@@ -146,10 +153,9 @@ class SupportPage extends StatelessWidget {
 
   // Function to send an email to support
   void _sendSupportEmail(BuildContext context) async {
-    const String supportEmail =
-        'support@yourapp.com'; // Replace with your support email
-    const String subject = 'Support Request from App';
-    const String body = 'Hello, I need assistance with...';
+    const String supportEmail = AppConfig.supportEmail;
+    String subject = AppLocalizations.of(context)!.supportRequestfromApp;
+    String body = AppLocalizations.of(context)!.iNeedAssistance;
 
     // Gmail URL scheme
     final Uri gmailUri = Uri.parse(
@@ -166,35 +172,31 @@ class SupportPage extends StatelessWidget {
       }),
     );
 
-    print('Attempting to launch Gmail URI: $gmailUri');
     try {
       // Try Gmail first
       if (await canLaunchUrl(gmailUri)) {
-        print('Launching Gmail URI');
         await launchUrl(gmailUri);
       } else {
-        print('Gmail URI failed, attempting mailto URI: $emailUri');
         if (await canLaunchUrl(emailUri)) {
-          print('Launching mailto URI');
           await launchUrl(emailUri);
         } else {
-          print('mailto URI failed, copying to clipboard');
           await FlutterClipboard.copy(supportEmail);
           if (context.mounted) {
             _showErrorSnackBar(
               context,
-              ' Email copied to clipboard: $supportEmail',
+              '${AppLocalizations.of(context)!.emailCopied}: $supportEmail',
             );
           }
         }
       }
     } catch (e) {
-      print('Exception occurred: $e');
       await FlutterClipboard.copy(supportEmail);
-      _showErrorSnackBar(
-        context,
-        ' Email copied to clipboard: $supportEmail',
-      );
+      if (context.mounted) {
+        _showErrorSnackBar(
+          context,
+          '${AppLocalizations.of(context)!.emailCopied}: $supportEmail',
+        );
+      }
     }
   }
 
@@ -208,7 +210,7 @@ class SupportPage extends StatelessWidget {
 
   // Function to start a support chat (placeholder)
   void _startSupportChat(BuildContext context) {
-    _showErrorSnackBar(context, 'Chat support is not yet implemented');
+    _showErrorSnackBar(context, 'Chat support is not yet implemented'); //TODO
   }
 
   // Function to contact support via WhatsApp
@@ -223,12 +225,14 @@ class SupportPage extends StatelessWidget {
         await launchUrl(whatsappUri);
       } else {
         if (context.mounted) {
-          _showErrorSnackBar(context, 'Unable to open WhatsApp');
+          _showErrorSnackBar(
+              context, AppLocalizations.of(context)!.unableOpenWhatsApp);
         }
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorSnackBar(context, 'Error opening WhatsApp: $e');
+        _showErrorSnackBar(
+            context, AppLocalizations.of(context)!.errorOpeningWhatsApp);
       }
     }
   }
@@ -241,6 +245,11 @@ class SupportPage extends StatelessWidget {
   // Function to view terms and conditions
   void _viewTermsAndConditions(BuildContext context) async {
     await NavigationService.navigateTo(AppRoutes.termsAndConditions);
+  }
+
+  // Function to view privacy policy
+  void _viewPrivacyPolicy(BuildContext context) async {
+    await NavigationService.navigateTo(AppRoutes.privacyPolicy);
   }
 
   // Function to delete account
@@ -306,15 +315,15 @@ class SupportPage extends StatelessWidget {
     );
   }
 
-  void _showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: AppTextStyles.text(context).copyWith(color: Colors.white),
-        ),
-        backgroundColor: AppColors.primaryColor,
-      ),
-    );
-  }
+  // void _showSuccessSnackBar(BuildContext context, String message) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text(
+  //         message,
+  //         style: AppTextStyles.text(context).copyWith(color: Colors.white),
+  //       ),
+  //       backgroundColor: AppColors.primaryColor,
+  //     ),
+  //   );
+  // }
 }

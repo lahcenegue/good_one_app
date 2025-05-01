@@ -77,7 +77,7 @@ class WorkerMainScreen extends StatelessWidget {
       _buildNavItem(
         context: context,
         index: 2,
-        label: AppLocalizations.of(context)!.order,
+        label: AppLocalizations.of(context)!.orders,
         activeIcon: AppAssets.booking2,
         inactiveIcon: AppAssets.booking,
         currentIndex: workerManager.currentIndex,

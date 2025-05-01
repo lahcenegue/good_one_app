@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Features/Both/Models/tax_model.dart';
 import 'package:good_one_app/Features/Both/Services/both_api.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +14,6 @@ import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
 import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/success_dialog.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Features/User/Models/booking.dart';
 import 'package:good_one_app/Features/User/Models/order_model.dart';
 import 'package:good_one_app/Features/User/Models/rate_model.dart';
@@ -89,8 +89,8 @@ class BookingManagerProvider with ChangeNotifier {
   bool get isLocationScreenLoading => _isLocationScreenLoading;
   bool get isLocationSelected => _isLocationSelected;
   String get formattedDateTime => _formatBookingDateTime();
-  List<String> get availableTimeSlots => AppStrings.timeSlots;
-  List<int> get availableDurations => AppStrings.availableDurations;
+  List<String> get availableTimeSlots => AppConfig.timeSlots;
+  List<int> get availableDurations => AppConfig.availableDurations;
   String? get appliedCoupon => _appliedCoupon;
   double? get discountPercentage => _discountPercentage;
   bool get isPaymentProcessing => _isPaymentProcessing;
@@ -142,25 +142,18 @@ class BookingManagerProvider with ChangeNotifier {
 
   /// Initializes provider state.
   Future<void> initialize() async {
-    print('Starting initialization');
     _isLoading = true;
     try {
       _token = await StorageManager.getString(StorageKeys.tokenKey);
 
       notifyListeners();
-      print('Token fetched: $_token');
-      if (_token != null) {
-        print('Calling fetchBookings from initialize');
 
+      if (_token != null) {
         await fetchBookings();
-      } else {
-        print('No token, skipping fetchBookings');
-      }
+      } else {}
     } catch (e) {
-      print('Initialization error: $e');
       _error = 'Initialization failed: $e';
     } finally {
-      print('Finalizing initialization');
       _isInitializing = false;
       _isLoading = false;
       notifyListeners();
@@ -169,22 +162,19 @@ class BookingManagerProvider with ChangeNotifier {
 
   /// Fetches taxes based on the region.
   Future<void> fetchTaxes(String region) async {
-    print('====== fetch taxes ======');
     _isTaxLoading = true;
     _taxError = null;
     notifyListeners();
     try {
       final response = await BothApi.fetchTaxes(region);
-      print(" ====== response succes: ${response.success}");
+
       if (response.success && response.data != null) {
         _taxInfo = response.data;
-        print('Tax info fetched: ${_taxInfo!.toJson()}');
       } else {
         _taxError =
             'Failed to fetch taxes: ${response.error ?? "Unknown error"}';
       }
     } catch (e) {
-      print('FetchTaxes error: $e');
       _taxError = 'Error fetching taxes: $e';
     } finally {
       _isTaxLoading = false;
@@ -206,17 +196,14 @@ class BookingManagerProvider with ChangeNotifier {
     notifyListeners();
     try {
       final response = await UserApi.getBookings();
-      print('FetchBookings Response: ${response.data}');
+
       if (response.success && response.data != null) {
         _bookings = response.data!;
-        print(
-            'Bookings updated: ${_bookings.map((b) => "id: ${b.id}, status: ${b.status}").toList()}');
       } else {
         _error =
             'Failed to fetch bookings: ${response.error ?? "Unknown error"}';
       }
     } catch (e) {
-      print('FetchBookings error: $e');
       _error = 'Error fetching bookings: $e';
     } finally {
       _isLoading = false;
@@ -230,8 +217,6 @@ class BookingManagerProvider with ChangeNotifier {
     int serviceId,
     double contractorCost,
   ) async {
-    print(
-        'Starting order creation with serviceId: $serviceId, cost: $contractorCost');
     _setPaymentProcessing(true);
     try {
       if (_region == null) {
@@ -239,11 +224,9 @@ class BookingManagerProvider with ChangeNotifier {
       }
 
       final amount = (finalPrice(contractorCost) * 100).toInt().toString();
-      print('Calculated amount for payment: $amount cents');
 
       final paymentResponse =
           await UserApi.createPaymentIntent(amount: amount, currency: 'CAD');
-      print('Payment Intent Response: ${paymentResponse.data}');
 
       if (!paymentResponse.success || paymentResponse.data == null) {
         throw Exception(
@@ -261,10 +244,9 @@ class BookingManagerProvider with ChangeNotifier {
         totalHours: _taskDurationHours,
         coupon: _appliedCoupon,
       );
-      print('Order request: ${orderRequest.toJson()}');
 
       final response = await UserApi.createOrder(orderRequest);
-      print('Order creation response: ${response.data}');
+
       if (response.success) {
         resetBookingData();
         await fetchBookings();
@@ -293,14 +275,12 @@ class BookingManagerProvider with ChangeNotifier {
       }
       throw Exception(response.error ?? 'Order creation failed');
     } on StripeException catch (e) {
-      print('Stripe exception: $e');
       _setError('Payment failed: ${e.error}');
       if (context.mounted) {
         _showSnackBar(context, 'Payment failed: ${e.error}');
       }
       return false;
     } catch (e) {
-      print('General exception: $e');
       _setError('Order creation failed: $e');
       if (context.mounted) {
         _showSnackBar(context, 'Failed to create order: $e');
@@ -308,7 +288,6 @@ class BookingManagerProvider with ChangeNotifier {
       return false;
     } finally {
       _setPaymentProcessing(false);
-      print('Order creation process completed');
     }
   }
 
@@ -356,7 +335,6 @@ class BookingManagerProvider with ChangeNotifier {
     BuildContext dialogContext,
     int orderId,
   ) async {
-    print('====== receiveOrder function ');
     _setLoading(true);
     try {
       final orderRequest = OrderEditRequest(orderId: orderId);
@@ -552,7 +530,7 @@ class BookingManagerProvider with ChangeNotifier {
   }
 
   void selectTime(String time) {
-    if (AppStrings.timeSlots.contains(time)) {
+    if (AppConfig.timeSlots.contains(time)) {
       _selectedTime = time;
       _updateEndTime();
       notifyListeners();
@@ -560,7 +538,7 @@ class BookingManagerProvider with ChangeNotifier {
   }
 
   void setTaskDuration(int hours) {
-    if (AppStrings.availableDurations.contains(hours)) {
+    if (AppConfig.availableDurations.contains(hours)) {
       _taskDurationHours = hours;
       _updateEndTime();
       notifyListeners();
@@ -702,7 +680,6 @@ class BookingManagerProvider with ChangeNotifier {
 
   void _setError(String? message) {
     _error = message;
-    debugPrint('BookingManager Error: $message');
     notifyListeners();
   }
 
@@ -741,31 +718,24 @@ class BookingManagerProvider with ChangeNotifier {
   }
 
   Future<void> _initializePayment(String clientSecret) async {
-    print('Initializing payment sheet with client secret: $clientSecret');
-    print('Current publishable key: ${Stripe.publishableKey}');
     try {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
-          customerId: AppStrings.stripeAccountId,
+          customerId: AppConfig.stripeAccountId,
           paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'Good One App',
           style: ThemeMode.system,
         ),
       );
-      print('Payment sheet initialized successfully');
     } catch (e) {
-      print('Payment sheet initialization error: $e');
       throw Exception('Failed to initialize payment sheet: $e');
     }
   }
 
   Future<void> _presentPaymentSheet() async {
-    print('Presenting payment sheet');
     try {
       await Stripe.instance.presentPaymentSheet();
-      print('Payment sheet presented successfully');
     } catch (e) {
-      print('Payment sheet presentation error: $e');
       if (e is PlatformException && e.code == 'canceled') {
         throw Exception('Payment canceled by user');
       }
@@ -820,12 +790,9 @@ class BookingManagerProvider with ChangeNotifier {
         _locationSearchController.text = _locationAddress;
         final administrativeArea = place.administrativeArea ?? '';
         _region = administrativeArea;
-        print(
-            'Determined region: $_region for administrativeArea: $administrativeArea');
 
         // Fetch taxes for the determined region
         if (_region != null && _region!.isNotEmpty) {
-          print('===== region in not null ======');
           await fetchTaxes(_region!);
         }
 

@@ -81,13 +81,13 @@ class _WithdrawalDialogState extends State<WithdrawalDialog>
   Widget _bankForm() {
     return ListView(
       children: [
-        _buildTextField(context, 'Full Name'),
+        _buildTextField(context, AppLocalizations.of(context)!.fullName),
         SizedBox(height: context.getHeight(12)),
-        _buildTextField(context, 'Transit'),
+        _buildTextField(context, AppLocalizations.of(context)!.transit),
         SizedBox(height: context.getHeight(12)),
-        _buildTextField(context, 'Institution'),
+        _buildTextField(context, AppLocalizations.of(context)!.institution),
         SizedBox(height: context.getHeight(12)),
-        _buildTextField(context, 'Account'),
+        _buildTextField(context, AppLocalizations.of(context)!.account),
       ],
     );
   }
@@ -113,7 +113,11 @@ class _WithdrawalDialogState extends State<WithdrawalDialog>
   void _submitWithdrawal(BuildContext context) {
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Withdrawal request submitted')),
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context)!.withdrawalRequestSubmitted,
+        ),
+      ),
     );
   }
 }

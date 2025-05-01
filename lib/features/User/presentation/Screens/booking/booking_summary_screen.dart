@@ -13,7 +13,6 @@ import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-/// Displays a summary of the booking details and handles order confirmation.
 class BookingSummaryScreen extends StatefulWidget {
   const BookingSummaryScreen({super.key});
 
@@ -74,7 +73,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     return Scaffold(
       appBar: _buildAppBar(context),
       body: Center(
-        child: Text('No contractor selected'),
+        child: Text(AppLocalizations.of(context)!.noContractorSelected),
       ),
     );
   }
@@ -369,7 +368,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               style: AppTextStyles.title2(context)),
           SizedBox(height: context.getHeight(16)),
           _buildPriceRow(context, AppLocalizations.of(context)!.hourlyRate,
-              '\$${userManager.selectedContractor!.costPerHour}/hr'),
+              '\$${userManager.selectedContractor!.costPerHour}/${AppLocalizations.of(context)!.hour}'),
           SizedBox(height: context.getHeight(8)),
           _buildPriceRow(context, AppLocalizations.of(context)!.duration,
               '${bookingManager.taskDurationHours} ${bookingManager.taskDurationHours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}'),
@@ -384,18 +383,20 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
           ],
           if (taxInfo != null) ...[
             SizedBox(height: context.getHeight(8)),
-            _buildPriceRow(context, 'Region Taxes (${taxInfo.regionTaxes}%)',
+            _buildPriceRow(
+                context,
+                '${AppLocalizations.of(context)!.regionTaxes} (${taxInfo.regionTaxes}%)',
                 '\$${taxAmount.toStringAsFixed(2)}'),
             if (taxInfo.platformFeesPercentage != 0) ...[
               SizedBox(height: context.getHeight(8)),
               _buildPriceRow(
                   context,
-                  'Platform Fee (${taxInfo.platformFeesPercentage}%)',
+                  '${AppLocalizations.of(context)!.platformFee} (${taxInfo.platformFeesPercentage}%)',
                   '\$${platformFeePercentageAmount.toStringAsFixed(2)}'),
             ],
             if (taxInfo.platformFees != 0) ...[
               SizedBox(height: context.getHeight(8)),
-              _buildPriceRow(context, 'Platform Fee (Fixed)',
+              _buildPriceRow(context, AppLocalizations.of(context)!.platformFee,
                   '\$${platformFeeFixed.toStringAsFixed(2)}'),
             ],
           ],

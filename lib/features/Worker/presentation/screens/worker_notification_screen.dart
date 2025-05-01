@@ -19,9 +19,9 @@ class WorkerNotificationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Notification',
+          AppLocalizations.of(context)!.notifications,
           style: AppTextStyles.appBarTitle(context),
-        ), //TODO
+        ),
       ),
       body: Consumer<WorkerManagerProvider>(
         builder: (context, workerManager, child) {
@@ -81,13 +81,13 @@ class WorkerNotificationScreen extends StatelessWidget {
                 ),
                 SizedBox(height: context.getHeight(16)),
                 Text(
-                  'No notifications available', //TODO
+                  AppLocalizations.of(context)!.noNotifications,
                   style: AppTextStyles.subTitle(context),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Pull down to refresh', //TODO
+                  AppLocalizations.of(context)!.pullDownToRefresh,
                   style: AppTextStyles.subTitle(context),
                   textAlign: TextAlign.center,
                 ),
@@ -108,7 +108,7 @@ class WorkerNotificationScreen extends StatelessWidget {
       children: [
         if (todayNotifications.isNotEmpty) ...[
           Text(
-            'Today', //TODO
+            AppLocalizations.of(context)!.today,
             style: AppTextStyles.title2(context),
           ),
           SizedBox(height: context.getHeight(16)),
@@ -118,7 +118,7 @@ class WorkerNotificationScreen extends StatelessWidget {
         if (earlierNotifications.isNotEmpty) ...[
           SizedBox(height: context.getHeight(16)),
           Text(
-            'Earlier', //TODO
+            AppLocalizations.of(context)!.earlier,
             style: AppTextStyles.title2(context),
           ),
           SizedBox(height: context.getHeight(8)),

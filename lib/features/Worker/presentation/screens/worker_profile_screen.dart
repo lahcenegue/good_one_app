@@ -121,12 +121,12 @@ class WorkerProfileScreen extends StatelessWidget {
             NavigationService.navigateTo(AppRoutes.supportPage);
           },
         ),
-        _buildMenuItem(
-          context,
-          image: AppAssets.privancy,
-          title: AppLocalizations.of(context)!.privacyPolicy,
-          onTap: () {},
-        ),
+        // _buildMenuItem(
+        //   context,
+        //   image: AppAssets.privancy,
+        //   title: AppLocalizations.of(context)!.privacyPolicy,
+        //   onTap: () {},
+        // ),
       ],
     );
   }

@@ -1,6 +1,6 @@
+import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
 
 class NavigationState {
@@ -39,7 +39,7 @@ class NavigationState {
       hasLanguage: hasLanguage,
       hasCompletedOnboarding: onboardingValue ?? false,
       hasToken: token != null,
-      isAWorker: accountType == AppStrings.service,
+      isAWorker: accountType == AppConfig.service,
     );
   }
 

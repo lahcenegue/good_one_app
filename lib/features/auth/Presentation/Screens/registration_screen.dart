@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +10,6 @@ import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
 import 'package:good_one_app/Providers/Both/auth_provider.dart';
 
@@ -173,7 +173,7 @@ class RegistrationScreen extends StatelessWidget {
               future: StorageManager.getString(StorageKeys.accountTypeKey),
               builder: (context, snapshot) {
                 final accountType = snapshot.data;
-                if (accountType == AppStrings.service) {
+                if (accountType == AppConfig.service) {
                   return Column(
                     children: [
                       SizedBox(height: context.getHeight(16)),
@@ -221,7 +221,6 @@ class RegistrationScreen extends StatelessWidget {
             text: AppLocalizations.of(context)!.signUp,
             isLoading: auth.isLoading,
             onPressed: () async {
-              print('register');
               await auth.register(context);
             },
           ),
@@ -259,7 +258,7 @@ class RegistrationScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Country',
+          AppLocalizations.of(context)!.country,
           style: AppTextStyles.subTitle(context),
         ),
         SizedBox(height: context.getHeight(8)),
@@ -274,10 +273,10 @@ class RegistrationScreen extends StatelessWidget {
               isExpanded: true,
               value: auth.selectedCountry,
               hint: Text(
-                'Select Country',
+                AppLocalizations.of(context)!.selectCountry,
                 style: AppTextStyles.text(context),
               ),
-              items: AppStrings.countries.map((String country) {
+              items: AppConfig.countries.map((String country) {
                 return DropdownMenuItem<String>(
                   value: country,
                   child: Text(
@@ -294,7 +293,7 @@ class RegistrationScreen extends StatelessWidget {
         ),
         SizedBox(height: context.getHeight(16)),
         Text(
-          'City',
+          AppLocalizations.of(context)!.city,
           style: AppTextStyles.subTitle(context),
         ),
         SizedBox(height: context.getHeight(8)),
@@ -309,7 +308,7 @@ class RegistrationScreen extends StatelessWidget {
               isExpanded: true,
               value: auth.selectedCity,
               hint: Text(
-                'Select City',
+                AppLocalizations.of(context)!.selectCity,
                 style: AppTextStyles.text(context),
               ),
               items: auth.availableCities.map((String city) {

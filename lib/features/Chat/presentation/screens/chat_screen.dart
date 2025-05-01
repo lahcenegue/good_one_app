@@ -9,6 +9,8 @@ import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
 import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class ChatScreen extends StatefulWidget {
   final String otherUserId;
   final String otherUserName;
@@ -45,13 +47,11 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (context, provider, _) {
         return WillPopScope(
           onWillPop: () async {
-            // Removed provider.dispose() to keep WebSocket alive
             return true;
           },
           child: Scaffold(
             appBar: AppBar(
               leading: BackButton(onPressed: () {
-                // Removed provider.dispose() here as well
                 Navigator.pop(context);
               }),
               title: Text(widget.otherUserName,
@@ -96,7 +96,7 @@ class _MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: provider.scrollController,
-      reverse: true, // Newest messages at bottom
+      reverse: true,
       padding: EdgeInsets.all(context.getWidth(16)),
       itemCount: provider.messages.length,
       itemBuilder: (_, index) {
@@ -167,8 +167,8 @@ class _MessageInput extends StatelessWidget {
               controller: controller,
               focusNode: focusNode,
               enabled: provider.isConnected,
-              decoration: const InputDecoration(
-                hintText: 'Type a message...',
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.typeMessage,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(25))),
                 contentPadding:
@@ -199,6 +199,6 @@ class _EmptyMessages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('No messages yet'));
+    return Center(child: Text(AppLocalizations.of(context)!.noMessagesYet));
   }
 }

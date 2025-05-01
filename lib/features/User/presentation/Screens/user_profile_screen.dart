@@ -163,12 +163,6 @@ class UserProfileScreen extends StatelessWidget {
             NavigationService.navigateTo(AppRoutes.languageSettingsScreen);
           },
         ),
-        _buildMenuItem(
-          context,
-          image: AppAssets.privancy,
-          title: AppLocalizations.of(context)!.privacyPolicy,
-          onTap: () {},
-        ),
       ],
     );
   }

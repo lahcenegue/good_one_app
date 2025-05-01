@@ -25,8 +25,8 @@ class UserAccountDetailsScreen extends StatelessWidget {
       builder: (context, userManager, _) {
         final user = userManager.userInfo;
         if (user == null) {
-          return const Center(
-            child: Text('User data not available'),
+          return Center(
+            child: Text(AppLocalizations.of(context)!.userDataNotAvailable),
           );
         }
 
@@ -170,7 +170,7 @@ class UserAccountDetailsScreen extends StatelessWidget {
             hintText: AppLocalizations.of(context)!.enterEmail,
             validator: (value) {
               if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value!)) {
-                return 'Please enter a valid email';
+                return AppLocalizations.of(context)!.invalidEmail;
               }
               return null;
             },
@@ -184,7 +184,7 @@ class UserAccountDetailsScreen extends StatelessWidget {
             hintText: AppLocalizations.of(context)!.enterPhoneNumber,
             validator: (value) {
               if (int.tryParse(value!) == null) {
-                return 'Please enter a valid phone number';
+                return AppLocalizations.of(context)!.invalidPhone;
               }
               return null;
             },

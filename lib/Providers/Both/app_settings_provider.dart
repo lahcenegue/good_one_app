@@ -8,7 +8,6 @@ import 'package:good_one_app/Core/Infrastructure/Services/notification_service.d
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Navigation/navigation_state.dart';
-import 'package:good_one_app/Core/Presentation/Resources/app_strings.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
 import 'package:good_one_app/Features/Setup/Models/account_type.dart';
 
@@ -164,7 +163,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
       if (token == null) {
         nextRoute = AppRoutes.userMain;
       } else {
-        nextRoute = accountType == AppStrings.service
+        nextRoute = accountType == AppConfig.service
             ? AppRoutes.workerMain
             : AppRoutes.userMain;
       }

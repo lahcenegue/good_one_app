@@ -37,6 +37,12 @@ class BookingManagerProvider with ChangeNotifier {
   int _taskDurationHours = 1;
   DateTime? _taskEndTime;
 
+  // Duration Selection State
+  String _durationType = 'hours'; // 'hours', 'days', 'task'
+  double _durationValue = 1.0;
+  final TextEditingController _durationController =
+      TextEditingController(text: '1');
+
   // Location State
   final MapController _mapController = MapController();
   final TextEditingController _locationSearchController =
@@ -77,6 +83,10 @@ class BookingManagerProvider with ChangeNotifier {
   DateTime get focusedDay => _focusedDay;
   String get selectedTime => _selectedTime;
   int get taskDurationHours => _taskDurationHours;
+  String get durationType => _durationType;
+  double get durationValue => _durationValue;
+  TextEditingController get durationController => _durationController;
+  bool get hasValidDuration => _durationValue > 0;
   MapController get mapController => _mapController;
   TextEditingController get locationSearchController =>
       _locationSearchController;
@@ -101,10 +111,10 @@ class BookingManagerProvider with ChangeNotifier {
   String? get ratingError => _ratingError;
   double get rating => _rating;
 
-  /// Calculates the base price (service price * hours).
-  double basePrice(double contractorCost) {
-    return _taskDurationHours * contractorCost;
-  }
+  // /// Calculates the base price (service price * hours).
+  // double basePrice(double contractorCost) {
+  //   return _taskDurationHours * contractorCost;
+  // }
 
   /// Calculates the effective price after applying the discount.
   double effectivePrice(double contractorCost) {
@@ -160,6 +170,86 @@ class BookingManagerProvider with ChangeNotifier {
     }
   }
 
+  /// Sets the duration type (hours, days, or task-based)
+  void setDurationType(String type) {
+    if (_durationType != type) {
+      _durationType = type;
+
+      // Reset values when changing type
+      switch (type) {
+        case 'hours':
+          _durationValue = 1.0;
+          _durationController.text = '1';
+          break;
+        case 'days':
+          _durationValue = 1.0;
+          _durationController.text = '1';
+          break;
+        case 'task':
+          // For task-based, set to 1 hour (fixed)
+          _durationValue = 1.0;
+          _durationController.clear(); // No input needed
+          break;
+      }
+
+      _updateTaskDurationFromType();
+      notifyListeners();
+    }
+  }
+
+  /// Sets the duration value and updates the controller
+  void setDurationValue(double value) {
+    _durationValue = value;
+    _durationController.text =
+        value == value.toInt() ? value.toInt().toString() : value.toString();
+    _updateTaskDurationFromType();
+    notifyListeners();
+  }
+
+  /// Updates duration from text input
+  void updateDurationInput(String value) {
+    final parsedValue = double.tryParse(value);
+    if (parsedValue != null && parsedValue >= 0) {
+      _durationValue = parsedValue;
+      _updateTaskDurationFromType();
+      notifyListeners();
+    }
+  }
+
+  /// Updates the task duration hours based on the selected type and value
+  void _updateTaskDurationFromType() {
+    switch (_durationType) {
+      case 'hours':
+        _taskDurationHours = _durationValue.ceil();
+        break;
+      case 'days':
+        // Assuming 8 hours per day
+        _taskDurationHours = (_durationValue * 8).ceil();
+        break;
+      case 'task':
+        // For task-based pricing, it's always 1 hour
+        _taskDurationHours = 1;
+        break;
+    }
+    _updateEndTime();
+  }
+
+  /// basePrice method to handle different pricing models
+  double basePrice(double contractorCost) {
+    switch (_durationType) {
+      case 'hours':
+        return _durationValue * contractorCost;
+      case 'days':
+        // For days, multiply by hours per day (8) and the hourly rate
+        return (_durationValue * 8) * contractorCost;
+      case 'task':
+        // For task-based pricing, it's fixed at the hourly rate (1 hour service)
+        return contractorCost;
+      default:
+        return _taskDurationHours * contractorCost;
+    }
+  }
+
   /// Fetches taxes based on the region.
   Future<void> fetchTaxes(String region) async {
     _isTaxLoading = true;
@@ -199,6 +289,8 @@ class BookingManagerProvider with ChangeNotifier {
 
       if (response.success && response.data != null) {
         _bookings = response.data!;
+        _error = null;
+        notifyListeners();
       } else {
         _error =
             'Failed to fetch bookings: ${response.error ?? "Unknown error"}';
@@ -662,6 +754,10 @@ class BookingManagerProvider with ChangeNotifier {
     _discountPercentage = null;
     _region = null;
     _taxInfo = null;
+
+    _durationType = 'hours';
+    _durationValue = 1.0;
+    _durationController.text = '1';
     notifyListeners();
   }
 
@@ -810,5 +906,11 @@ class BookingManagerProvider with ChangeNotifier {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
     }
+  }
+
+  @override
+  void dispose() {
+    _durationController.dispose();
+    super.dispose();
   }
 }

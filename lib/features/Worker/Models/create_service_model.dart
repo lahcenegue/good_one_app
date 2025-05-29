@@ -16,6 +16,7 @@ class CreateServiceRequest {
   final String? category;
   final int? categoryId;
   final int? subCategoryId;
+  final String? pricingType;
   final double? price;
   final String? description;
   final int? experience;
@@ -27,6 +28,7 @@ class CreateServiceRequest {
     this.category,
     this.categoryId,
     this.subCategoryId,
+    this.pricingType,
     this.price,
     this.description,
     this.experience,
@@ -46,8 +48,21 @@ class CreateServiceRequest {
     if (subCategoryId != null) {
       fields['subcategory_id'] = subCategoryId!.toString();
     }
-    if (price != null) {
-      fields['cost_per_hour'] = price!.toString();
+    if (pricingType != null) {
+      fields['pricing_type'] = pricingType!;
+    }
+    if (price != null && pricingType != null) {
+      switch (pricingType!) {
+        case 'hourly':
+          fields['cost_per_hour'] = price!.toString();
+          break;
+        case 'daily':
+          fields['cost_per_day'] = price!.toString();
+          break;
+        case 'fixed':
+          fields['fixed_price'] = price!.toString();
+          break;
+      }
     }
     if (description != null) {
       fields['about'] = description!;

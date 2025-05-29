@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Features/Auth/Presentation/Screens/otp_screen.dart';
+import 'package:good_one_app/Features/Auth/Presentation/Screens/reset_password_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/cancellation_policy_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/privacy_policy_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/terms_and_conditions_screen.dart';
@@ -33,6 +35,8 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String accountSelection = '/accountSelection';
+  static const String otpScreen = '/otpScreen';
+  static const String resetPassword = '/resetPassword';
 
   // Both screens
   static const String conversations = '/conversations';
@@ -69,6 +73,8 @@ class AppRoutes {
       login: (_) => const LoginScreen(),
       register: (_) => const RegistrationScreen(),
       accountSelection: (_) => const AccountTypeSelectionOverlay(),
+      otpScreen: (BuildContext context) => const OtpScreen(),
+      resetPassword: (BuildContext context) => const PasswordResetScreen(),
 
       contractorsByService: (context) {
         final args =

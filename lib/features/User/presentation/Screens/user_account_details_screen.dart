@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -14,52 +15,89 @@ import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class UserAccountDetailsScreen extends StatelessWidget {
-  UserAccountDetailsScreen({super.key});
+class UserAccountDetailsScreen extends StatefulWidget {
+  const UserAccountDetailsScreen({super.key});
 
+  @override
+  State<UserAccountDetailsScreen> createState() =>
+      _UserAccountDetailsScreenState();
+}
+
+class _UserAccountDetailsScreenState extends State<UserAccountDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        final user = userManager.userInfo;
-        if (user == null) {
-          return Center(
-            child: Text(AppLocalizations.of(context)!.userDataNotAvailable),
+        // Handle loading state for user info if it's essential before showing the form
+        if (userManager.isLoadingUserInfo && userManager.userInfo == null) {
+          return Scaffold(
+            appBar: _buildAppBar(context),
+            body: LoadingIndicator(),
           );
         }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              AppLocalizations.of(context)!.accountDetails,
-              style: AppTextStyles.appBarTitle(context),
+        // Handle error in fetching user info
+        if (userManager.userInfoError != null && userManager.userInfo == null) {
+          return Scaffold(
+            appBar: _buildAppBar(context),
+            body: AppErrorWidget(
+              // Assuming AppErrorWidget is for full page errors
+              message: userManager.userInfoError!,
+              onRetry: () => userManager
+                  .initialize(), // Or a more specific fetch for user info if available standalone
             ),
-          ),
+          );
+        }
+        if (userManager.userInfo == null) {
+          // This case should ideally be covered by the above, but as a fallback:
+          return Scaffold(
+              appBar: _buildAppBar(context),
+              body: Center(
+                child: Text(AppLocalizations.of(context)!.userDataNotAvailable),
+              ));
+        }
+
+        // At this point, userManager.userInfo is not null.
+        final UserInfo user = userManager.userInfo!;
+        return Scaffold(
+          appBar: _buildAppBar(context),
           body: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
               horizontal: context.getWidth(20),
               vertical: context.getHeight(10),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(height: context.getHeight(20)),
                 _buildImagePicker(context, userManager),
                 if (userManager.imageError != null)
                   Padding(
-                    padding: EdgeInsets.only(top: context.getHeight(8)),
+                    padding: EdgeInsets.only(
+                        top: context.getHeight(8),
+                        bottom: context.getHeight(12)),
                     child: Text(
                       userManager.imageError!,
                       style: AppTextStyles.text(context)
                           .copyWith(color: Colors.red),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 SizedBox(height: context.getHeight(20)),
                 _buildAccountDetailsForm(context, userManager, user),
-                if (userManager.error != null)
-                  AppErrorWidget(message: userManager.error!),
+                if (userManager.editAccountError != null)
+                  Padding(
+                    padding: EdgeInsets.only(top: context.getHeight(16)),
+                    child: Text(
+                      userManager.editAccountError!,
+                      style: AppTextStyles.text(context)
+                          .copyWith(color: Colors.red.shade700),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                SizedBox(height: context.getHeight(30)),
               ],
             ),
           ),
@@ -68,47 +106,54 @@ class UserAccountDetailsScreen extends StatelessWidget {
     );
   }
 
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Text(
+        AppLocalizations.of(context)!.accountDetails,
+        style: AppTextStyles.appBarTitle(context),
+      ),
+    );
+  }
+
   Widget _buildImagePicker(
     BuildContext context,
     UserManagerProvider userManager,
   ) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           AppLocalizations.of(context)!.profilePicture,
           style: AppTextStyles.subTitle(context),
         ),
-        SizedBox(height: context.getHeight(8)),
-        Center(
-          child: GestureDetector(
-            onTap: () => _showImagePickerModal(context, userManager),
-            child: userManager.selectedImage == null
-                ? UserAvatar(
-                    picture: userManager.userInfo?.picture,
-                    size: context.getWidth(120),
-                    backgroundColor: AppColors.dimGray,
-                    iconColor: AppColors.primaryColor,
-                  )
-                : Container(
-                    width: context.getWidth(120),
-                    height: context.getWidth(120),
-                    decoration: BoxDecoration(
-                      color: AppColors.dimGray,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primaryColor,
-                        width: 2,
-                      ),
-                      image: userManager.selectedImage != null
-                          ? DecorationImage(
-                              image: FileImage(userManager.selectedImage!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+        SizedBox(height: context.getHeight(12)),
+        GestureDetector(
+          onTap: () => _showImagePickerModal(context, userManager),
+          child: userManager.selectedImage == null
+              ? UserAvatar(
+                  picture: userManager.userInfo?.picture,
+                  size: context.getWidth(120),
+                  backgroundColor: AppColors.dimGray,
+                  iconColor: AppColors.primaryColor,
+                )
+              : Container(
+                  width: context.getWidth(120),
+                  height: context.getWidth(120),
+                  decoration: BoxDecoration(
+                    color: AppColors.dimGray,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primaryColor,
+                      width: 2,
                     ),
+                    image: userManager.selectedImage != null
+                        ? DecorationImage(
+                            image: FileImage(userManager.selectedImage!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
                   ),
-          ),
+                ),
         ),
       ],
     );
@@ -169,7 +214,7 @@ class UserAccountDetailsScreen extends StatelessWidget {
             label: AppLocalizations.of(context)!.email,
             hintText: AppLocalizations.of(context)!.enterEmail,
             validator: (value) {
-              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value!)) {
+              if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value!)) {
                 return AppLocalizations.of(context)!.invalidEmail;
               }
               return null;
@@ -182,18 +227,25 @@ class UserAccountDetailsScreen extends StatelessWidget {
             controller: userManager.phoneController,
             label: AppLocalizations.of(context)!.phoneNumber,
             hintText: AppLocalizations.of(context)!.enterPhoneNumber,
+            // validator: (value) {
+            //   if (int.tryParse(value!) == null) {
+            //     return AppLocalizations.of(context)!.invalidPhone;
+            //   }
+            //   return null;
+            // },
             validator: (value) {
-              if (int.tryParse(value!) == null) {
+              if (!RegExp(r'^\+?[0-9\s-]{7,15}$').hasMatch(value!)) {
+                // Basic phone validation
                 return AppLocalizations.of(context)!.invalidPhone;
               }
               return null;
             },
             keyboardType: TextInputType.phone,
           ),
-          SizedBox(height: context.getHeight(24)),
+          SizedBox(height: context.getHeight(30)),
           PrimaryButton(
             text: AppLocalizations.of(context)!.update,
-            isLoading: userManager.isLoading,
+            isLoading: userManager.isLoadingEditAccount,
             onPressed: () async {
               await userManager.editAccount(context);
             },

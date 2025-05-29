@@ -15,8 +15,15 @@ import 'package:good_one_app/Providers/Both/auth_provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class RegistrationScreen extends StatelessWidget {
+class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
+
+  @override
+  State<RegistrationScreen> createState() => _RegistrationScreenState();
+}
+
+class _RegistrationScreenState extends State<RegistrationScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +155,7 @@ class RegistrationScreen extends StatelessWidget {
     AuthProvider auth,
   ) {
     return Form(
-      key: auth.registrationFormKey,
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

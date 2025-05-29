@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:good_one_app/Core/Infrastructure/Websocket/websocket_service.dart';
@@ -8,6 +9,9 @@ import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
 class ChatProvider with ChangeNotifier {
   final WebSocketService _socketService;
   final ScrollController _scrollController = ScrollController();
+
+  // Cache for better performance
+  final Map<String, List<ChatMessage>> _messagesCache = {};
 
   List<ChatMessage> _messages = [];
   List<ChatConversation> _conversations = [];
@@ -19,9 +23,21 @@ class ChatProvider with ChangeNotifier {
   String? _currentChatUserId;
   String? _currentId;
 
+  // Event listener management
+  bool _listenersSetup = false;
+  final Set<String> _activeRooms = {};
+
+  // Simple timeout management
+  Timer? _conversationsTimeout;
+  Timer? _messagesTimeout;
+
+  static const int _timeoutSeconds = 10;
+  static const int _maxRetries = 2;
+
   ChatProvider({WebSocketService? socketService})
       : _socketService = socketService ?? WebSocketService();
 
+  // Getters
   List<ChatMessage> get messages => _messages;
   List<ChatConversation> get conversations => _conversations;
   bool get isLoadingConversations => _isLoadingConversations;
@@ -34,44 +50,33 @@ class ChatProvider with ChangeNotifier {
   ScrollController get scrollController => _scrollController;
 
   Future<void> initialize(String id) async {
-    _currentId = id;
-    try {
-      _setupSocketListeners();
-      await _socketService.connect();
-      _isConnected = await _socketService.waitForConnection();
-      if (_isConnected) {
-        await initializeConversations();
-      } else {
-        _setError('Failed to establish WebSocket connection');
-        _initialFetchComplete = true;
-        notifyListeners();
-      }
-    } catch (e) {
-      _setError('Initialization error: $e');
-      _setLoadingConversations(false);
-      _initialFetchComplete = true;
-      notifyListeners();
-    }
-  }
-
-  Future<void> initializeConversations() async {
-    if (!_isConnected || _currentId == null) {
-      _setError('Not connected or user ID missing');
+    if (_currentId == id && _initialFetchComplete && _isConnected) {
+      debugPrint('ChatProvider: Already initialized for user $id');
       return;
     }
-    _setLoadingConversations(true);
-    _initialFetchComplete = false;
+
+    _currentId = id;
+    _clearState();
+    _clearError();
+
     try {
-      _socketService.emit('get-chats', []);
-      // Wait for a maximum of 5 seconds for the response
-      await Future.delayed(const Duration(seconds: 5)).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          throw Exception('Timeout waiting for chat conversations');
-        },
-      );
+      // Setup listeners only once
+      if (!_listenersSetup) {
+        _setupSocketListeners();
+        _listenersSetup = true;
+      }
+
+      await _connectWithRetry();
+
+      if (_isConnected) {
+        // Initialize user and load conversations
+        _socketService.emit('init', [id]);
+        await _loadConversations();
+      } else {
+        _setError('Failed to establish connection');
+      }
     } catch (e) {
-      _setError('Failed to fetch conversations: $e');
+      _setError('Initialization failed: $e');
     } finally {
       _initialFetchComplete = true;
       _setLoadingConversations(false);
@@ -79,254 +84,529 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Future<void> initializeChat(String otherUserId) async {
-    _currentChatUserId = otherUserId;
-    _messages = [];
-    _isLoadingMessages = true;
-    _error = null;
-    try {
-      _socketService.emit('join-room', [otherUserId]);
-      _socketService.emit('get-messages', [otherUserId, 0]);
-      final index =
-          _conversations.indexWhere((c) => c.user.id.toString() == otherUserId);
-      if (index != -1) {
-        _conversations[index] = ChatConversation(
-          user: _conversations[index].user,
-          latestMessage: _conversations[index].latestMessage,
-          time: _conversations[index].time,
-          hasNewMessages: false,
-        );
-        debugPrint(
-            'Chat opened for $otherUserId, hasNewMessages reset to false');
-        notifyListeners();
+  Future<void> _connectWithRetry() async {
+    for (int attempt = 1; attempt <= _maxRetries; attempt++) {
+      try {
+        debugPrint('ChatProvider: Connection attempt $attempt');
+
+        await _socketService.connect();
+        _isConnected =
+            await _socketService.waitForConnection(timeoutSeconds: 8);
+
+        if (_isConnected) {
+          debugPrint('ChatProvider: Connected successfully');
+          return;
+        }
+
+        if (attempt < _maxRetries) {
+          await Future.delayed(Duration(seconds: attempt));
+        }
+      } catch (e) {
+        debugPrint('ChatProvider: Connection attempt $attempt failed: $e');
+        if (attempt == _maxRetries) rethrow;
       }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
+    }
+  }
+
+  Future<void> _loadConversations() async {
+    _setLoadingConversations(true);
+
+    try {
+      // Set timeout
+      _conversationsTimeout = Timer(Duration(seconds: _timeoutSeconds), () {
+        if (_isLoadingConversations) {
+          _setError('Loading conversations timed out');
+          _setLoadingConversations(false);
+        }
       });
+
+      // Request conversations
+      _socketService.emit('get-chats', []);
+      debugPrint('ChatProvider: Requested conversations');
     } catch (e) {
-      _setError('Failed to initialize chat: $e');
+      _setError('Failed to request conversations: $e');
+      _setLoadingConversations(false);
+    }
+  }
+
+  Future<void> initializeConversations() async {
+    await _loadConversations();
+  }
+
+  Future<void> initializeChat(String otherUserId) async {
+    if (_currentChatUserId == otherUserId && _messages.isNotEmpty) {
+      debugPrint('ChatProvider: Chat already loaded for user $otherUserId');
+      return;
+    }
+
+    _currentChatUserId = otherUserId;
+    _setLoadingMessages(true);
+    _clearError();
+
+    try {
+      // Check cache first
+      if (_messagesCache.containsKey(otherUserId)) {
+        _messages = List.from(_messagesCache[otherUserId]!);
+        _setLoadingMessages(false);
+        _scrollToBottom();
+        notifyListeners();
+        debugPrint('ChatProvider: Loaded messages from cache');
+        return;
+      }
+
+      // Set timeout
+      _messagesTimeout = Timer(Duration(seconds: _timeoutSeconds), () {
+        if (_isLoadingMessages) {
+          _setError('Loading messages timed out');
+          _setLoadingMessages(false);
+        }
+      });
+
+      // Leave previous room
+      if (_activeRooms.isNotEmpty) {
+        for (final roomId in _activeRooms) {
+          _socketService.emit('leave-room', [roomId]);
+        }
+        _activeRooms.clear();
+      }
+
+      // Join new room and request messages
+      _socketService.emit('join-room', [otherUserId]);
+      _activeRooms.add(otherUserId);
+      _socketService.emit('get-messages', [otherUserId, 0]);
+
+      debugPrint('ChatProvider: Requested messages for user $otherUserId');
+
+      // Reset new message indicator
+      _resetNewMessageIndicator(otherUserId);
+    } catch (e) {
+      _setError('Failed to load chat: $e');
+      _setLoadingMessages(false);
     }
   }
 
   void sendMessage(String message, String otherUserId) {
     if (!_isConnected || message.trim().isEmpty) return;
+
     final chatMessage = ChatMessage(
-      message: message,
+      message: message.trim(),
       userId: _currentId!,
       timestamp: DateTime.now(),
     );
+
+    // Add message optimistically
     _messages.add(chatMessage);
-    _updateConversation(otherUserId, chatMessage, isSent: true);
+    _updateMessagesCache(otherUserId, chatMessage);
+    _updateConversationOptimistically(otherUserId, chatMessage);
+
     notifyListeners();
     _scrollToBottom();
-    _socketService.emit('send-message', [otherUserId, message]);
+
+    // Send to server
+    _socketService.emit('send-message', [otherUserId, message.trim()]);
   }
 
   void _setupSocketListeners() {
+    // Connection handlers
     _socketService.onConnected = () {
       _isConnected = true;
-      _error = null;
+      _clearError();
+      debugPrint('ChatProvider: WebSocket connected');
       notifyListeners();
-      if (_currentId != null) {
-        _socketService.emit('init', [_currentId!]);
-      }
     };
 
     _socketService.onDisconnected = () {
       _isConnected = false;
-      _setError('Disconnected from chat server');
+      _setError('Disconnected from server');
       if (!isDisposed) notifyListeners();
     };
 
-    _socketService.onError = (error) => _setError('WebSocket error: $error');
+    _socketService.onError = (error) {
+      _setError('Connection error: $error');
+    };
 
-    _socketService.on('chats', (data) => _handleChatsReceived(data));
-    _socketService.on('messages', (data) => _handleMessageHistory(data));
-    _socketService.on('receive-message', (data) => _handleSingleMessage(data));
+    // Data handlers
+    _socketService.on('chats', _handleChatsReceived);
+    _socketService.on('messages', _handleMessagesReceived);
+    _socketService.on('receive-message', _handleNewMessage);
   }
 
   void _handleChatsReceived(dynamic data) {
     try {
-      List<ChatConversation> newConversations = [];
+      debugPrint('ChatProvider: Raw chats data received: $data');
+      debugPrint('ChatProvider: Data type: ${data.runtimeType}');
 
-      if (data == null) {
-        _conversations = [];
-      } else if (data is String) {
-        data = json.decode(data);
-      }
+      _conversationsTimeout?.cancel();
 
-      if (data is Map) {
-        newConversations = data.entries.map((entry) {
-          final userInfo = entry.value['user_info'] as Map;
-          return ChatConversation(
-            user: ChatUser(
-              id: int.parse(entry.key),
-              email: '',
-              fullName: userInfo['full_name']?.toString() ?? '',
-              picture: userInfo['picture']?.toString() ?? '',
-            ),
-            latestMessage: entry.value['latest_message']?.toString(),
-            time: DateTime.now().toString(),
-            hasNewMessages:
-                entry.value['new_message']?.toString().isNotEmpty ?? false,
-          );
-        }).toList();
-      } else if (data is List) {
-        newConversations = (data).map((item) {
-          final map = item as Map;
-          final userInfo = map['user_info'] as Map? ?? {};
-          return ChatConversation(
-            user: ChatUser(
-              id: int.parse(map['user_id']?.toString() ?? '0'),
-              email: '',
-              fullName: userInfo['full_name']?.toString() ?? '',
-              picture: userInfo['picture']?.toString() ?? '',
-            ),
-            latestMessage: map['latest_message']?.toString(),
-            time: map['time']?.toString() ?? DateTime.now().toString(),
-            hasNewMessages: map['new_message']?.toString().isNotEmpty ?? false,
-          );
-        }).toList();
-      } else {
-        throw Exception('Unexpected data format: ${data.runtimeType}');
-      }
+      final conversations = _parseConversationsFromData(data);
+      _conversations = conversations;
+      _setLoadingConversations(false);
 
-      _conversations = newConversations;
-      _initialFetchComplete = true;
+      debugPrint(
+          'ChatProvider: Successfully loaded ${conversations.length} conversations');
       notifyListeners();
     } catch (e) {
-      _setError('Error processing conversations: $e');
-      _initialFetchComplete = true;
-      notifyListeners();
-    } finally {
+      debugPrint('ChatProvider: Error handling chats: $e');
+      _setError('Failed to process conversations: $e');
       _setLoadingConversations(false);
     }
   }
 
-  void _handleMessageHistory(dynamic data) {
+  void _handleMessagesReceived(dynamic data) {
     try {
-      List<ChatMessage> newMessages = [];
+      debugPrint('ChatProvider: Raw messages data received: $data');
+      debugPrint('ChatProvider: Data type: ${data.runtimeType}');
 
-      if (data is String) {
-        data = json.decode(data);
+      _messagesTimeout?.cancel();
+
+      final messages = _parseMessagesFromData(data);
+      _messages = messages;
+
+      if (_currentChatUserId != null) {
+        _messagesCache[_currentChatUserId!] = List.from(messages);
       }
 
-      if (data is Map<String, dynamic>) {
-        newMessages = data.entries
-            .map<ChatMessage>((e) => _createChatMessage(e.value))
-            .toList();
-      } else if (data is List) {
-        newMessages =
-            data.map<ChatMessage>((item) => _createChatMessage(item)).toList();
-      } else {
-        throw Exception(
-            'Unexpected message history format: ${data.runtimeType}');
-      }
+      _setLoadingMessages(false);
 
-      newMessages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-      _messages = newMessages;
+      // Scroll to bottom after loading
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
+      });
+
+      debugPrint(
+          'ChatProvider: Successfully loaded ${messages.length} messages');
       notifyListeners();
     } catch (e) {
-      _setError('Error processing message history: $e');
-    } finally {
+      debugPrint('ChatProvider: Error handling messages: $e');
+      _setError('Failed to process messages: $e');
       _setLoadingMessages(false);
     }
   }
 
-  void _handleSingleMessage(dynamic data) {
+  void _handleNewMessage(dynamic data) {
     try {
-      final message = _createChatMessage(data);
+      final message = _parseMessageFromData(data);
       final senderId = message.userId;
-      debugPrint('Received message from $senderId: ${message.message}');
-      if (_currentChatUserId != null &&
-          senderId != _currentId &&
-          !_messages.any((m) =>
-              m.timestamp == message.timestamp &&
-              m.message == message.message)) {
+
+      debugPrint('ChatProvider: Received new message from $senderId');
+
+      // Add to current chat if applicable
+      if (_currentChatUserId == senderId && !_isDuplicateMessage(message)) {
         _messages.add(message);
+        _updateMessagesCache(senderId, message);
         WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
       }
-      _updateConversation(senderId, message, isSent: false);
-      debugPrint('Notifying listeners for new message from $senderId');
+
+      // Update conversation
+      _updateConversationFromMessage(senderId, message);
       notifyListeners();
     } catch (e) {
-      _setError('Error processing message: $e');
+      debugPrint('ChatProvider: Error handling new message: $e');
     }
   }
 
-  void _updateConversation(String userId, ChatMessage message,
-      {required bool isSent}) {
+  // Efficient data parsing methods - Fixed to match server response format
+  List<ChatConversation> _parseConversationsFromData(dynamic data) {
+    debugPrint('ChatProvider: Parsing conversations data: $data');
+
+    if (data == null) {
+      debugPrint('ChatProvider: Data is null, returning empty list');
+      return [];
+    }
+
+    final List<ChatConversation> conversations = [];
+
+    try {
+      // Handle string response (JSON string)
+      if (data is String) {
+        debugPrint('ChatProvider: Converting string data to JSON');
+        data = json.decode(data);
+      }
+
+      // The server sends data as a Map where keys are user IDs
+      if (data is Map<String, dynamic>) {
+        debugPrint(
+            'ChatProvider: Processing Map data with ${data.length} entries');
+
+        for (final entry in data.entries) {
+          try {
+            final userId = entry.key;
+            final conversationData = entry.value as Map<String, dynamic>;
+            final userInfo =
+                conversationData['user_info'] as Map<String, dynamic>? ?? {};
+
+            debugPrint(
+                'ChatProvider: Processing conversation for user $userId');
+
+            final conversation = ChatConversation(
+              user: ChatUser(
+                id: int.tryParse(userId) ?? 0,
+                email: '',
+                fullName: userInfo['full_name']?.toString() ?? 'Unknown User',
+                picture: userInfo['picture']?.toString() ?? '',
+              ),
+              latestMessage: conversationData['latest_message']?.toString(),
+              time: DateTime.now().toIso8601String(),
+              hasNewMessages:
+                  _parseNewMessageFlag(conversationData['new_message']),
+            );
+
+            conversations.add(conversation);
+            debugPrint(
+                'ChatProvider: Added conversation for ${conversation.user.fullName}');
+          } catch (e) {
+            debugPrint(
+                'ChatProvider: Error parsing individual conversation: $e');
+          }
+        }
+      } else {
+        debugPrint('ChatProvider: Unexpected data type: ${data.runtimeType}');
+      }
+    } catch (e) {
+      debugPrint('ChatProvider: Error parsing conversations: $e');
+    }
+
+    // Sort by time (most recent first)
+    conversations.sort((a, b) => (b.time ?? '').compareTo(a.time ?? ''));
+    debugPrint('ChatProvider: Returning ${conversations.length} conversations');
+    return conversations;
+  }
+
+  List<ChatMessage> _parseMessagesFromData(dynamic data) {
+    debugPrint('ChatProvider: Parsing messages data: $data');
+
+    if (data == null) {
+      debugPrint('ChatProvider: Messages data is null, returning empty list');
+      return [];
+    }
+
+    final List<ChatMessage> messages = [];
+
+    try {
+      // Handle string response (JSON string)
+      if (data is String) {
+        debugPrint('ChatProvider: Converting string messages data to JSON');
+        data = json.decode(data);
+      }
+
+      // The server sends messages as a Map where keys are message IDs
+      if (data is Map<String, dynamic>) {
+        debugPrint(
+            'ChatProvider: Processing messages Map data with ${data.length} entries');
+
+        for (final entry in data.entries) {
+          try {
+            final messageId = entry.key;
+            final messageData = entry.value as Map<String, dynamic>;
+
+            debugPrint(
+                'ChatProvider: Processing message $messageId: $messageData');
+
+            final message = ChatMessage(
+              message: messageData['message']?.toString() ?? '',
+              userId: messageData['from_user']?.toString() ?? '',
+              timestamp: _parseTimestamp(messageData['time']),
+            );
+
+            messages.add(message);
+            debugPrint(
+                'ChatProvider: Added message from user ${message.userId}: ${message.message}');
+          } catch (e) {
+            debugPrint('ChatProvider: Error parsing individual message: $e');
+          }
+        }
+      } else {
+        debugPrint(
+            'ChatProvider: Unexpected messages data type: ${data.runtimeType}');
+      }
+    } catch (e) {
+      debugPrint('ChatProvider: Error parsing messages: $e');
+    }
+
+    // Sort by timestamp (oldest first for chat display)
+    messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    debugPrint('ChatProvider: Returning ${messages.length} messages');
+    return messages;
+  }
+
+  ChatMessage _parseMessageFromData(dynamic data) {
+    final map =
+        data is String ? json.decode(data) : data as Map<String, dynamic>;
+
+    return ChatMessage(
+      message: map['message']?.toString() ?? '',
+      userId: map['from_user']?.toString() ?? map['userId']?.toString() ?? '',
+      timestamp: _parseTimestamp(map['time'] ?? map['timestamp']),
+    );
+  }
+
+  DateTime _parseTimestamp(dynamic timeValue) {
+    if (timeValue == null) return DateTime.now();
+
+    try {
+      if (timeValue is String) {
+        return DateTime.parse(timeValue);
+      } else if (timeValue is num) {
+        // Server sends Unix timestamp in seconds, convert to milliseconds
+        final milliseconds = timeValue < 1000000000000
+            ? (timeValue * 1000).toInt()
+            : timeValue.toInt();
+        return DateTime.fromMillisecondsSinceEpoch(milliseconds);
+      }
+    } catch (e) {
+      debugPrint('ChatProvider: Error parsing timestamp $timeValue: $e');
+    }
+    return DateTime.now();
+  }
+
+  bool _parseNewMessageFlag(dynamic flag) {
+    if (flag is bool) return flag;
+    if (flag is String) return flag.isNotEmpty;
+    if (flag is num) return flag > 0;
+    return false;
+  }
+
+  // Helper methods (same as before but simplified)
+  void _updateMessagesCache(String userId, ChatMessage message) {
+    _messagesCache.putIfAbsent(userId, () => []).add(message);
+  }
+
+  void _updateConversationOptimistically(String userId, ChatMessage message) {
     final index =
         _conversations.indexWhere((c) => c.user.id.toString() == userId);
+
     if (index != -1) {
       _conversations[index] = ChatConversation(
         user: _conversations[index].user,
         latestMessage: message.message,
-        time: message.timestamp.toString(),
-        hasNewMessages: !isSent ||
-            _conversations[index]
-                .hasNewMessages, // Set true for received, preserve for sent
+        time: message.timestamp.toIso8601String(),
+        hasNewMessages: false,
       );
-      debugPrint(
-          'Updated conversation $userId: hasNewMessages = ${_conversations[index].hasNewMessages}');
-    } else {
-      _conversations.add(
-        ChatConversation(
-          user: ChatUser(
-              id: int.parse(userId), email: '', fullName: '', picture: ''),
-          latestMessage: message.message,
-          time: message.timestamp.toString(),
-          hasNewMessages: !isSent,
-        ),
-      );
-      debugPrint('Added new conversation $userId: hasNewMessages = ${!isSent}');
     }
-    _conversations.sort((a, b) => b.time!.compareTo(a.time!));
+
+    _conversations.sort((a, b) => (b.time ?? '').compareTo(a.time ?? ''));
   }
 
-  ChatMessage _createChatMessage(dynamic data) {
-    final map = data is String ? json.decode(data) : data as Map;
-    return ChatMessage(
-      message: map['message']?.toString() ?? '',
-      userId: map['from_user']?.toString() ?? '',
-      timestamp: DateTime.fromMillisecondsSinceEpoch(
-        ((map['time'] ?? DateTime.now().millisecondsSinceEpoch / 1000) * 1000)
-            .toInt(),
-      ),
-    );
+  void _updateConversationFromMessage(String userId, ChatMessage message) {
+    final index =
+        _conversations.indexWhere((c) => c.user.id.toString() == userId);
+
+    if (index != -1) {
+      _conversations[index] = ChatConversation(
+        user: _conversations[index].user,
+        latestMessage: message.message,
+        time: message.timestamp.toIso8601String(),
+        hasNewMessages: _currentChatUserId != userId,
+      );
+    } else {
+      _conversations.add(ChatConversation(
+        user: ChatUser(
+          id: int.tryParse(userId) ?? 0,
+          email: '',
+          fullName: 'Unknown User',
+          picture: '',
+        ),
+        latestMessage: message.message,
+        time: message.timestamp.toIso8601String(),
+        hasNewMessages: true,
+      ));
+    }
+
+    _conversations.sort((a, b) => (b.time ?? '').compareTo(a.time ?? ''));
+  }
+
+  void _resetNewMessageIndicator(String otherUserId) {
+    final index =
+        _conversations.indexWhere((c) => c.user.id.toString() == otherUserId);
+    if (index != -1) {
+      _conversations[index] = ChatConversation(
+        user: _conversations[index].user,
+        latestMessage: _conversations[index].latestMessage,
+        time: _conversations[index].time,
+        hasNewMessages: false,
+      );
+    }
+  }
+
+  bool _isDuplicateMessage(ChatMessage newMessage) {
+    return _messages.any((m) =>
+        m.timestamp.isAtSameMomentAs(newMessage.timestamp) &&
+        m.message == newMessage.message &&
+        m.userId == newMessage.userId);
   }
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         0.0,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
       );
     }
   }
 
-  void _setLoadingConversations(bool value) {
-    _isLoadingConversations = value;
-    notifyListeners();
+  // State management helpers
+  void _clearState() {
+    _messages.clear();
+    _conversations.clear();
+    _messagesCache.clear();
+    _activeRooms.clear();
+    _initialFetchComplete = false;
+    _conversationsTimeout?.cancel();
+    _messagesTimeout?.cancel();
   }
 
-  void _setLoadingMessages(bool value) {
-    _isLoadingMessages = value;
-    notifyListeners();
+  void _clearError() {
+    if (_error != null) {
+      _error = null;
+      notifyListeners();
+    }
   }
 
   void _setError(String? error) {
-    _error = error;
-    notifyListeners();
+    if (_error != error) {
+      _error = error;
+      notifyListeners();
+    }
   }
 
+  void _setLoadingConversations(bool value) {
+    if (_isLoadingConversations != value) {
+      _isLoadingConversations = value;
+      notifyListeners();
+    }
+  }
+
+  void _setLoadingMessages(bool value) {
+    if (_isLoadingMessages != value) {
+      _isLoadingMessages = value;
+      notifyListeners();
+    }
+  }
+
+  // Public retry methods
+  Future<void> retryInitialization() async {
+    if (_currentId != null) {
+      await initialize(_currentId!);
+    }
+  }
+
+  Future<void> retryLoadMessages() async {
+    if (_currentChatUserId != null) {
+      _messagesCache.remove(_currentChatUserId!);
+      await initializeChat(_currentChatUserId!);
+    }
+  }
+
+  // Dispose
   bool _disposed = false;
   bool get isDisposed => _disposed;
 
   @override
   void dispose() {
     _disposed = true;
+    _conversationsTimeout?.cancel();
+    _messagesTimeout?.cancel();
     _scrollController.dispose();
     _socketService.disconnect();
     super.dispose();

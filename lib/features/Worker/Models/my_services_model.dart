@@ -1,6 +1,9 @@
 class MyServicesModel {
   final int id;
-  final double costPerHour;
+  final double? costPerHour;
+  final double? costPerDay;
+  final double? fixedPrice;
+  final String? pricingType;
   final String service;
   final int yearsOfExperience;
   final String about;
@@ -12,6 +15,9 @@ class MyServicesModel {
   MyServicesModel({
     required this.id,
     required this.costPerHour,
+    this.costPerDay,
+    this.fixedPrice,
+    this.pricingType,
     required this.service,
     required this.yearsOfExperience,
     required this.about,
@@ -24,7 +30,16 @@ class MyServicesModel {
   factory MyServicesModel.fromJson(Map<String, dynamic> json) {
     return MyServicesModel(
       id: json['id'] as int,
-      costPerHour: (json['cost_per_hour'] as num).toDouble(),
+      costPerHour: json['cost_per_hour'] != null
+          ? (json['cost_per_hour'] as num).toDouble()
+          : null,
+      costPerDay: json['cost_per_day'] != null
+          ? (json['cost_per_day'] as num).toDouble()
+          : null,
+      fixedPrice: json['fixed_price'] != null
+          ? (json['fixed_price'] as num).toDouble()
+          : null,
+      pricingType: json['pricing_type'] as String?,
       service: json['service'] as String,
       yearsOfExperience: json['years_of_experience'] as int,
       about: json['about'] as String,
@@ -34,6 +49,34 @@ class MyServicesModel {
           Subcategory.fromJson(json['subcategory'] as Map<String, dynamic>),
       hasCertificate: json['verified_liscence'] as int?,
     );
+  }
+
+  // Helper method to get the current price and type
+  String getPriceDisplay() {
+    switch (pricingType) {
+      case 'hourly':
+        return '\$${costPerHour?.toStringAsFixed(2) ?? '0'}/hr';
+      case 'daily':
+        return '\$${costPerDay?.toStringAsFixed(2) ?? '0'}/day';
+      case 'fixed':
+        return '\$${fixedPrice?.toStringAsFixed(2) ?? '0'} (Fixed)';
+      default:
+        return '\$${costPerHour?.toStringAsFixed(2) ?? '0'}/hr';
+    }
+  }
+
+  // Helper method to get current price value
+  double? getCurrentPrice() {
+    switch (pricingType) {
+      case 'hourly':
+        return costPerHour;
+      case 'daily':
+        return costPerDay;
+      case 'fixed':
+        return fixedPrice;
+      default:
+        return costPerHour;
+    }
   }
 }
 

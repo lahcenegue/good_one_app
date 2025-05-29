@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Features/User/Presentation/Widgets/search_drop_down.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
@@ -24,19 +25,10 @@ class UserHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        if (userManager.isLoading) {
-          return LoadingIndicator();
-        }
-
-        if (userManager.error != null) {
-          return AppErrorWidget(
-            message: userManager.error!,
-            onRetry: userManager.initialize,
-          );
-        }
-
         return RefreshIndicator(
-          onRefresh: userManager.initialize,
+          onRefresh: () async {
+            await userManager.initialize();
+          },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
@@ -48,14 +40,14 @@ class UserHomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: context.getHeight(40)),
-                  if (userManager.token != null)
-                    _buildHeader(context, userManager),
+                  _buildHeader(context, userManager),
                   SizedBox(height: context.getHeight(20)),
                   _buildSearchBar(context, userManager),
                   SizedBox(height: context.getHeight(20)),
                   _buildServicesSection(context, userManager),
                   SizedBox(height: context.getHeight(20)),
                   _buildBestContractorsSection(context, userManager),
+                  SizedBox(height: context.getHeight(20)),
                 ],
               ),
             ),
@@ -69,23 +61,30 @@ class UserHomeScreen extends StatelessWidget {
     BuildContext context,
     UserManagerProvider userManager,
   ) {
-    if (!userManager.isAuthenticated) {
-      return const SizedBox.shrink();
+    if (userManager.isLoadingUserInfo && userManager.userInfo == null) {
+      return SizedBox(
+        height: context.getWidth(40) + context.getHeight(10),
+        child: Center(child: LoadingIndicator()),
+      );
     }
 
-    final user = userManager.userInfo;
+    if (!userManager.isAuthenticated || userManager.userInfo == null) {
+      return const SizedBox.shrink(); // Or a "Guest" view
+    }
+
+    final user = userManager.userInfo!;
 
     return Row(
       children: [
         UserAvatar(
-          picture: user?.picture,
+          picture: user.picture,
           size: context.getWidth(40),
         ),
         SizedBox(width: context.getWidth(10)),
         Expanded(
           child: _buildUserInfo(
             context,
-            user!.fullName,
+            user.fullName,
           ),
         ),
         _buildNotificationIcon(context),
@@ -103,7 +102,7 @@ class UserHomeScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          name != null
+          (name != null && name.isNotEmpty)
               ? '${AppLocalizations.of(context)!.hello}, $name'
               : AppLocalizations.of(context)!.hello,
           style: AppTextStyles.title2(context),
@@ -114,26 +113,37 @@ class UserHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationIcon(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.dimGray,
-      ),
-      child: IconButton(
-        icon: Image.asset(
-          AppAssets.notification,
-          width: context.getAdaptiveSize(20),
+  Widget _buildNotificationIcon(
+    BuildContext context,
+  ) {
+    return Stack(
+      alignment: Alignment.topRight,
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.dimGray,
+          ),
+          child: IconButton(
+            icon: Image.asset(
+              AppAssets.notification,
+              width: context.getAdaptiveSize(20),
+              height: context.getAdaptiveSize(20),
+            ),
+            onPressed: () {
+              NavigationService.navigateTo(AppRoutes.userNotificationsScreen);
+            },
+          ),
         ),
-        onPressed: () {
-          NavigationService.navigateTo(AppRoutes.userNotificationsScreen);
-        },
-      ),
+        //TODO hasUnreadNotifications
+      ],
     );
   }
 
   Widget _buildMessageIcon(
-      BuildContext context, UserManagerProvider userManager) {
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
     return Container(
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
@@ -143,6 +153,7 @@ class UserHomeScreen extends StatelessWidget {
         icon: Image.asset(
           AppAssets.message,
           width: context.getAdaptiveSize(25),
+          height: context.getAdaptiveSize(25),
         ),
         onPressed: () {
           if (userManager.userInfo != null) {
@@ -154,23 +165,35 @@ class UserHomeScreen extends StatelessWidget {
   }
 
   Widget _buildSearchBar(
-      BuildContext context, UserManagerProvider userManager) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.dimGray,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: TextField(
-        onChanged: userManager.updateSearchQuery,
-        decoration: InputDecoration(
-          hintText: AppLocalizations.of(context)!.search,
-          prefixIcon: Icon(
-            Icons.search,
-            size: context.getAdaptiveSize(24),
-            color: Colors.black,
-          ),
+    BuildContext context,
+    UserManagerProvider userManager,
+  ) {
+    return Column(
+      children: [
+        SearchDropdown(
+          searchController: userManager.searchController,
+          onSearch: userManager.searchServiceAndContractor,
+          onSubmitted: (query) {
+            if (query.isNotEmpty) {
+              userManager.searchServiceAndContractor(query);
+            } else {
+              userManager.searchResults.clear();
+              userManager.searchController.clear();
+            }
+          },
+          searchResults: userManager.searchResults,
+          hintText: AppLocalizations.of(context)!.searchServices,
+          onResultTap: (contractor) {
+            userManager.setSelectedContractor(contractor);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ContractorProfile(),
+              ),
+            );
+          },
         ),
-      ),
+      ],
     );
   }
 
@@ -179,14 +202,34 @@ class UserHomeScreen extends StatelessWidget {
     UserManagerProvider userManager,
   ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
           context,
           title: AppLocalizations.of(context)!.ourServices,
           onSeeAll: () => userManager.setCurrentIndex(2),
         ),
-        if (userManager.isLoading && userManager.categories.isEmpty)
-          LoadingIndicator()
+        SizedBox(height: context.getHeight(10)),
+        if (userManager.isLoadingCategories)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: context.getHeight(40)),
+            child: LoadingIndicator(),
+          )
+        else if (userManager.categoriesError != null)
+          AppErrorWidget(
+            message: userManager.categoriesError!,
+            onRetry: () => userManager.fetchCategories(),
+          )
+        else if (userManager.categories.isEmpty)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: context.getHeight(40)),
+            child: Center(
+              child: Text(
+                AppLocalizations.of(context)!.noServicesAvailable,
+                style: AppTextStyles.text(context).copyWith(color: Colors.grey),
+              ),
+            ),
+          )
         else
           _buildServicesGrid(context, userManager),
       ],
@@ -222,26 +265,28 @@ class UserHomeScreen extends StatelessWidget {
     BuildContext context,
     UserManagerProvider userManager,
   ) {
+    final displayedCategories = userManager.categories.take(6).toList();
+    if (displayedCategories.isEmpty) return const SizedBox.shrink();
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 1.2,
+        childAspectRatio: 1,
         crossAxisSpacing: context.getWidth(10),
         mainAxisSpacing: context.getHeight(10),
       ),
-      itemCount:
-          userManager.categories.length > 6 ? 6 : userManager.categories.length,
+      itemCount: displayedCategories.length,
       itemBuilder: (context, index) => ServiceGridItem(
-        category: userManager.categories[index],
+        category: displayedCategories[index],
         onTap: () {
           Navigator.pushNamed(
             context,
             AppRoutes.contractorsByService,
             arguments: {
-              'id': userManager.categories[index].id,
-              'name': userManager.categories[index].name,
+              'id': displayedCategories[index].id,
+              'name': displayedCategories[index].name,
             },
           );
         },
@@ -254,6 +299,7 @@ class UserHomeScreen extends StatelessWidget {
     UserManagerProvider userManager,
   ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -264,7 +310,14 @@ class UserHomeScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // TODO: Navigate to all contractors
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.contractorsByService,
+                  arguments: {
+                    'id': 1,
+                    'name': AppLocalizations.of(context)!.bestContractors,
+                  },
+                );
               },
               child: Text(
                 AppLocalizations.of(context)!.seeAll,
@@ -273,34 +326,54 @@ class UserHomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: context.getHeight(10)),
-        if (userManager.isLoading && userManager.bestContractors.isEmpty)
-          const LoadingIndicator()
+        if (userManager.isLoadingBestContractors)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: context.getHeight(40)),
+            child: const Center(child: LoadingIndicator()),
+          )
+        else if (userManager.bestContractorsError != null)
+          AppErrorWidget(
+            message: userManager.bestContractorsError!,
+            onRetry: () => userManager.fetchBestContractors(),
+          )
+        else if (userManager.bestContractors.isEmpty)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: context.getHeight(40)),
+            child: Center(
+              child: Text(
+                AppLocalizations.of(context)!.noContractorsFound,
+                style: AppTextStyles.text(context).copyWith(color: Colors.grey),
+              ),
+            ),
+          )
         else
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: userManager.bestContractors.length,
-            separatorBuilder: (context, index) =>
-                SizedBox(height: context.getHeight(10)),
-            itemBuilder: (context, index) {
-              return ContractorListItem(
-                contractor: userManager.bestContractors[index],
-                onTap: () async {
-                  userManager.setSelectedContractor(
-                      userManager.bestContractors[index]);
-
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ContractorProfile(),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+          _buildBestContractorsList(context, userManager),
       ],
     );
+  }
+
+  _buildBestContractorsList(
+      BuildContext context, UserManagerProvider userManager) {
+    final displayedContractors = userManager.bestContractors.toList();
+    if (displayedContractors.isEmpty) return const SizedBox.shrink();
+
+    return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: displayedContractors.length,
+        separatorBuilder: (context, index) =>
+            SizedBox(height: context.getHeight(12)),
+        itemBuilder: (context, index) {
+          return ContractorListItem(
+            contractor: displayedContractors[index],
+            onTap: () async {
+              userManager.setSelectedContractor(displayedContractors[index]);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ContractorProfile()),
+              );
+            },
+          );
+        });
   }
 }

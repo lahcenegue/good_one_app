@@ -11,7 +11,7 @@ class AppConfig {
   static const String appVersion = '1.0.0';
 
   /// The base URL for API endpoints.
-  static const String apiBaseUrl = 'http://162.254.35.98';
+  static const String apiBaseUrl = 'https://goodone.cfd';
 
   /// The base url for Stripe payment
   static const String stripeApiBase = 'https://api.stripe.com/v1';

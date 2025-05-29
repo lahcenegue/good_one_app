@@ -11,8 +11,16 @@ import 'package:provider/provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _forgotPasswordFormKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +56,12 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLoginForm(BuildContext context, AuthProvider auth) {
+  Widget _buildLoginForm(
+    BuildContext context,
+    AuthProvider auth,
+  ) {
     return Form(
-      key: auth.formKey,
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -72,7 +83,7 @@ class LoginScreen extends StatelessWidget {
             toggleVisibility: auth.togglePasswordVisibility,
             validator: (value) => auth.validatePassword(value, context),
           ),
-          _buildForgotPassword(context),
+          _buildForgotPassword(context, auth),
           SizedBox(height: context.getHeight(20)),
           PrimaryButton(
             text: AppLocalizations.of(context)!.login,
@@ -84,15 +95,14 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildForgotPassword(BuildContext context) {
+  Widget _buildForgotPassword(
+    BuildContext context,
+    AuthProvider auth,
+  ) {
     return Align(
       alignment: Alignment.bottomLeft,
       child: TextButton(
-        onPressed: () {
-          //TODO
-
-          // NavigationService.navigateTo(AppRoutes.forgotPassword);
-        },
+        onPressed: () => _forgotPasswordShow(context, auth),
         child: Text(
           AppLocalizations.of(context)!.forgotPassword,
           style: AppTextStyles.textButton(context),
@@ -122,6 +132,75 @@ class LoginScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _forgotPasswordShow(
+    BuildContext context,
+    AuthProvider auth,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: EdgeInsets.all(context.getAdaptiveSize(25)),
+            height: context.getHeight(320),
+            width: context.screenWidth,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(context.getAdaptiveSize(20)),
+                topRight: Radius.circular(context.getAdaptiveSize(20)),
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _forgotPasswordFormKey,
+                child: Column(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.enterEmail,
+                      style: AppTextStyles.title2(context),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: context.getHeight(5)),
+                    Text(
+                      AppLocalizations.of(context)!.resetPasswordEnterEmail,
+                      style: AppTextStyles.text(context),
+                      textAlign: TextAlign.justify,
+                    ),
+                    SharedAuthWidgets.buildInputField(
+                      context,
+                      controller: auth.forgotPasswordEmailController,
+                      label: '',
+                      hintText: AppLocalizations.of(context)!.enterEmail,
+                      validator: (value) => auth.validateEmail(value, context),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    SizedBox(height: context.getHeight(25)),
+                    PrimaryButton(
+                      text: AppLocalizations.of(context)!.confirm,
+                      isLoading: auth.isLoading,
+                      onPressed: () async {
+                        if (_forgotPasswordFormKey.currentState!.validate()) {
+                          // Using local form key
+                          Navigator.pop(
+                              context); // Close the bottom sheet first
+                          await auth.sendOtp(isForPasswordReset: true);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

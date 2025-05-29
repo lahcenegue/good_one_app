@@ -25,12 +25,27 @@ class WorkerAddServiceScreen extends StatefulWidget {
 }
 
 class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
+  WorkerManagerProvider? _workerManager;
+  bool _tempActiveStatus = true; // Default to active for new services
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Safely get the provider reference
+    _workerManager ??=
+        Provider.of<WorkerManagerProvider>(context, listen: false);
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<WorkerManagerProvider>(context, listen: false)
-          .fetchCategories();
+      final workerManager =
+          Provider.of<WorkerManagerProvider>(context, listen: false);
+      // Reset any previous selections first
+      workerManager.resetCategorySelection();
+      // Then fetch categories
+      workerManager.fetchCategories();
     });
   }
 
@@ -42,44 +57,78 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
           appBar: _buildAppBar(context),
           body: workerManager.isServiceLoading
               ? LoadingIndicator()
-              : Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-                  child: SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: context.screenWidth,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildServiceDetailsStep(workerManager),
-                          SizedBox(height: context.getHeight(32)),
-                          PrimaryButton(
-                            text: AppLocalizations.of(context)!.next,
-                            onPressed: () async {
-                              final serviceId =
-                                  await workerManager.createAndEditService();
-                              if (serviceId > 0) {
-                                if (context.mounted) {
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => AddImagesScreen(
-                                            serviceId: serviceId)),
-                                    (Route<dynamic> route) => false,
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                          if (workerManager.addServiceError != null)
-                            AppErrorWidget(
-                                message: workerManager.addServiceError!),
-                        ],
+              : CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildServiceVisibilityCard(workerManager),
+                            SizedBox(height: context.getHeight(24)),
+                            _buildServiceDetailsCard(workerManager),
+                            SizedBox(height: context.getHeight(32)),
+                            PrimaryButton(
+                              text: workerManager.isServiceLoading
+                                  ? 'Creating...'
+                                  : AppLocalizations.of(context)!.next,
+                              onPressed: workerManager.isServiceLoading
+                                  ? () {}
+                                  : () async {
+                                      // Set the active status before creating
+                                      workerManager
+                                          .setActive(_tempActiveStatus);
+
+                                      final serviceId = await workerManager
+                                          .createAndEditService();
+                                      if (serviceId > 0) {
+                                        if (context.mounted) {
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AddImagesScreen(
+                                                        serviceId: serviceId)),
+                                            (Route<dynamic> route) => false,
+                                          );
+                                        }
+                                      }
+                                    },
+                            ),
+                            if (workerManager.addServiceError != null)
+                              Padding(
+                                padding:
+                                    EdgeInsets.only(top: context.getHeight(16)),
+                                child: Container(
+                                  padding: EdgeInsets.all(
+                                      context.getAdaptiveSize(12)),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red[50],
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.red[300]!),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.error, color: Colors.red[700]),
+                                      SizedBox(width: context.getWidth(8)),
+                                      Expanded(
+                                        child: Text(
+                                          workerManager.addServiceError!,
+                                          style:
+                                              TextStyle(color: Colors.red[700]),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            SizedBox(height: context.getHeight(24)),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
         );
       },
@@ -95,86 +144,170 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
     );
   }
 
-  Widget _buildServiceDetailsStep(
-    WorkerManagerProvider workerManager,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: context.getHeight(16)),
-        Text(
-          AppLocalizations.of(context)!.defineYourServiceExpertise,
-          style: AppTextStyles.title2(context),
-        ),
-        SizedBox(height: context.getHeight(16)),
-        CategoryDropdownWidget<CategoryModel>(
-          label: AppLocalizations.of(context)!.selectServiceCategory,
-          hint: AppLocalizations.of(context)!.chooseServiceCategory,
-          value: workerManager.selectedCategory,
-          items: workerManager.categories,
-          onChanged: (category) {
-            workerManager.setCategory(category);
-          },
-        ),
-        SizedBox(height: context.getHeight(16)),
-        CategoryDropdownWidget<SubcategoryModel>(
-          label: AppLocalizations.of(context)!.selectSubcategory,
-          hint: AppLocalizations.of(context)!.chooseSubcategory,
-          value: workerManager.selectedSubcategory,
-          items: workerManager.selectedCategory?.subcategories ?? [],
-          onChanged: (subcategory) {
-            workerManager.setSubcategory(subcategory);
-          },
-        ),
-        SizedBox(height: context.getHeight(16)),
-        SharedAuthWidgets.buildInputField(
-          context,
-          controller: workerManager.descriptionController,
-          label: AppLocalizations.of(context)!.serviceDescription,
-          hintText: AppLocalizations.of(context)!.provideDetailedDescription,
-          validator: (value) => value!.isEmpty
-              ? AppLocalizations.of(context)!.descriptionRequired
-              : null,
-          keyboardType: TextInputType.text,
-        ),
-        SizedBox(height: context.getHeight(16)),
-        SharedAuthWidgets.buildInputField(
-          context,
-          controller: workerManager.servicePriceController,
-          label: AppLocalizations.of(context)!.servicePricePerHour,
-          hintText: AppLocalizations.of(context)!.enterPrice,
-          validator: (value) => value!.isEmpty
-              ? AppLocalizations.of(context)!.priceRequired
-              : null,
-          keyboardType: TextInputType.number,
-        ),
-        SizedBox(height: context.getHeight(16)),
-        SharedAuthWidgets.buildInputField(
-          context,
-          controller: workerManager.experienceController,
-          label: AppLocalizations.of(context)!.yearsOfExperience,
-          hintText: AppLocalizations.of(context)!.enterExperienceYears,
-          validator: (value) => value!.isEmpty
-              ? AppLocalizations.of(context)!.experienceRequired
-              : null,
-          keyboardType: TextInputType.number,
-        ),
-        SizedBox(height: context.getHeight(16)),
-        if (workerManager.selectedCategory?.hasLiscence == false)
-          Column(
-            children: [
-              CheckboxListTile(
-                title: Text(AppLocalizations.of(context)!.doYouHaveCertificate),
-                value: workerManager.hasCertificate,
-                onChanged: (value) {
-                  workerManager.setHasCertificate(value!);
-                },
-              ),
-              if (workerManager.hasCertificate)
-                _buildLicenseCertificate(context, workerManager),
-            ],
+  // NEW: Service Visibility Card
+  Widget _buildServiceVisibilityCard(WorkerManagerProvider workerManager) {
+    return Container(
+      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: Offset(0, 2),
           ),
-      ],
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(context.getAdaptiveSize(12)),
+            decoration: BoxDecoration(
+              color: _tempActiveStatus ? Colors.green[50] : Colors.grey[50],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              _tempActiveStatus ? Icons.visibility : Icons.visibility_off,
+              color: _tempActiveStatus ? Colors.green[600] : Colors.grey[600],
+              size: context.getAdaptiveSize(24),
+            ),
+          ),
+          SizedBox(width: context.getWidth(16)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Service Visibility',
+                  style: AppTextStyles.title2(context),
+                ),
+                Text(
+                  _tempActiveStatus
+                      ? 'Service will be visible to customers'
+                      : 'Service will be hidden from customers',
+                  style: AppTextStyles.text(context).copyWith(
+                    color: _tempActiveStatus
+                        ? Colors.green[600]
+                        : Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  'You can change this anytime after creating',
+                  style: AppTextStyles.text(context).copyWith(
+                    color: Colors.grey[500],
+                    fontSize: context.getAdaptiveSize(12),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _tempActiveStatus,
+            onChanged: (value) {
+              setState(() {
+                _tempActiveStatus = value;
+              });
+            },
+            activeColor: AppColors.primaryColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceDetailsCard(WorkerManagerProvider workerManager) {
+    return Container(
+      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.defineYourServiceExpertise,
+            style: AppTextStyles.title2(context),
+          ),
+          SizedBox(height: context.getHeight(16)),
+          CategoryDropdownWidget<CategoryModel>(
+            label: AppLocalizations.of(context)!.selectServiceCategory,
+            hint: AppLocalizations.of(context)!.chooseServiceCategory,
+            value: workerManager.categories
+                    .contains(workerManager.selectedCategory)
+                ? workerManager.selectedCategory
+                : null, // Safety check
+            items: workerManager.categories,
+            onChanged: (category) {
+              workerManager.setCategory(category);
+            },
+          ),
+          SizedBox(height: context.getHeight(16)),
+          CategoryDropdownWidget<SubcategoryModel>(
+            label: AppLocalizations.of(context)!.selectSubcategory,
+            hint: AppLocalizations.of(context)!.chooseSubcategory,
+            value: (workerManager.selectedCategory?.subcategories ?? [])
+                    .contains(workerManager.selectedSubcategory)
+                ? workerManager.selectedSubcategory
+                : null, // Safety check
+            items: workerManager.selectedCategory?.subcategories ?? [],
+            onChanged: (subcategory) {
+              workerManager.setSubcategory(subcategory);
+            },
+          ),
+          SizedBox(height: context.getHeight(16)),
+          SharedAuthWidgets.buildInputField(
+            context,
+            controller: workerManager.descriptionController,
+            label: AppLocalizations.of(context)!.serviceDescription,
+            hintText: AppLocalizations.of(context)!.provideDetailedDescription,
+            validator: (value) => value!.isEmpty
+                ? AppLocalizations.of(context)!.descriptionRequired
+                : null,
+            keyboardType: TextInputType.text,
+          ),
+          SizedBox(height: context.getHeight(16)),
+          _buildModernPricingSection(context, workerManager),
+          SizedBox(height: context.getHeight(16)),
+          SharedAuthWidgets.buildInputField(
+            context,
+            controller: workerManager.experienceController,
+            label: AppLocalizations.of(context)!.yearsOfExperience,
+            hintText: AppLocalizations.of(context)!.enterExperienceYears,
+            validator: (value) => value!.isEmpty
+                ? AppLocalizations.of(context)!.experienceRequired
+                : null,
+            keyboardType: TextInputType.number,
+          ),
+          SizedBox(height: context.getHeight(16)),
+          if (workerManager.selectedCategory?.hasLiscence == false)
+            Column(
+              children: [
+                CheckboxListTile(
+                  title:
+                      Text(AppLocalizations.of(context)!.doYouHaveCertificate),
+                  value: workerManager.hasCertificate,
+                  onChanged: (value) {
+                    workerManager.setHasCertificate(value!);
+                  },
+                ),
+                if (workerManager.hasCertificate)
+                  _buildLicenseCertificate(context, workerManager),
+              ],
+            ),
+        ],
+      ),
     );
   }
 
@@ -184,6 +317,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
   ) {
     return Column(
       children: [
+        SizedBox(height: context.getHeight(16)),
         Text(
           AppLocalizations.of(context)!.uploadYourCertificate,
           style: AppTextStyles.title2(context),
@@ -230,10 +364,24 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
   ) {
     showModalBottomSheet(
       context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
+        return Container(
+          padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               ListTile(
                 leading:
                     const Icon(Icons.camera_alt, color: AppColors.primaryColor),
@@ -256,6 +404,200 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildModernPricingSection(
+      BuildContext context, WorkerManagerProvider workerManager) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pricing Options',
+          style: AppTextStyles.title2(context),
+        ),
+        SizedBox(height: context.getHeight(12)),
+
+        // Modern Pricing Type Selector
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+            border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+          ),
+          child: Column(
+            children: [
+              _buildPricingOption(
+                context,
+                workerManager,
+                'hourly',
+                'Hourly Rate',
+                'Set price per hour',
+                Icons.access_time,
+                workerManager.hourlyPriceController,
+                '\$/hour',
+              ),
+              Divider(
+                  height: 1, color: AppColors.primaryColor.withOpacity(0.2)),
+              _buildPricingOption(
+                context,
+                workerManager,
+                'daily',
+                'Daily Rate',
+                'Set price per day',
+                Icons.calendar_today,
+                workerManager.dailyPriceController,
+                '\$/day',
+              ),
+              Divider(
+                  height: 1, color: AppColors.primaryColor.withOpacity(0.2)),
+              _buildPricingOption(
+                context,
+                workerManager,
+                'fixed',
+                'Fixed Price',
+                'One-time service price',
+                Icons.monetization_on,
+                workerManager.fixedPriceController,
+                '\$ Total',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPricingOption(
+    BuildContext context,
+    WorkerManagerProvider workerManager,
+    String pricingType,
+    String title,
+    String subtitle,
+    IconData icon,
+    TextEditingController controller,
+    String priceHint,
+  ) {
+    bool isSelected = workerManager.selectedPricingType == pricingType;
+
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppColors.primaryColor.withOpacity(0.1)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+      ),
+      child: InkWell(
+        onTap: () {
+          workerManager.setPricingType(pricingType);
+        },
+        borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+        child: Padding(
+          padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+          child: Row(
+            children: [
+              // Radio button with modern design
+              Container(
+                width: context.getAdaptiveSize(24),
+                height: context.getAdaptiveSize(24),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? AppColors.primaryColor : Colors.grey,
+                    width: 2,
+                  ),
+                  color:
+                      isSelected ? AppColors.primaryColor : Colors.transparent,
+                ),
+                child: isSelected
+                    ? Icon(
+                        Icons.check,
+                        size: context.getAdaptiveSize(16),
+                        color: Colors.white,
+                      )
+                    : null,
+              ),
+              SizedBox(width: context.getWidth(16)),
+
+              // Icon
+              Container(
+                padding: EdgeInsets.all(context.getAdaptiveSize(8)),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withOpacity(0.1),
+                  borderRadius:
+                      BorderRadius.circular(context.getAdaptiveSize(8)),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.primaryColor,
+                  size: context.getAdaptiveSize(20),
+                ),
+              ),
+              SizedBox(width: context.getWidth(12)),
+
+              // Title and subtitle
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyles.subTitle(context).copyWith(
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? AppColors.primaryColor : null,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: AppTextStyles.text(context),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Price input (only show for selected option)
+              if (isSelected) ...[
+                SizedBox(width: context.getWidth(12)),
+                SizedBox(
+                  width: context.getWidth(120),
+                  child: TextField(
+                    controller: controller,
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    style: AppTextStyles.subTitle(context),
+                    decoration: InputDecoration(
+                      hintText: priceHint,
+                      hintStyle: AppTextStyles.text(context),
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(context.getAdaptiveSize(8)),
+                        borderSide: BorderSide(color: AppColors.primaryColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(context.getAdaptiveSize(8)),
+                        borderSide: BorderSide(
+                            color: AppColors.primaryColor.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(context.getAdaptiveSize(8)),
+                        borderSide:
+                            BorderSide(color: AppColors.primaryColor, width: 2),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: context.getWidth(12),
+                        vertical: context.getHeight(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

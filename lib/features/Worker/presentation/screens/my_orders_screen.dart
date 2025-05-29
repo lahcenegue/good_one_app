@@ -199,7 +199,7 @@ class _OrdersContentState extends State<OrdersContent> {
                     ordersManager.dates.indexOf(date);
 
                 return Container(
-                  height: 70,
+                  height: 70, //TODO
                   padding: EdgeInsets.symmetric(
                     horizontal: context.getAdaptiveSize(4),
                     vertical: context.getAdaptiveSize(2),
@@ -285,8 +285,11 @@ class _OrdersContentState extends State<OrdersContent> {
     );
   }
 
-  Widget _orderBox(BuildContext context, OrdersManagerProvider orderManager,
-      MyOrderModel order) {
+  Widget _orderBox(
+    BuildContext context,
+    OrdersManagerProvider orderManager,
+    MyOrderModel order,
+  ) {
     return GeneralBox(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,6 +334,39 @@ class _OrdersContentState extends State<OrdersContent> {
                         style: AppTextStyles.text(context).copyWith(
                           color: orderManager.getStatusColor(order.status),
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: context.getHeight(4)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.serviceRate,
+                      style: AppTextStyles.subTitle(context),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.getWidth(8),
+                        vertical: context.getHeight(4),
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getPricingTypeColor(order.pricingType)
+                            .withOpacity(0.1),
+                        borderRadius:
+                            BorderRadius.circular(context.getAdaptiveSize(6)),
+                        border: Border.all(
+                          color: _getPricingTypeColor(order.pricingType),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        order.getPriceDisplay(),
+                        style: AppTextStyles.text(context).copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: _getPricingTypeColor(order.pricingType),
                         ),
                       ),
                     ),
@@ -401,5 +437,18 @@ class _OrdersContentState extends State<OrdersContent> {
       dateTime = DateTime.parse(timestamp).toLocal();
     }
     return DateFormat('MMM dd, HH:mm').format(dateTime);
+  }
+
+  Color _getPricingTypeColor(String? pricingType) {
+    switch (pricingType) {
+      case 'hourly':
+        return Colors.blue;
+      case 'daily':
+        return Colors.green;
+      case 'fixed':
+        return Colors.orange;
+      default:
+        return AppColors.primaryColor;
+    }
   }
 }

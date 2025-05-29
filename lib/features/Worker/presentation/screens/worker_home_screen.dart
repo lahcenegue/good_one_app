@@ -214,7 +214,7 @@ class WorkerHomeScreen extends StatelessWidget {
   ) {
     showDialog(
       context: context,
-      builder: (_) => WithdrawalDialog(workerManager: workerManager),
+      builder: (_) => WithdrawalDialog(),
     );
   }
 

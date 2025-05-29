@@ -4,14 +4,14 @@ class Booking {
   final int id;
   final int totalHours;
   final int startAt;
-  final String note;
-  final int status;
-  final int userId;
-  final int serviceId;
-  final String location;
   final double price;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String location;
+  final int serviceId;
+  final int status;
+  final String note;
+  // final int userId;
+  //final DateTime createdAt;
+  //final DateTime updatedAt;
   final Service service;
 
   Booking({
@@ -20,12 +20,12 @@ class Booking {
     required this.startAt,
     required this.note,
     required this.status,
-    required this.userId,
+    // required this.userId,
     required this.serviceId,
     required this.location,
     required this.price,
-    required this.createdAt,
-    required this.updatedAt,
+    //  required this.createdAt,
+    //  required this.updatedAt,
     required this.service,
   });
 
@@ -34,16 +34,16 @@ class Booking {
       id: json['id'] as int? ?? 0,
       totalHours: json['total_hours'] as int? ?? 0,
       startAt: json['start_at'] as int? ?? 0,
-      note: json['note'] as String? ?? '',
-      status: json['status'] as int? ?? 0,
-      userId: json['user_id'] as int? ?? 0,
-      serviceId: json['service_id'] as int? ?? 0,
-      location: json['location'] as String? ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      createdAt: DateTime.parse(
-          json['created_at'] as String? ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(
-          json['updated_at'] as String? ?? DateTime.now().toIso8601String()),
+      location: json['location'] as String? ?? '',
+      serviceId: json['service_id'] as int? ?? 0,
+      status: json['status'] as int? ?? 0,
+      note: json['note'] as String? ?? '',
+      //userId: json['user_id'] as int? ?? 0,
+      // createdAt: DateTime.parse(
+      //     json['created_at'] as String? ?? DateTime.now().toIso8601String()),
+      // updatedAt: DateTime.parse(
+      //     json['updated_at'] as String? ?? DateTime.now().toIso8601String()),
       service: Service.fromJson(json['service'] as Map<String, dynamic>),
     );
   }
@@ -54,12 +54,12 @@ class Booking {
         'start_at': startAt,
         'note': note,
         'status': status,
-        'user_id': userId,
+        //'user_id': userId,
         'service_id': serviceId,
         'location': location,
         'price': price,
-        'created_at': createdAt.toIso8601String(),
-        'updated_at': updatedAt.toIso8601String(),
+        // 'created_at': createdAt.toIso8601String(),
+        // 'updated_at': updatedAt.toIso8601String(),
         'service': service.toJson(),
       };
 

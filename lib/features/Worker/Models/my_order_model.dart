@@ -4,7 +4,10 @@ class MyOrderModel {
   final String note;
   final String service;
   final int serviceId;
-  final double costPerHour;
+  final double? costPerHour;
+  final double? costPerDay;
+  final double? fixedPrice;
+  final String? pricingType;
   final int totalHours;
   final int startAt;
   final double totalPrice;
@@ -19,7 +22,10 @@ class MyOrderModel {
     required this.note,
     required this.service,
     required this.serviceId,
-    required this.costPerHour,
+    this.costPerHour,
+    this.costPerDay,
+    this.fixedPrice,
+    this.pricingType,
     required this.totalHours,
     required this.startAt,
     required this.totalPrice,
@@ -36,7 +42,16 @@ class MyOrderModel {
       note: json['note'] as String,
       service: json['service'] as String,
       serviceId: json['service_id'] as int,
-      costPerHour: (json['cost_per_hour'] as num).toDouble(),
+      costPerHour: json['cost_per_hour'] != null
+          ? (json['cost_per_hour'] as num).toDouble()
+          : null,
+      costPerDay: json['cost_per_day'] != null
+          ? (json['cost_per_day'] as num).toDouble()
+          : null,
+      fixedPrice: json['fixed_price'] != null
+          ? (json['fixed_price'] as num).toDouble()
+          : null,
+      pricingType: json['pricing_type'] as String?,
       totalHours: json['total_hours'] as int,
       startAt: json['start_at'] as int,
       totalPrice: (json['total_price'] as num).toDouble(),
@@ -55,6 +70,9 @@ class MyOrderModel {
       'service': service,
       'service_id': serviceId,
       'cost_per_hour': costPerHour,
+      'cost_per_day': costPerDay,
+      'fixed_price': fixedPrice,
+      'pricing_type': pricingType,
       'total_hours': totalHours,
       'start_at': startAt,
       'total_price': totalPrice,
@@ -63,6 +81,34 @@ class MyOrderModel {
       'status': status,
       'user': user.toJson(),
     };
+  }
+
+  // Helper method to get pricing display
+  String getPriceDisplay() {
+    switch (pricingType) {
+      case 'hourly':
+        return '\$${costPerHour?.toStringAsFixed(2) ?? '0'}/hr';
+      case 'daily':
+        return '\$${costPerDay?.toStringAsFixed(2) ?? '0'}/day';
+      case 'fixed':
+        return '\$${fixedPrice?.toStringAsFixed(2) ?? '0'} (Fixed)';
+      default:
+        return '\$${costPerHour?.toStringAsFixed(2) ?? '0'}/hr';
+    }
+  }
+
+  // Helper method to get rate for calculations
+  double getCurrentRate() {
+    switch (pricingType) {
+      case 'hourly':
+        return costPerHour ?? 0;
+      case 'daily':
+        return costPerDay ?? 0;
+      case 'fixed':
+        return fixedPrice ?? 0;
+      default:
+        return costPerHour ?? 0;
+    }
   }
 }
 

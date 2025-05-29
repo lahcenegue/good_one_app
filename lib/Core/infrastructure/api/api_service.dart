@@ -130,17 +130,43 @@ class ApiService {
     try {
       final dynamic decodedBody = jsonDecode(response.body);
 
-      // First check if it's a successful response (200-299)
+      // Debug print to see exact response body
+      print("=== API RESPONSE DEBUG ===");
+      print("Status Code: ${response.statusCode}");
+      print("Response Body Type: ${decodedBody.runtimeType}");
+      print("Response Body: ${response.body}");
+      print("Is List: ${decodedBody is List}");
+      print("Is Map: ${decodedBody is Map<String, dynamic>}");
+      if (decodedBody is Map<String, dynamic>) {
+        print("Map keys: ${decodedBody.keys.toList()}");
+        print("Has 'data' key: ${decodedBody.containsKey('data')}");
+      }
+      print("========================");
+
+      // Check if it's a successful response (200-299)
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (decodedBody is Map<String, dynamic>) {
-          if (decodedBody.containsKey('data')) {
-            return ApiResponse.success(fromJson(decodedBody['data']));
+        try {
+          T result;
+
+          if (decodedBody is Map<String, dynamic> &&
+              decodedBody.containsKey('data')) {
+            print("Processing as wrapped data response");
+            result = fromJson(decodedBody['data']);
+          } else if (decodedBody is List) {
+            print("Processing as direct list response");
+            result = fromJson(decodedBody);
+          } else {
+            print("Processing as direct response");
+            result = fromJson(decodedBody);
           }
-          return ApiResponse.success(fromJson(decodedBody));
-        } else if (decodedBody is List) {
-          return ApiResponse.success(fromJson(decodedBody));
+
+          print("✅ Successfully processed response");
+          return ApiResponse.success(result);
+        } catch (parseError) {
+          print("❌ Error in fromJson parsing: $parseError");
+          print("Data being parsed: $decodedBody");
+          return ApiResponse.error('Failed to parse response: $parseError');
         }
-        return ApiResponse.success(fromJson(decodedBody));
       }
 
       // Check for token expiration first
@@ -150,12 +176,16 @@ class ApiService {
 
       // Handle other errors
       if (decodedBody is Map<String, dynamic>) {
-        final message = decodedBody['message']?.toString() ?? '';
+        final message = decodedBody['message']?.toString() ??
+            decodedBody['error']?.toString() ??
+            'Unknown error';
 
         // Handle other specific error codes
         switch (response.statusCode) {
           case 400:
             return ApiResponse.error(message.isEmpty ? 'Bad Request' : message);
+          case 401:
+            return ApiResponse.error('Unauthorized: $message');
           case 403:
             return ApiResponse.error(
                 message.isEmpty ? 'Access Denied' : message);
@@ -172,15 +202,88 @@ class ApiService {
           case 503:
             return ApiResponse.error('Server error. Please try again later.');
           default:
-            return ApiResponse.error('Something went wrong. Please try again.');
+            return ApiResponse.error('Something went wrong: $message');
         }
       }
 
-      return ApiResponse.error('Something went wrong. Please try again.');
+      return ApiResponse.error('Invalid response format');
     } catch (e) {
-      return ApiResponse.error('Something went wrong. Please try again.');
+      print("❌ Exception in _processResponse: $e");
+      print("Response body: ${response.body}");
+      return ApiResponse.error('Failed to process response: $e');
     }
   }
+
+  // Future<ApiResponse<T>> _processResponse<T>(
+  //   http.Response response,
+  //   T Function(dynamic) fromJson,
+  // ) async {
+  //   try {
+  //     final dynamic decodedBody = jsonDecode(response.body);
+
+  //     // Debug print to see exact response body
+  //     print("API Response Body: ${response.body}");
+  //     print("API Status Code: ${response.statusCode}");
+
+  //     // Check if it's a successful response (200-299)
+  //     if (response.statusCode >= 200 && response.statusCode < 300) {
+  //       if (decodedBody is Map<String, dynamic> &&
+  //           decodedBody.containsKey('data')) {
+  //         return ApiResponse.success(fromJson(decodedBody['data']));
+  //       } else if (decodedBody is List) {
+  //         return ApiResponse.success(fromJson(decodedBody));
+  //       }
+  //       return ApiResponse.success(fromJson(decodedBody));
+  //     }
+
+  //     // Check for token expiration first
+  //     if (_isTokenExpired(response)) {
+  //       return ApiResponse.error('Token expired or invalid detected');
+  //     }
+
+  //     // Handle other errors
+  //     if (decodedBody is Map<String, dynamic>) {
+  //       final message = decodedBody['message']?.toString() ??
+  //           decodedBody['error']?.toString() ??
+  //           'Unknown error';
+  //       // // Check if there's an 'error' field in the response
+  //       // if (decodedBody.containsKey('error') && decodedBody['error'] != null) {
+  //       //   return ApiResponse.error(decodedBody['error'].toString());
+  //       // }
+
+  //       // final message = decodedBody['message']?.toString() ?? '';
+
+  //       // Handle other specific error codes
+  //       switch (response.statusCode) {
+  //         case 400:
+  //           return ApiResponse.error(message.isEmpty ? 'Bad Request' : message);
+  //         case 401:
+  //           return ApiResponse.error('Unauthorized: $message');
+  //         case 403:
+  //           return ApiResponse.error(
+  //               message.isEmpty ? 'Access Denied' : message);
+  //         case 404:
+  //           return ApiResponse.error(message.isEmpty ? 'Not Found' : message);
+  //         case 422:
+  //           return ApiResponse.error(
+  //               message.isEmpty ? 'Validation Error' : message);
+  //         case 429:
+  //           return ApiResponse.error('Too Many Requests');
+  //         case 500:
+  //         case 501:
+  //         case 502:
+  //         case 503:
+  //           return ApiResponse.error('Server error. Please try again later.');
+  //         default:
+  //           return ApiResponse.error('Something went wrong: $message');
+  //       }
+  //     }
+
+  //     return ApiResponse.error('Invalid response format');
+  //   } catch (e) {
+  //     return ApiResponse.error('Failed to process response: $e');
+  //   }
+  // }
 
 // Add this helper method to check for token expiration
   bool _isTokenExpired(http.Response response) {

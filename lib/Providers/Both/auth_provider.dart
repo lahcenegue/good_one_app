@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Features/Auth/Models/check_request.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -23,18 +26,27 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  Timer? _timer;
+  int _seconds = 60;
+  String? _otpCode;
+
   String? selectedCountry;
   String? selectedCity;
 
   // Form Controllers
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  // final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  // final GlobalKey<FormState> registrationFormKey = GlobalKey<FormState>();
+  // final GlobalKey<FormState> forgotPasswordFormKey = GlobalKey<FormState>();
+
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController forgotPasswordEmailController =
+      TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final GlobalKey<FormState> registrationFormKey = GlobalKey<FormState>();
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
+
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -53,6 +65,8 @@ class AuthProvider with ChangeNotifier {
   bool get isAuth => _authData?.accessToken != null;
   String? get token => _authData?.accessToken;
   String? get error => _error;
+  int get seconds => _seconds;
+  String? get otpCode => _otpCode;
   bool get obscurePassword => _obscurePassword;
   bool get obscureConfirmPassword => _obscureConfirmPassword;
   File? get selectedImage => _selectedImage;
@@ -142,9 +156,14 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void getOtpCode(String otpCode) {
+    _otpCode = otpCode;
+    notifyListeners();
+  }
+
 // Authentication Methods
   Future<void> login(BuildContext context) async {
-    if (!formKey.currentState!.validate()) return;
+    print('======Login function ======');
 
     try {
       _setLoading(true);
@@ -175,6 +194,8 @@ class AuthProvider with ChangeNotifier {
         } else {
           await NavigationService.navigateToAndReplace(AppRoutes.userMain);
         }
+      } else if (response.error == 'Account is not verified') {
+        await sendOtp();
       } else {
         _error = response.error;
         notifyListeners();
@@ -198,8 +219,6 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> register(BuildContext context) async {
-    if (!registrationFormKey.currentState!.validate()) return;
-
     try {
       _setLoading(true);
       _clearErrors();
@@ -237,25 +256,31 @@ class AuthProvider with ChangeNotifier {
       );
 
       final response = await AuthApi.register(request);
-
       if (response.success) {
-        _authData = response.data;
-        _clearFormData();
-        await _saveAuthData();
-
-        _setLoading(false);
-        if (accountType == AppConfig.service) {
-          await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
-        } else {
-          await NavigationService.navigateToAndReplace(
-            AppRoutes.userMain,
-            arguments: 0,
-          );
-        }
+        await NavigationService.navigateToAndReplace(AppRoutes.otpScreen);
       } else {
         _error = response.error;
         notifyListeners();
       }
+
+      // if (response.success) {
+      //   _authData = response.data;
+      //   _clearFormData();
+      //   await _saveAuthData();
+
+      //   _setLoading(false);
+      //   if (accountType == AppConfig.service) {
+      //     await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+      //   } else {
+      //     await NavigationService.navigateToAndReplace(
+      //       AppRoutes.userMain,
+      //       arguments: 0,
+      //     );
+      //   }
+      // } else {
+      //   _error = response.error;
+      //   notifyListeners();
+      // }
     } catch (e) {
       _handleError(e);
     } finally {
@@ -270,6 +295,82 @@ class AuthProvider with ChangeNotifier {
       _clearFormData();
 
       clearData();
+    } catch (e) {
+      _handleError(e);
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  //TODO
+  Future<void> deleteAccount() async {}
+
+  Future<void> sendOtp({bool isForPasswordReset = false}) async {
+    try {
+      final email = isForPasswordReset
+          ? forgotPasswordEmailController.text.trim()
+          : emailController.text.trim();
+
+      final response = await AuthApi.sendOtp(email: email);
+      if (response.success) {
+        startTimer();
+        if (isForPasswordReset) {
+          await NavigationService.navigateTo(AppRoutes.resetPassword);
+        } else {
+          await NavigationService.navigateTo(AppRoutes.otpScreen);
+        }
+      } else {
+        _error = response.error;
+        notifyListeners();
+      }
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
+  Future<void> resendOtpForPasswordReset() async {
+    try {
+      final response = await AuthApi.sendOtp(
+        email: forgotPasswordEmailController.text.trim(),
+      );
+      if (response.success) {
+        startTimer();
+      }
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
+  Future<void> checkOtp() async {
+    try {
+      _setLoading(true);
+      _clearErrors();
+
+      final accountType =
+          await StorageManager.getString(StorageKeys.accountTypeKey);
+
+      final request = CheckRequest(
+        email: emailController.text.trim(),
+        otp: _otpCode!,
+      );
+
+      final response = await AuthApi.checkOtp(request);
+
+      if (response.success) {
+        _authData = response.data;
+        _clearFormData();
+        await _saveAuthData();
+        _setLoading(false);
+
+        if (accountType == AppConfig.service) {
+          await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+        } else {
+          await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+        }
+      } else {
+        _error = response.error;
+        notifyListeners();
+      }
     } catch (e) {
       _handleError(e);
     } finally {
@@ -333,6 +434,18 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void startTimer() {
+    _seconds = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_seconds > 0) {
+        _seconds--;
+        notifyListeners();
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
   // String? _getLocalizedErrorMessage(String? errorCode,
   //     [BuildContext? context]) {
   //   if (context == null) return null;
@@ -355,22 +468,26 @@ class AuthProvider with ChangeNotifier {
 
   void _clearFormData() {
     _obscurePassword = true;
+    _obscureConfirmPassword = true;
     _selectedImage = null;
-    fullNameController.clear;
+    _otpCode = null;
+    fullNameController.clear();
     emailController.clear();
+    forgotPasswordEmailController.clear();
     passwordController.clear();
-    phoneController.clear;
+    phoneController.clear();
 
     notifyListeners();
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     emailController.dispose();
+    forgotPasswordEmailController.dispose();
     passwordController.dispose();
     fullNameController.dispose();
     phoneController.dispose();
-    confirmPasswordController.dispose();
     super.dispose();
   }
 }

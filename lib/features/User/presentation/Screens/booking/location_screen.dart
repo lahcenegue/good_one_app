@@ -22,11 +22,13 @@ class LocationScreen extends StatelessWidget {
     return Consumer<BookingManagerProvider>(
       builder: (context, bookingManager, _) {
         final initialLocation = bookingManager.selectedLocation ??
-            const LatLng(43.6532, -79.3832); // Default to Toronto
+            const LatLng(51.0486, -114.0708); // Default to Calgary Alberta
         return Scaffold(
           appBar: AppBar(
-            title: Text(AppLocalizations.of(context)!.location,
-                style: AppTextStyles.appBarTitle(context)),
+            title: Text(
+              AppLocalizations.of(context)!.location,
+              style: AppTextStyles.appBarTitle(context),
+            ),
           ),
           body: bookingManager.isLocationSelected
               ? _buildSelectedLocationView(

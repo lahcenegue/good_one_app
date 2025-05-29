@@ -32,6 +32,20 @@ class UserApi {
     );
   }
 
+  static Future<ApiResponse<List<Contractor>>> search(String query) async {
+    return _api.get<List<Contractor>>(
+      url: '${ApiEndpoints.search}=$query',
+      fromJson: (dynamic response) {
+        if (response is List) {
+          return response
+              .map((item) => Contractor.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+        throw Exception('Invalid response format');
+      },
+    );
+  }
+
   static Future<ApiResponse<List<Contractor>>> getBestContractors() async {
     return _api.get<List<Contractor>>(
       url: ApiEndpoints.bestcontractors,
@@ -63,7 +77,7 @@ class UserApi {
 
   static Future<ApiResponse<List<Booking>>> getBookings() async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
-    return _api.get<List<Booking>>(
+    return await _api.get<List<Booking>>(
       url: ApiEndpoints.userOrders,
       fromJson: (dynamic response) {
         if (response is List) {

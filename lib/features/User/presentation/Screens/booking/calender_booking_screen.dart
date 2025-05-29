@@ -18,8 +18,10 @@ class CalendarBookingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.schedule,
-            style: AppTextStyles.appBarTitle(context)),
+        title: Text(
+          AppLocalizations.of(context)!.schedule,
+          style: AppTextStyles.appBarTitle(context),
+        ),
       ),
       body: Consumer<BookingManagerProvider>(
         builder: (context, bookingManager, _) => SingleChildScrollView(
@@ -182,9 +184,10 @@ class CalendarBookingScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the duration selection row.
   Widget _buildDurationSelection(
-      BuildContext context, BookingManagerProvider bookingManager) {
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -198,50 +201,372 @@ class CalendarBookingScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey.shade200),
           ),
-          padding: EdgeInsets.all(context.getWidth(12)),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: bookingManager.availableDurations.map((hours) {
-                final isSelected = bookingManager.taskDurationHours == hours;
-                return Padding(
-                  padding: EdgeInsets.only(
-                      right: hours == bookingManager.availableDurations.last
-                          ? 0
-                          : context.getWidth(8)),
-                  child: InkWell(
-                    onTap: () => bookingManager.setTaskDuration(hours),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: context.getWidth(16),
-                          vertical: context.getHeight(8)),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primaryColor
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                            color: isSelected
-                                ? AppColors.primaryColor
-                                : AppColors.dimGray),
-                      ),
-                      child: Text(
-                        '$hours ${hours == 1 ? AppLocalizations.of(context)!.hour : AppLocalizations.of(context)!.hours}',
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+          padding: EdgeInsets.all(context.getWidth(16)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Duration Type Selection
+              Text(
+                AppLocalizations.of(context)!.selectDurationType,
+                style: AppTextStyles.text(context).copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              SizedBox(height: context.getHeight(8)),
+              Row(
+                children: [
+                  _buildDurationTypeChip(
+                    context,
+                    bookingManager,
+                    'hours',
+                    AppLocalizations.of(context)!.hours,
+                    Icons.access_time,
+                  ),
+                  SizedBox(width: context.getWidth(8)),
+                  _buildDurationTypeChip(
+                    context,
+                    bookingManager,
+                    'days',
+                    AppLocalizations.of(context)!.days,
+                    Icons.calendar_today,
+                  ),
+                  SizedBox(width: context.getWidth(8)),
+                  _buildDurationTypeChip(
+                    context,
+                    bookingManager,
+                    'task',
+                    AppLocalizations.of(context)!.taskBased,
+                    Icons.task_alt,
+                  ),
+                ],
+              ),
+
+              SizedBox(height: context.getHeight(16)),
+
+              // Duration Input Section (only for hours and days)
+              if (bookingManager.durationType != 'task') ...[
+                Text(
+                  _getDurationInputLabel(context, bookingManager.durationType),
+                  style: AppTextStyles.text(context).copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                SizedBox(height: context.getHeight(8)),
+
+                // Manual Input Field
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                    color: Colors.grey.shade50,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: bookingManager.durationController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(
+                            hintText: _getHintText(
+                                context, bookingManager.durationType),
+                            hintStyle: TextStyle(color: Colors.grey.shade500),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: context.getWidth(12),
+                              vertical: context.getHeight(12),
+                            ),
+                          ),
+                          onChanged: (value) =>
+                              bookingManager.updateDurationInput(value),
                         ),
                       ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.getWidth(12),
+                          vertical: context.getHeight(12),
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          _getDurationUnit(
+                              context, bookingManager.durationType),
+                          style: TextStyle(
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                // Task-based explanation
+                Container(
+                  padding: EdgeInsets.all(context.getWidth(12)),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.primaryColor.withValues(alpha: 0.2),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.primaryColor,
+                        size: 20,
+                      ),
+                      SizedBox(width: context.getWidth(8)),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.taskBasedInfo,
+                          style: TextStyle(
+                            color: AppColors.primaryColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              // Quick Selection for Hours/Days
+              if (bookingManager.durationType != 'task') ...[
+                SizedBox(height: context.getHeight(12)),
+                Text(
+                  AppLocalizations.of(context)!.quickSelect,
+                  style: AppTextStyles.text(context).copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                SizedBox(height: context.getHeight(8)),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children:
+                        _getQuickSelectOptions(bookingManager.durationType)
+                            .map((value) => _buildQuickSelectChip(
+                                  context,
+                                  bookingManager,
+                                  value,
+                                ))
+                            .toList(),
+                  ),
+                ),
+              ],
+
+              // Duration Summary
+              if (bookingManager.hasValidDuration) ...[
+                SizedBox(height: context.getHeight(12)),
+                Container(
+                  padding: EdgeInsets.all(context.getWidth(12)),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.primaryColor.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.primaryColor,
+                        size: 18,
+                      ),
+                      SizedBox(width: context.getWidth(8)),
+                      Expanded(
+                        child: Text(
+                          _getDurationSummary(context, bookingManager),
+                          style: TextStyle(
+                            color: AppColors.primaryColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],
     );
+  }
+
+  /// Builds duration type selection chips (Hours/Days/Task-based)
+  Widget _buildDurationTypeChip(
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+    String type,
+    String label,
+    IconData icon,
+  ) {
+    final isSelected = bookingManager.durationType == type;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => bookingManager.setDurationType(type),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: context.getWidth(12),
+            vertical: context.getHeight(10),
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? AppColors.primaryColor : Colors.grey.shade300,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? Colors.white : Colors.grey.shade600,
+              ),
+              SizedBox(width: context.getWidth(6)),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.grey.shade700,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontSize: 12,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds quick selection chips for common durations
+  Widget _buildQuickSelectChip(
+    BuildContext context,
+    BookingManagerProvider bookingManager,
+    double value,
+  ) {
+    final isSelected = bookingManager.durationValue == value;
+
+    return Padding(
+      padding: EdgeInsets.only(right: context.getWidth(8)),
+      child: InkWell(
+        onTap: () => bookingManager.setDurationValue(value),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: context.getWidth(12),
+            vertical: context.getHeight(6),
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: isSelected ? AppColors.primaryColor : Colors.grey.shade300,
+            ),
+          ),
+          child: Text(
+            value == value.toInt()
+                ? value.toInt().toString()
+                : value.toString(),
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.grey.shade700,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Helper methods for labels and options
+  String _getDurationInputLabel(BuildContext context, String durationType) {
+    switch (durationType) {
+      case 'hours':
+        return AppLocalizations.of(context)!.enterHours;
+      case 'days':
+        return AppLocalizations.of(context)!.enterDays;
+      case 'task':
+        return AppLocalizations.of(context)!.taskPrice;
+      default:
+        return AppLocalizations.of(context)!.enterDuration;
+    }
+  }
+
+  String _getHintText(BuildContext context, String durationType) {
+    switch (durationType) {
+      case 'hours':
+        return AppLocalizations.of(context)!.exampleHours;
+      case 'days':
+        return AppLocalizations.of(context)!.exampleDays;
+      case 'task':
+        return AppLocalizations.of(context)!.exampleTaskPrice;
+      default:
+        return '';
+    }
+  }
+
+  String _getDurationUnit(BuildContext context, String durationType) {
+    switch (durationType) {
+      case 'hours':
+        return AppLocalizations.of(context)!.hoursUnit;
+      case 'days':
+        return AppLocalizations.of(context)!.daysUnit;
+      case 'task':
+        return '\$';
+      default:
+        return '';
+    }
+  }
+
+  List<double> _getQuickSelectOptions(String durationType) {
+    switch (durationType) {
+      case 'hours':
+        return [1, 2, 4, 6, 8, 12];
+      case 'days':
+        return [1, 2, 3, 5, 7, 14];
+      default:
+        return [];
+    }
+  }
+
+  String _getDurationSummary(
+      BuildContext context, BookingManagerProvider bookingManager) {
+    final value = bookingManager.durationValue;
+    final type = bookingManager.durationType;
+
+    switch (type) {
+      case 'hours':
+        return '${AppLocalizations.of(context)!.totalHours}: ${value == value.toInt() ? value.toInt() : value}';
+      case 'days':
+        final totalHours = value * 8; // Assuming 8 hours per day
+        return '${AppLocalizations.of(context)!.totalDays}: ${value == value.toInt() ? value.toInt() : value} (${totalHours.toInt()} ${AppLocalizations.of(context)!.hours})';
+      case 'task':
+        return '${AppLocalizations.of(context)!.fixedTaskPrice}: ${AppLocalizations.of(context)!.oneHourService}';
+      default:
+        return '';
+    }
   }
 
   /// Displays a summary of the selected booking details.

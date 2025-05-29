@@ -272,5 +272,102 @@
   "transit":"Transit",
   "institution":"Institution",
   "account":"Account",
-  "withdrawalRequestSubmitted":"Withdrawal request submitted"
+  "withdrawalRequestSubmitted":"Withdrawal request submitted",
+  "noServiceFound":"No Service Found",
+  "searchServices": "Search for a service...",
+  "searchResults":"Search Results",
+  "resetPasswordEnterEmail":"Please enter your registered email address, and we will send you a verification code (OTP) to reset your password.",
+  "otpVerification":"OTP Verification",
+  "enterVerificationCode":"Enter the verification code (OTP)",
+  "otpSent":"We have sent a 6-digit verification code to your registered contact.",
+  "checkCode":"Check the code",
+  "resendCode": "Resend the code",
+  "noContractorsFound":"No contractors found",
+  "noContractorsMatchFilters": "No contractors match the current filters.",
+  "noContractorsAvailableInThisCategory": "No contractors are currently available in this category.",
+  "chatConnectionFailed":"Chat Connection Failed",
+  "waitingForUserInfo":"Waiting For User Info",
+  "connected":"Connected",
+  "reconnect":"Reconnect",
+  "checkConnection":"Please check your internet connection",
+  "bankAccountInformation":"Bank Account Information",
+  "interacTransferInformation":"Interac e-Transfer Information",
+  "interacMessage":"Funds will be sent to this email address via Interac e-Transfer.",
+  "saveAccount":"Save account information for future use",
+  "processing":"Processing...",
+  "requiredFields":"Please fill in all required fields correctly.",
+
+
+ "selectDurationType": "Select Duration Type",
+  "days": "Days",
+  "taskBased": "Task",
+  "enterHours": "Enter Number of Hours",
+  "enterDays": "Enter Number of Days", 
+  "enterDuration": "Enter Duration",
+  "exampleHours": "e.g. 2.5",
+  "exampleDays": "e.g. 1.5",
+  "hoursUnit": "hrs",
+  "daysUnit": "days",
+  "quickSelect": "Quick Select",
+  "totalDays": "Total Days",
+  "fixedTaskPrice": "Fixed Task Price",
+  "oneHourService": "One hour service at hourly rate",
+  "taskBasedInfo": "Fixed price task - charged at hourly rate for one hour of service",
+  "taskPrice": "Enter Task Price",
+  "exampleTaskPrice": "e.g. 150.00",
+
+  "pricingOptions":"Pricing Options",
+  "serviceRate":"service Rate",
+
+
+  "resetPassword": "Reset Password",
+  "@resetPassword": {
+    "description": "Button text and page title for password reset"
+  },
+  
+  "resetYourPassword": "Reset Your Password",
+  "@resetYourPassword": {
+    "description": "Main heading for password reset screen"
+  },
+  
+  "enterOtpAndNewPassword": "Enter the verification code sent to your email and create a new password for your account.",
+  "@enterOtpAndNewPassword": {
+    "description": "Instructions for password reset process"
+  },
+  
+  "verificationCode": "Verification Code",
+  "@verificationCode": {
+    "description": "Label for OTP input field"
+  },
+  
+  "newPassword": "New Password",
+  "@newPassword": {
+    "description": "Label for new password input field"
+  },
+  
+  "enterNewPassword": "Enter your new password",
+  "@enterNewPassword": {
+    "description": "Hint text for new password field"
+  },
+  
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Label for confirm password input field"
+  },
+  
+  "confirmNewPassword": "Confirm your new password",
+  "@confirmNewPassword": {
+    "description": "Hint text for confirm password field"
+  },
+  
+  "otpRequired": "Verification code is required",
+  "@otpRequired": {
+    "description": "Error message when OTP is missing"
+  },
+  
+  "passwordResetSuccess": "Password reset successfully! Please log in with your new password.",
+  "@passwordResetSuccess": {
+    "description": "Success message after password reset"
+  }
+
 }

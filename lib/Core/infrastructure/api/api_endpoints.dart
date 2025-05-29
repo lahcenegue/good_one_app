@@ -13,6 +13,9 @@ abstract class ApiEndpoints {
   static String get login => '$baseUrl/api/auth/login';
   static String get register => '$baseUrl/api/auth/register';
   static String get refreshToken => '$baseUrl/api/auth/refresh';
+  static String get sendOtp => '$baseUrl/api/auth/password/reset/code';
+  static String get checkOtp => '$baseUrl/api/auth/verifyAccount';
+  static String get resetPassword => '$baseUrl/api/auth/password/reset';
 
   // Both Endpoints
   static String get me => '$baseUrl/api/auth/me';
@@ -20,6 +23,7 @@ abstract class ApiEndpoints {
   static String get taxes => '$baseUrl/api/taxes';
 
   // User Endpoints
+  static String get search => '$baseUrl/api/services?query';
   static String get categories => '$baseUrl/api/categories';
   static String get bestcontractors => '$baseUrl/api/services';
   static String get contractorsByService => '$baseUrl/api/services/category';

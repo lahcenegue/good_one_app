@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
@@ -18,21 +19,12 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        // Handle error state
-        if (userManager.error != null) {
-          return Scaffold(
-            appBar: _buildAppBar(context),
-            body: AppErrorWidget(
-              message: userManager.error!,
-              onRetry: userManager.fetchCategories,
-            ),
-          );
-        }
-
         return Scaffold(
           appBar: _buildAppBar(context),
           body: RefreshIndicator(
-            onRefresh: userManager.fetchCategories,
+            onRefresh: () async {
+              await userManager.fetchCategories();
+            },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: Padding(
@@ -44,7 +36,7 @@ class ServicesScreen extends StatelessWidget {
                   children: [
                     _buildSearchBar(context, userManager),
                     SizedBox(height: context.getHeight(20)),
-                    _buildServicesGrid(context, userManager),
+                    _buildServicesGridContainer(context, userManager),
                   ],
                 ),
               ),
@@ -72,35 +64,65 @@ class ServicesScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.dimGray,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
-        onChanged: userManager.updateSearchQuery,
+        onChanged: userManager.searchServicesQuery,
         decoration: InputDecoration(
-          hintText: AppLocalizations.of(context)!.search,
+          hintText: AppLocalizations.of(context)!.searchServices,
           prefixIcon: Icon(
             Icons.search,
-            size: context.getAdaptiveSize(24),
-            color: Colors.black,
+            size: context.getAdaptiveSize(22),
+            color: Colors.grey.shade700,
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: context.getWidth(15),
+            vertical: context.getHeight(12),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildServicesGrid(
+  Widget _buildServicesGridContainer(
     BuildContext context,
     UserManagerProvider userManager,
   ) {
-    if (userManager.isLoading && userManager.categories.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+    if (userManager.isLoadingCategories && userManager.categories.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: context.getHeight(50)),
+        child: LoadingIndicator(),
+      );
     }
 
-    if (userManager.categories.isEmpty) {
-      return Center(
-        child: Text(
-          AppLocalizations.of(context)!.noServicesAvailable,
-          style: AppTextStyles.text(context),
+    if (userManager.categoriesError != null && userManager.categories.isEmpty) {
+      return AppErrorWidget(
+        message: userManager.categoriesError!,
+        onRetry: () => userManager.fetchCategories(),
+      );
+    }
+
+    // Filter categories based on search query
+    final filteredCategories = userManager.searchQuery.isEmpty
+        ? userManager.categories
+        : userManager.categories
+            .where((category) => category.name
+                .toLowerCase()
+                .contains(userManager.searchQuery.toLowerCase()))
+            .toList();
+
+    if (filteredCategories.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: context.getHeight(50)),
+        child: Center(
+          child: Text(
+            userManager.searchQuery.isEmpty
+                ? AppLocalizations.of(context)!.noServicesAvailable
+                : AppLocalizations.of(context)!.noServiceFound,
+            style: AppTextStyles.text(context),
+            textAlign: TextAlign.center,
+          ),
         ),
       );
     }
@@ -110,24 +132,26 @@ class ServicesScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 1.2,
-        crossAxisSpacing: context.getWidth(10),
-        mainAxisSpacing: context.getHeight(10),
+        childAspectRatio: 0.9,
+        crossAxisSpacing: context.getWidth(12),
+        mainAxisSpacing: context.getHeight(12),
       ),
-      itemCount: userManager.categories.length,
-      itemBuilder: (context, index) => ServiceGridItem(
-        category: userManager.categories[index],
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            AppRoutes.contractorsByService,
-            arguments: {
-              'id': userManager.categories[index].id,
-              'name': userManager.categories[index].name,
-            },
-          );
-        },
-      ),
+      itemCount: filteredCategories.length,
+      itemBuilder: (context, index) {
+        return ServiceGridItem(
+          category: filteredCategories[index],
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRoutes.contractorsByService,
+              arguments: {
+                'id': filteredCategories[index].id,
+                'name': filteredCategories[index].name,
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

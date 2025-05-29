@@ -32,10 +32,8 @@ class BookingScreen extends StatelessWidget {
     return Consumer<BookingManagerProvider>(
       builder: (context, bookingManager, child) {
         if (bookingManager.isInitializing) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+          return Scaffold(
+            body: LoadingIndicator(),
           );
         }
         if (!userManager.isAuthenticated) {

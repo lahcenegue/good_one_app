@@ -4,6 +4,7 @@ import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Features/Worker/Models/balance_model.dart';
 import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
 import 'package:good_one_app/Features/Worker/Models/withdrawal_model.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_result.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -39,6 +40,10 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool _isBankSelected = true;
   WithdrawalModel? _withdrawalModel;
   List<WithdrawStatus>? _withdrawStatus;
+
+  // Withdrawal Dialog State
+  bool _isWithdrawalLoading = false;
+  bool _saveAccountInfo = true;
 
   // Form Controllers
   final TextEditingController _fullNameController = TextEditingController();
@@ -76,11 +81,15 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool _hasCertificate = false;
   int? _editingServiceId;
   int? _active;
+  String _selectedPricingType = 'hourly'; // Default to hourly
 
   // Form controllers for Add Service
   final TextEditingController _servicePriceController = TextEditingController();
   final TextEditingController _experienceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _hourlyPriceController = TextEditingController();
+  final TextEditingController _dailyPriceController = TextEditingController();
+  final TextEditingController _fixedPriceController = TextEditingController();
 
   // Getters for Authentication and User Info
   String? get token => _token;
@@ -98,6 +107,10 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool get isBankSelected => _isBankSelected;
   WithdrawalModel? get withdrawalModel => _withdrawalModel;
   List<WithdrawStatus>? get withdrawStatus => _withdrawStatus;
+
+  // Withdrawal Dialog Getters
+  bool get isWithdrawalLoading => _isWithdrawalLoading;
+  bool get saveAccountInfo => _saveAccountInfo;
 
   TextEditingController get fullNameController => _fullNameController;
   TextEditingController get emailController => _emailController;
@@ -121,10 +134,15 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool get isServiceLoading => _isServiceLoading;
   bool get hasCertificate => _hasCertificate;
   int? get avtice => _active;
+  String get selectedPricingType => _selectedPricingType;
+
   TextEditingController get amountController => _ammountController;
   TextEditingController get servicePriceController => _servicePriceController;
   TextEditingController get experienceController => _experienceController;
   TextEditingController get descriptionController => _descriptionController;
+  TextEditingController get hourlyPriceController => _hourlyPriceController;
+  TextEditingController get dailyPriceController => _dailyPriceController;
+  TextEditingController get fixedPriceController => _fixedPriceController;
 
   WorkerManagerProvider() {
     initialize();
@@ -155,6 +173,280 @@ class WorkerManagerProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  // -----------------------------------
+  // Withdrawal Dialog Management
+  // -----------------------------------
+
+  /// Loads saved account information from storage
+  Future<void> loadSavedAccountInfo() async {
+    try {
+      // Load saved bank account info
+      final bankAccount =
+          await StorageManager.getObject(StorageKeys.bankAccountKey);
+      if (bankAccount != null) {
+        _fullNameController.text = bankAccount['fullName'] ?? '';
+        _transitController.text = bankAccount['transit'] ?? '';
+        _institutionController.text = bankAccount['institution'] ?? '';
+        _accountController.text = bankAccount['account'] ?? '';
+      }
+
+      // Load saved Interac info
+      final interacAccount =
+          await StorageManager.getObject(StorageKeys.interacAccountKey);
+      if (interacAccount != null) {
+        _emailController.text = interacAccount['email'] ?? '';
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error loading saved account info: $e');
+    }
+  }
+
+  /// Saves account information to storage
+  Future<void> saveAccountInfos(bool isBankTab) async {
+    if (!_saveAccountInfo) return;
+
+    try {
+      if (isBankTab) {
+        // Save bank account info
+        final bankAccountData = {
+          'fullName': _fullNameController.text.trim(),
+          'transit': _transitController.text.trim(),
+          'institution': _institutionController.text.trim(),
+          'account': _accountController.text.trim(),
+        };
+        await StorageManager.setObject(
+            StorageKeys.bankAccountKey, bankAccountData);
+      } else {
+        // Save Interac info
+        final interacAccountData = {
+          'email': _emailController.text.trim(),
+        };
+        await StorageManager.setObject(
+            StorageKeys.interacAccountKey, interacAccountData);
+      }
+    } catch (e) {
+      print('Error saving account info: $e');
+    }
+  }
+
+  /// Validates the withdrawal form
+  bool validateWithdrawalForm(bool isBankTab) {
+    if (_ammountController.text.trim().isEmpty ||
+        (double.tryParse(_ammountController.text.trim()) ?? 0) <= 0) {
+      return false;
+    }
+    if (isBankTab) {
+      // Validate bank account form
+      return _ammountController.text.trim().isNotEmpty &&
+          _fullNameController.text.trim().isNotEmpty &&
+          _transitController.text.trim().isNotEmpty &&
+          _institutionController.text.trim().isNotEmpty &&
+          _accountController.text.trim().isNotEmpty;
+    } else {
+      // Validate Interac form
+      return _ammountController.text.trim().isNotEmpty &&
+          _emailController.text.trim().isNotEmpty &&
+          _emailController.text.contains('@');
+    }
+  }
+
+  /// Sets the save account info preference
+  void setSaveAccountInfo(bool value) {
+    _saveAccountInfo = value;
+    notifyListeners();
+  }
+
+  /// Sets the withdrawal loading state
+  void setWithdrawalLoading(bool value) {
+    _isWithdrawalLoading = value;
+    notifyListeners();
+  }
+
+  void setBankSelected(bool bankSelected) {
+    _isBankSelected = bankSelected;
+    print('====================== selected banc: $_isBankSelected');
+    notifyListeners();
+  }
+
+  Future<WithdrawalAttemptResult> requestWithdrawal() async {
+    if (_token == null) {
+      return WithdrawalAttemptResult(
+        false,
+        errorMessage: "Authentication error. Please log in again.",
+      );
+    }
+
+    try {
+      final request = WithdrawalRequest(
+        amount: double.tryParse(_ammountController.text),
+        method: _isBankSelected ? 'bank' : 'interac',
+        name: _fullNameController.text,
+        transit: int.tryParse(_transitController.text),
+        institution: int.tryParse(_institutionController.text),
+        account: int.tryParse(_accountController.text),
+        email: _emailController.text,
+      );
+      if (request.amount == null || request.amount! <= 0) {
+        return WithdrawalAttemptResult(
+          false,
+          errorMessage: "Invalid amount entered.",
+        );
+      }
+
+      if (_isBankSelected) {
+        if (request.name!.isEmpty ||
+            request.transit == null ||
+            request.institution == null ||
+            request.account == null) {
+          return WithdrawalAttemptResult(
+            false,
+            errorMessage: "Invalid data.",
+          );
+        }
+      } else {
+        // Interac
+        if (request.email == null ||
+            request.email!.isEmpty ||
+            !request.email!.contains('@')) {
+          return WithdrawalAttemptResult(
+            false,
+            errorMessage: "Invalid email for Interac.",
+          );
+        }
+      }
+
+      final response = await WorkerApi.withdrawRequest(request);
+      if (response.success) {
+        _withdrawalModel = response.data;
+
+        notifyListeners();
+        return WithdrawalAttemptResult(true);
+      } else {
+        return WithdrawalAttemptResult(
+          false,
+          errorMessage: response.error ??
+              'Failed to process withdrawal. Please try again.',
+        );
+      }
+    } catch (e) {
+      print("Exception in requestWithdrawal: $e");
+      return WithdrawalAttemptResult(
+        false,
+        errorMessage:
+            'An unexpected error occurred. Please check your connection and try again.',
+      );
+    }
+  }
+
+  /// Handles withdrawal form submission
+  Future<bool> submitWithdrawal(
+    BuildContext context,
+    bool isBankTab,
+  ) async {
+    if (!validateWithdrawalForm(isBankTab)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.requiredFields),
+          backgroundColor: Colors.red[600],
+        ),
+      );
+      return false;
+    }
+
+    setWithdrawalLoading(true);
+
+    WithdrawalAttemptResult result;
+
+    try {
+      // Save account info if requested
+      await saveAccountInfos(isBankTab);
+
+      result = await requestWithdrawal();
+
+      if (result.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context)!.withdrawalRequestSubmitted,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        return true;
+      } else {
+        // Show failure SnackBar using the error set by requestWithdrawal
+        final String errorMessage = _error ??
+            AppLocalizations.of(context)!.generalError; // Use a fallback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red[600],
+          ),
+        );
+        return false;
+      }
+    } catch (e) {
+      print("Exception in submitWithdrawal: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.generalError),
+          backgroundColor: Colors.red[600],
+        ),
+      );
+
+      return false;
+    } finally {
+      setWithdrawalLoading(false);
+    }
+  }
+
+  // Withdrawalstatus
+  Future<bool> fetchWithdrawalStatus() async {
+    if (_token == null) return false;
+    setError(null);
+    _setLoading(true);
+    try {
+      final response = await WorkerApi.withdrawStatus();
+      if (response.success && response.data != null) {
+        _withdrawStatus = response.data;
+        notifyListeners();
+        _setLoading(false);
+        return true;
+      } else {
+        setError('failed to fetching withdraw status');
+        _setLoading(false);
+        return false;
+      }
+    } catch (e) {
+      setError('Exception fetching withdraw status');
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  // Statistic Charts
+  List<ServiceChartData> getServicesChartData() {
+    final totalServices = myServices.length;
+    final visibleServices =
+        myServices.where((service) => service.active == 1).length;
+    final hiddenServices = totalServices - visibleServices;
+    return [ServiceChartData('Services', visibleServices, hiddenServices)];
   }
 
   // Load vacation status from storage
@@ -194,68 +486,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
-  }
-
-  Future<bool> requestWithdrawal() async {
-    if (_token == null) return false;
-    setError(null);
-    _setLoading(true);
-    try {
-      final request = WithdrawalRequest(
-        amount: double.tryParse(_ammountController.text),
-        method: _isBankSelected ? 'bank' : 'interac',
-        name: _fullNameController.text,
-        transit: int.tryParse(_transitController.text),
-        institution: int.tryParse(_institutionController.text),
-        account: int.tryParse(_accountController.text),
-        email: _emailController.text,
-      );
-
-      final response = await WorkerApi.withdrawRequest(request);
-      if (response.success) {
-        _withdrawalModel = response.data;
-        _setLoading(false);
-        setError(null);
-        notifyListeners();
-        return true;
-      } else {
-        setError('Failed to withdraw');
-        _setLoading(false);
-        return false;
-      }
-    } catch (e) {
-      _setLoading(false);
-      setError('Failed to withdraw');
-      return false;
-    }
-  }
-
-  Future<bool> fetchWithdrawalStatus() async {
-    if (_token == null) return false;
-    setError(null);
-    _setLoading(true);
-    try {
-      final response = await WorkerApi.withdrawStatus();
-      if (response.success && response.data != null) {
-        _withdrawStatus = response.data;
-        notifyListeners();
-        _setLoading(false);
-        return true;
-      } else {
-        setError('failed to fetching withdraw status');
-        _setLoading(false);
-        return false;
-      }
-    } catch (e) {
-      setError('Exception fetching withdraw status');
-      _setLoading(false);
-      return false;
-    }
-  }
-
-  void setBankSelected(bool bankSelected) {
-    _isBankSelected = bankSelected;
-    notifyListeners();
   }
 
   /// Loads user data from storage and fetches user info if a token is available.
@@ -425,14 +655,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     }
   }
 
-  List<ServiceChartData> getServicesChartData() {
-    final totalServices = myServices.length;
-    final visibleServices =
-        myServices.where((service) => service.active == 1).length;
-    final hiddenServices = totalServices - visibleServices;
-    return [ServiceChartData('Services', visibleServices, hiddenServices)];
-  }
-
   // -----------------------------------
   // Add Service Management
   // -----------------------------------
@@ -440,6 +662,10 @@ class WorkerManagerProvider extends ChangeNotifier {
 
   Future<void> fetchCategories() async {
     _setServiceLoading(true);
+
+    _selectedCategory = null;
+    _selectedSubcategory = null;
+
     final response = await WorkerApi.fetchCategories();
 
     if (response.success && response.data != null) {
@@ -454,6 +680,23 @@ class WorkerManagerProvider extends ChangeNotifier {
   void setCategory(CategoryModel? category) {
     _selectedCategory = category;
     _selectedSubcategory = null;
+    _addServiceError = null;
+    notifyListeners();
+  }
+
+  void resetCategorySelection() {
+    _selectedCategory = null;
+    _selectedSubcategory = null;
+    _addServiceError = null;
+    // Also reset pricing selections for new service
+    _selectedPricingType = 'hourly';
+    _hourlyPriceController.clear();
+    _dailyPriceController.clear();
+    _fixedPriceController.clear();
+    _experienceController.clear();
+    _descriptionController.clear();
+    _selectedImage = null;
+    _editingServiceId = null;
     notifyListeners();
   }
 
@@ -461,6 +704,24 @@ class WorkerManagerProvider extends ChangeNotifier {
   void setSubcategory(SubcategoryModel? subcategory) {
     _selectedSubcategory = subcategory;
     notifyListeners();
+  }
+
+  void setPricingType(String pricingType) {
+    _selectedPricingType = pricingType;
+    notifyListeners();
+  }
+
+  double? getCurrentPrice() {
+    switch (_selectedPricingType) {
+      case 'hourly':
+        return double.tryParse(_hourlyPriceController.text);
+      case 'daily':
+        return double.tryParse(_dailyPriceController.text);
+      case 'fixed':
+        return double.tryParse(_fixedPriceController.text);
+      default:
+        return null;
+    }
   }
 
   /// Create a new service
@@ -477,7 +738,8 @@ class WorkerManagerProvider extends ChangeNotifier {
         category: _selectedCategory?.name,
         categoryId: _selectedCategory?.id,
         subCategoryId: _selectedSubcategory?.id,
-        price: double.tryParse(_servicePriceController.text),
+        pricingType: _selectedPricingType,
+        price: getCurrentPrice(),
         description: _descriptionController.text.isEmpty
             ? null
             : _descriptionController.text,
@@ -493,11 +755,25 @@ class WorkerManagerProvider extends ChangeNotifier {
         return response.data!.serviceId!;
       } else {
         _setServiceLoading(false);
-        _setAddServiceError(response.error);
+        // Enhanced error handling
+        String errorMessage = response.error ?? 'Unknown error occurred';
+        if (errorMessage.contains('validation')) {
+          errorMessage = 'Please check all required fields and try again.';
+        } else if (errorMessage.contains('network') ||
+            errorMessage.contains('connection')) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        _setAddServiceError(errorMessage);
         return 0;
       }
     } catch (e) {
-      _setAddServiceError('Failed to create a new service: $e');
+      String errorMessage = 'Failed to create service: $e';
+      if (e.toString().contains('SocketException')) {
+        errorMessage = 'No internet connection. Please try again.';
+      } else if (e.toString().contains('TimeoutException')) {
+        errorMessage = 'Request timed out. Please try again.';
+      }
+      _setAddServiceError(errorMessage);
       _setServiceLoading(false);
       return 0;
     }
@@ -575,11 +851,23 @@ class WorkerManagerProvider extends ChangeNotifier {
       _setAddServiceError('Please enter a service description.');
       return false;
     }
-    if (_servicePriceController.text.isEmpty ||
-        double.tryParse(_servicePriceController.text)! <= 0) {
-      _setAddServiceError('Please enter a valid service price.');
+
+    double? currentPrice = getCurrentPrice();
+    if (currentPrice == null || currentPrice <= 0) {
+      String priceLabel = _selectedPricingType == 'hourly'
+          ? 'hourly rate'
+          : _selectedPricingType == 'daily'
+              ? 'daily rate'
+              : 'fixed price';
+      _setAddServiceError('Please enter a valid $priceLabel.');
       return false;
     }
+
+    // if (_servicePriceController.text.isEmpty ||
+    //     double.tryParse(_servicePriceController.text)! <= 0) {
+    //   _setAddServiceError('Please enter a valid service price.');
+    //   return false;
+    // }
     if (_experienceController.text.isEmpty ||
         int.tryParse(_experienceController.text)! < 0) {
       _setAddServiceError('Please enter valid years of experience.');
@@ -597,7 +885,10 @@ class WorkerManagerProvider extends ChangeNotifier {
     _selectedImage = null;
     _galleryImages.clear();
     _addServiceError = null;
-    _servicePriceController.clear();
+    _selectedPricingType = 'hourly';
+    _hourlyPriceController.clear();
+    _dailyPriceController.clear();
+    _fixedPriceController.clear();
     _experienceController.clear();
     _descriptionController.clear();
     notifyListeners();
@@ -634,11 +925,36 @@ class WorkerManagerProvider extends ChangeNotifier {
   void initializeServiceControlles(MyServicesModel service) {
     _editingServiceId = service.id;
     _descriptionController.text = service.about;
-    _servicePriceController.text = service.costPerHour.toString();
+
+    _selectedPricingType = service.pricingType ?? 'hourly';
+    switch (service.pricingType) {
+      case 'hourly':
+        _hourlyPriceController.text = service.costPerHour?.toString() ?? '';
+        _dailyPriceController.clear(); // Clear other controllers
+        _fixedPriceController.clear();
+        break;
+      case 'daily':
+        _dailyPriceController.text = service.costPerDay?.toString() ?? '';
+        _hourlyPriceController.clear(); // Clear other controllers
+        _fixedPriceController.clear();
+        break;
+      case 'fixed':
+        _fixedPriceController.text = service.fixedPrice?.toString() ?? '';
+        _hourlyPriceController.clear(); // Clear other controllers
+        _dailyPriceController.clear();
+        break;
+      default:
+        _hourlyPriceController.text = service.costPerHour?.toString() ?? '';
+        _dailyPriceController.clear();
+        _fixedPriceController.clear();
+    }
+
     _experienceController.text = service.yearsOfExperience.toString();
     setHasCertificate(service.hasCertificate == 0 ? false : true);
     _galleryImages =
         List.from(service.gallary.map((img) => AddImageModel(image: img)));
+
+    // Don't set category/subcategory here - let the UI handle it
     notifyListeners();
   }
 
@@ -702,6 +1018,10 @@ class WorkerManagerProvider extends ChangeNotifier {
     _transitController.dispose();
     _institutionController.dispose();
     _accountController.dispose();
+
+    _hourlyPriceController.dispose();
+    _dailyPriceController.dispose();
+    _fixedPriceController.dispose();
 
     super.dispose();
   }

@@ -208,22 +208,45 @@ class WWorkerServicesScreen extends StatelessWidget {
                         Text(service.subcategory.name,
                             style: AppTextStyles.subTitle(context)),
                         SizedBox(height: context.getHeight(8)),
-                        Row(
-                          children: [
-                            Text(
-                              '\$${service.costPerHour}/hr',
-                              style: AppTextStyles.text(context).copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.getWidth(8),
+                            vertical: context.getHeight(4),
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getPricingTypeColor(service.pricingType)
+                                .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(
+                                context.getAdaptiveSize(6)),
+                            border: Border.all(
+                              color: _getPricingTypeColor(service.pricingType),
+                              width: 1,
                             ),
-                            SizedBox(width: context.getWidth(16)),
-                            Text(
-                              '${service.yearsOfExperience} years exp',
-                              style: AppTextStyles.text(context),
+                          ),
+                          child: Text(
+                            service.getPriceDisplay(),
+                            style: AppTextStyles.text(context).copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: _getPricingTypeColor(service.pricingType),
                             ),
-                          ],
+                          ),
                         ),
+                        // Row(
+                        //   children: [
+                        //     Text(
+                        //       '\$${service.costPerHour}/hr',
+                        //       style: AppTextStyles.text(context).copyWith(
+                        //         fontWeight: FontWeight.bold,
+                        //         color: Colors.black,
+                        //       ),
+                        //     ),
+                        //     SizedBox(width: context.getWidth(16)),
+                        //     Text(
+                        //       '${service.yearsOfExperience} years exp',
+                        //       style: AppTextStyles.text(context),
+                        //     ),
+                        //   ],
+                        // ),
                         SizedBox(height: context.getHeight(8)),
                         Text(
                           service.about,
@@ -262,5 +285,18 @@ class WWorkerServicesScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Color _getPricingTypeColor(String? pricingType) {
+    switch (pricingType) {
+      case 'hourly':
+        return Colors.blue;
+      case 'daily':
+        return Colors.green;
+      case 'fixed':
+        return Colors.orange;
+      default:
+        return AppColors.primaryColor;
+    }
   }
 }

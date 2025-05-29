@@ -7,7 +7,7 @@ class Contractor {
   final num? phone;
   final String? fullName;
   final String? picture;
-  final int? costPerHour;
+  final num? costPerHour;
   final String? service;
   final int? yearsOfExperience;
   final String? about;
@@ -51,7 +51,8 @@ class Contractor {
       phone: json['phone'],
       fullName: json['full_name'] as String?,
       picture: json['picture'] as String?,
-      costPerHour: json['cost_per_hour'] as int?,
+      costPerHour:
+          json['cost_per_hour'] is num ? json['cost_per_hour'] as num : null,
       service: json['service'] as String?,
       yearsOfExperience: json['years_of_experience'] as int?,
       about: json['about'] as String?,

@@ -85,7 +85,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   SizedBox(height: context.getHeight(24)),
 
                   // Action Buttons
-                  widget.order.status == 3
+                  widget.order.status == 3 || widget.order.status == 2
                       ? SizedBox.shrink()
                       : _buildActionButtons(orderManager),
                   SizedBox(height: context.getHeight(16)),
@@ -170,10 +170,35 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               orderManager.formatTimestamp(widget.order.createdAt)),
           _buildInfoRow(AppLocalizations.of(context)!.startTime,
               orderManager.formatTimestamp(widget.order.startAt)),
+
+          //
+          // NEW: Show pricing information based on pricing type
+          if (widget.order.pricingType == 'hourly') ...[
+            _buildInfoRow(AppLocalizations.of(context)!.totalHours,
+                '${widget.order.totalHours} hrs'),
+            _buildInfoRow(AppLocalizations.of(context)!.costPerHour,
+                '\$${widget.order.costPerHour?.toStringAsFixed(2) ?? '0'}'),
+          ] else if (widget.order.pricingType == 'daily') ...[
+            _buildInfoRow('Total Days',
+                '${(widget.order.totalHours / 8).ceil()} days'), // Assuming 8 hours per day
+            _buildInfoRow('Cost Per Day',
+                '\$${widget.order.costPerDay?.toStringAsFixed(2) ?? '0'}'),
+          ] else if (widget.order.pricingType == 'fixed') ...[
+            _buildInfoRow('Service Type', 'Fixed Price Service'),
+            _buildInfoRow('Fixed Rate',
+                '\$${widget.order.fixedPrice?.toStringAsFixed(2) ?? '0'}'),
+          ] else ...[
+            // Fallback for legacy orders
+            _buildInfoRow(AppLocalizations.of(context)!.totalHours,
+                '${widget.order.totalHours} hrs'),
+            _buildInfoRow(AppLocalizations.of(context)!.costPerHour,
+                '\$${widget.order.costPerHour?.toStringAsFixed(2) ?? '0'}'),
+          ],
+
+          //
           _buildInfoRow(AppLocalizations.of(context)!.totalHours,
               '${widget.order.totalHours} hrs'),
-          _buildInfoRow(AppLocalizations.of(context)!.costPerHour,
-              '\$${widget.order.costPerHour.toStringAsFixed(2)}'),
+
           _buildInfoRow(
             AppLocalizations.of(context)!.totalPrice,
             '\$${widget.order.totalPrice.toStringAsFixed(2)}',

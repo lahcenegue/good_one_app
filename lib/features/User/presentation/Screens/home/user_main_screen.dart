@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/Error/error_widget.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Utils/size_config.dart';
@@ -22,24 +24,36 @@ class UserMainScreen extends StatefulWidget {
 class _UserMainScreenState extends State<UserMainScreen> {
   @override
   void initState() {
+    super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      print('========== user Main Screen');
       final userManager =
           Provider.of<UserManagerProvider>(context, listen: false);
       await userManager.initialize();
     });
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
-        if (userManager.isLoading) {
+        if (userManager.isGlobalLoading &&
+            userManager.categories.isEmpty &&
+            userManager.bestContractors.isEmpty &&
+            userManager.userInfo == null) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: LoadingIndicator(),
           );
+        }
+        if (userManager.globalError != null &&
+            userManager.categories.isEmpty &&
+            userManager.bestContractors.isEmpty) {
+          return Scaffold(
+              body: AppErrorWidget(
+            message: userManager.globalError!,
+            onRetry: () => userManager.initialize(),
+          ));
         }
 
         return Scaffold(

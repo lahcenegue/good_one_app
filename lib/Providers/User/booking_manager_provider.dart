@@ -111,11 +111,6 @@ class BookingManagerProvider with ChangeNotifier {
   String? get ratingError => _ratingError;
   double get rating => _rating;
 
-  // /// Calculates the base price (service price * hours).
-  // double basePrice(double contractorCost) {
-  //   return _taskDurationHours * contractorCost;
-  // }
-
   /// Calculates the effective price after applying the discount.
   double effectivePrice(double contractorCost) {
     return (1 - (_discountPercentage ?? 0.0)) * basePrice(contractorCost);
@@ -223,11 +218,10 @@ class BookingManagerProvider with ChangeNotifier {
         _taskDurationHours = _durationValue.ceil();
         break;
       case 'days':
-        // Assuming 8 hours per day
-        _taskDurationHours = (_durationValue * 8).ceil();
+        _taskDurationHours = _durationValue.ceil();
         break;
       case 'task':
-        // For task-based pricing, it's always 1 hour
+        // For task-based pricing, it's always 1 unit
         _taskDurationHours = 1;
         break;
     }
@@ -240,13 +234,13 @@ class BookingManagerProvider with ChangeNotifier {
       case 'hours':
         return _durationValue * contractorCost;
       case 'days':
-        // For days, multiply by hours per day (8) and the hourly rate
-        return (_durationValue * 8) * contractorCost;
+        // For daily pricing, multiply days by daily rate (not converted to hours)
+        return _durationValue * contractorCost;
       case 'task':
-        // For task-based pricing, it's fixed at the hourly rate (1 hour service)
+        // For task-based pricing, it's fixed at the service rate
         return contractorCost;
       default:
-        return _taskDurationHours * contractorCost;
+        return _durationValue * contractorCost;
     }
   }
 
@@ -333,7 +327,8 @@ class BookingManagerProvider with ChangeNotifier {
         location: _locationAddress,
         region: _region!,
         startAt: getTimestamp(_selectedDay, _selectedTime),
-        totalHours: _taskDurationHours,
+        durationValue:
+            _durationValue, // Send the actual duration value the user entered
         coupon: _appliedCoupon,
       );
 
@@ -499,7 +494,10 @@ class BookingManagerProvider with ChangeNotifier {
 
   /// Modifies an order, handling additional payment if required.
   Future<bool> modifyOrder(
-      BuildContext context, int orderId, OrderEditRequest request) async {
+    BuildContext context,
+    int orderId,
+    OrderEditRequest request,
+  ) async {
     _setLoading(true);
     try {
       final response = await UserApi.updateOrder(request);
@@ -523,8 +521,12 @@ class BookingManagerProvider with ChangeNotifier {
   }
 
   /// Modifies an order with additional payment.
-  Future<bool> modifyOrderWithPayment(BuildContext context, int orderId,
-      OrderEditRequest request, double additionalCost) async {
+  Future<bool> modifyOrderWithPayment(
+    BuildContext context,
+    int orderId,
+    OrderEditRequest request,
+    double additionalCost,
+  ) async {
     _setPaymentProcessing(true);
     try {
       final amount = (additionalCost * 100).toInt().toString();
@@ -547,6 +549,22 @@ class BookingManagerProvider with ChangeNotifier {
       return false;
     } finally {
       _setPaymentProcessing(false);
+    }
+  }
+
+  /// Get the appropriate service cost based on pricing type
+  double getServiceCost(dynamic service) {
+    final type = service!.pricingType ?? 'hourly';
+
+    switch (type) {
+      case 'hourly':
+        return service.costPerHour?.toDouble() ?? 0.0;
+      case 'daily':
+        return service.costPerDay?.toDouble() ?? 0.0;
+      case 'fixed':
+        return service.fixedPrice?.toDouble() ?? 0.0;
+      default:
+        return service.costPerHour?.toDouble() ?? 0.0;
     }
   }
 
@@ -576,7 +594,7 @@ class BookingManagerProvider with ChangeNotifier {
               title: AppLocalizations.of(context)!.feedbackSuccessTitle,
               description:
                   AppLocalizations.of(context)!.feedbackSuccessDescription,
-              confirmText: AppLocalizations.of(context)!.backToBookings,
+              confirmText: AppLocalizations.of(context)!.back,
               onConfirm: () {
                 Navigator.of(context).pop(); // Close dialog
                 Navigator.of(context).pushNamedAndRemoveUntil(
@@ -801,8 +819,8 @@ class BookingManagerProvider with ChangeNotifier {
 
   String _formatBookingDateTime() {
     final formatter = DateFormat('MMM dd, yyyy');
-    final endTime = _taskEndTime ?? _buildDateTime(_selectedDay, _selectedTime);
-    return '${formatter.format(_selectedDay)} from $_selectedTime to ${DateFormat('HH:mm').format(endTime)}';
+
+    return '${formatter.format(_selectedDay)} , $_selectedTime';
   }
 
   int getTimestamp(DateTime day, String time, [int additionalHours = 0]) {

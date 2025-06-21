@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Presentation/Widgets/general_box.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Infrastructure/Api/api_endpoints.dart';
@@ -15,25 +15,32 @@ import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.da
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class WWorkerServicesScreen extends StatelessWidget {
-  const WWorkerServicesScreen({super.key});
+class WorkerServicesScreen extends StatelessWidget {
+  const WorkerServicesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<WorkerManagerProvider>(
       builder: (context, workerManager, _) {
         return Scaffold(
-          appBar: _buildAppBar(context),
+          backgroundColor: AppColors.lightGray,
+          appBar: _buildModernAppBar(context),
           body: RefreshIndicator(
             onRefresh: workerManager.fetchMyServices,
+            color: AppColors.primaryColor,
+            backgroundColor: AppColors.backgroundCard,
             child: workerManager.isServiceLoading
-                ? const Center(child: CircularProgressIndicator())
-                : workerManager.error != null
+                ? const LoadingIndicator()
+                : workerManager.servicesError != null
                     ? AppErrorWidget(
-                        message: workerManager.error!,
-                        onRetry: workerManager.fetchMyServices,
+                        message: workerManager.servicesError!,
+                        onRetry: () {
+                          workerManager.clearError('services');
+                          workerManager.fetchMyServices();
+                        },
                       )
                     : SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -49,13 +56,15 @@ class WWorkerServicesScreen extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildModernAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      elevation: 0,
       title: Text(
         AppLocalizations.of(context)!.services,
         style: AppTextStyles.appBarTitle(context),
       ),
+      centerTitle: true,
     );
   }
 
@@ -65,12 +74,25 @@ class WWorkerServicesScreen extends StatelessWidget {
   ) {
     return Padding(
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-      child: PrimaryButton(
-        width: context.getWidth(160),
-        text: AppLocalizations.of(context)!.addService,
-        onPressed: () {
-          NavigationService.navigateTo(AppRoutes.workerAddService);
-        },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryColor.withValues(alpha: 0.3),
+              blurRadius: 15,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: PrimaryButton(
+          width: context.getWidth(160),
+          text: AppLocalizations.of(context)!.addService,
+          onPressed: () {
+            workerProvider.clearError('services');
+            NavigationService.navigateTo(AppRoutes.workerAddService);
+          },
+        ),
       ),
     );
   }
@@ -80,26 +102,7 @@ class WWorkerServicesScreen extends StatelessWidget {
     WorkerManagerProvider workerManager,
   ) {
     if (workerManager.myServices.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.all(context.getAdaptiveSize(32)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.assignment_outlined,
-                size: context.getAdaptiveSize(60),
-                color: AppColors.hintColor.withValues(alpha: 0.7),
-              ),
-              SizedBox(height: context.getHeight(20)),
-              Text(
-                AppLocalizations.of(context)!.noServicesAvailable,
-                style: AppTextStyles.subTitle(context),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _ModernEmptyState();
     }
 
     return ListView.separated(
@@ -108,182 +111,365 @@ class WWorkerServicesScreen extends StatelessWidget {
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
       itemCount: workerManager.myServices.length,
       separatorBuilder: (context, index) =>
-          SizedBox(height: context.getHeight(10)),
+          SizedBox(height: context.getHeight(16)),
       itemBuilder: (BuildContext context, int index) {
         final service = workerManager.myServices[index];
-        final hasImage = service.gallary.isNotEmpty;
+        return ModernServiceCard(
+          service: service,
+          animationDelay: index * 100,
+        );
+      },
+    );
+  }
+}
 
-        return GeneralBox(
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Active',
-                    style: AppTextStyles.title2(context),
-                  ),
-                  Switch(
-                    value: service.active == 1,
-                    onChanged: (value) async {
-                      workerManager.setServiceId(service.id);
-                      workerManager.setActive(value);
-                      await workerManager.createAndEditService(isEditing: true);
-                    },
-                  ),
-                ],
+/// Modern empty state with beautiful illustration
+class _ModernEmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(context.getWidth(32)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(context.getWidth(24)),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(30),
               ),
-              SizedBox(
-                height: context.getHeight(18),
+              child: Icon(
+                Icons.assignment_outlined,
+                size: context.getWidth(80),
+                color: Colors.grey.shade400,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(context.getAdaptiveSize(16)),
-                    child: hasImage
-                        ? Image.network(
-                            '${ApiEndpoints.imageBaseUrl}/${service.gallary.first}',
-                            width: context.getWidth(100),
-                            height: context.getWidth(120),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                              width: context.getWidth(80),
-                              height: context.getWidth(80),
-                              color: AppColors.dimGray,
-                              child: Icon(
-                                Icons.broken_image,
-                                color: AppColors.hintColor,
-                                size: context.getAdaptiveSize(40),
-                              ),
-                            ),
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Container(
-                                width: context.getWidth(80),
-                                height: context.getWidth(80),
-                                color: AppColors.dimGray,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            (loadingProgress
-                                                    .expectedTotalBytes ??
-                                                1)
-                                        : null,
-                                  ),
-                                ),
-                              );
-                            },
-                          )
-                        : Container(
-                            width: context.getWidth(100),
-                            height: context.getWidth(120),
-                            color: AppColors.dimGray,
-                            child: Icon(
-                              Icons.image_not_supported,
-                              color: AppColors.hintColor,
-                              size: context.getAdaptiveSize(40),
-                            ),
-                          ),
-                  ),
-                  SizedBox(width: context.getWidth(16)),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          service.service,
-                          style: AppTextStyles.title(context).copyWith(
-                            fontSize: context.getAdaptiveSize(18),
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                        SizedBox(height: context.getHeight(4)),
-                        Text(service.subcategory.name,
-                            style: AppTextStyles.subTitle(context)),
-                        SizedBox(height: context.getHeight(8)),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: context.getWidth(8),
-                            vertical: context.getHeight(4),
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getPricingTypeColor(service.pricingType)
-                                .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(
-                                context.getAdaptiveSize(6)),
-                            border: Border.all(
-                              color: _getPricingTypeColor(service.pricingType),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            service.getPriceDisplay(),
-                            style: AppTextStyles.text(context).copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: _getPricingTypeColor(service.pricingType),
-                            ),
-                          ),
-                        ),
-                        // Row(
-                        //   children: [
-                        //     Text(
-                        //       '\$${service.costPerHour}/hr',
-                        //       style: AppTextStyles.text(context).copyWith(
-                        //         fontWeight: FontWeight.bold,
-                        //         color: Colors.black,
-                        //       ),
-                        //     ),
-                        //     SizedBox(width: context.getWidth(16)),
-                        //     Text(
-                        //       '${service.yearsOfExperience} years exp',
-                        //       style: AppTextStyles.text(context),
-                        //     ),
-                        //   ],
-                        // ),
-                        SizedBox(height: context.getHeight(8)),
-                        Text(
-                          service.about,
-                          style: AppTextStyles.text(context),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: context.getHeight(24)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              width: context.getWidth(100),
-                              child: SmallPrimaryButton(
-                                text: 'Edit',
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          EditService(service: service),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+            ),
+            SizedBox(height: context.getHeight(24)),
+            Text(
+              AppLocalizations.of(context)!.noServicesAvailable,
+              style: AppTextStyles.title2(context).copyWith(
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: context.getHeight(12)),
+            Text(
+              AppLocalizations.of(context)!.createFirstServicePrompt,
+              style: AppTextStyles.text(context).copyWith(
+                color: Colors.grey.shade500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Modern service card with enhanced design
+class ModernServiceCard extends StatefulWidget {
+  final dynamic service; // Replace with your actual service model type
+  final int animationDelay;
+
+  const ModernServiceCard({
+    super.key,
+    required this.service,
+    this.animationDelay = 0,
+  });
+
+  @override
+  State<ModernServiceCard> createState() => _ModernServiceCardState();
+}
+
+class _ModernServiceCardState extends State<ModernServiceCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Start animation with delay
+    Future.delayed(Duration(milliseconds: widget.animationDelay), () {
+      if (mounted) {
+        _animationController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = widget.service.gallary.isNotEmpty;
+    final (statusColor, statusText, statusIcon) = _getStatusDetails(context);
+
+    return SlideTransition(
+      position: _slideAnimation,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                blurRadius: 15,
+                offset: Offset(0, 8),
               ),
             ],
           ),
-        );
-      },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Column(
+              children: [
+                // Status header
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(context.getWidth(16)),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        statusIcon,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: context.getWidth(8)),
+                      Text(
+                        statusText,
+                        style: AppTextStyles.subTitle(context).copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Spacer(),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.edit, color: Colors.white, size: 18),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EditService(service: widget.service),
+                              ),
+                            );
+                          },
+                          padding: EdgeInsets.all(8),
+                          constraints: BoxConstraints(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Main content
+                Padding(
+                  padding: EdgeInsets.all(context.getWidth(20)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Service info with image
+                      _ModernServiceInfo(
+                        service: widget.service,
+                        hasImage: hasImage,
+                      ),
+                      SizedBox(height: context.getHeight(20)),
+
+                      // Details grid
+                      _ModernServiceDetailsGrid(service: widget.service),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  (Color, String, IconData) _getStatusDetails(BuildContext context) {
+    if (widget.service.active == 1) {
+      return (
+        Colors.green,
+        AppLocalizations.of(context)!.active,
+        Icons.check_circle,
+      );
+    } else {
+      return (
+        Colors.orange,
+        AppLocalizations.of(context)!.inactive,
+        Icons.pause_circle,
+      );
+    }
+  }
+}
+
+/// Modern service info section
+class _ModernServiceInfo extends StatelessWidget {
+  final dynamic service;
+  final bool hasImage;
+
+  const _ModernServiceInfo({
+    required this.service,
+    required this.hasImage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Service image
+        ClipRRect(
+          borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+          child: hasImage
+              ? Image.network(
+                  '${ApiEndpoints.imageBaseUrl}/${service.gallary.first}',
+                  width: context.getWidth(100),
+                  height: context.getWidth(100),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: context.getWidth(100),
+                    height: context.getWidth(100),
+                    color: Colors.grey.shade200,
+                    child: Icon(
+                      Icons.broken_image,
+                      color: Colors.grey.shade400,
+                      size: context.getAdaptiveSize(40),
+                    ),
+                  ),
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      width: context.getWidth(100),
+                      height: context.getWidth(100),
+                      color: Colors.grey.shade200,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                )
+              : Container(
+                  width: context.getWidth(100),
+                  height: context.getWidth(100),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius:
+                        BorderRadius.circular(context.getAdaptiveSize(16)),
+                  ),
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey.shade400,
+                    size: context.getAdaptiveSize(40),
+                  ),
+                ),
+        ),
+        SizedBox(width: context.getWidth(16)),
+
+        // Service details
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                service.service,
+                style: AppTextStyles.title2(context).copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              SizedBox(height: context.getHeight(8)),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.getWidth(12),
+                  vertical: context.getHeight(6),
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  service.subcategory.name,
+                  style: AppTextStyles.text(context).copyWith(
+                    color: AppColors.primaryColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              SizedBox(height: context.getHeight(12)),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.getWidth(12),
+                  vertical: context.getHeight(8),
+                ),
+                decoration: BoxDecoration(
+                  color: _getPricingTypeColor(service.pricingType)
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _getPricingTypeColor(service.pricingType)
+                        .withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: Text(
+                  service.getPriceDisplay(),
+                  style: AppTextStyles.text(context).copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: _getPricingTypeColor(service.pricingType),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -298,5 +484,56 @@ class WWorkerServicesScreen extends StatelessWidget {
       default:
         return AppColors.primaryColor;
     }
+  }
+}
+
+/// Modern service details grid
+class _ModernServiceDetailsGrid extends StatelessWidget {
+  final dynamic service;
+
+  const _ModernServiceDetailsGrid({required this.service});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(context.getWidth(16)),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.description_rounded,
+                size: 16,
+                color: Colors.grey.shade600,
+              ),
+              SizedBox(width: context.getWidth(8)),
+              Text(
+                AppLocalizations.of(context)!.serviceDescription,
+                style: AppTextStyles.text(context).copyWith(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: context.getHeight(8)),
+          Text(
+            service.about,
+            style: AppTextStyles.text(context).copyWith(
+              color: Colors.grey.shade800,
+              height: 1.4,
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -71,7 +70,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                             SizedBox(height: context.getHeight(32)),
                             PrimaryButton(
                               text: workerManager.isServiceLoading
-                                  ? 'Creating...'
+                                  ? AppLocalizations.of(context)!.creating
                                   : AppLocalizations.of(context)!.next,
                               onPressed: workerManager.isServiceLoading
                                   ? () {}
@@ -115,8 +114,8 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                                       Expanded(
                                         child: Text(
                                           workerManager.addServiceError!,
-                                          style:
-                                              TextStyle(color: Colors.red[700]),
+                                          style: AppTextStyles.errorTextStyle(
+                                              context),
                                         ),
                                       ),
                                     ],
@@ -180,13 +179,14 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Service Visibility',
+                  AppLocalizations.of(context)!.serviceVisibility,
                   style: AppTextStyles.title2(context),
                 ),
                 Text(
                   _tempActiveStatus
-                      ? 'Service will be visible to customers'
-                      : 'Service will be hidden from customers',
+                      ? AppLocalizations.of(context)!.serviceVisibleToCustomers
+                      : AppLocalizations.of(context)!
+                          .serviceHiddenFromCustomers,
                   style: AppTextStyles.text(context).copyWith(
                     color: _tempActiveStatus
                         ? Colors.green[600]
@@ -194,7 +194,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                   ),
                 ),
                 Text(
-                  'You can change this anytime after creating',
+                  AppLocalizations.of(context)!.canChangeAnytimeAfterCreating,
                   style: AppTextStyles.text(context).copyWith(
                     color: Colors.grey[500],
                     fontSize: context.getAdaptiveSize(12),
@@ -413,7 +413,7 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Pricing Options',
+          AppLocalizations.of(context)!.pricingOptions,
           style: AppTextStyles.title2(context),
         ),
         SizedBox(height: context.getHeight(12)),
@@ -430,11 +430,11 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                 context,
                 workerManager,
                 'hourly',
-                'Hourly Rate',
-                'Set price per hour',
+                AppLocalizations.of(context)!.hourlyRate,
+                AppLocalizations.of(context)!.setPricePerHour,
                 Icons.access_time,
                 workerManager.hourlyPriceController,
-                '\$/hour',
+                '\$/${AppLocalizations.of(context)!.hour}',
               ),
               Divider(
                   height: 1, color: AppColors.primaryColor.withOpacity(0.2)),
@@ -442,11 +442,11 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                 context,
                 workerManager,
                 'daily',
-                'Daily Rate',
-                'Set price per day',
+                AppLocalizations.of(context)!.dailyRate,
+                AppLocalizations.of(context)!.setPricePerDay,
                 Icons.calendar_today,
                 workerManager.dailyPriceController,
-                '\$/day',
+                '\$/${AppLocalizations.of(context)!.day}',
               ),
               Divider(
                   height: 1, color: AppColors.primaryColor.withOpacity(0.2)),
@@ -454,11 +454,11 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                 context,
                 workerManager,
                 'fixed',
-                'Fixed Price',
-                'One-time service price',
+                AppLocalizations.of(context)!.fixedPrice,
+                AppLocalizations.of(context)!.oneTimeServicePrice,
                 Icons.monetization_on,
                 workerManager.fixedPriceController,
-                '\$ Total',
+                '\$ ${AppLocalizations.of(context)!.total}',
               ),
             ],
           ),

@@ -79,8 +79,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Last Updated: 15 April 2025\n\nWelcome to Good One. These Terms and Conditions govern your use of our mobile application and services. By using our app, you agree to comply with these terms. If you do not agree, please do not use the app.',
+          description: AppLocalizations.of(context)!.termsIntroduction,
         ),
       ],
     );
@@ -94,31 +93,27 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '"App"',
-          description:
-              'Refers to Good One app, the mobile application that connects customers with service providers.',
+          description: AppLocalizations.of(context)!.appDefinition,
         ),
         _buildPolicyItem(
           context,
           title: '"User"',
-          description:
-              'Refers to anyone who accesses and uses the App, including both customers and service providers.',
+          description: AppLocalizations.of(context)!.userDefinition,
         ),
         _buildPolicyItem(
           context,
           title: '"Customer"',
-          description:
-              'Refers to individuals seeking services through the App.',
+          description: AppLocalizations.of(context)!.customerDefinition,
         ),
         _buildPolicyItem(
           context,
           title: '"Service Provider"',
-          description:
-              'Refers to individuals offering their services through the App.',
+          description: AppLocalizations.of(context)!.serviceProviderDefinition,
         ),
         _buildPolicyItem(
           context,
           title: '"Platform"',
-          description: 'Refers to the App and its associated services.',
+          description: AppLocalizations.of(context)!.platformDefinition,
         ),
       ],
     );
@@ -132,106 +127,101 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description: 'To use the App, you must:',
+          description: AppLocalizations.of(context)!.toUseTheApp,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Provide accurate and truthful information during registration.',
+          description: AppLocalizations.of(context)!.provideAccurateInfo,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description: 'Comply with all applicable laws and regulations.',
+          description: AppLocalizations.of(context)!.complyWithLaws,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Be at least 18 years old to register as a service provider. Minors under 18 are required to provide parents’ consent to confirm that the service will be under the parent’s responsibility and supervision.',
+          description: AppLocalizations.of(context)!.ageRequirement,
         ),
         _buildSubSection(
           context,
-          title: 'Minimum Working Age by Province/Territory',
+          title: AppLocalizations.of(context)!.minimumWorkingAgeByProvince,
           children: [
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'Most provinces set 14 as the minimum age for general work with restrictions.',
+                  AppLocalizations.of(context)!.mostProvincesSet14Minimum,
             ),
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'Some provinces allow 12-year-olds to work in specific, non-hazardous jobs with parental consent.',
+                  AppLocalizations.of(context)!.someProvinces12YearOlds,
             ),
           ],
         ),
         _buildSubSection(
           context,
-          title: 'Restrictions on Work for Minors',
+          title: AppLocalizations.of(context)!.restrictionsWorkMinors,
           children: [
             _buildPolicyItem(
               context,
-              title: 'No hazardous work',
+              title: AppLocalizations.of(context)!.noHazardousWork,
               description:
-                  'Minors cannot perform dangerous jobs (e.g., construction, heavy machinery, electrical work).',
+                  AppLocalizations.of(context)!.minorsCannotDangerousJobs,
             ),
             _buildPolicyItem(
               context,
-              title: 'Parental consent',
-              description:
-                  'Many provinces require parental permission for those under 16.',
+              title: AppLocalizations.of(context)!.parentalConsent,
+              description: AppLocalizations.of(context)!
+                  .provincesRequireParentalPermission,
             ),
             _buildPolicyItem(
               context,
-              title: 'Limited work hours',
-              description:
-                  'Kids under 18 usually can\'t work late hours or during school time.',
+              title: AppLocalizations.of(context)!.limitedWorkHours,
+              description: AppLocalizations.of(context)!.kidsNoLateHours,
             ),
             _buildPolicyItem(
               context,
-              title: 'Business licensing issues',
+              title: AppLocalizations.of(context)!.businessLicensingIssues,
               description:
-                  'Some provinces may restrict minors from operating as independent contractors.',
+                  AppLocalizations.of(context)!.provincesRestrictMinors,
             ),
           ],
         ),
         _buildSubSection(
           context,
-          title: 'Specific Cases for Gig Work (Your App\'s Context)',
+          title: AppLocalizations.of(context)!.specificCasesGigWork,
           children: [
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'The App provides services often involve physical labor, handyman work, and home services.',
+                  AppLocalizations.of(context)!.servicesInvolvePhysicalLabor,
             ),
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'These types of jobs typically require workers to be 18+ because they involve safety risks, contracts, and potential liability issues.',
+              description: AppLocalizations.of(context)!.jobsRequire18Plus,
             ),
           ],
         ),
         _buildSubSection(
           context,
-          title: 'Conclusion: Should Minors Be Allowed on the App?',
+          title: AppLocalizations.of(context)!.conclusionMinorsAllowed,
           children: [
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'It’s best to require service providers to be at least 18.',
+              description: AppLocalizations.of(context)!.bestRequire18,
             ),
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'If younger users (e.g., babysitting, tutoring) are allowed in the future, parental consent and provincial legal approval may be required. (Contact customer support to send you the consent to be signed.)',
+                  AppLocalizations.of(context)!.youngerUsersParentalConsent,
             ),
           ],
         ),
@@ -247,19 +237,22 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description: 'Users must create an account to access the services.',
+          description: AppLocalizations.of(context)!.usersMustCreateAccount,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'You are responsible for maintaining the confidentiality of your login credentials.',
+          description: AppLocalizations.of(context)!.responsibleForCredentials,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'You must not share, transfer, or sell your account to another person.',
+          description: AppLocalizations.of(context)!.notShareAccountInfo,
+        ),
+        _buildPolicyItem(
+          context,
+          title: '',
+          description: AppLocalizations.of(context)!.unauthorizedAccess,
         ),
       ],
     );
@@ -273,20 +266,17 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'The in-app chat is the only permitted method of communication between customers and service providers.',
+          description: AppLocalizations.of(context)!.communicationViaApp,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Users are strictly prohibited from sharing personal contact information (e.g., phone numbers, emails) through the chat.',
+          description: AppLocalizations.of(context)!.noPersonalContactSharing,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Violation of this rule may result in account suspension or termination.',
+          description: AppLocalizations.of(context)!.violationAccountSuspension,
         ),
       ],
     );
@@ -300,19 +290,17 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description: 'All payments must be processed through the App.',
+          description: AppLocalizations.of(context)!.allPaymentsThroughApp,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'No payments outside the App are allowed. Any attempt to process payments outside the platform may result in permanent account suspension.',
+          description: AppLocalizations.of(context)!.noPaymentsOutside,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'The App may charge service fees or transaction fees, which will be disclosed before payment.',
+          description: AppLocalizations.of(context)!.serviceFeeDisclosure,
         ),
       ],
     );
@@ -326,20 +314,17 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Service providers can upload certifications to enhance their profile credibility, but this is optional.',
+          description: AppLocalizations.of(context)!.certificationsOptional,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Service providers may also complete a security check through the App, which will further increase trust.',
+          description: AppLocalizations.of(context)!.securityCheckAvailable,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'The App does not guarantee job assignments or earnings for service providers.',
+          description: AppLocalizations.of(context)!.noJobGuarantee,
         ),
       ],
     );
@@ -353,102 +338,92 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'The App allows advertisements from companies and individuals, including service providers who wish to promote their services. By submitting an advertisement, you agree to the following terms:',
+          description: AppLocalizations.of(context)!.advertisingPolicyIntro,
         ),
         _buildSubSection(
           context,
-          title: 'Eligibility to Advertise',
+          title: AppLocalizations.of(context)!.eligibilityToAdvertise,
           children: [
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'Advertisers must comply with all applicable laws and regulations.',
+              description: AppLocalizations.of(context)!.advertisersComplyLaws,
             ),
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'Service providers may advertise their services, but advertisements must not mislead users or contain false claims.',
+                  AppLocalizations.of(context)!.serviceProviderAdsNotMislead,
             ),
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'Companies must ensure that their ads are relevant to the platform’s audience.',
+                  AppLocalizations.of(context)!.companiesEnsureRelevantAds,
             ),
           ],
         ),
         _buildSubSection(
           context,
-          title: 'Ad Content Guidelines',
+          title: AppLocalizations.of(context)!.adContentGuidelines,
           children: [
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'Ads must be truthful, accurate, and not misleading.',
+              description: AppLocalizations.of(context)!.adsTruthfulAccurate,
             ),
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'Ads must not promote illegal activities, violence, discrimination, or explicit content.',
+              description: AppLocalizations.of(context)!.adsNotPromoteIllegal,
             ),
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'Ads must not include personal contact details (e.g., phone numbers, email addresses) to ensure transactions remain within the App.',
+              description: AppLocalizations.of(context)!.adsNoPersonalContact,
             ),
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'The App reserves the right to review and reject any advertisement that does not align with these guidelines.',
+              description: AppLocalizations.of(context)!.appReviewRejectAds,
             ),
           ],
         ),
         _buildSubSection(
           context,
-          title: 'Ad Placement and Fees',
+          title: AppLocalizations.of(context)!.adPlacementFees,
           children: [
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'Advertisers may choose from different ad placement options within the App.',
+                  AppLocalizations.of(context)!.advertisersChoosePlacement,
             ),
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'Advertising fees vary based on placement, duration, and visibility.',
+              description: AppLocalizations.of(context)!.advertisingFeesVary,
             ),
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'Payment for advertisements must be processed through the App.',
+              description: AppLocalizations.of(context)!.adPaymentThroughApp,
             ),
           ],
         ),
         _buildSubSection(
           context,
-          title: 'Ad Removal and Violations',
+          title: AppLocalizations.of(context)!.adRemovalViolations,
           children: [
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'The App reserves the right to remove ads that violate these policies without notice or refund.',
+              description: AppLocalizations.of(context)!.appRemoveViolatingAds,
             ),
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'Repeated violations may result in a ban from advertising on the platform.',
+              description: AppLocalizations.of(context)!.repeatedViolationsBan,
             ),
           ],
         ),
@@ -464,27 +439,27 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description: 'Users must not:',
+          description: AppLocalizations.of(context)!.usersMustNot,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description: 'Misrepresent themselves or their services.',
+          description: AppLocalizations.of(context)!.misrepresentServices,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description: 'Engage in fraudulent activities.',
+          description: AppLocalizations.of(context)!.engageFraudulent,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description: 'Violate any local, state, or national laws.',
+          description: AppLocalizations.of(context)!.violateLocalLaws,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description: 'Use the App for any illegal or unethical purposes.',
+          description: AppLocalizations.of(context)!.useAppIllegalPurposes,
         ),
       ],
     );
@@ -498,14 +473,13 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Any disputes between users must be handled through the App’s customer support team.',
+          description: AppLocalizations.of(context)!.disputesHandledBySupport,
         ),
         _buildPolicyItem(
           context,
           title: '',
           description:
-              'The App is not responsible for any disagreements between customers and service providers but will assist in resolving disputes where possible.',
+              AppLocalizations.of(context)!.appNotResponsibleDisagreements,
         ),
       ],
     );
@@ -522,33 +496,31 @@ class TermsAndConditionsScreen extends StatelessWidget {
           children: [
             _buildPolicyItem(
               context,
-              title: 'Free Cancellation Window',
+              title: AppLocalizations.of(context)!.freeCancellationWindow,
               description:
-                  'Customers can cancel a booking for free if done at least 48 hours before the scheduled service.',
+                  AppLocalizations.of(context)!.customersFreeCancel48Hours,
             ),
             _buildPolicyItem(
               context,
-              title: 'Late Cancellations',
-              description:
-                  'If a cancellation is made within 24 hours of the scheduled service, a cancellation fee of 20% of the paid amount may be charged.',
+              title: AppLocalizations.of(context)!.lateCancellations,
+              description: AppLocalizations.of(context)!.lateCancellationFee,
             ),
             _buildPolicyItem(
               context,
-              title: 'No-Shows',
-              description:
-                  'If the customer fails to be present at the service location without prior cancellation, they may be charged the full service fee.',
+              title: AppLocalizations.of(context)!.noShows,
+              description: AppLocalizations.of(context)!.noShowFullCharge,
             ),
             _buildPolicyItem(
               context,
-              title: 'Refund Policy',
+              title: AppLocalizations.of(context)!.refundPolicy,
               description:
-                  'Refund eligibility depends on the specific service provider\'s policy. In some cases, partial refunds may be issued after deducting applicable fees.',
+                  AppLocalizations.of(context)!.refundEligibilityDepends,
             ),
             _buildPolicyItem(
               context,
-              title: 'Emergency Cancellations',
+              title: AppLocalizations.of(context)!.emergencyCancellations,
               description:
-                  'If a cancellation is due to an emergency (e.g., medical issues, accidents), the customer must provide proof, and a full refund may be issued at the platform’s discretion.',
+                  AppLocalizations.of(context)!.emergencyCancellationPolicy,
             ),
           ],
         ),
@@ -559,27 +531,26 @@ class TermsAndConditionsScreen extends StatelessWidget {
           children: [
             _buildPolicyItem(
               context,
-              title: 'Advance Notice',
-              description:
-                  'Service providers must inform the customer and the platform at least 48 hours before the scheduled service if they need to cancel.',
+              title: AppLocalizations.of(context)!.advanceNotice,
+              description: AppLocalizations.of(context)!.inform48HoursBefore,
             ),
             _buildPolicyItem(
               context,
-              title: 'Frequent Cancellations',
+              title: AppLocalizations.of(context)!.frequentCancellations,
               description:
-                  'Repeated last-minute cancellations or no-shows may result in penalties, lower visibility in search results, or account suspension.',
+                  AppLocalizations.of(context)!.repeatedCancellationsPenalties,
             ),
             _buildPolicyItem(
               context,
-              title: 'Customer Compensation',
+              title: AppLocalizations.of(context)!.customerCompensation,
               description:
-                  'If a service provider cancels after a customer has already made preparations (e.g., purchasing materials, rearranging schedules), compensation may be required.',
+                  AppLocalizations.of(context)!.providerCancelCompensation,
             ),
             _buildPolicyItem(
               context,
-              title: 'Unavoidable Cancellations',
+              title: AppLocalizations.of(context)!.unavoidableCancellations,
               description:
-                  'If a service provider must cancel due to unforeseen circumstances (e.g., health issues, family emergencies), they should notify support immediately to avoid penalties.',
+                  AppLocalizations.of(context)!.unforeseeableCircumstances,
             ),
           ],
         ),
@@ -590,14 +561,14 @@ class TermsAndConditionsScreen extends StatelessWidget {
             _buildPolicyItem(
               context,
               title: '',
-              description:
-                  'If a service is canceled by either party due to unforeseen circumstances, both the customer and the service provider should report the issue through the App to avoid penalties.',
+              description: AppLocalizations.of(context)!
+                  .reportUnforeseeableCircumstances,
             ),
             _buildPolicyItem(
               context,
               title: '',
               description:
-                  'The App reserves the right to modify cancellation policies and will notify users of significant changes.',
+                  AppLocalizations.of(context)!.appModifyCancellationPolicies,
             ),
           ],
         ),
@@ -614,13 +585,12 @@ class TermsAndConditionsScreen extends StatelessWidget {
           context,
           title: '',
           description:
-              'The App reserves the right to suspend or terminate any account that violates these terms.',
+              AppLocalizations.of(context)!.appSuspendTerminateViolations,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Users may deactivate their accounts at any time through the App settings.',
+          description: AppLocalizations.of(context)!.usersDeactivateAccounts,
         ),
       ],
     );
@@ -634,14 +604,13 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'The App acts as a platform to connect customers with service providers but does not guarantee service quality or outcomes.',
+          description: AppLocalizations.of(context)!.appPlatformConnect,
         ),
         _buildPolicyItem(
           context,
           title: '',
           description:
-              'The App is not liable for any damages, losses, or disputes arising from user interactions.',
+              AppLocalizations.of(context)!.appNotLiableUserInteractions,
         ),
       ],
     );
@@ -655,14 +624,12 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'The App reserves the right to update these Terms and Conditions at any time. Users will be notified of significant changes.',
+          description: AppLocalizations.of(context)!.appUpdateTermsAnytime,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'Continued use of the App after changes are posted constitutes acceptance of the new terms.',
+          description: AppLocalizations.of(context)!.continuedUseAcceptance,
         ),
       ],
     );
@@ -676,14 +643,13 @@ class TermsAndConditionsScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'For questions or concerns regarding these Terms and Conditions, please contact our support team within the App.',
+          description: AppLocalizations.of(context)!.contactSupportForQuestions,
         ),
         _buildPolicyItem(
           context,
           title: '',
           description:
-              'By using Good One, you acknowledge that you have read, understood, and agreed to these Terms and Conditions.',
+              AppLocalizations.of(context)!.acknowledgmentReadUnderstood,
         ),
       ],
     );

@@ -5,6 +5,8 @@ import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Features/User/Models/contractor.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class CustomerReviewsScreen extends StatelessWidget {
   final Contractor contractor;
   final ScrollController _scrollController = ScrollController();
@@ -19,7 +21,7 @@ class CustomerReviewsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "All Reviews (${contractor.ratings!.length})",
+          "${AppLocalizations.of(context)!.allReviews} (${contractor.ratings!.length})",
           style: AppTextStyles.appBarTitle(context),
         ),
       ),
@@ -74,7 +76,7 @@ class CustomerReviewsScreen extends StatelessWidget {
                 ],
               ),
               Text(
-                '$totalReviews reviews',
+                '$totalReviews ${AppLocalizations.of(context)!.reviews}',
                 style: AppTextStyles.text(context).copyWith(
                   color: Colors.grey,
                 ),

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/secondary_button.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
+import 'package:good_one_app/Core/Utils/message_helper.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/orders_status_chart.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/services_status_chart.dart';
-import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_dialog.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
@@ -18,6 +19,7 @@ import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
+import 'package:good_one_app/Core/Utils/notification_helper.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -26,35 +28,39 @@ class WorkerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<WorkerManagerProvider, OrdersManagerProvider>(
-      builder: (context, workerManager, ordersManager, _) {
+    return Consumer3<WorkerManagerProvider, OrdersManagerProvider,
+        ChatProvider>(
+      builder: (context, workerManager, ordersManager, chatProvider, _) {
+        // Only show loading indicator for critical loading states
         if (workerManager.isLoading || ordersManager.isOrdersLoading) {
           return const LoadingIndicator();
         }
 
-        if (workerManager.error != null) {
+        // Only show error widget for critical errors (auth errors)
+        if (workerManager.hasCriticalError) {
           return AppErrorWidget(
-            message: workerManager.error!,
+            message: workerManager.criticalError!,
             onRetry: workerManager.initialize,
           );
         }
 
         return RefreshIndicator(
           onRefresh: () async {
+            final currentUserId = workerManager.workerInfo?.id?.toString();
             await Future.wait([
               workerManager.initialize(),
+              workerManager.refreshEarningsData(), // Add this line
               ordersManager.initialize(),
+              if (currentUserId != null) chatProvider.initialize(currentUserId),
             ]);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.all(
-              context.getAdaptiveSize(20),
-            ),
+            padding: EdgeInsets.all(context.getAdaptiveSize(20)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _workerHeader(context, workerManager),
+                _workerHeader(context, workerManager, chatProvider),
                 SizedBox(height: context.getHeight(24)),
                 _workerBalanceCard(context, workerManager),
                 SizedBox(height: context.getHeight(20)),
@@ -74,6 +80,7 @@ class WorkerHomeScreen extends StatelessWidget {
   Widget _workerHeader(
     BuildContext context,
     WorkerManagerProvider workerManager,
+    ChatProvider chatProvider,
   ) {
     final worker = workerManager.workerInfo;
     return Row(
@@ -98,43 +105,50 @@ class WorkerHomeScreen extends StatelessWidget {
             ],
           ),
         ),
-        _iconButton(
+        NotificationHelper.buildNotificationIconWithBadge(
           context: context,
-          asset: AppAssets.notification,
+          icon: Container(
+            padding: EdgeInsets.all(context.getAdaptiveSize(8)),
+            decoration: BoxDecoration(
+              color: AppColors.dimGray,
+              shape: BoxShape.circle,
+            ),
+            child: Image.asset(
+              AppAssets.notification,
+              width: context.getAdaptiveSize(24),
+              color: AppColors.primaryColor,
+            ),
+          ),
           onTap: () =>
               NavigationService.navigateTo(AppRoutes.workerNotificationsScreen),
         ),
         SizedBox(width: context.getWidth(10)),
-        _iconButton(
+        MessageHelper.buildMessageIconWithBadge(
           context: context,
-          asset: AppAssets.message,
+          icon: Container(
+            padding: EdgeInsets.all(context.getAdaptiveSize(8)),
+            decoration: BoxDecoration(
+              color: AppColors.dimGray,
+              shape: BoxShape.circle,
+            ),
+            child: Image.asset(
+              AppAssets.message,
+              width: context.getAdaptiveSize(24),
+              color: AppColors.primaryColor,
+            ),
+          ),
           onTap: workerManager.workerInfo != null
-              ? () => NavigationService.navigateTo(AppRoutes.conversations)
+              ? () {
+                  final currentUserId =
+                      workerManager.workerInfo?.id?.toString();
+                  if (currentUserId != null) {
+                    chatProvider.initialize(currentUserId);
+                  }
+                  NavigationService.navigateTo(AppRoutes.conversations);
+                }
               : null,
         ),
       ],
-    );
-  }
-
-  Widget _iconButton({
-    required BuildContext context,
-    required String asset,
-    required VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(context.getAdaptiveSize(8)),
-        decoration: BoxDecoration(
-          color: AppColors.dimGray,
-          shape: BoxShape.circle,
-        ),
-        child: Image.asset(
-          asset,
-          width: context.getAdaptiveSize(24),
-          color: AppColors.primaryColor,
-        ),
-      ),
     );
   }
 
@@ -151,6 +165,73 @@ class WorkerHomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Show balance error if it exists
+          if (workerManager.balanceError != null)
+            Container(
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red, size: 16),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      workerManager.balanceError!,
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, size: 16, color: Colors.red),
+                    onPressed: () => workerManager.clearError('balance'),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+
+          // Show earnings error if it exists
+          if (workerManager.earningsError != null)
+            Container(
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber,
+                    color: Colors.orange,
+                    size: 16,
+                  ),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      workerManager.earningsError!,
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, size: 16, color: Colors.orange),
+                    onPressed: () => workerManager.clearError('earnings'),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -169,15 +250,83 @@ class WorkerHomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(
-                '\$${workerManager.balance?.balance?.toStringAsFixed(2) ?? '0.00'}',
-                style: AppTextStyles.title2(context).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              // Show loading indicator for balance or display balance
+              workerManager.isBalanceLoading || workerManager.isEarningsLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      '\$${workerManager.balance?.balance?.toStringAsFixed(2) ?? '0.00'}',
+                      style: AppTextStyles.title2(context).copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ],
           ),
+
+          // Add earnings summary display if available
+          if (workerManager.earningsSummary != null) ...[
+            SizedBox(height: context.getHeight(12)),
+            Container(
+              padding: EdgeInsets.all(context.getAdaptiveSize(12)),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(context.getAdaptiveSize(8)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total Earnings:',
+                        style: AppTextStyles.text(context).copyWith(
+                          color: Colors.white70,
+                          fontSize: context.getAdaptiveSize(12),
+                        ),
+                      ),
+                      Text(
+                        '\$${workerManager.earningsSummary!.totalEarnings.toStringAsFixed(2)}',
+                        style: AppTextStyles.text(context).copyWith(
+                          color: Colors.white,
+                          fontSize: context.getAdaptiveSize(12),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: context.getHeight(4)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'This Month:',
+                        style: AppTextStyles.text(context).copyWith(
+                          color: Colors.white70,
+                          fontSize: context.getAdaptiveSize(12),
+                        ),
+                      ),
+                      Text(
+                        '\$${workerManager.earningsSummary!.monthlyEarnings.toStringAsFixed(2)}',
+                        style: AppTextStyles.text(context).copyWith(
+                          color: Colors.white,
+                          fontSize: context.getAdaptiveSize(12),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           SizedBox(height: context.getHeight(24)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -187,7 +336,7 @@ class WorkerHomeScreen extends StatelessWidget {
                 child: PrimaryButton(
                   text: AppLocalizations.of(context)!.withdrawal,
                   onPressed: () =>
-                      _showWithdrawalDialog(context, workerManager),
+                      _showWithdrawalScreen(context, workerManager),
                 ),
               ),
               SizedBox(width: context.getWidth(12)),
@@ -208,17 +357,13 @@ class WorkerHomeScreen extends StatelessWidget {
     );
   }
 
-  void _showWithdrawalDialog(
+  void _showWithdrawalScreen(
     BuildContext context,
     WorkerManagerProvider workerManager,
   ) {
-    showDialog(
-      context: context,
-      builder: (_) => WithdrawalDialog(),
-    );
+    NavigationService.navigateTo(AppRoutes.withdrawalScreen);
   }
 
-  // Dashboard Overview Card
   Widget _dashboardOverviewCard(
     BuildContext context,
     WorkerManagerProvider workerManager,
@@ -234,9 +379,77 @@ class WorkerHomeScreen extends StatelessWidget {
             style: AppTextStyles.title(context),
           ),
           SizedBox(height: context.getHeight(20)),
-          OrdersStatusChart(ordersManager: ordersManager),
+
+          // Orders Chart with error handling
+          Column(
+            children: [
+              if (ordersManager.error != null)
+                Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.errorLight,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.errorDark),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline,
+                          color: AppColors.errorDark, size: 16),
+                      SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Orders: ${ordersManager.error}',
+                          style: TextStyle(
+                              color: AppColors.errorDark, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              OrdersStatusChart(ordersManager: ordersManager),
+            ],
+          ),
+
           SizedBox(height: context.getHeight(20)),
-          ServicesStatusChart(workerManager: workerManager),
+
+          // Services Chart with error handling
+          Column(
+            children: [
+              if (workerManager.servicesError != null)
+                Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.errorLight,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.errorDark),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline,
+                          color: AppColors.errorDark, size: 16),
+                      SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Services: ${workerManager.servicesError}',
+                          style: TextStyle(
+                              color: AppColors.errorDark, fontSize: 12),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close,
+                            size: 16, color: AppColors.errorDark),
+                        onPressed: () => workerManager.clearError('services'),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                ),
+              ServicesStatusChart(workerManager: workerManager),
+            ],
+          ),
         ],
       ),
     );
@@ -252,6 +465,38 @@ class WorkerHomeScreen extends StatelessWidget {
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
       child: Column(
         children: [
+          // Show account state error if it exists
+          if (workerManager.accountStateError != null)
+            Container(
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.errorLight,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.errorDark),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline,
+                      color: AppColors.errorDark, size: 16),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      workerManager.accountStateError!,
+                      style:
+                          TextStyle(color: AppColors.errorDark, fontSize: 12),
+                    ),
+                  ),
+                  IconButton(
+                    icon:
+                        Icon(Icons.close, size: 16, color: AppColors.errorDark),
+                    onPressed: () => workerManager.clearError('accountState'),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
           Row(
             children: [
               Icon(
@@ -271,12 +516,18 @@ class WorkerHomeScreen extends StatelessWidget {
           ),
           SizedBox(height: context.getHeight(12)),
           PrimaryButton(
-            text: isActive
-                ? AppLocalizations.of(context)!.goOnVacation
-                : AppLocalizations.of(context)!.returnToWork,
-            onPressed: () async {
-              await workerManager.changeAccountState(isActive ? 0 : 1);
-            },
+            text: workerManager.isAccountStateLoading
+                ? AppLocalizations.of(context)!.processing
+                : isActive
+                    ? AppLocalizations.of(context)!.goOnVacation
+                    : AppLocalizations.of(context)!.returnToWork,
+            onPressed: workerManager.isAccountStateLoading
+                ? () {}
+                : () async {
+                    // Clear previous errors before attempting the action
+                    workerManager.clearError('accountState');
+                    await workerManager.changeAccountState(isActive ? 0 : 1);
+                  },
           ),
         ],
       ),
@@ -327,7 +578,7 @@ class WorkerHomeScreen extends StatelessWidget {
             ),
             SizedBox(height: context.getHeight(8)),
             PrimaryButton(
-              text: AppLocalizations.of(context)!.completeSecurityCheck,
+              text: AppLocalizations.of(context)!.complete,
               onPressed: () => _launchSecurityCheck(context),
             ),
           ],

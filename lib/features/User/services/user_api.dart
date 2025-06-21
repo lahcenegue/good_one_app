@@ -177,7 +177,8 @@ class UserApi {
   }
 
   static Future<ApiResponse<Order>> updateOrder(
-      OrderEditRequest orderEditRequest) async {
+    OrderEditRequest orderEditRequest,
+  ) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
     return _api.post<Order>(
       url: ApiEndpoints.updateOrder,

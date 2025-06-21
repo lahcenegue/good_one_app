@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Features/User/Models/order_model.dart';
 import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
 
@@ -37,6 +38,9 @@ class OrdersManagerProvider extends ChangeNotifier {
   MapController get mapController => _mapController;
   LatLng? get customerLatLng => _customerLatLng;
 
+  int get totalIncompleteOrders => _orders.values
+      .fold(0, (sum, list) => sum + list.where((o) => o.status == 1).length);
+
   OrdersManagerProvider() {
     initialize();
   }
@@ -66,7 +70,8 @@ class OrdersManagerProvider extends ChangeNotifier {
     try {
       final response = await WorkerApi.fetchOrders();
       if (response.success && response.data != null) {
-        _orders = response.data!;
+        // Sort orders to prioritize pending ones
+        _orders = _sortOrdersByPriority(response.data!);
         _dates = orders.keys.toList();
         notifyListeners();
       } else {
@@ -80,13 +85,43 @@ class OrdersManagerProvider extends ChangeNotifier {
     }
   }
 
-  // Helper methods for summary data
-  List<ChartData> getRequestStatusChartData() {
-    final completedOrders = totalOrders - pendingOrders;
+  int getIncompleteOrdersCount(String date) {
+    final dateOrders = _orders[date] ?? [];
+    return dateOrders.where((order) => order.status == 1).length;
+  }
 
+  // This sorts orders to show incomplete (pending) orders first
+  Map<String, List<MyOrderModel>> _sortOrdersByPriority(
+      Map<String, List<MyOrderModel>> orders) {
+    Map<String, List<MyOrderModel>> sortedOrders = {};
+
+    for (String date in orders.keys) {
+      List<MyOrderModel> dateOrders = List.from(orders[date] ?? []);
+
+      // Sort orders: status 1 (pending) first, then others
+      dateOrders.sort((a, b) {
+        // Pending orders (status 1) come first
+        if (a.status == 1 && b.status != 1) return -1;
+        if (a.status != 1 && b.status == 1) return 1;
+
+        // Among non-pending orders, sort by creation time (newest first)
+        return b.createdAt.compareTo(a.createdAt);
+      });
+
+      sortedOrders[date] = dateOrders;
+    }
+
+    return sortedOrders;
+  }
+
+  // Helper methods for summary data
+  List<ChartData> getRequestStatusChartData(BuildContext context) {
+    final completedOrders = totalOrders - pendingOrders;
     return [
-      ChartData('Pending', pendingOrders, Colors.orange),
-      ChartData('Completed', completedOrders, Colors.green),
+      ChartData(AppLocalizations.of(context)!.pending, pendingOrders,
+          AppColors.chartPending),
+      ChartData(AppLocalizations.of(context)!.completed, completedOrders,
+          AppColors.chartCompleted),
     ].where((item) => item.value > 0).toList();
   }
 
@@ -166,14 +201,19 @@ class OrdersManagerProvider extends ChangeNotifier {
 
   Future<void> completeOrder(
     BuildContext context,
-    int orderId,
-  ) async {
+    int orderId, {
+    VoidCallback? onBalanceRefreshNeeded,
+  }) async {
     _setOrdersLoading(true);
     try {
       final orderRequest = OrderEditRequest(orderId: orderId);
       final response = await WorkerApi.completeOrder(orderRequest);
       if (response.success) {
         await fetchOrders();
+
+        // Call the callback to refresh balance
+        onBalanceRefreshNeeded?.call();
+
         await NavigationService.navigateToAndReplace(
           AppRoutes.workerMain,
           arguments: 2,
@@ -204,14 +244,14 @@ class OrdersManagerProvider extends ChangeNotifier {
   Color getStatusColor(int status) {
     switch (status) {
       case 1:
-        return Colors.red;
+        return AppColors.errorColor;
       case 2:
-        return Colors.green;
+        return AppColors.successColor;
       case 3:
-        return Colors.grey;
+        return AppColors.chartInactive;
 
       default:
-        return Colors.grey;
+        return AppColors.chartInactive;
     }
   }
 }

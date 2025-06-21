@@ -138,15 +138,17 @@ class WebSocketService {
   void emit(String event, List<dynamic> data) {
     if (_isConnected && _socket != null) {
       try {
+        debugPrint('WebSocket: About to emit "$event" with data: $data');
         _socket!.emit(event, data);
-        debugPrint('WebSocket: Emitted "$event" with data: $data');
+        debugPrint('WebSocket: Successfully emitted "$event"');
       } catch (e) {
         debugPrint('WebSocket: Error emitting "$event": $e');
         _lastError = 'Failed to emit event: $e';
         onError?.call(_lastError!);
       }
     } else {
-      debugPrint('WebSocket: Cannot emit "$event" - not connected');
+      debugPrint(
+          'WebSocket: Cannot emit "$event" - Connection status: connected=$_isConnected, socket=${_socket != null}');
       _lastError = 'Cannot emit event - not connected';
       onError?.call(_lastError!);
     }

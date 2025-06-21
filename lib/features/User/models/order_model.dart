@@ -13,6 +13,9 @@ class Order {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  final String? pricingType;
+  final double? durationValue;
+
   Order({
     required this.totalHours,
     required this.startAt,
@@ -27,6 +30,8 @@ class Order {
     required this.createdAt,
     required this.updatedAt,
     required this.id,
+    this.pricingType,
+    this.durationValue,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -44,6 +49,10 @@ class Order {
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       id: json['id'] as int,
+      pricingType: json['pricing_type'] as String?,
+      durationValue: json['duration_value'] != null
+          ? (json['duration_value'] as num).toDouble()
+          : null,
     );
   }
 
@@ -62,6 +71,8 @@ class Order {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'id': id,
+      'pricing_type': pricingType,
+      'duration_value': durationValue,
     };
   }
 }
@@ -70,7 +81,7 @@ class OrderRequest {
   final int serviceId;
   final String location;
   final int startAt;
-  final int totalHours;
+  final double durationValue; // Changed from totalHours to durationValue
   final String region;
   String? coupon;
 
@@ -78,7 +89,7 @@ class OrderRequest {
     required this.serviceId,
     required this.location,
     required this.startAt,
-    required this.totalHours,
+    required this.durationValue, // Updated parameter name
     required this.region,
     this.coupon,
   });
@@ -87,7 +98,7 @@ class OrderRequest {
         'service_id': serviceId,
         'location': location,
         'start_at': startAt,
-        'total_hours': totalHours,
+        'duration_value': durationValue, // Updated JSON key
         'region': region,
         if (coupon != null) 'coupon': coupon,
       };
@@ -97,14 +108,14 @@ class OrderEditRequest {
   int? orderId;
   String? location;
   int? startAt;
-  int? totalHours;
+  double? durationValue; // Changed from totalHours to durationValue
   String? note;
 
   OrderEditRequest({
     this.orderId,
     this.location,
     this.startAt,
-    this.totalHours,
+    this.durationValue, // Updated parameter name
     this.note,
   });
 
@@ -113,7 +124,7 @@ class OrderEditRequest {
       if (orderId != null) 'order_id': orderId,
       if (location != null) 'location': location,
       if (startAt != null) 'start_at': startAt,
-      if (totalHours != null) 'total_hours': totalHours,
+      if (durationValue != null) 'duration_value': durationValue, // Updated key
       if (note != null) 'note': note,
     };
   }

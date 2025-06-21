@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/infrastructure/api/api_endpoints.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:photo_view/photo_view.dart';
@@ -40,10 +41,10 @@ class _GalleryViewerPageState extends State<GalleryViewerPage> {
     return Consumer<UserManagerProvider>(
       builder: (context, userManager, _) {
         return Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: AppColors.blackText,
           appBar: AppBar(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.blackText,
+            foregroundColor: AppColors.whiteText,
             title: Text(
                 '${_currentIndex + 1} / ${userManager.selectedContractor!.gallery!.length}'),
           ),
@@ -65,7 +66,7 @@ class _GalleryViewerPageState extends State<GalleryViewerPage> {
             },
             scrollPhysics: const BouncingScrollPhysics(),
             backgroundDecoration: const BoxDecoration(
-              color: Colors.black,
+              color: AppColors.blackText,
             ),
           ),
         );

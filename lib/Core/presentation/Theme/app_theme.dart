@@ -14,15 +14,13 @@ class AppTheme {
         colorScheme: ColorScheme.light(
           primary: AppColors.primaryColor,
           error: AppColors.oxblood,
-        ),
-
-        // AppBar theme
+        ), // AppBar theme
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           backgroundColor: AppColors.backgroundColor,
           elevation: 0,
           titleTextStyle: TextStyle(
-            color: Colors.black,
+            color: AppColors.blackText,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -42,12 +40,12 @@ class AppTheme {
             fontWeight: FontWeight.w400,
           ),
           labelStyle: const TextStyle(
-            color: Colors.black,
+            color: AppColors.blackText,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
           floatingLabelStyle: const TextStyle(
-            color: Colors.black,
+            color: AppColors.blackText,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
@@ -64,15 +62,15 @@ class AppTheme {
           isDense: true,
           alignLabelWithHint: true,
           suffixIconColor: AppColors.hintColor,
-          focusColor: Colors.transparent,
-          hoverColor: Colors.transparent,
+          focusColor: AppColors.transparent,
+          hoverColor: AppColors.transparent,
         ),
 
         // Button themes
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.whiteText,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -80,12 +78,11 @@ class AppTheme {
           ),
         ),
       );
-
   static OutlineInputBorder _defaultBorder() {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(15),
       borderSide: const BorderSide(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         width: 0,
       ),
     );

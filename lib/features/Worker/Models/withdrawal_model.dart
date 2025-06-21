@@ -2,9 +2,9 @@ class WithdrawalRequest {
   final double? amount;
   final String? method;
   final String? name;
-  final int? transit;
-  final int? institution;
-  final int? account;
+  final String? transit;
+  final String? institution;
+  final String? account;
   final String? email;
 
   WithdrawalRequest({
@@ -22,9 +22,9 @@ class WithdrawalRequest {
       if (amount != null) 'amount': amount!,
       if (method != null) 'method': method!.toString(),
       if (name != null) 'name': name!.toString(),
-      if (transit != null) 'transit': transit!,
-      if (institution != null) 'institution': institution!,
-      if (account != null) 'account': account!,
+      if (transit != null) 'transit': transit!.toString(),
+      if (institution != null) 'institution': institution!.toString(),
+      if (account != null) 'account': account!.toString(),
       if (email != null) 'email': email!.toString(),
     };
   }
@@ -45,20 +45,37 @@ class WithdrawalModel {
 
   factory WithdrawalModel.fromJson(Map<String, dynamic> json) {
     return WithdrawalModel(
-      amount: json['amount'] as double,
-      method: json['method'] as String,
-      createdAt: json['created_at'] as String,
-      requestId: json['id'] as int,
+      amount: _parseDouble(json['amount']),
+      method: json['method']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      requestId: _parseInt(json['id']),
     );
+  }
+
+  // Helper methods (add these as static methods in the class)
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 }
 
 class WithdrawStatus {
   final double? amount;
   final String? name;
-  final int? transit;
-  final int? institution;
-  final int? account;
+  final String? transit;
+  final String? institution;
+  final String? account;
   final String? email;
   final String? createdAt;
   final int? status;
@@ -76,14 +93,14 @@ class WithdrawStatus {
 
   factory WithdrawStatus.fromJson(Map<String, dynamic> json) {
     return WithdrawStatus(
-      amount: double.tryParse(json['amount'].toString()),
+      amount: (json['amount'] as num?)?.toDouble(),
       createdAt: json['created_at'],
       status: json['status'],
-      name: json['name'],
-      email: json['email'],
-      account: json['account'],
-      institution: json['institution'],
-      transit: json['transit'],
+      name: json['name'].toString(),
+      email: json['email'].toString(),
+      account: json['account'].toString(),
+      institution: json['institution'].toString(),
+      transit: json['transit'].toString(),
     );
   }
 }

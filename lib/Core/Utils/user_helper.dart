@@ -9,19 +9,19 @@ class UserHelper {
   static String? getCurrentUserId(BuildContext context) {
     try {
       // First try UserManagerProvider
-      final userInfo = context.read<UserManagerProvider>().userInfo;
-      if (userInfo != null) {
+      final userProvider = context.read<UserManagerProvider>();
+      if (userProvider.userInfo != null) {
         debugPrint(
-            'UserHelper: Found user in UserManagerProvider - ID: ${userInfo.id}');
-        return userInfo.id.toString();
+            'UserHelper: Found user in UserManagerProvider - ID: ${userProvider.userInfo!.id}');
+        return userProvider.userInfo!.id.toString();
       }
 
       // Fallback to WorkerManagerProvider
-      final workerInfo = context.read<WorkerManagerProvider>().workerInfo;
-      if (workerInfo != null) {
+      final workerProvider = context.read<WorkerManagerProvider>();
+      if (workerProvider.workerInfo != null) {
         debugPrint(
-            'UserHelper: Found user in WorkerManagerProvider - ID: ${workerInfo.id}');
-        return workerInfo.id.toString();
+            'UserHelper: Found user in WorkerManagerProvider - ID: ${workerProvider.workerInfo!.id}');
+        return workerProvider.workerInfo!.id.toString();
       }
 
       debugPrint('UserHelper: No user found in either provider');

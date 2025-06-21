@@ -5,6 +5,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Providers/User/contractors_by_service_provider.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/orders_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserManagerProvider()),
+        ChangeNotifierProvider(create: (_) => ContractorsByServiceProvider()),
         ChangeNotifierProvider(create: (_) => BookingManagerProvider()),
         ChangeNotifierProvider(create: (_) => WorkerManagerProvider()),
         ChangeNotifierProvider(create: (_) => OrdersManagerProvider()),

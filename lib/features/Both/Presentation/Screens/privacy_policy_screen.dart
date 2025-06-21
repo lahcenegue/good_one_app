@@ -61,27 +61,26 @@ class PrivacyPolicyScreen extends StatelessWidget {
       children: [
         _buildPolicyItem(
           context,
-          title: 'Personal Information',
+          title: AppLocalizations.of(context)!.personalInformation,
           description:
-              'We collect information such as your name, email address, and phone number when you use our app.',
+              AppLocalizations.of(context)!.personalInformationDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Location Information',
+          title: AppLocalizations.of(context)!.locationInformation,
           description:
-              'If location services are enabled, we collect geographic data to enhance your user experience.',
+              AppLocalizations.of(context)!.locationInformationDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Device Information',
+          title: AppLocalizations.of(context)!.deviceInformation,
           description:
-              'We collect details like device type, operating system, and IP address.',
+              AppLocalizations.of(context)!.deviceInformationDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Usage Data',
-          description:
-              'We gather data on how you interact with the app to improve our services.',
+          title: AppLocalizations.of(context)!.usageData,
+          description: AppLocalizations.of(context)!.usageDataDescription,
         ),
       ],
     );
@@ -94,27 +93,26 @@ class PrivacyPolicyScreen extends StatelessWidget {
       children: [
         _buildPolicyItem(
           context,
-          title: 'Service Improvement',
+          title: AppLocalizations.of(context)!.serviceImprovement,
           description:
-              'We use your data to enhance and personalize app services.',
+              AppLocalizations.of(context)!.serviceImprovementDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Notifications',
+          title: AppLocalizations.of(context)!.notificationsUsage,
           description:
-              'We send notifications and service-related alerts to keep you informed.',
+              AppLocalizations.of(context)!.notificationsUsageDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Communication',
+          title: AppLocalizations.of(context)!.communicationUsage,
           description:
-              'We use your data to process requests and communicate with you.',
+              AppLocalizations.of(context)!.communicationUsageDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Legal Compliance',
-          description:
-              'We ensure compliance with legal and regulatory requirements.',
+          title: AppLocalizations.of(context)!.legalCompliance,
+          description: AppLocalizations.of(context)!.legalComplianceDescription,
         ),
       ],
     );
@@ -127,21 +125,21 @@ class PrivacyPolicyScreen extends StatelessWidget {
       children: [
         _buildPolicyItem(
           context,
-          title: 'Service Providers',
+          title: AppLocalizations.of(context)!.serviceProviders,
           description:
-              'We may share your data with payment processors, analytics providers, and technical support companies.',
+              AppLocalizations.of(context)!.serviceProvidersDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Legal Compliance',
+          title: AppLocalizations.of(context)!.legalComplianceSharing,
           description:
-              'We may share data if required by law or to protect our rights.',
+              AppLocalizations.of(context)!.legalComplianceSharingDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Advertising Partners',
+          title: AppLocalizations.of(context)!.advertisingPartners,
           description:
-              'With your consent, we may share some data for marketing purposes.',
+              AppLocalizations.of(context)!.advertisingPartnersDescription,
         ),
       ],
     );
@@ -154,15 +152,14 @@ class PrivacyPolicyScreen extends StatelessWidget {
       children: [
         _buildPolicyItem(
           context,
-          title: 'Modifying Data',
-          description:
-              'You may update or correct your personal data through the app.',
+          title: AppLocalizations.of(context)!.modifyingData,
+          description: AppLocalizations.of(context)!.modifyingDataDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Requesting Deletion',
+          title: AppLocalizations.of(context)!.requestingDeletion,
           description:
-              'You may request the deletion of your data, unless we are legally required to retain it.',
+              AppLocalizations.of(context)!.requestingDeletionDescription,
         ),
       ],
     );
@@ -176,8 +173,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'We implement security measures to protect your data from unauthorized access, alteration, or loss. However, absolute security over the internet cannot be guaranteed.',
+          description: AppLocalizations.of(context)!.dataProtectionDescription,
         ),
       ],
     );
@@ -191,8 +187,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'We may update this policy from time to time. You will be notified of significant changes through in-app notifications or via email.',
+          description: AppLocalizations.of(context)!.policyChangesDescription,
         ),
       ],
     );
@@ -206,8 +201,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'If you have any questions about this Privacy Policy, you can contact us via email or phone. By using the app, you agree to the terms of this Privacy Policy.',
+          description: AppLocalizations.of(context)!.contactUsDescription,
         ),
       ],
     );

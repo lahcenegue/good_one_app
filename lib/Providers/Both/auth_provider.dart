@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Features/Auth/Models/check_request.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -17,6 +20,7 @@ import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isInitialized = false;
@@ -187,12 +191,70 @@ class AuthProvider with ChangeNotifier {
         _clearFormData();
         await _saveAuthData();
 
+        // Initialize chat AFTER the providers have loaded user data
         _setLoading(false);
 
         if (accountType == AppConfig.service) {
           await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+
+          // Initialize chat for worker after navigation with better error handling
+          try {
+            final workerProvider =
+                Provider.of<WorkerManagerProvider>(context, listen: false);
+            final chatProvider =
+                Provider.of<ChatProvider>(context, listen: false);
+
+            // Wait longer for the worker provider to load user data
+            await Future.delayed(const Duration(milliseconds: 2000));
+
+            if (workerProvider.workerInfo?.id != null) {
+              // Use switchUser instead of initialize for clean state
+              await chatProvider
+                  .switchUser(workerProvider.workerInfo!.id.toString());
+              print(
+                  'Chat initialized for worker: ${workerProvider.workerInfo!.id}');
+            } else {
+              print('Worker info not available yet, will retry...');
+              // Retry after additional delay
+              await Future.delayed(const Duration(milliseconds: 1000));
+              if (workerProvider.workerInfo?.id != null) {
+                await chatProvider
+                    .switchUser(workerProvider.workerInfo!.id.toString());
+              }
+            }
+          } catch (e) {
+            print('Worker chat initialization failed: $e');
+          }
         } else {
           await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+
+          // Initialize chat for user after navigation with better error handling
+          try {
+            final userProvider =
+                Provider.of<UserManagerProvider>(context, listen: false);
+            final chatProvider =
+                Provider.of<ChatProvider>(context, listen: false);
+
+            // Wait longer for the user provider to load user data
+            await Future.delayed(const Duration(milliseconds: 2000));
+
+            if (userProvider.userInfo?.id != null) {
+              // Use switchUser instead of initialize for clean state
+              await chatProvider
+                  .switchUser(userProvider.userInfo!.id.toString());
+              print('Chat initialized for user: ${userProvider.userInfo!.id}');
+            } else {
+              print('User info not available yet, will retry...');
+              // Retry after additional delay
+              await Future.delayed(const Duration(milliseconds: 1000));
+              if (userProvider.userInfo?.id != null) {
+                await chatProvider
+                    .switchUser(userProvider.userInfo!.id.toString());
+              }
+            }
+          } catch (e) {
+            print('User chat initialization failed: $e');
+          }
         }
       } else if (response.error == 'Account is not verified') {
         await sendOtp();
@@ -294,6 +356,22 @@ class AuthProvider with ChangeNotifier {
       _clearErrors();
       _clearFormData();
 
+      // Clear chat data on logout - IMPORTANT: Do this BEFORE clearing auth data
+      try {
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+        // Completely disconnect and clear all chat state
+        chatProvider.disconnect();
+
+        // Additional cleanup - force clear any remaining state
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        print('Chat disconnected and cleared on logout');
+      } catch (e) {
+        print('Chat cleanup failed: $e');
+      }
+
+      // Clear authentication data
       clearData();
     } catch (e) {
       _handleError(e);
@@ -341,7 +419,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> checkOtp() async {
+  Future<void> checkOtp(BuildContext context) async {
     try {
       _setLoading(true);
       _clearErrors();
@@ -364,8 +442,46 @@ class AuthProvider with ChangeNotifier {
 
         if (accountType == AppConfig.service) {
           await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+
+          // Initialize chat for worker
+          try {
+            final workerProvider =
+                Provider.of<WorkerManagerProvider>(context, listen: false);
+            final chatProvider =
+                Provider.of<ChatProvider>(context, listen: false);
+
+            await Future.delayed(const Duration(milliseconds: 2000));
+
+            if (workerProvider.workerInfo?.id != null) {
+              await chatProvider
+                  .switchUser(workerProvider.workerInfo!.id.toString());
+              print(
+                  'Chat initialized for verified worker: ${workerProvider.workerInfo!.id}');
+            }
+          } catch (e) {
+            print('Worker chat initialization failed: $e');
+          }
         } else {
           await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+
+          // Initialize chat for user
+          try {
+            final userProvider =
+                Provider.of<UserManagerProvider>(context, listen: false);
+            final chatProvider =
+                Provider.of<ChatProvider>(context, listen: false);
+
+            await Future.delayed(const Duration(milliseconds: 2000));
+
+            if (userProvider.userInfo?.id != null) {
+              await chatProvider
+                  .switchUser(userProvider.userInfo!.id.toString());
+              print(
+                  'Chat initialized for verified user: ${userProvider.userInfo!.id}');
+            }
+          } catch (e) {
+            print('User chat initialization failed: $e');
+          }
         }
       } else {
         _error = response.error;

@@ -43,22 +43,27 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       debugPrint(
           'ConversationsScreen: Account type from storage: $_accountType');
 
-      // Get user ID using the helper utility
+      // Get user ID using the helper utility with better error handling
       final userId = UserHelper.getCurrentUserId(context);
 
-      if (userId != null) {
+      if (userId != null && userId.isNotEmpty) {
+        debugPrint(
+            'ConversationsScreen: Initializing chat for user ID: $userId');
         await context.read<ChatProvider>().initialize(userId);
         setState(() => _isInitialized = true);
-        debugPrint(
-            'ConversationsScreen: Successfully initialized with ID: $userId');
+        debugPrint('ConversationsScreen: Successfully initialized');
       } else {
-        throw Exception('User ID not available from either provider');
+        throw Exception('User ID not available - user may not be logged in');
       }
     } catch (e) {
       debugPrint('ConversationsScreen: Initialization error: $e');
-      // Error will be shown through provider state
+      // Set a more specific error message
+      context
+          .read<ChatProvider>()
+          .setError(AppLocalizations.of(context)!.failedToInitializeChat);
     } finally {
       _isInitializing = false;
+      if (mounted) setState(() {});
     }
   }
 
@@ -80,7 +85,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       appBar: AppBar(
         leading: const BackButton(),
         title: Text(
-          AppLocalizations.of(context)?.messages ?? 'Messages',
+          AppLocalizations.of(context)!.messages,
           style: AppTextStyles.appBarTitle(context),
         ),
         actions: [
@@ -93,8 +98,8 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                 ),
                 onPressed: provider.isConnected ? null : _refresh,
                 tooltip: provider.isConnected
-                    ? AppLocalizations.of(context)?.connected ?? 'Connected'
-                    : AppLocalizations.of(context)?.reconnect ?? 'Reconnect',
+                    ? AppLocalizations.of(context)!.connected
+                    : AppLocalizations.of(context)!.reconnect,
               );
             },
           ),
@@ -126,18 +131,30 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             );
           }
 
+          // Sort conversations: unread messages first, then by time
+          final sortedConversations =
+              List<ChatConversation>.from(provider.conversations);
+          sortedConversations.sort((a, b) {
+            // First, prioritize conversations with new messages
+            if (a.hasNewMessages && !b.hasNewMessages) return -1;
+            if (!a.hasNewMessages && b.hasNewMessages) return 1;
+
+            // If both have the same new message status, sort by time (most recent first)
+            return (b.time ?? '').compareTo(a.time ?? '');
+          });
+
           return RefreshIndicator(
             onRefresh: _refresh,
             child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: provider.conversations.length,
+              itemCount: sortedConversations.length,
               separatorBuilder: (_, __) => const Divider(
                 indent: 72,
                 endIndent: 16,
                 height: 1,
               ),
               itemBuilder: (_, index) => _ConversationTile(
-                conversation: provider.conversations[index],
+                conversation: sortedConversations[index],
                 accountType: _accountType,
               ),
             ),
@@ -153,13 +170,13 @@ class _InitializingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           LoadingIndicator(),
           SizedBox(height: 16),
-          Text('Initializing chat...'),
+          Text(AppLocalizations.of(context)!.initializingChat),
         ],
       ),
     );
@@ -171,13 +188,13 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           LoadingIndicator(),
           SizedBox(height: 16),
-          Text('Loading conversations...'),
+          Text(AppLocalizations.of(context)!.loadingConversations),
         ],
       ),
     );
@@ -220,8 +237,7 @@ class _ErrorState extends StatelessWidget {
             if (!isConnected) ...[
               const SizedBox(height: 8),
               Text(
-                AppLocalizations.of(context)?.checkConnection ??
-                    'Please check your internet connection',
+                AppLocalizations.of(context)!.checkConnection,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -235,8 +251,8 @@ class _ErrorState extends StatelessWidget {
               icon: Icon(isConnected ? Icons.refresh : Icons.wifi),
               label: Text(
                 isConnected
-                    ? AppLocalizations.of(context)?.retry ?? 'Try Again'
-                    : AppLocalizations.of(context)?.reconnect ?? 'Reconnect',
+                    ? AppLocalizations.of(context)!.retry
+                    : AppLocalizations.of(context)!.reconnect,
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryColor,
@@ -265,17 +281,38 @@ class _ConversationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () => _navigateToChat(context),
-      leading: UserAvatar(
-        picture: conversation.user.picture,
-        size: context.getWidth(56),
+      leading: Stack(
+        children: [
+          UserAvatar(
+            picture: conversation.user.picture,
+            size: context.getWidth(56),
+          ),
+          // Add a visual indicator for unread messages on the avatar
+          if (conversation.hasNewMessages)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+              ),
+            ),
+        ],
       ),
       title: Text(
         conversation.user.fullName.isNotEmpty
             ? conversation.user.fullName
-            : 'Unknown User',
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
+            : AppLocalizations.of(context)!.unknownUser,
+        style: TextStyle(
+          fontWeight:
+              conversation.hasNewMessages ? FontWeight.w700 : FontWeight.w600,
           fontSize: 16,
+          color: conversation.hasNewMessages ? Colors.black : Colors.black87,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -283,6 +320,10 @@ class _ConversationTile extends StatelessWidget {
       subtitle: _buildSubtitle(context),
       trailing: _buildTrailing(context),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      // Add subtle background highlight for unread conversations
+      tileColor: conversation.hasNewMessages
+          ? AppColors.primaryColor.withOpacity(0.05)
+          : null,
     );
   }
 
@@ -292,12 +333,16 @@ class _ConversationTile extends StatelessWidget {
     return Text(
       hasMessage
           ? conversation.latestMessage!
-          : AppLocalizations.of(context)?.noMessagesYet ?? 'No messages yet',
+          : AppLocalizations.of(context)!.noMessagesYet,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
-        color: hasMessage ? Colors.black87 : Colors.grey[600],
+        color: hasMessage
+            ? (conversation.hasNewMessages ? Colors.black87 : Colors.black54)
+            : Colors.grey[600],
         fontSize: 14,
+        fontWeight:
+            conversation.hasNewMessages ? FontWeight.w500 : FontWeight.normal,
         fontStyle: hasMessage ? FontStyle.normal : FontStyle.italic,
       ),
     );
@@ -310,9 +355,14 @@ class _ConversationTile extends StatelessWidget {
       children: [
         Text(
           ChatUtils.formatMessageTime(conversation.time),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: Colors.grey,
+            color: conversation.hasNewMessages
+                ? AppColors.primaryColor
+                : Colors.grey,
+            fontWeight: conversation.hasNewMessages
+                ? FontWeight.w600
+                : FontWeight.normal,
           ),
         ),
         const SizedBox(height: 4),
@@ -324,7 +374,7 @@ class _ConversationTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              AppLocalizations.of(context)?.newMessage ?? 'New',
+              AppLocalizations.of(context)!.newMessage,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 10,
@@ -344,7 +394,7 @@ class _ConversationTile extends StatelessWidget {
           otherUserId: conversation.user.id.toString(),
           otherUserName: conversation.user.fullName.isNotEmpty
               ? conversation.user.fullName
-              : 'Unknown User',
+              : AppLocalizations.of(context)!.unknownUser,
         ),
       ),
     );
@@ -366,7 +416,7 @@ class _EmptyState extends StatelessWidget {
       onRefresh: () async => onRefresh(),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.of(context).size.height * 0.7,
           child: Center(
             child: Column(
@@ -379,8 +429,7 @@ class _EmptyState extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  AppLocalizations.of(context)?.noConversations ??
-                      'No conversations',
+                  AppLocalizations.of(context)!.noConversations,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -389,8 +438,7 @@ class _EmptyState extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  AppLocalizations.of(context)?.startNewConversation ??
-                      'Start a new conversation',
+                  AppLocalizations.of(context)!.startNewConversation,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -402,8 +450,7 @@ class _EmptyState extends StatelessWidget {
                   ElevatedButton.icon(
                     onPressed: onRefresh,
                     icon: const Icon(Icons.wifi),
-                    label: Text(
-                        AppLocalizations.of(context)?.reconnect ?? 'Reconnect'),
+                    label: Text(AppLocalizations.of(context)!.reconnect),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryColor,
                       foregroundColor: Colors.white,

@@ -13,10 +13,9 @@ class OrdersStatusChart extends StatelessWidget {
   final OrdersManagerProvider ordersManager;
 
   const OrdersStatusChart({super.key, required this.ordersManager});
-
   @override
   Widget build(BuildContext context) {
-    final chartData = ordersManager.getRequestStatusChartData();
+    final chartData = ordersManager.getRequestStatusChartData(context);
     return SizedBox(
       height: context.getHeight(200),
       child: Column(
@@ -45,10 +44,12 @@ class OrdersStatusChart extends StatelessWidget {
                   xValueMapper: (ChartData data, _) => data.label,
                   yValueMapper: (ChartData data, _) => data.value,
                   pointColorMapper: (ChartData data, _) => data.color,
-                  dataLabelSettings: const DataLabelSettings(
+                  dataLabelSettings: DataLabelSettings(
                     isVisible: true,
                     labelPosition: ChartDataLabelPosition.inside,
-                    textStyle: TextStyle(color: Colors.white, fontSize: 12),
+                    textStyle: AppTextStyles.withColor(
+                        AppTextStyles.captionMedium(context),
+                        AppColors.whiteText),
                   ),
                   radius: '80%',
                   innerRadius: '50%',

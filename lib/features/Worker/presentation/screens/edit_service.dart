@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -25,23 +26,66 @@ class EditService extends StatefulWidget {
 }
 
 class _EditServiceState extends State<EditService>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   bool _tempActiveStatus = false;
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
 
     _tempActiveStatus = widget.service.active == 1;
 
+    // Initialize animations
+    _fadeController = AnimationController(
+      duration: Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final workerManager =
           Provider.of<WorkerManagerProvider>(context, listen: false);
 
       await workerManager.fetchCategories();
-
       workerManager.initializeServiceControlles(widget.service);
       _setCorrectCategoryAndSubcategory(workerManager);
+
+      // Start animations
+      _fadeController.forward();
+      Future.delayed(Duration(milliseconds: 200), () {
+        _slideController.forward();
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
   }
 
   @override
@@ -49,106 +93,100 @@ class _EditServiceState extends State<EditService>
     return Consumer<WorkerManagerProvider>(
       builder: (context, workerManager, _) {
         return Scaffold(
-          appBar: _buildAppBar(context),
+          backgroundColor: Colors.grey.shade50,
+          appBar: _buildModernAppBar(context),
           body: workerManager.isServiceLoading
-              ? const Center(child: CircularProgressIndicator())
-              : CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-                      sliver: SliverToBoxAdapter(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildServiceVisibilityCard(workerManager),
-                            SizedBox(height: context.getHeight(24)),
-                            _buildServiceDetailsCard(workerManager),
-                            SizedBox(height: context.getHeight(24)),
-                            _buildImageGalleryCard(context, workerManager),
-                            SizedBox(height: context.getHeight(24)),
-                            _buildSaveButton(context, workerManager),
-                            if (workerManager.addServiceError != null)
-                              Padding(
-                                padding:
-                                    EdgeInsets.only(top: context.getHeight(16)),
-                                child: Container(
-                                  padding: EdgeInsets.all(
-                                      context.getAdaptiveSize(12)),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red[50],
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.red[300]!),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.error, color: Colors.red[700]),
-                                      SizedBox(width: context.getWidth(8)),
-                                      Expanded(
-                                        child: Text(
-                                          workerManager.addServiceError!,
-                                          style:
-                                              TextStyle(color: Colors.red[700]),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            SizedBox(height: context.getHeight(24)),
-                          ],
+              ? LoadingIndicator()
+              : FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: CustomScrollView(
+                      physics: BouncingScrollPhysics(),
+                      slivers: [
+                        SliverPadding(
+                          padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate([
+                              _buildServiceHeader(),
+                              SizedBox(height: context.getHeight(24)),
+                              _buildServiceVisibilityCard(workerManager),
+                              SizedBox(height: context.getHeight(24)),
+                              _buildServiceDetailsCard(workerManager),
+                              SizedBox(height: context.getHeight(24)),
+                              _buildImageGalleryCard(context, workerManager),
+                              SizedBox(height: context.getHeight(24)),
+                              _buildSaveButton(context, workerManager),
+                              if (workerManager.addServiceError != null) ...[
+                                SizedBox(height: context.getHeight(16)),
+                                _buildErrorCard(workerManager.addServiceError!),
+                              ],
+                              SizedBox(height: context.getHeight(24)),
+                            ]),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
         );
       },
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildModernAppBar(BuildContext context) {
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.transparent,
+      leading: Container(
+        margin: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: IconButton(
+          icon:
+              Icon(Icons.arrow_back_ios_rounded, color: AppColors.primaryColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       title: Text(
-        '${AppLocalizations.of(context)!.edit} ${widget.service.service}',
+        '${AppLocalizations.of(context)!.edit} ${AppLocalizations.of(context)!.service}',
         style: AppTextStyles.appBarTitle(context).copyWith(
           fontWeight: FontWeight.bold,
-          shadows: [Shadow(color: Colors.black12, blurRadius: 4)],
+          color: Colors.grey.shade800,
         ),
       ),
       centerTitle: true,
     );
   }
 
-  // NEW: Service Visibility Card
-  Widget _buildServiceVisibilityCard(WorkerManagerProvider workerManager) {
+  Widget _buildServiceHeader() {
     return Container(
-      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      padding: EdgeInsets.all(context.getAdaptiveSize(20)),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
+        color: AppColors.primaryColor,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(context.getAdaptiveSize(12)),
             decoration: BoxDecoration(
-              color: _tempActiveStatus ? Colors.green[50] : Colors.grey[50],
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
-              _tempActiveStatus ? Icons.visibility : Icons.visibility_off,
-              color: _tempActiveStatus ? Colors.green[600] : Colors.grey[600],
-              size: context.getAdaptiveSize(24),
+              Icons.edit_note_rounded,
+              color: Colors.white,
+              size: context.getAdaptiveSize(28),
             ),
           ),
           SizedBox(width: context.getWidth(16)),
@@ -157,42 +195,157 @@ class _EditServiceState extends State<EditService>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Service Visibility',
-                  style: AppTextStyles.title2(context),
+                  widget.service.service,
+                  style: AppTextStyles.title(context).copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                SizedBox(height: context.getHeight(4)),
                 Text(
-                  _tempActiveStatus
-                      ? 'Service will be visible to customers'
-                      : 'Service will be hidden from customers',
+                  AppLocalizations.of(context)!.editUpdateServiceDetails,
                   style: AppTextStyles.text(context).copyWith(
-                    color: _tempActiveStatus
-                        ? Colors.green[600]
-                        : Colors.grey[600],
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
-                if (_tempActiveStatus != (widget.service.active == 1))
-                  Padding(
-                    padding: EdgeInsets.only(top: context.getHeight(4)),
-                    child: Text(
-                      '• Unsaved changes',
-                      style: AppTextStyles.text(context).copyWith(
-                        color: Colors.orange[600],
-                        fontSize: context.getAdaptiveSize(12),
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
-          Switch(
-            value: _tempActiveStatus,
-            onChanged: (value) async {
-              setState(() {
-                _tempActiveStatus = value;
-              });
-            },
-            activeColor: AppColors.primaryColor,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceVisibilityCard(WorkerManagerProvider workerManager) {
+    return Container(
+      padding: EdgeInsets.all(context.getAdaptiveSize(20)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(context.getAdaptiveSize(8)),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.visibility_rounded,
+                  color: AppColors.primaryColor,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: context.getWidth(12)),
+              Text(
+                AppLocalizations.of(context)!.serviceVisibility,
+                style: AppTextStyles.title2(context).copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: context.getHeight(16)),
+          Container(
+            padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+            decoration: BoxDecoration(
+              color: _tempActiveStatus
+                  ? Colors.green.shade50
+                  : Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _tempActiveStatus
+                    ? Colors.green.withValues(alpha: 0.3)
+                    : Colors.grey.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _tempActiveStatus ? Icons.visibility : Icons.visibility_off,
+                  color: _tempActiveStatus
+                      ? Colors.green.shade600
+                      : Colors.grey.shade600,
+                  size: context.getAdaptiveSize(24),
+                ),
+                SizedBox(width: context.getWidth(16)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _tempActiveStatus
+                            ? AppLocalizations.of(context)!.serviceIsActive
+                            : AppLocalizations.of(context)!.serviceIsInactive,
+                        style: AppTextStyles.subTitle(context).copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: _tempActiveStatus
+                              ? Colors.green.shade700
+                              : Colors.grey.shade700,
+                        ),
+                      ),
+                      SizedBox(height: context.getHeight(4)),
+                      Text(
+                        _tempActiveStatus
+                            ? AppLocalizations.of(context)!
+                                .customersCanSeeAndBook
+                            : AppLocalizations.of(context)!
+                                .serviceHiddenFromCustomers,
+                        style: AppTextStyles.text(context).copyWith(
+                          color: _tempActiveStatus
+                              ? Colors.green.shade600
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                      if (_tempActiveStatus !=
+                          (widget.service.active == 1)) ...[
+                        SizedBox(height: context.getHeight(8)),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.getWidth(8),
+                            vertical: context.getHeight(4),
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.orange.shade300),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)!.unsavedChanges,
+                            style: AppTextStyles.text(context).copyWith(
+                              color: Colors.orange.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _tempActiveStatus,
+                  onChanged: (value) {
+                    setState(() {
+                      _tempActiveStatus = value;
+                    });
+                  },
+                  activeColor: AppColors.primaryColor,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -201,135 +354,325 @@ class _EditServiceState extends State<EditService>
 
   Widget _buildServiceDetailsCard(WorkerManagerProvider workerManager) {
     return Container(
-      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      padding: EdgeInsets.all(context.getAdaptiveSize(20)),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: Offset(0, 2),
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 15,
+            offset: Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context)!.editServiceDetails,
-            style: AppTextStyles.title2(context),
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(context.getAdaptiveSize(8)),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.settings_rounded,
+                  color: AppColors.primaryColor,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: context.getWidth(12)),
+              Text(
+                AppLocalizations.of(context)!.serviceDetails,
+                style: AppTextStyles.title2(context).copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: context.getHeight(16)),
-          _buildDropdown<CategoryModel>(
+          SizedBox(height: context.getHeight(20)),
+          _buildModernDropdown<CategoryModel>(
             label: AppLocalizations.of(context)!.selectServiceCategory,
             hint: widget.service.service,
             value: workerManager.selectedCategory,
             items: workerManager.categories,
             onChanged: workerManager.setCategory,
+            icon: Icons.category_rounded,
           ),
-          SizedBox(height: context.getHeight(16)),
-          _buildDropdown<SubcategoryModel>(
+          SizedBox(height: context.getHeight(20)),
+          _buildModernDropdown<SubcategoryModel>(
             label: AppLocalizations.of(context)!.selectSubcategory,
             hint: widget.service.subcategory.name,
             value: workerManager.selectedSubcategory,
             items: workerManager.selectedCategory?.subcategories ?? [],
             onChanged: workerManager.setSubcategory,
+            icon: Icons.subdirectory_arrow_right_rounded,
           ),
-          SizedBox(height: context.getHeight(16)),
-          _buildTextField(
+          SizedBox(height: context.getHeight(20)),
+          _buildModernTextField(
             controller: workerManager.descriptionController,
             label: AppLocalizations.of(context)!.serviceDescription,
             hintText: AppLocalizations.of(context)!.provideDetailedDescription,
+            icon: Icons.description_rounded,
             minLines: 3,
           ),
-          SizedBox(height: context.getHeight(16)),
-
-          // NEW: Modern Pricing Section
+          SizedBox(height: context.getHeight(24)),
           _buildModernPricingSection(context, workerManager),
-
-          SizedBox(height: context.getHeight(16)),
-          _buildTextField(
+          SizedBox(height: context.getHeight(20)),
+          _buildModernTextField(
             controller: workerManager.experienceController,
             label: AppLocalizations.of(context)!.yearsOfExperience,
             hintText: AppLocalizations.of(context)!.enterExperienceYears,
+            icon: Icons.work_history_rounded,
             keyboardType: TextInputType.number,
           ),
-          SizedBox(height: context.getHeight(16)),
-          if (workerManager.selectedCategory?.hasLiscence == false)
-            Column(
-              children: [
-                CheckboxListTile(
-                  title: Text(
-                    AppLocalizations.of(context)!.doYouHaveCertificate,
-                    style: AppTextStyles.subTitle(context),
-                  ),
-                  value: workerManager.hasCertificate,
-                  onChanged: (value) {
-                    workerManager.setHasCertificate(value!);
-                  },
-                ),
-                if (workerManager.hasCertificate)
-                  _buildCertificateSection(context, workerManager),
-              ],
-            ),
+          if (workerManager.selectedCategory?.hasLiscence == false) ...[
+            SizedBox(height: context.getHeight(20)),
+            _buildCertificateSection(context, workerManager),
+          ],
         ],
       ),
     );
   }
 
-  // NEW: Modern Pricing Section for Edit
-  Widget _buildModernPricingSection(
-      BuildContext context, WorkerManagerProvider workerManager) {
+  Widget _buildModernDropdown<T>({
+    required String label,
+    required String hint,
+    required T? value,
+    required List<T> items,
+    required void Function(T?) onChanged,
+    required IconData icon,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Pricing Options',
-          style: AppTextStyles.title2(context),
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: AppColors.primaryColor,
+            ),
+            SizedBox(width: context.getWidth(8)),
+            Text(
+              label,
+              style: AppTextStyles.subTitle(context).copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
+        CategoryDropdownWidget<T>(
+          label: '',
+          hint: hint,
+          value: value,
+          items: items,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hintText,
+    required IconData icon,
+    TextInputType? keyboardType,
+    int? minLines,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 16, color: AppColors.primaryColor),
+            SizedBox(width: context.getWidth(8)),
+            Text(
+              label,
+              style: AppTextStyles.subTitle(context).copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
+        SharedAuthWidgets.buildInputField(
+          context,
+          controller: controller,
+          label: '',
+          hintText: hintText,
+          keyboardType: keyboardType,
+          validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+          minLines: minLines ?? 1,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCertificateSection(
+    BuildContext context,
+    WorkerManagerProvider workerManager,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.verified_rounded,
+                  color: Colors.blue.shade600, size: 20),
+              SizedBox(width: context.getWidth(8)),
+              Text(
+                AppLocalizations.of(context)!.certificate,
+                style: AppTextStyles.subTitle(context).copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue.shade700,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: context.getHeight(12)),
+          CheckboxListTile(
+            title: Text(
+              AppLocalizations.of(context)!.doYouHaveCertificate,
+              style: AppTextStyles.text(context).copyWith(
+                color: Colors.blue.shade700,
+              ),
+            ),
+            value: workerManager.hasCertificate,
+            onChanged: (value) => workerManager.setHasCertificate(value!),
+            activeColor: Colors.blue.shade600,
+            contentPadding: EdgeInsets.zero,
+          ),
+          if (workerManager.hasCertificate) ...[
+            SizedBox(height: context.getHeight(16)),
+            Center(
+              child: GestureDetector(
+                onTap: () => _showCertificatePicker(context, workerManager),
+                child: Container(
+                  width: context.getWidth(200),
+                  height: context.getWidth(200),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.blue.shade300, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: workerManager.selectedImage == null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.upload_file_rounded,
+                              size: context.getAdaptiveSize(40),
+                              color: Colors.blue.shade600,
+                            ),
+                            SizedBox(height: context.getHeight(8)),
+                            Text(
+                              AppLocalizations.of(context)!.uploadCertificate,
+                              style: AppTextStyles.text(context).copyWith(
+                                color: Colors.blue.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.file(
+                            workerManager.selectedImage!,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernPricingSection(
+    BuildContext context,
+    WorkerManagerProvider workerManager,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.payments_rounded,
+                size: 16, color: AppColors.primaryColor),
+            SizedBox(width: context.getWidth(8)),
+            Text(
+              AppLocalizations.of(context)!.pricingOptions,
+              style: AppTextStyles.subTitle(context).copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
         ),
         SizedBox(height: context.getHeight(12)),
         Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
-            border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
           ),
           child: Column(
             children: [
-              _buildPricingOption(
+              _buildModernPricingOption(
                 context,
                 workerManager,
                 'hourly',
-                'Hourly Rate',
-                'Set price per hour',
-                Icons.access_time,
+                AppLocalizations.of(context)!.hourlyRate,
+                AppLocalizations.of(context)!.setPricePerHour,
+                Icons.access_time_rounded,
                 workerManager.hourlyPriceController,
-                '\$/hour',
+                '\$/${AppLocalizations.of(context)!.hour}',
+                Colors.blue,
               ),
-              Divider(
-                  height: 1, color: AppColors.primaryColor.withOpacity(0.2)),
-              _buildPricingOption(
+              Divider(height: 1, color: Colors.grey.shade200),
+              _buildModernPricingOption(
                 context,
                 workerManager,
                 'daily',
-                'Daily Rate',
-                'Set price per day',
-                Icons.calendar_today,
+                AppLocalizations.of(context)!.dailyRate,
+                AppLocalizations.of(context)!.setPricePerDay,
+                Icons.calendar_today_rounded,
                 workerManager.dailyPriceController,
-                '\$/day',
+                '\$/${AppLocalizations.of(context)!.day}',
+                Colors.green,
               ),
-              Divider(
-                  height: 1, color: AppColors.primaryColor.withOpacity(0.2)),
-              _buildPricingOption(
+              Divider(height: 1, color: Colors.grey.shade200),
+              _buildModernPricingOption(
                 context,
                 workerManager,
                 'fixed',
-                'Fixed Price',
-                'One-time service price',
-                Icons.monetization_on,
+                AppLocalizations.of(context)!.fixedPrice,
+                AppLocalizations.of(context)!.oneTimeServicePrice,
+                Icons.monetization_on_rounded,
                 workerManager.fixedPriceController,
-                '\$ Total',
+                '\$ ${AppLocalizations.of(context)!.total}',
+                Colors.orange,
               ),
             ],
           ),
@@ -338,7 +681,7 @@ class _EditServiceState extends State<EditService>
     );
   }
 
-  Widget _buildPricingOption(
+  Widget _buildModernPricingOption(
     BuildContext context,
     WorkerManagerProvider workerManager,
     String pricingType,
@@ -347,76 +690,67 @@ class _EditServiceState extends State<EditService>
     IconData icon,
     TextEditingController controller,
     String priceHint,
+    Color color,
   ) {
     bool isSelected = workerManager.selectedPricingType == pricingType;
 
     return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 300),
       decoration: BoxDecoration(
-        color: isSelected
-            ? AppColors.primaryColor.withOpacity(0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+        color: isSelected ? color.withValues(alpha: 0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
-        onTap: () {
-          workerManager.setPricingType(pricingType);
-        },
-        borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+        onTap: () => workerManager.setPricingType(pricingType),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+          padding: EdgeInsets.all(context.getAdaptiveSize(10)),
           child: Row(
             children: [
-              // Radio button with modern design
-              Container(
-                width: context.getAdaptiveSize(24),
-                height: context.getAdaptiveSize(24),
+              AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                width: context.getAdaptiveSize(18),
+                height: context.getAdaptiveSize(18),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? AppColors.primaryColor : Colors.grey,
+                    color: isSelected ? color : Colors.grey.shade400,
                     width: 2,
                   ),
-                  color:
-                      isSelected ? AppColors.primaryColor : Colors.transparent,
+                  color: isSelected ? color : Colors.transparent,
                 ),
                 child: isSelected
                     ? Icon(
                         Icons.check,
-                        size: context.getAdaptiveSize(16),
+                        size: context.getAdaptiveSize(12),
                         color: Colors.white,
                       )
                     : null,
               ),
-              SizedBox(width: context.getWidth(16)),
-
-              // Icon
+              SizedBox(width: context.getWidth(12)),
               Container(
                 padding: EdgeInsets.all(context.getAdaptiveSize(8)),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
-                  borderRadius:
-                      BorderRadius.circular(context.getAdaptiveSize(8)),
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  color: AppColors.primaryColor,
+                  color: color,
                   size: context.getAdaptiveSize(20),
                 ),
               ),
-              SizedBox(width: context.getWidth(12)),
-
-              // Title and subtitle
+              SizedBox(width: context.getWidth(8)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: AppTextStyles.subTitle(context).copyWith(
+                      style: AppTextStyles.title2(context).copyWith(
                         fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? AppColors.primaryColor : null,
+                            isSelected ? FontWeight.bold : FontWeight.w600,
+                        color: isSelected ? color : Colors.grey.shade700,
                       ),
                     ),
                     Text(
@@ -426,37 +760,27 @@ class _EditServiceState extends State<EditService>
                   ],
                 ),
               ),
-
-              // Price input (only show for selected option)
               if (isSelected) ...[
                 SizedBox(width: context.getWidth(12)),
                 Container(
                   width: context.getWidth(120),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: color.withValues(alpha: 0.3)),
+                  ),
                   child: TextField(
                     controller: controller,
                     keyboardType:
                         TextInputType.numberWithOptions(decimal: true),
-                    style: AppTextStyles.subTitle(context),
+                    style:
+                        AppTextStyles.subTitle(context).copyWith(color: color),
                     decoration: InputDecoration(
                       hintText: priceHint,
-                      hintStyle: AppTextStyles.text(context),
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(context.getAdaptiveSize(8)),
-                        borderSide: BorderSide(color: AppColors.primaryColor),
+                      hintStyle: AppTextStyles.text(context).copyWith(
+                        color: Colors.grey.shade500,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(context.getAdaptiveSize(8)),
-                        borderSide: BorderSide(
-                            color: AppColors.primaryColor.withOpacity(0.5)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(context.getAdaptiveSize(8)),
-                        borderSide:
-                            BorderSide(color: AppColors.primaryColor, width: 2),
-                      ),
+                      border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: context.getWidth(12),
                         vertical: context.getHeight(8),
@@ -472,101 +796,18 @@ class _EditServiceState extends State<EditService>
     );
   }
 
-  Widget _buildDropdown<T>({
-    required String label,
-    required String hint,
-    required T? value,
-    required List<T> items,
-    required void Function(T?) onChanged,
-  }) {
-    return CategoryDropdownWidget<T>(
-      label: label,
-      hint: hint,
-      value: value,
-      items: items,
-      onChanged: onChanged,
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hintText,
-    TextInputType? keyboardType,
-    int? minLines,
-  }) {
-    return SharedAuthWidgets.buildInputField(
-      context,
-      controller: controller,
-      label: label,
-      hintText: hintText,
-      keyboardType: keyboardType,
-      validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-      minLines: minLines ?? 1,
-    );
-  }
-
-  Widget _buildCertificateSection(
-    BuildContext context,
-    WorkerManagerProvider workerManager,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: context.getHeight(16)),
-        Text(
-          AppLocalizations.of(context)!.uploadYourCertificate,
-          style: AppTextStyles.title2(context),
-        ),
-        SizedBox(height: context.getHeight(8)),
-        Center(
-          child: GestureDetector(
-            onTap: () => _showCertificatePicker(context, workerManager),
-            child: Container(
-              width: context.getWidth(200),
-              height: context.getWidth(200),
-              decoration: BoxDecoration(
-                color: AppColors.dimGray,
-                borderRadius:
-                    BorderRadius.circular(context.getAdaptiveSize(16)),
-                border: Border.all(color: AppColors.primaryColor),
-              ),
-              child: workerManager.selectedImage == null
-                  ? Center(
-                      child: Icon(
-                        Icons.upload_file,
-                        size: context.getAdaptiveSize(40),
-                        color: AppColors.primaryColor,
-                      ),
-                    )
-                  : ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(context.getAdaptiveSize(16)),
-                      child: Image.file(
-                        workerManager.selectedImage!,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildImageGalleryCard(
       BuildContext context, WorkerManagerProvider workerManager) {
     return Container(
-      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      padding: EdgeInsets.all(context.getAdaptiveSize(20)),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: Offset(0, 2),
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 15,
+            offset: Offset(0, 8),
           ),
         ],
       ),
@@ -576,29 +817,83 @@ class _EditServiceState extends State<EditService>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                AppLocalizations.of(context)!.manageServiceImages,
-                style: AppTextStyles.title2(context),
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(context.getAdaptiveSize(8)),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.photo_library_rounded,
+                      color: AppColors.primaryColor,
+                      size: 20,
+                    ),
+                  ),
+                  SizedBox(width: context.getWidth(12)),
+                  Text(
+                    AppLocalizations.of(context)!.serviceGallery,
+                    style: AppTextStyles.title2(context).copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              IconButton(
-                icon: Icon(Icons.add_a_photo, color: AppColors.primaryColor),
-                onPressed: () => _showImagePickerModal(context, workerManager),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryColor.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.add_a_photo_rounded, color: Colors.white),
+                  onPressed: () =>
+                      _showImagePickerModal(context, workerManager),
+                ),
               ),
             ],
           ),
-          SizedBox(height: context.getHeight(16)),
+          SizedBox(height: context.getHeight(20)),
           if (workerManager.galleryImages.isEmpty)
             Container(
-              padding: EdgeInsets.all(context.getAdaptiveSize(20)),
+              padding: EdgeInsets.all(context.getAdaptiveSize(32)),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.grey[50],
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color: Colors.grey.shade200, style: BorderStyle.solid),
               ),
-              child: Center(
-                child: Text(
-                  'No images yet. Add some!',
-                  style: AppTextStyles.subTitle(context),
-                ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.photo_library_outlined,
+                    size: context.getAdaptiveSize(48),
+                    color: Colors.grey.shade400,
+                  ),
+                  SizedBox(height: context.getHeight(12)),
+                  Text(
+                    AppLocalizations.of(context)!.noImagesYet,
+                    style: AppTextStyles.subTitle(context).copyWith(
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: context.getHeight(4)),
+                  Text(
+                    AppLocalizations.of(context)!.addPhotosToShowcase,
+                    style: AppTextStyles.text(context).copyWith(
+                      color: Colors.grey.shade500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             )
           else
@@ -614,40 +909,84 @@ class _EditServiceState extends State<EditService>
               itemCount: workerManager.galleryImages.length,
               itemBuilder: (context, index) {
                 final image = workerManager.galleryImages[index];
-                return Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        '${ApiEndpoints.imageBaseUrl}/${image.image!}',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: AppColors.dimGray,
-                          child: Icon(Icons.broken_image, color: Colors.white),
-                        ),
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
                       ),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: () async {
-                          await workerManager.removeServiceImage(image.image!);
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          '${ApiEndpoints.imageBaseUrl}/${image.image!}',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey.shade400,
+                                  size: 32,
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  AppLocalizations.of(context)!.failedToLoad,
+                                  style: AppTextStyles.withColor(
+                                    AppTextStyles.captionMedium(context),
+                                    AppColors.textMedium,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child:
-                              Icon(Icons.delete, color: Colors.white, size: 16),
                         ),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: () async {
+                            await workerManager
+                                .removeServiceImage(image.image!);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.delete_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -660,55 +999,128 @@ class _EditServiceState extends State<EditService>
     BuildContext context,
     WorkerManagerProvider workerManager,
   ) {
-    // Check if there are any changes
-    bool hasVisibilityChanges =
-        _tempActiveStatus != (widget.service.active == 1);
-    bool hasOtherChanges = workerManager.descriptionController.text.trim() !=
-            widget.service.about ||
-        workerManager.experienceController.text.trim() !=
-            widget.service.yearsOfExperience.toString();
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryColor.withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: PrimaryButton(
+        text: workerManager.isServiceLoading
+            ? AppLocalizations.of(context)!.updating
+            : AppLocalizations.of(context)!.update,
+        onPressed: workerManager.isServiceLoading
+            ? () {}
+            : () async {
+                workerManager.setServiceId(widget.service.id);
+                workerManager.setActive(_tempActiveStatus);
 
-    return Column(
-      children: [
-        // Show changes summary if there are unsaved changes
+                final success =
+                    await workerManager.createAndEditService(isEditing: true);
+                if (success > 0) {
+                  _showSuccessSnackbar(context);
+                  Navigator.pop(context);
+                }
+              },
+      ),
+    );
+  }
 
-        PrimaryButton(
-          text: workerManager.isServiceLoading
-              ? 'Updating...'
-              : AppLocalizations.of(context)!.update,
-          onPressed: workerManager.isServiceLoading
-              ? () {}
-              : () async {
-                  // Set the active status before saving
-                  workerManager.setServiceId(widget.service.id);
-                  workerManager.setActive(_tempActiveStatus);
+  Widget _buildErrorCard(String error) {
+    return Container(
+      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.red.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.red.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child:
+                Icon(Icons.error_rounded, color: Colors.red.shade600, size: 20),
+          ),
+          SizedBox(width: context.getWidth(12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.updateFailed,
+                  style: AppTextStyles.subTitle(context).copyWith(
+                    color: Colors.red.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  error,
+                  style: AppTextStyles.text(context).copyWith(
+                    color: Colors.red.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                  final success =
-                      await workerManager.createAndEditService(isEditing: true);
-                  if (success > 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Row(
-                          children: [
-                            Icon(Icons.check_circle, color: Colors.white),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text('Service updated successfully!'),
-                            ),
-                          ],
-                        ),
-                        backgroundColor: Colors.green,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
+  void _showSuccessSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          padding: EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.check_circle_rounded,
+                    color: Colors.white, size: 20),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context)!.serviceUpdatedSuccessfully,
+                  style: AppTextStyles.withColor(
+                    AppTextStyles.buttonTextMedium(context),
+                    AppColors.whiteText,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+        backgroundColor: AppColors.successColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: EdgeInsets.all(16),
+        elevation: 8,
+        duration: Duration(seconds: 3),
+      ),
     );
   }
 
@@ -716,11 +1128,10 @@ class _EditServiceState extends State<EditService>
       BuildContext context, WorkerManagerProvider workerManager) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) =>
-          _buildPickerModal(context, workerManager, isCertificate: true),
+          _buildModernPickerModal(context, workerManager, isCertificate: true),
     );
   }
 
@@ -728,34 +1139,70 @@ class _EditServiceState extends State<EditService>
       BuildContext context, WorkerManagerProvider workerManager) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) =>
-          _buildPickerModal(context, workerManager, isCertificate: false),
+          _buildModernPickerModal(context, workerManager, isCertificate: false),
     );
   }
 
-  Widget _buildPickerModal(
+  Widget _buildModernPickerModal(
       BuildContext context, WorkerManagerProvider workerManager,
       {required bool isCertificate}) {
     return Container(
-      padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: Offset(0, -8),
+          ),
+        ],
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          SizedBox(height: 12),
           Container(
             width: 40,
             height: 4,
-            margin: EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.grey.shade300,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.camera_alt, color: AppColors.primaryColor),
-            title: Text(AppLocalizations.of(context)!.takePhoto),
+          SizedBox(height: 24),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                Icon(
+                  isCertificate
+                      ? Icons.verified_rounded
+                      : Icons.photo_library_rounded,
+                  color: AppColors.primaryColor,
+                  size: 24,
+                ),
+                SizedBox(width: 12),
+                Text(
+                  isCertificate
+                      ? AppLocalizations.of(context)!.addCertificate
+                      : AppLocalizations.of(context)!.addPhoto,
+                  style: AppTextStyles.title2(context).copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24),
+          _buildModernPickerOption(
+            context,
+            icon: Icons.camera_alt_rounded,
+            title: AppLocalizations.of(context)!.takePhoto,
+            subtitle: AppLocalizations.of(context)!.useYourCamera,
             onTap: () {
               Navigator.pop(context);
               if (isCertificate) {
@@ -766,9 +1213,11 @@ class _EditServiceState extends State<EditService>
               }
             },
           ),
-          ListTile(
-            leading: Icon(Icons.photo_library, color: AppColors.primaryColor),
-            title: Text(AppLocalizations.of(context)!.chooseFromGallery),
+          _buildModernPickerOption(
+            context,
+            icon: Icons.photo_library_rounded,
+            title: AppLocalizations.of(context)!.chooseFromGallery,
+            subtitle: AppLocalizations.of(context)!.selectFromGallery,
             onTap: () {
               Navigator.pop(context);
               if (isCertificate) {
@@ -779,17 +1228,63 @@ class _EditServiceState extends State<EditService>
               }
             },
           ),
+          SizedBox(height: 24),
         ],
       ),
     );
   }
 
+  Widget _buildModernPickerOption(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey.shade50,
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: AppColors.primaryColor, size: 24),
+        ),
+        title: Text(
+          title,
+          style: AppTextStyles.subTitle(context).copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: AppTextStyles.text(context).copyWith(
+            color: Colors.grey.shade600,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios_rounded,
+          color: Colors.grey.shade400,
+          size: 16,
+        ),
+        onTap: onTap,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
   void _setCorrectCategoryAndSubcategory(WorkerManagerProvider workerManager) {
-    // Find the category that matches the service's subcategory
     for (CategoryModel category in workerManager.categories) {
       for (SubcategoryModel subcategory in category.subcategories) {
         if (subcategory.id == widget.service.subcategory.subCategoryid) {
-          // Set the correct category and subcategory
           workerManager.setCategory(category);
           workerManager.setSubcategory(subcategory);
           return;

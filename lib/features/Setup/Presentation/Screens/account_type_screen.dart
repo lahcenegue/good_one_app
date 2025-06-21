@@ -12,6 +12,8 @@ import 'package:good_one_app/Features/Setup/Models/account_type.dart';
 import 'package:good_one_app/Features/Setup/Presentation/Widgets/account_type_card.dart';
 import 'package:good_one_app/Providers/Both/app_settings_provider.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class AccountTypeSelectionOverlay extends StatelessWidget {
   const AccountTypeSelectionOverlay({super.key});
 
@@ -43,12 +45,13 @@ class AccountTypeSelectionOverlay extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Welcome to our app!',
+                        AppLocalizations.of(context)!.welcomeToOurApp,
                         style: AppTextStyles.title(context),
                       ),
                       SizedBox(height: context.getHeight(8)),
                       Text(
-                        'To get started, please select the account\ntype you wish to register with:',
+                        AppLocalizations.of(context)!
+                            .accountTypeSelectionPrompt,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.text(context),
                       ),
@@ -72,7 +75,7 @@ class AccountTypeSelectionOverlay extends StatelessWidget {
                       ),
                       SizedBox(height: context.getHeight(12)),
                       PrimaryButton(
-                        text: 'Next',
+                        text: AppLocalizations.of(context)!.next,
                         onPressed: appSettings.canProceed
                             ? () {
                                 NavigationService.navigateToAndReplace(

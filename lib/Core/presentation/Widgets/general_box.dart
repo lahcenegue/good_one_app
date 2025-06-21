@@ -14,7 +14,7 @@ class GeneralBox extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(context.getAdaptiveSize(12)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.backgroundCard,
         borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
         boxShadow: [
           BoxShadow(

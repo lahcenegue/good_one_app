@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +17,7 @@ import 'package:good_one_app/Features/User/Services/user_api.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 class UserManagerProvider extends ChangeNotifier {
   // --- Authentication State ---
@@ -22,9 +25,8 @@ class UserManagerProvider extends ChangeNotifier {
   UserInfo? _userInfo;
 
   // --- Global UI State ---
-  // For overall initialization or unclassified states
-  String? _globalError; // Renamed from _error for clarity
-  bool _isGlobalLoading = false; // Renamed from _isLoading
+  String? _globalError;
+  bool _isGlobalLoading = false;
   int _currentIndex = 0;
 
   // --- Form Controllers ---
@@ -41,12 +43,10 @@ class UserManagerProvider extends ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
 
   // --- Search State ---
-  String _searchQuery = ''; // For filtering services on ServicesScreen
-  String _contractorsByServiceSearch =
-      ''; // For filtering contractors on ContractorsByService screen
+  String _searchQuery = '';
   List<dynamic> _searchResults = [];
-  bool _isSearching = false; // Loading state for search operation
-  String? _searchError; // Error state for search operation
+  bool _isSearching = false;
+  String? _searchError;
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
 
@@ -54,15 +54,9 @@ class UserManagerProvider extends ChangeNotifier {
   Contractor? _selectedContractor;
   final List<ServiceCategory> _categories = [];
   final List<Contractor> _bestContractors = [];
-  final List<Contractor> _contractorsByService = [];
-  final List<Contractor> _allContractorsForCurrentService = [];
   List<NotificationModel> _notifications = [];
 
-  ServiceCategory? _currentViewedServiceCategory;
-
-  final Set<int> _selectedSubcategoryIds = {};
-
-  // --- NEW Specific Loading and Error States ---
+  // --- Specific Loading and Error States ---
   bool _isLoadingUserInfo = false;
   String? _userInfoError;
 
@@ -72,14 +66,17 @@ class UserManagerProvider extends ChangeNotifier {
   bool _isLoadingBestContractors = false;
   String? _bestContractorsError;
 
-  bool _isLoadingContractorsByService = false;
-  String? _contractorsByServiceError;
-
-  bool _isNotificationLoading = false; // Already existed
-  String? _notificationError; // Already existed
+  bool _isNotificationLoading = false;
+  String? _notificationError;
 
   bool _isLoadingEditAccount = false;
   String? _editAccountError;
+
+  // --- Home Screen Sort State ---
+  String _homeScreenSortBy = 'default';
+
+  // --- Notification Count ---
+  int _newNotificationCount = 0;
 
   // --- Getters ---
   String? get token => _token;
@@ -103,9 +100,9 @@ class UserManagerProvider extends ChangeNotifier {
   TextEditingController get searchController => _searchController;
 
   // Search
-  String get searchQuery => _searchQuery; // For ServicesScreen filter
-  bool get isSearching => _isSearching; // For search API call
-  String? get searchError => _searchError; // For search API call
+  String get searchQuery => _searchQuery;
+  bool get isSearching => _isSearching;
+  String? get searchError => _searchError;
   List<dynamic> get searchResults => List.unmodifiable(_searchResults);
 
   // Data lists and their specific states
@@ -119,53 +116,21 @@ class UserManagerProvider extends ChangeNotifier {
   bool get isLoadingBestContractors => _isLoadingBestContractors;
   String? get bestContractorsError => _bestContractorsError;
 
-  List<Contractor> get allContractorsForCurrentService =>
-      List.unmodifiable(_allContractorsForCurrentService);
-
-  List<Contractor> get contractorsByService {
-    List<Contractor> filteredList = List.from(_allContractorsForCurrentService);
-
-    // Filter by selected subcategories
-    if (_selectedSubcategoryIds.isNotEmpty) {
-      filteredList = filteredList.where((contractor) {
-        return contractor.subcategory != null &&
-            _selectedSubcategoryIds.contains(contractor.subcategory!.id);
-      }).toList();
-    }
-
-    // Then filter by search query
-    if (_contractorsByServiceSearch.isNotEmpty) {
-      final query = _contractorsByServiceSearch.toLowerCase();
-      filteredList = filteredList
-          .where((contractor) =>
-              (contractor.fullName?.toLowerCase().contains(query) ?? false) ||
-              (contractor.service?.toLowerCase().contains(query) ?? false) ||
-              (contractor.subcategory?.name.toLowerCase().contains(query) ??
-                  false))
-          .toList();
-    }
-    return List.unmodifiable(filteredList);
-  }
-
-  String get contractorsByServiceSearchTerm => _contractorsByServiceSearch;
-  bool get isLoadingContractorsByService => _isLoadingContractorsByService;
-
-  String? get contractorsByServiceError => _contractorsByServiceError;
-
   List<NotificationModel> get notifications =>
       List.unmodifiable(_notifications);
   bool get isNotificationLoading => _isNotificationLoading;
   String? get notificationError => _notificationError;
+
+  /// Get the count of new notifications (never seen before)
+  int get unreadNotificationCount => _newNotificationCount;
 
   bool get isLoadingUserInfo => _isLoadingUserInfo;
   String? get userInfoError => _userInfoError;
 
   bool get isLoadingEditAccount => _isLoadingEditAccount;
   String? get editAccountError => _editAccountError;
-  ServiceCategory? get currentViewedServiceCategory =>
-      _currentViewedServiceCategory;
-  Set<int> get selectedSubcategoryIds =>
-      Set.unmodifiable(_selectedSubcategoryIds);
+
+  String get homeScreenSortBy => _homeScreenSortBy;
 
   // --- Constructor ---
   UserManagerProvider() {
@@ -193,7 +158,7 @@ class UserManagerProvider extends ChangeNotifier {
     _searchDebounce?.cancel();
     if (query.isEmpty) {
       _searchResults = [];
-      _searchError = null; // Clear search error when query is empty
+      _searchError = null;
       notifyListeners();
       return;
     }
@@ -204,40 +169,61 @@ class UserManagerProvider extends ChangeNotifier {
 
   // --- Initialization ---
   Future<void> initialize() async {
+    print(
+        '======================== initialize user manager ==================');
     setGlobalError(null);
-    setGlobalLoading(true); // Manages _isGlobalLoading and notifies
+    setGlobalLoading(true);
 
     try {
       _token = await StorageManager.getString(StorageKeys.tokenKey);
 
       List<Future<void>> tasks = [];
-      // Task 1: Fetch public data (categories, best contractors)
       tasks.add(_fetchPublicData());
 
       if (_token != null) {
-        // Task 2: Load user-specific data (user info)
-        tasks.add(
-            _loadUserDataInternal()); // Renamed to avoid conflict if a public _loadUserData is needed
-        // Task 3: Fetch notifications
-        tasks.add(fetchNotifications());
+        tasks.add(_loadUserDataInternal());
+        tasks.add(_initializeNotifications());
+        // Initialize chat for authenticated users
+        tasks.add(_initializeChat());
       }
 
-      // Wait for all top-level tasks to complete.
-      // These tasks are responsible for setting their own specific error/loading flags
-      // and should catch their operational errors internally.
       await Future.wait(tasks.map((task) => task.catchError((e) {
-            debugPrint(
-                'A main initialization task failed unexpectedly: $e. This should have been caught internally by the task.');
-            // This catchError is a safety net. The task itself should have set its specific error.
-            // Optionally, set a global error if any main task has an unhandled failure.
-            // setGlobalError("A part of app data could not be loaded.");
+            debugPrint('A main initialization task failed unexpectedly: $e');
           })));
     } catch (e) {
-      // Catches errors like StorageManager failure or truly unhandled ones from above.
       setGlobalError('Critical app initialization failed: ${e.toString()}');
     } finally {
       setGlobalLoading(false);
     }
+  }
+
+  Future<void> _initializeChat() async {
+    try {
+      if (_userInfo?.id != null) {
+        final context = NavigationService.navigatorKey.currentContext;
+        if (context != null) {
+          final chatProvider =
+              Provider.of<ChatProvider>(context, listen: false);
+          if (!chatProvider.initialFetchComplete ||
+              chatProvider.currentUserId != _userInfo!.id.toString()) {
+            await chatProvider.initialize(_userInfo!.id.toString());
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('UserManager: Failed to initialize chat: $e');
+    }
+  }
+
+  Future<void> _initializeNotifications() async {
+    await Future.wait([
+      fetchNotifications(),
+      BothApi.getNewNotificationsCount().then((response) {
+        if (response.success && response.data != null) {
+          _newNotificationCount = response.data!;
+        }
+      }),
+    ]);
   }
 
   // --- State Management Helpers ---
@@ -250,7 +236,13 @@ class UserManagerProvider extends ChangeNotifier {
     _token = null;
     _userInfo = null;
     _userInfoError = null;
-    // Clear other user-specific data if necessary
+
+    // Clear notifications data
+    _notifications.clear();
+    _notificationError = null;
+    _isNotificationLoading = false;
+    _newNotificationCount = 0;
+
     await StorageManager.remove(StorageKeys.tokenKey);
     await StorageManager.remove(StorageKeys.accountTypeKey);
     await TokenManager.instance.clearToken();
@@ -273,12 +265,92 @@ class UserManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- Home Screen Sort Methods ---
+  void setHomeScreenSortBy(String sortBy) {
+    _homeScreenSortBy = sortBy;
+    notifyListeners();
+  }
+
+  List<Contractor> getSortedBestContractors() {
+    List<Contractor> sortedContractors = List.from(_bestContractors);
+
+    switch (_homeScreenSortBy) {
+      case 'rating':
+        sortedContractors.sort(
+            (a, b) => (b.rating?.rating ?? 0).compareTo(a.rating?.rating ?? 0));
+        break;
+      case 'price_asc':
+        sortedContractors =
+            _sortContractorsByPrice(sortedContractors, ascending: true);
+        break;
+      case 'price_desc':
+        sortedContractors =
+            _sortContractorsByPrice(sortedContractors, ascending: false);
+        break;
+      case 'orders':
+        sortedContractors
+            .sort((a, b) => (b.orders ?? 0).compareTo(a.orders ?? 0));
+        break;
+      case 'hourly':
+        sortedContractors =
+            _filterAndSortByPricingType(sortedContractors, 'hourly');
+        break;
+      case 'daily':
+        sortedContractors =
+            _filterAndSortByPricingType(sortedContractors, 'daily');
+        break;
+      case 'fixed':
+        sortedContractors =
+            _filterAndSortByPricingType(sortedContractors, 'fixed');
+        break;
+      case 'default':
+      default:
+        break;
+    }
+
+    return List.unmodifiable(sortedContractors);
+  }
+
+  List<Contractor> _filterAndSortByPricingType(
+    List<Contractor> contractors,
+    String pricingType,
+  ) {
+    List<Contractor> withPricingType = [];
+    List<Contractor> withoutPricingType = [];
+
+    for (var contractor in contractors) {
+      String effectiveType = contractor.getEffectivePricingType();
+      if (effectiveType == pricingType) {
+        withPricingType.add(contractor);
+      } else {
+        withoutPricingType.add(contractor);
+      }
+    }
+
+    withPricingType = _sortContractorsByPrice(withPricingType, ascending: true);
+    return [...withPricingType, ...withoutPricingType];
+  }
+
+  List<Contractor> _sortContractorsByPrice(List<Contractor> contractors,
+      {bool ascending = true}) {
+    contractors.sort((a, b) {
+      double? priceA = a.getPrimaryPrice();
+      double? priceB = b.getPrimaryPrice();
+
+      if (priceA == null && priceB == null) return 0;
+      if (priceA == null) return 1;
+      if (priceB == null) return -1;
+
+      return ascending ? priceA.compareTo(priceB) : priceB.compareTo(priceA);
+    });
+
+    return contractors;
+  }
+
   // --- User Info ---
   Future<void> _loadUserDataInternal() async {
-    // This method is part of initialize(), manages _isLoadingUserInfo and _userInfoError
     if (_token == null) {
-      _userInfoError =
-          "Not authenticated to load user data."; // Should not happen if called correctly
+      _userInfoError = "Not authenticated to load user data.";
       notifyListeners();
       return;
     }
@@ -293,10 +365,9 @@ class UserManagerProvider extends ChangeNotifier {
       if (userInfoSuccess) {
         _initializeControllers();
       } else {
-        // _userInfoError would have been set by _fetchUserInfoInternalLogic or token refresh logic
         final refreshed = await TokenManager.instance.refreshToken();
         if (refreshed) {
-          _token = TokenManager.instance.token; // Update token
+          _token = TokenManager.instance.token;
           final refreshedUserInfoSuccess = await _fetchUserInfoInternalLogic();
           if (refreshedUserInfoSuccess) {
             _initializeControllers();
@@ -304,16 +375,11 @@ class UserManagerProvider extends ChangeNotifier {
             _userInfoError = _userInfoError ??
                 'Failed to fetch user info after token refresh.';
           }
-          // It's good practice to also re-fetch data that might depend on user context
-          // or that might have failed previously due to auth issues.
-          // await _fetchPublicData(); // Consider if needed here, or rely on initial call.
         } else {
-          await clearData(); // Clears user data, token
+          await clearData();
           _userInfoError =
               _userInfoError ?? 'Session expired. Please log in again.';
-          // _fetchPublicData(); // Public data should still be available
-          _currentIndex =
-              3; // Example: Navigate to profile/login indicate a problem
+          _currentIndex = 3;
         }
       }
     } catch (e) {
@@ -325,20 +391,14 @@ class UserManagerProvider extends ChangeNotifier {
   }
 
   Future<bool> _fetchUserInfoInternalLogic() async {
-    // This is the core API call logic for user info
-    // Assumes _token is valid and available.
-    // Sets _userInfoError on failure.
-    _isLoadingUserInfo =
-        true; // Can be set here or by caller (_loadUserDataInternal)
-    _userInfoError = null; // Clear previous error for this specific operation
-    // notifyListeners(); // Caller will notify
+    _isLoadingUserInfo = true;
+    _userInfoError = null;
 
     try {
       final response = await BothApi.getUserInfo();
       if (response.success && response.data != null) {
         _userInfo = response.data;
         _userInfoError = null;
-        // notifyListeners(); // Caller will notify
         return true;
       } else {
         _userInfoError = 'Failed to fetch user info';
@@ -348,8 +408,8 @@ class UserManagerProvider extends ChangeNotifier {
       _userInfoError = 'Exception fetching user info: ${e.toString()}';
       return false;
     } finally {
-      _isLoadingUserInfo = false; // Managed by caller (_loadUserDataInternal)
-      notifyListeners(); // Caller will notify
+      _isLoadingUserInfo = false;
+      notifyListeners();
     }
   }
 
@@ -388,7 +448,7 @@ class UserManagerProvider extends ChangeNotifier {
         _userInfo = response.data;
         _initializeControllers();
         _selectedImage = null;
-        setImageError(null); // Clears image-specific error
+        setImageError(null);
         _editAccountError = null;
         notifyListeners();
         return true;
@@ -405,7 +465,6 @@ class UserManagerProvider extends ChangeNotifier {
   }
 
   Future<void> pickImage(BuildContext context, ImageSource source) async {
-    // _imageError and _selectedImage are already specific
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
@@ -415,21 +474,19 @@ class UserManagerProvider extends ChangeNotifier {
       );
       if (image != null) {
         _selectedImage = File(image.path);
-        setImageError(null); // Clear specific image error
+        setImageError(null);
       }
     } catch (e) {
       if (context.mounted) {
         setImageError(AppLocalizations.of(context)!.generalError);
       }
     } finally {
-      notifyListeners(); // Notify UI of changes to _selectedImage or _imageError
+      notifyListeners();
     }
   }
 
   // --- Categories and Contractors ---
   Future<void> _fetchPublicData() async {
-    // This method orchestrates fetching data that doesn't require auth.
-    // It calls individual fetch methods which manage their own state.
     await Future.wait([
       fetchCategories().catchError(
           (e) => debugPrint("fetchCategories failed in _fetchPublicData: $e")),
@@ -482,67 +539,6 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchContractorsByService(int? serviceId) async {
-    print('serviceId: $serviceId');
-    _isLoadingContractorsByService = true;
-    _contractorsByServiceError = null;
-    _selectedSubcategoryIds.clear();
-    _allContractorsForCurrentService.clear();
-    _currentViewedServiceCategory = null;
-    notifyListeners();
-
-    if (serviceId == null) {
-      _contractorsByServiceError = "Service ID is required.";
-      _isLoadingContractorsByService = false;
-      notifyListeners();
-      return;
-    }
-
-    try {
-      try {
-        _currentViewedServiceCategory =
-            _categories.firstWhere((cat) => cat.id == serviceId);
-      } catch (e) {
-        _currentViewedServiceCategory = null;
-        debugPrint(
-            "UserManagerProvider: Service category with ID $serviceId not found in local _categories cache. Subcategory chips might not be available.");
-      }
-
-      final response = await UserApi.getContractorsByService(id: serviceId);
-      if (response.success && response.data != null) {
-        _allContractorsForCurrentService.addAll(response.data!);
-        _contractorsByServiceError = null;
-        debugPrint(
-            "UserManagerProvider: _allContractorsForCurrentService populated with ${_allContractorsForCurrentService.length} contractors for service ID $serviceId.");
-      } else {
-        _contractorsByServiceError =
-            'Failed to fetch contractors for this service';
-      }
-    } catch (e) {
-      _contractorsByServiceError =
-          'Exception fetching contractors by service: ${e.toString()}';
-    } finally {
-      _isLoadingContractorsByService = false;
-      notifyListeners();
-    }
-  }
-
-  // Toggle subcategory selection
-  void toggleSubcategorySelection(int subcategoryId) {
-    if (_selectedSubcategoryIds.contains(subcategoryId)) {
-      _selectedSubcategoryIds.remove(subcategoryId);
-    } else {
-      _selectedSubcategoryIds.add(subcategoryId);
-    }
-    notifyListeners();
-  }
-
-  // Clear all subcategory selections
-  void clearSubcategorySelections() {
-    _selectedSubcategoryIds.clear();
-    notifyListeners();
-  }
-
   Future<void> searchServiceAndContractor(String query) async {
     if (query.isEmpty) {
       _searchResults = [];
@@ -582,14 +578,20 @@ class UserManagerProvider extends ChangeNotifier {
 
   // --- Notifications ---
   Future<void> fetchNotifications() async {
-    _isNotificationLoading = true; // Uses existing specific loading
-    _notificationError = null; // Uses existing specific error
+    _isNotificationLoading = true;
+    _notificationError = null;
     notifyListeners();
     try {
-      debugPrint('Fetching notifications...');
+      debugPrint('UserManager: Fetching notifications...');
       final response = await BothApi.fetchNotifications();
       if (response.success && response.data != null) {
         _notifications = response.data!;
+
+        // Count new notifications based on local data
+        _newNotificationCount = _notifications.where((n) => n.isNew).length;
+
+        debugPrint(
+            'UserManager: Loaded ${_notifications.length} notifications, $_newNotificationCount new');
         _notificationError = null;
       } else {
         _notificationError = 'Failed to load notifications';
@@ -602,21 +604,188 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
+  /// Enhanced method to fetch only notification counts (for home page badge)
+  Future<void> fetchNotificationCounts() async {
+    try {
+      debugPrint('UserManager: Fetching notification counts...');
+
+      final results = await Future.wait([
+        BothApi.getNewNotificationsCount(),
+        BothApi.getUnreadNotificationsCount(),
+      ]);
+
+      final newCountResponse = results[0];
+
+      bool hasChanges = false;
+
+      if (newCountResponse.success && newCountResponse.data != null) {
+        final newCount = newCountResponse.data!;
+        if (_newNotificationCount != newCount) {
+          _newNotificationCount = newCount;
+          hasChanges = true;
+          debugPrint(
+              'UserManager: Updated new notification count: $_newNotificationCount');
+        }
+      }
+
+      if (hasChanges) {
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('UserManager: Exception in fetchNotificationCounts: $e');
+    }
+  }
+
+  /// Enhanced mark all notifications as seen (when entering notifications screen)
+  Future<void> markAllNotificationsAsSeenNew() async {
+    debugPrint(
+        'UserManager: markAllNotificationsAsSeenNew called. Current new count: $_newNotificationCount');
+
+    if (_newNotificationCount == 0) {
+      debugPrint('UserManager: No new notifications to mark as seen');
+      return;
+    }
+
+    try {
+      // Update local state immediately for better UX
+      final oldNewCount = _newNotificationCount;
+      final updatedNotifications = _notifications
+          .map((notification) => notification.copyWith(
+                isNew: false,
+                seenAt: DateTime.now(),
+              ))
+          .toList();
+
+      _notifications = updatedNotifications;
+      _newNotificationCount = 0;
+
+      debugPrint(
+          'UserManager: Optimistically updated UI - marked $oldNewCount notifications as seen');
+      notifyListeners();
+
+      // Call the API to sync with backend
+      final response = await BothApi.markNotificationsAsSeen();
+
+      if (response.success) {
+        debugPrint('UserManager: Successfully synced seen status with backend');
+        await fetchNotificationCounts();
+      } else {
+        debugPrint(
+            'UserManager: Failed to sync seen status: ${response.error}');
+        // Revert optimistic update on failure
+        _newNotificationCount = oldNewCount;
+        _notifications = _notifications
+            .map((notification) => notification.copyWith(
+                  isNew: true,
+                  seenAt: null,
+                ))
+            .toList();
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('UserManager: Exception in markAllNotificationsAsSeenNew: $e');
+    }
+  }
+
+  /// Mark specific notifications as read
+  Future<void> markNotificationsAsRead(List<String> notificationIds) async {
+    if (notificationIds.isEmpty) {
+      debugPrint('UserManager: No notification IDs provided');
+      return;
+    }
+
+    try {
+      debugPrint(
+          'UserManager: Marking ${notificationIds.length} notifications as read');
+
+      // Update local state immediately
+      final updatedNotifications = _notifications.map((notification) {
+        if (notificationIds.contains(notification.id)) {
+          return notification.copyWith(
+            isNew: false,
+            isRead: true,
+            seenAt: notification.seenAt ?? DateTime.now(),
+            readAt: DateTime.now(),
+          );
+        }
+        return notification;
+      }).toList();
+
+      _notifications = updatedNotifications;
+      _newNotificationCount = _notifications.where((n) => n.isNew).length;
+      notifyListeners();
+
+      // Sync with backend
+      final response = await BothApi.markNotificationsAsRead(notificationIds);
+
+      if (response.success) {
+        debugPrint(
+            'UserManager: Successfully marked specific notifications as read');
+        await fetchNotificationCounts();
+      } else {
+        debugPrint(
+            'UserManager: Failed to mark specific notifications as read: ${response.error}');
+        await fetchNotifications();
+      }
+    } catch (e) {
+      debugPrint('UserManager: Exception in markNotificationsAsRead: $e');
+      await fetchNotifications();
+    }
+  }
+
+  /// Mark all notifications as seen (when entering notifications screen)
+  Future<void> markAllNotificationsAsRead() async {
+    debugPrint(
+        'UserManager: markAllNotificationsAsRead called. Current new count: $_newNotificationCount');
+
+    if (_newNotificationCount == 0) {
+      debugPrint('UserManager: No new notifications to mark as read');
+      return;
+    }
+
+    try {
+      // Update local state immediately for better UX
+      final updatedNotifications = _notifications
+          .map((notification) => notification.copyWith(
+                isNew: false,
+                isRead: true,
+                seenAt: notification.seenAt ?? DateTime.now(),
+                readAt: DateTime.now(),
+              ))
+          .toList();
+
+      _notifications = updatedNotifications;
+      _newNotificationCount = 0;
+
+      debugPrint(
+          'UserManager: Optimistically updated UI - marked all notifications as read');
+      notifyListeners();
+
+      // Call the API to sync with backend
+      final response = await BothApi.markAllNotificationsAsRead();
+
+      if (response.success) {
+        debugPrint('UserManager: Successfully synced read status with backend');
+        await fetchNotificationCounts();
+      } else {
+        debugPrint(
+            'UserManager: Failed to sync read status: ${response.error}');
+        await fetchNotifications();
+      }
+    } catch (e) {
+      debugPrint('UserManager: Exception in markAllNotificationsAsRead: $e');
+    }
+  }
+
+  /// Reset notification error
+  void clearNotificationError() {
+    _notificationError = null;
+    notifyListeners();
+  }
+
   // --- Search Query Filters ---
   void searchServicesQuery(String query) {
     _searchQuery = query;
     notifyListeners();
   }
-
-  void updateContractorsByServiceSearch(String query) {
-    _contractorsByServiceSearch = query;
-    notifyListeners();
-  }
-
-  // bool _matchesSearchQuery(Contractor contractor) {
-  //   final query = _contractorsByServiceSearch.toLowerCase();
-  //   return contractor.fullName!.toLowerCase().contains(query) ||
-  //       (contractor.service?.toLowerCase().contains(query) ??
-  //           false); // Added null check for service
-  // }
 }

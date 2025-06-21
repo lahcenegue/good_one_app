@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Core/Presentation/Resources/app_assets.dart';
@@ -21,9 +22,7 @@ class WorkerMainScreen extends StatelessWidget {
       builder: (context, workerManager, _) {
         if (workerManager.isLoading) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: LoadingIndicator(),
           );
         }
 
@@ -43,7 +42,7 @@ class WorkerMainScreen extends StatelessWidget {
       case 0:
         return const WorkerHomeScreen();
       case 1:
-        return const WWorkerServicesScreen();
+        return const WorkerServicesScreen();
       case 2:
         return const MyOrdersScreen();
       case 3:

@@ -19,8 +19,20 @@ abstract class ApiEndpoints {
 
   // Both Endpoints
   static String get me => '$baseUrl/api/auth/me';
-  static String get notifications => '$baseUrl/api/user/notifications';
   static String get taxes => '$baseUrl/api/taxes';
+
+  // Notifications Endpoints
+  static String get notifications => '$baseUrl/api/user/notifications';
+  static String get newNotificationsCount =>
+      '$baseUrl/api/user/notifications/count/new';
+  static String get unreadNotificationsCount =>
+      '$baseUrl/api/user/notifications/count/unread';
+  static String get markNotificationsAsSeen =>
+      '$baseUrl/api/user/notifications/mark-seen';
+  static String get markNotificationsAsRead =>
+      '$baseUrl/api/user/notifications/mark-read';
+  static String get markAllNotificationsAsRead =>
+      '$baseUrl/api/user/notifications/mark-all-read';
 
   // User Endpoints
   static String get search => '$baseUrl/api/services?query';
@@ -48,6 +60,8 @@ abstract class ApiEndpoints {
   static String get withdrawReauest => '$baseUrl/api/user/balance/withdraw';
   static String get withdrawStatus =>
       '$baseUrl/api/user/balance/withdraw/requests';
+  static String get earningsHistory => '$baseUrl/api/user/earnings/history';
+  static String get earningsSummary => '$baseUrl/api/user/earnings/summary';
 
   // Stripe payment Endpoints
   static String get paymentApiUrl =>

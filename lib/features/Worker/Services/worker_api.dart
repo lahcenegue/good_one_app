@@ -11,6 +11,7 @@ import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
 import 'package:good_one_app/Features/Worker/Models/withdrawal_model.dart';
+import 'package:good_one_app/Features/Worker/Models/earnings_model.dart';
 
 class WorkerApi {
   static final _api = ApiService.instance;
@@ -26,9 +27,7 @@ class WorkerApi {
                 .map((item) =>
                     CategoryModel.fromJson(item as Map<String, dynamic>))
                 .toList();
-            // for (var category in categories) {
-            //   print(category.toDebugString());
-            // }
+
             return categories;
           }
           throw Exception('Invalid response format');
@@ -248,7 +247,50 @@ class WorkerApi {
 
       return response;
     } catch (e) {
-      return ApiResponse.error('Failed to fetch withdraw status');
+      return ApiResponse.error('Failed to fetch withdraw status: $e');
+    }
+  }
+
+  static Future<ApiResponse<List<EarningsHistoryModel>>>
+      getEarningsHistory() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    try {
+      final response = await _api.get<List<EarningsHistoryModel>>(
+        url: ApiEndpoints.earningsHistory,
+        fromJson: (dynamic json) {
+          if (json is Map<String, dynamic> && json.containsKey('data')) {
+            final List<dynamic> data = json['data'];
+            return data
+                .map((item) =>
+                    EarningsHistoryModel.fromJson(item as Map<String, dynamic>))
+                .toList();
+          }
+          return <EarningsHistoryModel>[];
+        },
+        token: token,
+      );
+      return response;
+    } catch (e) {
+      return ApiResponse.error('Failed to fetch earnings history: $e');
+    }
+  }
+
+  static Future<ApiResponse<EarningsSummaryModel>> getEarningsSummary() async {
+    final token = await StorageManager.getString(StorageKeys.tokenKey);
+    try {
+      final response = await _api.get<EarningsSummaryModel>(
+        url: ApiEndpoints.earningsSummary,
+        fromJson: (dynamic json) {
+          if (json is Map<String, dynamic>) {
+            return EarningsSummaryModel.fromJson(json);
+          }
+          throw Exception('Invalid earnings summary response format');
+        },
+        token: token,
+      );
+      return response;
+    } catch (e) {
+      return ApiResponse.error('Failed to fetch earnings summary: $e');
     }
   }
 }

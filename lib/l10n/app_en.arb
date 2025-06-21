@@ -1,323 +1,1604 @@
 {
   "@@locale": "en",
-  "retry": "Retry",
+
+    "retry": "Retry",
+  "@retry": {
+    "description": "Button text to retry a failed action"
+  },
+  
   "networkError": "Please check your internet connection and try again",
-  "generalError":"Something went wrong. Please try again.",
+  "@networkError": {
+    "description": "Error message displayed when network connection fails"
+  },
+  
+  "generalError": "Something went wrong. Please try again.",
+  "@generalError": {
+    "description": "Generic error message for unexpected failures"
+  },
+  
   "login": "Log in",
+  "@login": {
+    "description": "Button text and action for user authentication"
+  },
+  
   "email": "Email",
+  "@email": {
+    "description": "Label for email input field"
+  },
+  
   "enterEmail": "Enter your email",
+  "@enterEmail": {
+    "description": "Placeholder text for email input field"
+  },
+  
   "password": "Password",
+  "@password": {
+    "description": "Label for password input field"
+  },
+  
   "enterPassword": "Enter your password",
+  "@enterPassword": {
+    "description": "Placeholder text for password input field"
+  },
+  
   "forgotPassword": "Forgot your password?",
+  "@forgotPassword": {
+    "description": "Link text for password recovery"
+  },
+  
   "noAccount": "Don't have an account?",
+  "@noAccount": {
+    "description": "Text prompting user to create account"
+  },
+  
   "signUp": "Sign Up",
+  "@signUp": {
+    "description": "Button text for account registration"
+  },
+  
   "createAccount": "Create your account now",
+  "@createAccount": {
+    "description": "Call to action for account creation"
+  },
+  
   "profilePicture": "Profile Picture",
+  "@profilePicture": {
+    "description": "Label for user profile image"
+  },
+  
   "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Option to capture photo with camera"
+  },
+  
   "chooseFromGallery": "Choose from Gallery",
+  "@chooseFromGallery": {
+    "description": "Option to select photo from device gallery"
+  },
+  
   "fullName": "Full Name",
+  "@fullName": {
+    "description": "Label for complete name input field"
+  },
+  
   "enterFullName": "Enter your full name",
+  "@enterFullName": {
+    "description": "Placeholder text for full name input"
+  },
+  
   "phoneNumber": "Phone Number",
+  "@phoneNumber": {
+    "description": "Label for phone number input field"
+  },
+  
   "enterPhoneNumber": "Enter your phone number",
+  "@enterPhoneNumber": {
+    "description": "Placeholder text for phone number input"
+  },
+  
   "retypePassword": "Retype Password",
+  "@retypePassword": {
+    "description": "Label for password confirmation field"
+  },
+  
   "hasAccount": "Already have an account?",
+  "@hasAccount": {
+    "description": "Text prompting existing users to log in"
+  },
+  
   "loginToContinue": "Please log in to continue",
+  "@loginToContinue": {
+    "description": "Message requiring user authentication"
+  },
+  
   "back": "Back",
+  "@back": {
+    "description": "Navigation button to return to previous screen"
+  },
+  
   "cancellationPolicy": "Cancellation Policy",
-  "cancellationPolicyForCustomers":"Cancellation Policy for Customers",
-  "cancellationPolicyForServiceProviders":"Cancellation Policy for Service Providers",
-  "generalRules":"General Rules",
+  "@cancellationPolicy": {
+    "description": "Title for cancellation terms and conditions"
+  },
+  
+  "cancellationPolicyForCustomers": "Cancellation Policy for Customers",
+  "@cancellationPolicyForCustomers": {
+    "description": "Specific cancellation rules for service buyers"
+  },
+  
+  "cancellationPolicyForServiceProviders": "Cancellation Policy for Service Providers",
+  "@cancellationPolicyForServiceProviders": {
+    "description": "Specific cancellation rules for service sellers"
+  },
+  
+  "generalRules": "General Rules",
+  "@generalRules": {
+    "description": "Section title for general terms and guidelines"
+  },
+  
   "language": "Language",
+  "@language": {
+    "description": "Label for language selection option"
+  },
+  
   "save": "Save",
+  "@save": {
+    "description": "Button text to save changes or data"
+  },
+  
   "support": "Support",
+  "@support": {
+    "description": "Help and customer service section"
+  },
+  
   "supportHeader": "How Can We Assist You?",
+  "@supportHeader": {
+    "description": "Welcome message for support section"
+  },
+  
   "emailSupport": "Email Support",
+  "@emailSupport": {
+    "description": "Support option via email communication"
+  },
+  
   "emailSupportDescription": "Reach out to our team via email for assistance.",
+  "@emailSupportDescription": {
+    "description": "Description of email support service"
+  },
+  
   "chatSupport": "Live Chat Support",
+  "@chatSupport": {
+    "description": "Real-time chat support option"
+  },
+  
   "chatSupportDescription": "Connect with a support agent in real-time.",
+  "@chatSupportDescription": {
+    "description": "Description of live chat support service"
+  },
+  
   "whatsappSupport": "Contact via WhatsApp",
+  "@whatsappSupport": {
+    "description": "Support option through WhatsApp messaging"
+  },
+  
   "whatsappSupportDescription": "Message us on WhatsApp for quick support.",
-  "termsAndConditions":"Terms and Conditions",
-  "termsAndConditionsDescription":"View the terms and conditions of using the Good One app.",
+  "@whatsappSupportDescription": {
+    "description": "Description of WhatsApp support service"
+  },
+  
+  "termsAndConditions": "Terms and Conditions",
+  "@termsAndConditions": {
+    "description": "Legal terms and service conditions"
+  },
+  
+  "termsAndConditionsDescription": "View the terms and conditions of using the Good One app.",
+  "@termsAndConditionsDescription": {
+    "description": "Description of terms and conditions section"
+  },
+  
   "cancellationPolicyDescription": "Review our policy on cancellations and refunds.",
+  "@cancellationPolicyDescription": {
+    "description": "Description of cancellation policy section"
+  },
+  
   "deleteAccount": "Delete Account",
+  "@deleteAccount": {
+    "description": "Option to permanently remove user account"
+  },
+  
   "deleteAccountDescription": "Permanently delete your account and data.",
+  "@deleteAccountDescription": {
+    "description": "Warning about permanent account deletion"
+  },
+  
   "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
+  "@deleteAccountConfirmation": {
+    "description": "Confirmation message for irreversible account deletion"
+  },
+  
   "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button to cancel an action or dismiss dialog"
+  },
+  
   "delete": "Delete",
-  "introduction":"Introduction",
-  "definitions":"Definitions",
-  "userEligibility":"User Eligibility",
-  "accountRegistrationAndUse":"Account Registration and Use",
-  "communicationAndPrivacy":"Communication and Privacy",
-  "paymentsAndTransactions":"Payments and Transactions",
-  "serviceProviderRequirements":"Service Provider Requirements",
-  "advertisingPolicy":"Advertising Policy",
-  "prohibitedActivities":"Prohibited Activities",
-  "disputeResolution":"Dispute Resolution",
-  "terminationAndSuspension":"Termination and Suspension",
-  "liabilityAndDisclaimers":"Liability and Disclaimers",
-  "changesToTerms":"Changes to Terms",
-  "contactInformation":"Contact Information",
+  "@delete": {
+    "description": "Button to confirm deletion action"
+  },
+  
+  "introduction": "Introduction",
+  "@introduction": {
+    "description": "Opening section of terms or documentation"
+  },
+  
+  "definitions": "Definitions",
+  "@definitions": {
+    "description": "Section explaining key terms and meanings"
+  },
+  
+  "userEligibility": "User Eligibility",
+  "@userEligibility": {
+    "description": "Requirements for using the service"
+  },
+  
+  "accountRegistrationAndUse": "Account Registration and Use",
+  "@accountRegistrationAndUse": {
+    "description": "Rules for creating and using accounts"
+  },
+  
+  "communicationAndPrivacy": "Communication and Privacy",
+  "@communicationAndPrivacy": {
+    "description": "Guidelines for user communication and privacy"
+  },
+  
+  "paymentsAndTransactions": "Payments and Transactions",
+  "@paymentsAndTransactions": {
+    "description": "Rules governing financial transactions"
+  },
+  
+  "serviceProviderRequirements": "Service Provider Requirements",
+  "@serviceProviderRequirements": {
+    "description": "Obligations and rules for service providers"
+  },
+
+  "advertisingPolicy": "Advertising Policy",
+  "@advertisingPolicy": {
+    "description": "Rules and guidelines for advertisements"
+  },
+  
+  "prohibitedActivities": "Prohibited Activities",
+  "@prohibitedActivities": {
+    "description": "List of forbidden actions on the platform"
+  },
+  
+  "disputeResolution": "Dispute Resolution",
+  "@disputeResolution": {
+    "description": "Process for handling conflicts between users"
+  },
+  
+  "terminationAndSuspension": "Termination and Suspension",
+  "@terminationAndSuspension": {
+    "description": "Conditions for account termination or suspension"
+  },
+  
+  "liabilityAndDisclaimers": "Liability and Disclaimers",
+  "@liabilityAndDisclaimers": {
+    "description": "Legal disclaimers and liability limitations"
+  },
+  
+  "changesToTerms": "Changes to Terms",
+  "@changesToTerms": {
+    "description": "Policy on modifying terms and conditions"
+  },
+  
+  "contactInformation": "Contact Information",
+  "@contactInformation": {
+    "description": "How to reach customer support or company"
+  },
+  
   "onboardingDesc1": "Discover quick and easy solutions for all your home needs, from plumbing and electrical to cleaning and renovation. Let us make your home more comfortable.",
+  "@onboardingDesc1": {
+    "description": "First onboarding screen description highlighting home services"
+  },
+  
   "onboardingDesc2": "We offer a comprehensive range of high-quality, reliable home services, so you can enjoy your time at home without any worries.",
+  "@onboardingDesc2": {
+    "description": "Second onboarding screen description emphasizing service quality"
+  },
+  
   "onboardingTitle1": "Home services with a professional touch!",
+  "@onboardingTitle1": {
+    "description": "First onboarding screen title about professional services"
+  },
+  
   "onboardingTitle2": "We're here to make your life easier!",
+  "@onboardingTitle2": {
+    "description": "Second onboarding screen title about convenience"
+  },
+  
   "skip": "Skip",
+  "@skip": {
+    "description": "Button to bypass current step or section"
+  },
+  
   "next": "Next",
+  "@next": {
+    "description": "Button to proceed to next step or screen"
+  },
+  
   "languageSelectionTitle": "Language selection",
+  "@languageSelectionTitle": {
+    "description": "Title for language preference screen"
+  },
+  
   "welcomeMessage": "Welcome to",
+  "@welcomeMessage": {
+    "description": "Greeting message prefix for app welcome"
+  },
+  
   "chooseLanguagePrompt": "Choose your language to start",
+  "@chooseLanguagePrompt": {
+    "description": "Instruction for selecting preferred language"
+  },
+  
   "booking": "Booking",
+  "@booking": {
+    "description": "Service reservation or appointment"
+  },
+  
   "inProgress": "In progress",
+  "@inProgress": {
+    "description": "Status indicating ongoing service or process"
+  },
+  
   "completed": "Completed",
+  "@completed": {
+    "description": "Status indicating finished service or task"
+  },
+  
   "canceled": "Canceled",
+  "@canceled": {
+    "description": "Status indicating cancelled service or booking"
+  },
+  
   "noBookings": "No bookings",
+  "@noBookings": {
+    "description": "Message when user has no service reservations"
+  },
+  
   "unknownStatus": "Unknown status",
+  "@unknownStatus": {
+    "description": "Fallback message for undefined booking status"
+  },
+  
   "confirmService": "Confirm Service",
+  "@confirmService": {
+    "description": "Action to verify service completion"
+  },
+  
   "hasServiceBeenReceived": "Has the service been completed?",
+  "@hasServiceBeenReceived": {
+    "description": "Question to confirm service delivery"
+  },
+  
   "notYet": "Not Yet",
+  "@notYet": {
+    "description": "Response indicating service not completed"
+  },
+  
   "confirm": "Confirm",
+  "@confirm": {
+    "description": "Button to verify or approve an action"
+  },
+  
   "status": "Status",
+  "@status": {
+    "description": "Current state or condition label"
+  },
+  
   "service": "Service",
+  "@service": {
+    "description": "Type of work or assistance provided"
+  },
+  
   "location": "Location",
+  "@location": {
+    "description": "Place where service will be performed"
+  },
+  
   "time": "Time",
+  "@time": {
+    "description": "Scheduled time for service"
+  },
+  
   "price": "Price",
+  "@price": {
+    "description": "Cost of service or item"
+  },
+  
   "hour": "hour",
+  "@hour": {
+    "description": "Singular time unit for duration"
+  },
+  
   "hours": "hours",
+  "@hours": {
+    "description": "Plural time unit for duration"
+  },
+  
   "total": "Total",
+  "@total": {
+    "description": "Sum or complete amount"
+  },
+  
   "cancelBooking": "Cancel Booking",
+  "@cancelBooking": {
+    "description": "Action to cancel a service reservation"
+  },
+  
   "reasonForCancellation": "Reason for Cancellation",
+  "@reasonForCancellation": {
+    "description": "Explanation required for booking cancellation"
+  },
+  
   "enterReason": "Enter your reason here...",
+  "@enterReason": {
+    "description": "Placeholder for cancellation reason input"
+  },
+  
   "close": "Close",
+  "@close": {
+    "description": "Button to close dialog or window"
+  },
+  
   "reasonRequired": "Please provide a reason for cancellation.",
+  "@reasonRequired": {
+    "description": "Error message when cancellation reason is missing"
+  },
+  
   "submit": "Submit",
+  "@submit": {
+    "description": "Button to send or save form data"
+  },
+  
   "startDate": "Start Date",
+  "@startDate": {
+    "description": "Beginning date for service or booking"
+  },
+  
   "startTime": "Start Time",
+  "@startTime": {
+    "description": "Beginning time for service or booking"
+  },
+  
   "duration": "Duration",
+  "@duration": {
+    "description": "Length of time for service"
+  },
+  
   "additionalPaymentRequired": "Additional Payment Required",
+  "@additionalPaymentRequired": {
+    "description": "Notice that extra payment is needed"
+  },
+  
   "additionalHours": "Additional hours: {hours}",
+  "@additionalHours": {
+    "description": "Display of extra time needed with placeholder",
+    "placeholders": {
+      "hours": {
+        "type": "String",
+        "description": "Number of additional hours"
+      }
+    }
+  },
+  
   "additionalCost": "Additional cost: ${cost}",
+  "@additionalCost": {
+    "description": "Display of extra cost with placeholder",
+    "placeholders": {
+      "cost": {
+        "type": "String",
+        "description": "Additional cost amount"
+      }
+    }
+  },
+  
   "bookingSummary": "Booking Summary",
+  "@bookingSummary": {
+    "description": "Overview of reservation details"
+  },
+  
   "bookingDetails": "Booking Details",
+  "@bookingDetails": {
+    "description": "Specific information about reservation"
+  },
+  
   "date": "Date",
+  "@date": {
+    "description": "Calendar date label"
+  },
+  
   "noLocationSpecified": "No location specified",
+  "@noLocationSpecified": {
+    "description": "Message when no address is provided"
+  },
+  
   "couponsAndOffers": "Coupons & Offers",
+  "@couponsAndOffers": {
+    "description": "Section for discount codes and promotions"
+  },
+  
   "typeCouponCodeHere": "Type your coupon code here...",
+  "@typeCouponCodeHere": {
+    "description": "Placeholder for coupon code input field"
+  },
+  
   "apply": "Apply",
+  "@apply": {
+    "description": "Button to use coupon or submit changes"
+  },
+
   "couponApplied": "Coupon: ({coupon}), discount ({discount}%)",
+  "@couponApplied": {
+    "description": "Confirmation message showing applied coupon and discount",
+    "placeholders": {
+      "coupon": {
+        "type": "String",
+        "description": "Coupon code that was applied"
+      },
+      "discount": {
+        "type": "String",
+        "description": "Discount percentage"
+      }
+    }
+  },
+  
   "priceSummary": "Price Summary",
+  "@priceSummary": {
+    "description": "Breakdown of costs and charges"
+  },
+  
   "hourlyRate": "Hourly Rate",
-  "subtotal":"Subtotal",
+  "@hourlyRate": {
+    "description": "Cost per hour for service"
+  },
+  
+  "subtotal": "Subtotal",
+  "@subtotal": {
+    "description": "Total before taxes or fees"
+  },
+  
   "discount": "Discount",
+  "@discount": {
+    "description": "Amount reduced from original price"
+  },
+  
   "totalAmount": "Total Amount",
-  "schedule": "Schedule",  
+  "@totalAmount": {
+    "description": "Final amount to be paid"
+  },
+  
+  "schedule": "Schedule",
+  "@schedule": {
+    "description": "Time arrangement or booking calendar"
+  },
+  
   "selectValidTimeSlot": "Please select a valid future time slot",
+  "@selectValidTimeSlot": {
+    "description": "Error message for invalid time selection"
+  },
+  
   "searchCityOrPlace": "Search City Or Place",
-  "confirmThisLocation":"Confirm This Location",
-  "selectedLocationOnMap":"Selected Location on Map",
+  "@searchCityOrPlace": {
+    "description": "Placeholder for location search input"
+  },
+  
+  "confirmThisLocation": "Confirm This Location",
+  "@confirmThisLocation": {
+    "description": "Button to approve selected address"
+  },
+  
+  "selectedLocationOnMap": "Selected Location on Map",
+  "@selectedLocationOnMap": {
+    "description": "Label for chosen map location"
+  },
+  
   "hello": "Hello",
+  "@hello": {
+    "description": "Greeting message"
+  },
+  
   "search": "Search",
+  "@search": {
+    "description": "Action to find or look for items"
+  },
+  
   "ourServices": "Our services",
+  "@ourServices": {
+    "description": "Title for services offered section"
+  },
+  
   "seeAll": "See all",
+  "@seeAll": {
+    "description": "Link to view complete list"
+  },
+  
   "bestContractors": "Best Contractors",
+  "@bestContractors": {
+    "description": "Section showcasing top-rated service providers"
+  },
+  
   "home": "Home",
+  "@home": {
+    "description": "Main screen or residence-related services"
+  },
+  
   "services": "Services",
+  "@services": {
+    "description": "Work or assistance provided"
+  },
+  
   "profile": "Profile",
-  "chat":"Chat",
-  "book":"Book",
-  "confird":"Confird",
-  "withLisence":"With Lisence",
-  "yearsOfExperience":"Years of Experience",
+  "@profile": {
+    "description": "User account information and settings"
+  },
+  
+  "chat": "Chat",
+  "@chat": {
+    "description": "Messaging or communication feature"
+  },
+  
+  "book": "Book",
+  "@book": {
+    "description": "Action to reserve or schedule service"
+  },
+  
+  "confird": "Confird",
+  "@confird": {
+    "description": "Misspelled 'Confirmed' - verification status"
+  },
+  
+  "withLisence": "With Lisence",
+  "@withLisence": {
+    "description": "Misspelled 'With License' - having official permits"
+  },
+  
+  "yearsOfExperience": "Years of Experience",
+  "@yearsOfExperience": {
+    "description": "Duration of professional work history"
+  },
+  
   "rating": "Rating",
-  "clients":"Clients",
-  "about":"About",
-  "photoAlbum":"Photo album",
-  "customerReviews":"Customer reviews",
+  "@rating": {
+    "description": "Score or evaluation from customers"
+  },
+  
+  "clients": "Clients",
+  "@clients": {
+    "description": "Number of customers served"
+  },
+  
+  "about": "About",
+  "@about": {
+    "description": "Information section about service provider"
+  },
+  
+  "photoAlbum": "Photo album",
+  "@photoAlbum": {
+    "description": "Collection of images showcasing work"
+  },
+  
+  "customerReviews": "Customer reviews",
+  "@customerReviews": {
+    "description": "Feedback and comments from clients"
+  },
+  
   "rateService": "Rate Service",
+  "@rateService": {
+    "description": "Action to evaluate and score service quality"
+  },
+  
   "rateYourExperience": "Rate Your Experience",
+  "@rateYourExperience": {
+    "description": "Prompt to evaluate service satisfaction"
+  },
+  
   "comment": "Comment",
+  "@comment": {
+    "description": "Written feedback or review text"
+  },
+  
   "commentHint": "Share your feedback...",
+  "@commentHint": {
+    "description": "Placeholder encouraging user to write review"
+  },
+  
   "noServicesAvailable": "No Services Available",
+  "@noServicesAvailable": {
+    "description": "Message when no services are offered"
+  },
+  
   "accountDetails": "Account Details",
-  "update":"Update",
-  "notifications":"Notifications",
-  "noNotifications":"No notifications available",
-  "pullDownToRefresh":"Pull down to refresh",
-  "today":"Today",
-  "earlier":"Earlier",  
+  "@accountDetails": {
+    "description": "Personal information and account settings"
+  },
+  
+  "update": "Update",
+  "@update": {
+    "description": "Action to modify or refresh information"
+  },
+  
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Alerts and messages from the system"
+  },
+  
+  "noNotifications": "No notifications available",
+  "@noNotifications": {
+    "description": "Message when notification list is empty"
+  },
+  
+  "pullDownToRefresh": "Pull down to refresh",
+  "@pullDownToRefresh": {
+    "description": "Instruction for refreshing content with swipe gesture"
+  },
+  
+  "today": "Today",
+  "@today": {
+    "description": "Current date reference"
+  },
+  
+  "earlier": "Earlier",
+  "@earlier": {
+    "description": "Previous time period reference"
+  },
+  
   "privacyPolicy": "Privacy and Policy",
+  "@privacyPolicy": {
+    "description": "Data protection and usage policies"
+  },
+  
   "logout": "Logout",
-  "orders": "Orders",  
+  "@logout": {
+    "description": "Action to sign out of account"
+  },
+  
+  "orders": "Orders",
+  "@orders": {
+    "description": "Service requests or bookings made"
+  },
+  
   "edit": "Edit",
+  "@edit": {
+    "description": "Action to modify or change information"
+  },
+  
   "editServiceDetails": "Edit Service Details",
-  "selectServiceCategory" : "Select Service Category",
+  "@editServiceDetails": {
+    "description": "Action to modify service information"
+  },
+  
+  "selectServiceCategory": "Select Service Category",
+  "@selectServiceCategory": {
+    "description": "Instruction to choose service type"
+  },
+  
   "selectSubcategory": "Select Subcategory",
-  "serviceDescription":"Service Description",
+  "@selectSubcategory": {
+    "description": "Instruction to choose specific service subtype"
+  },
+  
+  "serviceDescription": "Service Description",
+  "@serviceDescription": {
+    "description": "Detailed explanation of service offered"
+  },
+  
   "provideDetailedDescription": "Provide Detailed Description",
-  "servicePricePerHour":"Service Price Per Hour",
-  "enterPrice":"Enter Price",
-  "enterExperienceYears":"Enter Experience Years",
-  "doYouHaveCertificate":"Do You Have Certificate?",
-  "uploadYourCertificate":"Upload Your Certificate",
-  "manageServiceImages":"Manage Service Images",
-  "myOrders":"My Orders",
-  "somethingWentWrong":"Something Went Wrong",
+  "@provideDetailedDescription": {
+    "description": "Instruction to write comprehensive service details"
+  },
+  
+  "servicePricePerHour": "Service Price Per Hour",
+  "@servicePricePerHour": {
+    "description": "Hourly rate for service"
+  },
+  
+  "enterPrice": "Enter Price",
+  "@enterPrice": {
+    "description": "Instruction to input cost amount"
+  },
+  
+  "enterExperienceYears": "Enter Experience Years",
+  "@enterExperienceYears": {
+    "description": "Instruction to input years of professional experience"
+  },
+  
+  "doYouHaveCertificate": "Do You Have Certificate?",
+  "@doYouHaveCertificate": {
+    "description": "Question about professional certification"
+  },
+
+    "uploadYourCertificate": "Upload Your Certificate",
+  "@uploadYourCertificate": {
+    "description": "Action to add professional certification document"
+  },
+  
+  "manageServiceImages": "Manage Service Images",
+  "@manageServiceImages": {
+    "description": "Action to organize photos showcasing work"
+  },
+  
+  "myOrders": "My Orders",
+  "@myOrders": {
+    "description": "Personal list of service requests"
+  },
+  
+  "somethingWentWrong": "Something Went Wrong",
+  "@somethingWentWrong": {
+    "description": "Error message for unexpected failures"
+  },
+  
   "noOrdersAvailable": "No Orders Available",
-  "noOrdersForThisDate":"No Orders For This Date",
-  "ordersDetails":"Order Details",
-  "orderSummary":"Order Summary",
-  "createdAt":"Created At",
-  "totalHours":"Total Hours",
-  "costPerHour":"Cost Per Hour",
-  "totalPrice":"Total Price",
-  "chatWithCustomer":"Chat With Customer",
-  "note":"Note",
-  "deliveryLocation":"Delivery Location",
-  "complete":"Complete",
-  "cancelOrder":"Cancel Order",
+  "@noOrdersAvailable": {
+    "description": "Message when order list is empty"
+  },
+  
+  "noOrdersForThisDate": "No Orders For This Date",
+  "@noOrdersForThisDate": {
+    "description": "Message when no orders exist for selected date"
+  },
+  
+  "ordersDetails": "Order Details",
+  "@ordersDetails": {
+    "description": "Specific information about service request"
+  },
+  
+  "orderSummary": "Order Summary",
+  "@orderSummary": {
+    "description": "Overview of service request details"
+  },
+  
+  "createdAt": "Created At",
+  "@createdAt": {
+    "description": "Timestamp when order was made"
+  },
+  
+  "totalHours": "Total Hours",
+  "@totalHours": {
+    "description": "Complete duration of service"
+  },
+  
+  "costPerHour": "Cost Per Hour",
+  "@costPerHour": {
+    "description": "Hourly rate for service"
+  },
+  
+  "totalPrice": "Total Price",
+  "@totalPrice": {
+    "description": "Final amount for entire service"
+  },
+  
+  "chatWithCustomer": "Chat With Customer",
+  "@chatWithCustomer": {
+    "description": "Action to message service requester"
+  },
+  
+  "note": "Note",
+  "@note": {
+    "description": "Additional comment or instruction"
+  },
+  
+  "deliveryLocation": "Delivery Location",
+  "@deliveryLocation": {
+    "description": "Address where service will be performed"
+  },
+  
+  "complete": "Complete",
+  "@complete": {
+    "description": "Action to finish or mark as done"
+  },
+  
+  "cancelOrder": "Cancel Order",
+  "@cancelOrder": {
+    "description": "Action to cancel service request"
+  },
+  
   "withdrawalStatus": "Withdrawal Status",
-  "statusSent":"Sent",
-  "statusWaitingToSend":"Waiting to Send",
-  "statusRequestReceived":"Request Received",
-  "unknown":"Unknown",
-  "city":"City",
-  "enterCity":"Enter Your City",
-  "country":"Country",
-  "enterCountry":"Enter Your Country",
+  "@withdrawalStatus": {
+    "description": "Current state of money withdrawal request"
+  },
+  
+  "statusSent": "Sent",
+  "@statusSent": {
+    "description": "Status indicating withdrawal has been processed"
+  },
+  
+  "statusWaitingToSend": "Waiting to Send",
+  "@statusWaitingToSend": {
+    "description": "Status indicating withdrawal is pending"
+  },
+  
+  "statusRequestReceived": "Request Received",
+  "@statusRequestReceived": {
+    "description": "Status indicating withdrawal request is acknowledged"
+  },
+  
+  "unknown": "Unknown",
+  "@unknown": {
+    "description": "Status when information is not available"
+  },
+  
+  "city": "City",
+  "@city": {
+    "description": "Urban area or municipality name"
+  },
+  
+  "enterCity": "Enter Your City",
+  "@enterCity": {
+    "description": "Instruction to input city name"
+  },
+  
+  "country": "Country",
+  "@country": {
+    "description": "Nation or state name"
+  },
+  
+  "enterCountry": "Enter Your Country",
+  "@enterCountry": {
+    "description": "Instruction to input country name"
+  },
+  
   "addService": "Add Service",
+  "@addService": {
+    "description": "Action to create new service offering"
+  },
+  
   "defineYourServiceExpertise": "Define Your Service Expertise",
+  "@defineYourServiceExpertise": {
+    "description": "Instruction to describe professional skills"
+  },
+  
   "chooseServiceCategory": "Choose Service Category",
+  "@chooseServiceCategory": {
+    "description": "Instruction to select service type"
+  },
+  
   "chooseSubcategory": "Choose Subcategory",
+  "@chooseSubcategory": {
+    "description": "Instruction to select specific service subtype"
+  },
+  
   "descriptionRequired": "Description is required",
+  "@descriptionRequired": {
+    "description": "Error message when service description is missing"
+  },
+  
   "priceRequired": "Price is required",
+  "@priceRequired": {
+    "description": "Error message when service price is missing"
+  },
+
+ 
   "experienceRequired": "Experience is required",
+  "@experienceRequired": {
+    "description": "Error message when experience field is missing"
+  },
+  
   "wallet": "Wallet",
+  "@wallet": {
+    "description": "Digital money storage and payment management"
+  },
+  
   "withdrawal": "Withdraw",
-  "serviceSummary":"Service Summary",
+  "@withdrawal": {
+    "description": "Action to take money out of account"
+  },
+  
+  "serviceSummary": "Service Summary",
+  "@serviceSummary": {
+    "description": "Overview of service details and information"
+  },
+  
   "onVacation": "On Vacation",
-  "available":"Available",
-  "returnToWork":"Return To Work",
-  "goOnVacation":"Go On Vacation",
-  "securityCheck":"Security Check",
-  "securityCheckCompleted":"Security Check Completed",
-  "securityCheckPending":"Security Check Pending",
-  "completeSecurityCheck":"Complete Security Check",
-  "requestStatus":"Request Status",
-  "servicesProvided":"Services Provided",
-  "visible":"Visible",  
-  "inactive":"Inactive",
-  "bankAccount": "Bank Account",  
+  "@onVacation": {
+    "description": "Status indicating service provider is temporarily unavailable"
+  },
+  
+  "available": "Available",
+  "@available": {
+    "description": "Status indicating service provider is ready to work"
+  },
+  
+  "returnToWork": "Return To Work",
+  "@returnToWork": {
+    "description": "Action to change status from vacation to available"
+  },
+  
+  "goOnVacation": "Go On Vacation",
+  "@goOnVacation": {
+    "description": "Action to change status to temporarily unavailable"
+  },
+  
+  "securityCheck": "Security Check",
+  "@securityCheck": {
+    "description": "Background verification process for safety"
+  },
+  
+  "securityCheckCompleted": "Security Check Completed",
+  "@securityCheckCompleted": {
+    "description": "Status indicating successful background verification"
+  },
+  
+  "securityCheckPending": "Security Check Pending",
+  "@securityCheckPending": {
+    "description": "Status indicating background verification in progress"
+  },
+  
+  "completeSecurityCheck": "Complete Security Check",
+  "@completeSecurityCheck": {
+    "description": "Action to finish background verification process"
+  },
+  
+  "requestStatus": "Request Status",
+  "@requestStatus": {
+    "description": "Current state of submitted request"
+  },
+  
+  "servicesProvided": "Services Provided",
+  "@servicesProvided": {
+    "description": "List of work types offered by provider"
+  },
+  
+  "visible": "Visible",
+  "@visible": {
+    "description": "Status indicating content can be seen by users"
+  },
+  
+  "inactive": "Inactive",
+  "@inactive": {
+    "description": "Status indicating content is not active or available"
+  },
+  
+  "bankAccount": "Bank Account",
+  "@bankAccount": {
+    "description": "Financial institution account for payments"
+  },
+  
   "fullNameRequired": "Full name is required",
+  "@fullNameRequired": {
+    "description": "Error message when complete name is missing"
+  },
+  
   "emailRequired": "Email is required",
+  "@emailRequired": {
+    "description": "Error message when email address is missing"
+  },
+  
   "phoneRequired": "Phone number is required",
+  "@phoneRequired": {
+    "description": "Error message when phone number is missing"
+  },
+  
   "passwordRequired": "Password is required",
+  "@passwordRequired": {
+    "description": "Error message when password is missing"
+  },
+  
   "invalidCoupon": "Invalid coupon code",
+  "@invalidCoupon": {
+    "description": "Error message for incorrect or expired discount code"
+  },
+  
   "invalidEmail": "Please enter a valid email address",
+  "@invalidEmail": {
+    "description": "Error message for incorrectly formatted email"
+  },
+  
   "passwordTooShort": "Password must be at least 8 characters",
+  "@passwordTooShort": {
+    "description": "Error message for insufficient password length"
+  },
+  
   "confirmPasswordRequired": "Please confirm your password",
+  "@confirmPasswordRequired": {
+    "description": "Error message when password confirmation is missing"
+  },
+  
   "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Error message when password and confirmation differ"
+  },
+  
   "locationRequired": "Your city and country are required",
+  "@locationRequired": {
+    "description": "Error message when location information is missing"
+  },
+  
   "orderSuccessTitle": "Order Created Successfully",
+  "@orderSuccessTitle": {
+    "description": "Success message title for completed booking"
+  },
+  
   "orderSuccessDescription": "Your booking has been confirmed. You can view it in your bookings.",
+  "@orderSuccessDescription": {
+    "description": "Success message details for completed booking"
+  },
+  
   "feedbackSuccessTitle": "Thank You for Your Feedback!",
+  "@feedbackSuccessTitle": {
+    "description": "Appreciation message for submitted review"
+  },
+  
   "feedbackSuccessDescription": "Your rating has been submitted successfully.",
+  "@feedbackSuccessDescription": {
+    "description": "Confirmation that review was saved"
+  },
+  
   "backToBookings": "Back to Bookings",
+  "@backToBookings": {
+    "description": "Navigation link to return to bookings list"
+  },
+  
   "submissionFailed": "Failed to submit feedback",
-  "pending":"Pending",
-  "selectCountry":"Select Country",
-  "selectCity":"Select City",
-  "supportRequestfromApp":"Support Request from App",
-  "iNeedAssistance":"Hello, I need assistance with...",
-  "emailCopied":"Email copied to clipboard",
-  "unableOpenWhatsApp":"Unable to open WhatsApp",
-  "errorOpeningWhatsApp":"Error opening WhatsApp",
-  "typeMessage":"Type a message...",
-  "noMessagesYet":"No messages yet",
-  "messages":"Messages",
-  "newMessage":"NEW",
-  "noConversations":"No conversations yet",
-  "startNewConversation":"Start a new conversation",
-  "modifyBooking":"Modify Booking",
-  "startTimeFuture":"Start time must be in the future",
-  "endTimeBetween":"End time must be between 6:00 and 22:00",
-  "noContractorSelected":"No contractor selected",
-  "regionTaxes":"Region Taxes",
-  "platformFee":"Platform Fee",
-  "taskDuration":"Task Duration",
-  "userDataNotAvailable":"User data not available",
-  "invalidPhone":"Please enter a valid phone number",
-  "uploadImages":"Please upload unique images to attract customers",
-  "additionalPhotos":"Additional photos of the service",
-  "chooseMoreImage":"You can choose more than one image for the service",
-  "addimages":"Add images",
-  "image":"Image",
-  "notLaunchGoogleMaps":"Could not launch Google Maps.",
-  "order":"Order",
-  "unableLoadMap":"Unable to load map.",
+  "@submissionFailed": {
+    "description": "Error message when review submission fails"
+  },
+  
+  "pending": "Pending",
+  "@pending": {
+    "description": "Status indicating waiting for action or approval"
+  },
+  
+  "selectCountry": "Select Country",
+  "@selectCountry": {
+    "description": "Instruction to choose nation from list"
+  },
+  
+  "selectCity": "Select City",
+  "@selectCity": {
+    "description": "Instruction to choose urban area from list"
+  },
+  
+  "supportRequestfromApp": "Support Request from App",
+  "@supportRequestfromApp": {
+    "description": "Subject line for customer service inquiry"
+  },
+  
+  "iNeedAssistance": "Hello, I need assistance with...",
+  "@iNeedAssistance": {
+    "description": "Template message for contacting support"
+  },
+  
+  "emailCopied": "Email copied to clipboard",
+  "@emailCopied": {
+    "description": "Confirmation that email address was copied"
+  },
+  
+  "unableOpenWhatsApp": "Unable to open WhatsApp",
+  "@unableOpenWhatsApp": {
+    "description": "Error message when WhatsApp cannot be launched"
+  },
+  
+  "errorOpeningWhatsApp": "Error opening WhatsApp",
+  "@errorOpeningWhatsApp": {
+    "description": "Error message for WhatsApp launch failure"
+  },
+  
+  "typeMessage": "Type a message...",
+  "@typeMessage": {
+    "description": "Placeholder for chat message input field"
+  },
+  
+  "noMessagesYet": "No messages yet",
+  "@noMessagesYet": {
+    "description": "Message when chat conversation is empty"
+  },
+  
+  "messages": "Messages",
+  "@messages": {
+    "description": "Chat conversation or communication list"
+  },
+  
+  "newMessage": "NEW",
+  "@newMessage": {
+    "description": "Label indicating unread message"
+  },
+  
+  "noConversations": "No conversations yet",
+  "@noConversations": {
+    "description": "Message when chat list is empty"
+  },
+  
+  "startNewConversation": "Start a new conversation",
+  "@startNewConversation": {
+    "description": "Action to begin new chat"
+  },
+  
+  "modifyBooking": "Modify Booking",
+  "@modifyBooking": {
+    "description": "Action to change existing reservation details"
+  },
+  
+  "startTimeFuture": "Start time must be in the future",
+  "@startTimeFuture": {
+    "description": "Error message for past time selection"
+  },
+  
+  "endTimeBetween": "End time must be between 6:00 and 22:00",
+  "@endTimeBetween": {
+    "description": "Error message for invalid end time selection"
+  },
+  
+  "noContractorSelected": "No contractor selected",
+  "@noContractorSelected": {
+    "description": "Error message when service provider is not chosen"
+  },
+
+  
+  "regionTaxes": "Region Taxes",
+  "@regionTaxes": {
+    "description": "Local government charges applied to services"
+  },
+  
+  "platformFee": "Platform Fee",
+  "@platformFee": {
+    "description": "Service charge for using the app"
+  },
+  
+  "taskDuration": "Task Duration",
+  "@taskDuration": {
+    "description": "Time required to complete specific job"
+  },
+  
+  "userDataNotAvailable": "User data not available",
+  "@userDataNotAvailable": {
+    "description": "Error message when user information cannot be loaded"
+  },
+  
+  "invalidPhone": "Please enter a valid phone number",
+  "@invalidPhone": {
+    "description": "Error message for incorrectly formatted phone number"
+  },
+  
+  "uploadImages": "Please upload unique images to attract customers",
+  "@uploadImages": {
+    "description": "Instruction to add photos for better customer appeal"
+  },
+  
+  "additionalPhotos": "Additional photos of the service",
+  "@additionalPhotos": {
+    "description": "Extra images showcasing work quality"
+  },
+  
+  "chooseMoreImage": "You can choose more than one image for the service",
+  "@chooseMoreImage": {
+    "description": "Information about multiple image selection"
+  },
+  
+  "addimages": "Add images",
+  "@addimages": {
+    "description": "Action to include photos in service listing"
+  },
+  
+  "image": "Image",
+  "@image": {
+    "description": "Single photo or picture"
+  },
+  
+  "notLaunchGoogleMaps": "Could not launch Google Maps.",
+  "@notLaunchGoogleMaps": {
+    "description": "Error message when map application fails to open"
+  },
+  
+  "order": "Order",
+  "@order": {
+    "description": "Service request or booking made by customer"
+  },
+  
+  "unableLoadMap": "Unable to load map.",
+  "@unableLoadMap": {
+    "description": "Error message when map cannot be displayed"
+  },
+  
   "dataWeCollect": "Data We Collect",
+  "@dataWeCollect": {
+    "description": "Privacy policy section about information gathering"
+  },
+  
   "howWeUseData": "How We Use the Data",
+  "@howWeUseData": {
+    "description": "Privacy policy section about data usage"
+  },
+  
   "sharingData": "Sharing Data with Third Parties",
+  "@sharingData": {
+    "description": "Privacy policy section about external data sharing"
+  },
+  
   "userRights": "User Rights",
+  "@userRights": {
+    "description": "Privacy policy section about user privileges"
+  },
+  
   "dataProtection": "Data Protection",
+  "@dataProtection": {
+    "description": "Privacy policy section about security measures"
+  },
+  
   "changesToPolicy": "Changes to the Privacy Policy",
+  "@changesToPolicy": {
+    "description": "Privacy policy section about policy updates"
+  },
+  
   "contactUs": "Contact Us",
+  "@contactUs": {
+    "description": "Section for reaching customer support"
+  },
+  
   "privacyPolicyDescription": "View our Privacy Policy to understand how we collect, use, and protect your personal data.",
-  "noRecentWithdrawals":"no Recent Withdrawals",
-  "checkBackLaterUpdates":"check BackLater For Updates",
-  "amount":"Amount",
-  "worker":"Worker",
-  "unknownTime":"Unknown time",
-  "totalServices":"Total Services",
-  "transit":"Transit",
-  "institution":"Institution",
-  "account":"Account",
-  "withdrawalRequestSubmitted":"Withdrawal request submitted",
-  "noServiceFound":"No Service Found",
+  "@privacyPolicyDescription": {
+    "description": "Explanation of privacy policy purpose"
+  },
+  
+  "noRecentWithdrawals": "no Recent Withdrawals",
+  "@noRecentWithdrawals": {
+    "description": "Message when no recent money withdrawals exist"
+  },
+  
+  "checkBackLaterUpdates": "check BackLater For Updates",
+  "@checkBackLaterUpdates": {
+    "description": "Instruction to return later for new information"
+  },
+  
+  "amount": "Amount",
+  "@amount": {
+    "description": "Sum of money or quantity"
+  },
+  
+  "worker": "Worker",
+  "@worker": {
+    "description": "Person providing service or labor"
+  },
+  
+  "unknownTime": "Unknown time",
+  "@unknownTime": {
+    "description": "Message when time information is not available"
+  },
+  
+  "totalServices": "Total Services",
+  "@totalServices": {
+    "description": "Complete count of services provided"
+  },
+  
+  "transit": "Transit",
+  "@transit": {
+    "description": "Transportation or movement status"
+  },
+  
+  "institution": "Institution",
+  "@institution": {
+    "description": "Financial organization or bank"
+  },
+  
+  "account": "Account",
+  "@account": {
+    "description": "User profile or financial account"
+  },
+  
+  "withdrawalRequestSubmitted": "Withdrawal request submitted",
+  "@withdrawalRequestSubmitted": {
+    "description": "Confirmation that money withdrawal request was sent"
+  },
+  
+  "noServiceFound": "No Service Found",
+  "@noServiceFound": {
+    "description": "Message when search returns no results"
+  },
+  
   "searchServices": "Search for a service...",
-  "searchResults":"Search Results",
-  "resetPasswordEnterEmail":"Please enter your registered email address, and we will send you a verification code (OTP) to reset your password.",
-  "otpVerification":"OTP Verification",
-  "enterVerificationCode":"Enter the verification code (OTP)",
-  "otpSent":"We have sent a 6-digit verification code to your registered contact.",
-  "checkCode":"Check the code",
+  "@searchServices": {
+    "description": "Placeholder for service search input field"
+  },
+  
+  "searchResults": "Search Results",
+  "@searchResults": {
+    "description": "List of items found from search query"
+  },
+  
+  "resetPasswordEnterEmail": "Please enter your registered email address, and we will send you a verification code (OTP) to reset your password.",
+  "@resetPasswordEnterEmail": {
+    "description": "Instructions for password reset process"
+  },
+  
+  "otpVerification": "OTP Verification",
+  "@otpVerification": {
+    "description": "Process of confirming one-time password code"
+  },
+  
+  "enterVerificationCode": "Enter the verification code (OTP)",
+  "@enterVerificationCode": {
+    "description": "Instruction to input received verification code"
+  },
+  
+  "otpSent": "We have sent a 6-digit verification code to your registered contact.",
+  "@otpSent": {
+    "description": "Confirmation that verification code was sent"
+  },
+  
+  "checkCode": "Check the code",
+  "@checkCode": {
+    "description": "Action to verify entered code"
+  },
+  
   "resendCode": "Resend the code",
-  "noContractorsFound":"No contractors found",
+  "@resendCode": {
+    "description": "Action to request new verification code"
+  },
+  
+  "noContractorsFound": "No contractors found",
+  "@noContractorsFound": {
+    "description": "Message when no service providers are available"
+  },
+  
   "noContractorsMatchFilters": "No contractors match the current filters.",
+  "@noContractorsMatchFilters": {
+    "description": "Message when search filters return no results"
+  },
+  
   "noContractorsAvailableInThisCategory": "No contractors are currently available in this category.",
-  "chatConnectionFailed":"Chat Connection Failed",
-  "waitingForUserInfo":"Waiting For User Info",
-  "connected":"Connected",
-  "reconnect":"Reconnect",
-  "checkConnection":"Please check your internet connection",
-  "bankAccountInformation":"Bank Account Information",
-  "interacTransferInformation":"Interac e-Transfer Information",
-  "interacMessage":"Funds will be sent to this email address via Interac e-Transfer.",
-  "saveAccount":"Save account information for future use",
-  "processing":"Processing...",
-  "requiredFields":"Please fill in all required fields correctly.",
+  "@noContractorsAvailableInThisCategory": {
+    "description": "Message when no providers exist in selected service type"
+  },
+  
+  "chatConnectionFailed": "Chat Connection Failed",
+  "@chatConnectionFailed": {
+    "description": "Error message when messaging system cannot connect"
+  },
+  
+  "waitingForUserInfo": "Waiting For User Info",
+  "@waitingForUserInfo": {
+    "description": "Status message while loading user data"
+  },
+  
+  "connected": "Connected",
+  "@connected": {
+    "description": "Status indicating successful connection"
+  },
+  
+  "reconnect": "Reconnect",
+  "@reconnect": {
+    "description": "Action to establish connection again"
+  },
+  
+  "checkConnection": "Please check your internet connection",
+  "@checkConnection": {
+    "description": "Instruction when network connectivity issues occur"
+  },
+  
+  "bankAccountInformation": "Bank Account Information",
+  "@bankAccountInformation": {
+    "description": "Financial account details for payments"
+  },
+  
+  "interacTransferInformation": "Interac e-Transfer Information",
+  "@interacTransferInformation": {
+    "description": "Canadian electronic money transfer details"
+  },
+  
+  "interacMessage": "Funds will be sent to this email address via Interac e-Transfer.",
+  "@interacMessage": {
+    "description": "Explanation of Canadian electronic payment method"
+  },
+  
+  "saveAccount": "Save account information for future use",
+  "@saveAccount": {
+    "description": "Option to store payment details for convenience"
+  },
 
-
- "selectDurationType": "Select Duration Type",
+    "processing": "Processing...",
+  "@processing": {
+    "description": "Status message indicating operation in progress"
+  },
+  
+  "requiredFields": "Please fill in all required fields correctly.",
+  "@requiredFields": {
+    "description": "Error message when mandatory form fields are incomplete"
+  },
+  
+  "selectDurationType": "Select Duration Type",
+  "@selectDurationType": {
+    "description": "Instruction to choose time measurement method"
+  },
+  
   "days": "Days",
+  "@days": {
+    "description": "Time unit for multi-day services"
+  },
+  
   "taskBased": "Task",
+  "@taskBased": {
+    "description": "Service pricing based on completion rather than time"
+  },
+  
   "enterHours": "Enter Number of Hours",
-  "enterDays": "Enter Number of Days", 
+  "@enterHours": {
+    "description": "Instruction to input time duration in hours"
+  },
+  
+  "enterDays": "Enter Number of Days",
+  "@enterDays": {
+    "description": "Instruction to input time duration in days"
+  },
+  
   "enterDuration": "Enter Duration",
+  "@enterDuration": {
+    "description": "Instruction to input service time length"
+  },
+  
   "exampleHours": "e.g. 2.5",
+  "@exampleHours": {
+    "description": "Sample format for entering hours with decimal"
+  },
+  
   "exampleDays": "e.g. 1.5",
+  "@exampleDays": {
+    "description": "Sample format for entering days with decimal"
+  },
+  
   "hoursUnit": "hrs",
+  "@hoursUnit": {
+    "description": "Abbreviated label for hours time unit"
+  },
+  
   "daysUnit": "days",
+  "@daysUnit": {
+    "description": "Label for days time unit"
+  },
+  
   "quickSelect": "Quick Select",
+  "@quickSelect": {
+    "description": "Feature for fast duration selection"
+  },
+  
   "totalDays": "Total Days",
+  "@totalDays": {
+    "description": "Complete number of days for service"
+  },
+  
   "fixedTaskPrice": "Fixed Task Price",
+  "@fixedTaskPrice": {
+    "description": "Set cost for completing specific job"
+  },
+  
   "oneHourService": "One hour service at hourly rate",
+  "@oneHourService": {
+    "description": "Standard single hour service description"
+  },
+  
   "taskBasedInfo": "Fixed price task - charged at hourly rate for one hour of service",
+  "@taskBasedInfo": {
+    "description": "Explanation of task-based pricing model"
+  },
+  
   "taskPrice": "Enter Task Price",
+  "@taskPrice": {
+    "description": "Instruction to input fixed job cost"
+  },
+  
   "exampleTaskPrice": "e.g. 150.00",
-
-  "pricingOptions":"Pricing Options",
-  "serviceRate":"service Rate",
+  "@exampleTaskPrice": {
+    "description": "Sample format for entering task price"
+  },
+  
+  "pricingOptions": "Pricing Options",
+  "@pricingOptions": {
+    "description": "Different cost structure choices available"
+  },
+  
+  "serviceRate": "service Rate",
+  "@serviceRate": {
+    "description": "Cost per unit of time for service"
+  },
 
 
   "resetPassword": "Reset Password",
@@ -364,10 +1645,1328 @@
   "@otpRequired": {
     "description": "Error message when OTP is missing"
   },
-  
   "passwordResetSuccess": "Password reset successfully! Please log in with your new password.",
   "@passwordResetSuccess": {
     "description": "Success message after password reset"
+  },
+
+  "termsIntroduction": "Last Updated: 15 April 2025\\n\\nWelcome to Good One. These Terms and Conditions govern your use of our mobile application and services. By using our app, you agree to comply with these terms. If you do not agree, please do not use the app.",
+  "@termsIntroduction": {
+    "description": "Introduction text for Terms and Conditions",
+    "context": "terms_and_conditions"
+  },
+  
+  "appDefinition": "Refers to Good One app, the mobile application that connects customers with service providers.",
+  "@appDefinition": {
+    "description": "Definition of 'App' in terms and conditions",
+    "context": "terms_definitions"
+  },
+  
+  "userDefinition": "Refers to anyone who accesses and uses the App, including both customers and service providers.",
+  "@userDefinition": {
+    "description": "Definition of 'User' in terms and conditions",
+    "context": "terms_definitions"
+  },
+  
+  "customerDefinition": "Refers to individuals seeking services through the App.",
+  "@customerDefinition": {
+    "description": "Definition of 'Customer' in terms and conditions",
+    "context": "terms_definitions"
+  },
+  
+  "serviceProviderDefinition": "Refers to individuals offering their services through the App.",
+  "@serviceProviderDefinition": {
+    "description": "Definition of 'Service Provider' in terms and conditions",
+    "context": "terms_definitions"
+  },
+  
+  "platformDefinition": "Refers to the App and its associated services.",
+  "@platformDefinition": {
+    "description": "Definition of 'Platform' in terms and conditions",
+    "context": "terms_definitions"
+  },
+  
+  "toUseTheApp": "To use the App, you must:",
+  "@toUseTheApp": {
+    "description": "Introduction to app usage requirements",
+    "context": "user_eligibility"
+  },
+  
+  "provideAccurateInfo": "Provide accurate and truthful information during registration.",
+  "@provideAccurateInfo": {
+    "description": "Requirement for accurate information",
+    "context": "user_eligibility"
+  },
+  
+  "complyWithLaws": "Comply with all applicable laws and regulations.",
+  "@complyWithLaws": {
+    "description": "Legal compliance requirement",
+    "context": "user_eligibility"
+  },
+  
+  "ageRequirement": "Be at least 18 years old to register as a service provider. Minors under 18 are required to provide parents' consent to confirm that the service will be under the parent's responsibility and supervision.",
+  "@ageRequirement": {
+    "description": "Age requirement for service providers",
+    "context": "user_eligibility"
+  },
+  
+  "minimumWorkingAgeByProvince": "Minimum Working Age by Province/Territory",
+  "@minimumWorkingAgeByProvince": {
+    "description": "Provincial age requirements section title",
+    "context": "user_eligibility"
+  },
+  
+  "mostProvincesSet14Minimum": "Most provinces set 14 as the minimum age for general work with restrictions.",
+  "@mostProvincesSet14Minimum": {
+    "description": "Provincial minimum age information",
+    "context": "user_eligibility"
+  },
+  
+  "someProvinces12YearOlds": "Some provinces allow 12-year-olds to work in specific, non-hazardous jobs with parental consent.",
+  "@someProvinces12YearOlds": {
+    "description": "Younger worker provisions",
+    "context": "user_eligibility"
+  },
+  
+  "restrictionsWorkMinors": "Restrictions on Work for Minors",
+  "@restrictionsWorkMinors": {
+    "description": "Minor work restrictions section title",
+    "context": "user_eligibility"
+  },
+  
+  "noHazardousWork": "No hazardous work",
+  "@noHazardousWork": {
+    "description": "Hazardous work prohibition title",
+    "context": "user_eligibility"
+  },
+  
+  "minorsCannotDangerousJobs": "Minors cannot perform dangerous jobs (e.g., construction, heavy machinery, electrical work).",
+  "@minorsCannotDangerousJobs": {
+    "description": "Dangerous work restriction",
+    "context": "user_eligibility"
+  },
+  
+  "parentalConsent": "Parental consent",
+  "@parentalConsent": {
+    "description": "Parental consent requirement title",
+    "context": "user_eligibility"
+  },
+  
+  "provincesRequireParentalPermission": "Many provinces require parental permission for those under 16.",
+  "@provincesRequireParentalPermission": {
+    "description": "Parental permission requirement",
+    "context": "user_eligibility"
+  },
+  
+  "limitedWorkHours": "Limited work hours",
+  "@limitedWorkHours": {
+    "description": "Work hours limitation title",
+    "context": "user_eligibility"
+  },
+  
+  "kidsNoLateHours": "Kids under 18 usually can't work late hours or during school time.",
+  "@kidsNoLateHours": {
+    "description": "Work hours restriction for minors",
+    "context": "user_eligibility"
+  },
+  
+  "businessLicensingIssues": "Business licensing issues",
+  "@businessLicensingIssues": {
+    "description": "Business licensing issues title",
+    "context": "user_eligibility"
+  },
+  
+  "provincesRestrictMinors": "Some provinces may restrict minors from operating as independent contractors.",
+  "@provincesRestrictMinors": {
+    "description": "Business licensing restriction for minors",
+    "context": "user_eligibility"
+  },
+  
+  "specificCasesGigWork": "Specific Cases for Gig Work (Your App's Context)",
+  "@specificCasesGigWork": {
+    "description": "App-specific work context section title",
+    "context": "user_eligibility"
+  },
+  
+  "servicesInvolvePhysicalLabor": "The App provides services often involve physical labor, handyman work, and home services.",
+  "@servicesInvolvePhysicalLabor": {
+    "description": "Description of services provided",
+    "context": "user_eligibility"
+  },
+  
+  "jobsRequire18Plus": "These types of jobs typically require workers to be 18+ because they involve safety risks, contracts, and potential liability issues.",
+  "@jobsRequire18Plus": {
+    "description": "Explanation of age requirement",
+    "context": "user_eligibility"
+  },
+  
+  "conclusionMinorsAllowed": "Conclusion: Should Minors Be Allowed on the App?",
+  "@conclusionMinorsAllowed": {
+    "description": "Age requirement conclusion section title",
+    "context": "user_eligibility"
+  },
+  
+  "bestRequire18": "It's best to require service providers to be at least 18.",
+  "@bestRequire18": {
+    "description": "Recommendation for age requirement",
+    "context": "user_eligibility"
+  },
+  
+  "youngerUsersParentalConsent": "If younger users (e.g., babysitting, tutoring) are allowed in the future, parental consent and provincial legal approval may be required. (Contact customer support to send you the consent to be signed.)",
+  "@youngerUsersParentalConsent": {
+    "description": "Future considerations for younger users",
+    "context": "user_eligibility"
+  },
+  
+  "usersMustCreateAccount": "Users must create an account to access the services.",
+  "@usersMustCreateAccount": {
+    "description": "Account registration requirement",
+    "context": "account_registration"
+  },
+  
+  "responsibleForCredentials": "You are responsible for maintaining the confidentiality of your login credentials.",
+  "@responsibleForCredentials": {
+    "description": "User responsibility for account security",
+    "context": "account_registration"
+  },
+  
+  "notShareAccountInfo": "You must not share your account information with others.",
+  "@notShareAccountInfo": {
+    "description": "Account sharing prohibition",
+    "context": "account_registration"
+  },
+  
+  "unauthorizedAccess": "Any unauthorized access to your account must be reported immediately to customer support.",
+  "@unauthorizedAccess": {
+    "description": "Security breach reporting requirement",
+    "context": "account_registration"
+  },
+  
+  "communicationViaApp": "All communication between customers and service providers must occur through the App's built-in chat feature.",
+  "@communicationViaApp": {
+    "description": "Communication channel requirement",
+    "context": "communication_privacy"
+  },
+  
+  "noPersonalContactSharing": "Users are strictly prohibited from sharing personal contact information (e.g., phone numbers, emails) through the chat.",
+  "@noPersonalContactSharing": {
+    "description": "Personal information sharing prohibition",
+    "context": "communication_privacy"
+  },
+  
+  "violationAccountSuspension": "Violation of this rule may result in account suspension or termination.",
+  "@violationAccountSuspension": {
+    "description": "Consequence of rule violation",
+    "context": "communication_privacy"
+  },
+  
+  "allPaymentsThroughApp": "All payments must be processed through the App.",
+  "@allPaymentsThroughApp": {
+    "description": "Payment processing requirement",
+    "context": "payments_transactions"
+  },
+  
+  "noPaymentsOutside": "No payments outside the App are allowed. Any attempt to process payments outside the platform may result in permanent account suspension.",
+  "@noPaymentsOutside": {
+    "description": "External payment prohibition",
+    "context": "payments_transactions"
+  },
+  
+  "serviceFeeDisclosure": "The App may charge service fees or transaction fees, which will be disclosed before payment.",
+  "@serviceFeeDisclosure": {
+    "description": "Fee transparency policy",
+    "context": "payments_transactions"
+  },
+  
+  "certificationsOptional": "Service providers can upload certifications to enhance their profile credibility, but this is optional.",
+  "@certificationsOptional": {
+    "description": "Certification upload policy",
+    "context": "service_provider_requirements"
+  },
+  
+  "securityCheckAvailable": "Service providers may also complete a security check through the App, which will further increase trust.",
+  "@securityCheckAvailable": {
+    "description": "Security verification option",
+    "context": "service_provider_requirements"
+  },
+  
+  "noJobGuarantee": "The App does not guarantee job assignments or earnings for service providers.",
+  "@noJobGuarantee": {
+    "description": "Disclaimer about work availability",
+    "context": "service_provider_requirements"
+  },
+  
+  "advertisingPolicyIntro": "The App allows advertisements from companies and individuals, including service providers who wish to promote their services. By submitting an advertisement, you agree to the following terms:",
+  "@advertisingPolicyIntro": {
+    "description": "Introduction to advertising terms",
+    "context": "advertising_policy"
+  },
+  
+  "eligibilityToAdvertise": "Eligibility to Advertise",
+  "@eligibilityToAdvertise": {
+    "description": "Advertising eligibility section title",
+    "context": "advertising_policy"
+  },
+  
+  "advertisersComplyLaws": "Advertisers must comply with all applicable laws and regulations.",
+  "@advertisersComplyLaws": {
+    "description": "Legal compliance requirement for advertisers",
+    "context": "advertising_policy"
+  },
+  
+  "serviceProviderAdsNotMislead": "Service providers may advertise their services, but advertisements must not mislead users or contain false claims.",
+  "@serviceProviderAdsNotMislead": {
+    "description": "Truthful advertising requirement",
+    "context": "advertising_policy"
+  },
+  
+  "companiesEnsureRelevantAds": "Companies must ensure that their ads are relevant to the platform's audience.",
+  "@companiesEnsureRelevantAds": {
+    "description": "Advertising relevance requirement",
+    "context": "advertising_policy"
+  },
+  
+  "adContentGuidelines": "Ad Content Guidelines",
+  "@adContentGuidelines": {
+    "description": "Advertisement content rules section title",
+    "context": "advertising_policy"
+  },
+  
+  "adsTruthfulAccurate": "Ads must be truthful, accurate, and not misleading.",
+  "@adsTruthfulAccurate": {
+    "description": "Advertisement accuracy requirement",
+    "context": "advertising_policy"
+  },
+  
+  "adsNotPromoteIllegal": "Ads must not promote illegal activities, violence, discrimination, or explicit content.",
+  "@adsNotPromoteIllegal": {
+    "description": "Advertisement content restrictions",
+    "context": "advertising_policy"
+  },
+  
+  "adsNoPersonalContact": "Ads must not include personal contact details (e.g., phone numbers, email addresses) to ensure transactions remain within the App.",
+  "@adsNoPersonalContact": {
+    "description": "Contact information restriction in ads",
+    "context": "advertising_policy"
+  },
+  
+  "appReviewRejectAds": "The App reserves the right to review and reject any advertisement that does not align with these guidelines.",
+  "@appReviewRejectAds": {
+    "description": "Advertisement review policy",
+    "context": "advertising_policy"
+  },
+  
+  "adPlacementFees": "Ad Placement and Fees",
+  "@adPlacementFees": {
+    "description": "Advertisement pricing section title",
+    "context": "advertising_policy"
+  },
+  
+  "advertisersChoosePlacement": "Advertisers may choose from different ad placement options within the App.",
+  "@advertisersChoosePlacement": {
+    "description": "Advertisement placement options",
+    "context": "advertising_policy"
+  },
+  
+  "advertisingFeesVary": "Advertising fees vary based on placement, duration, and visibility.",
+  "@advertisingFeesVary": {
+    "description": "Advertisement pricing structure",
+    "context": "advertising_policy"
+  },
+  
+  "adPaymentThroughApp": "Payment for advertisements must be processed through the App.",
+  "@adPaymentThroughApp": {
+    "description": "Advertisement payment requirement",
+    "context": "advertising_policy"
+  },
+  
+  "adRemovalViolations": "Ad Removal and Violations",
+  "@adRemovalViolations": {
+    "description": "Advertisement violation consequences section title",
+    "context": "advertising_policy"
+  },
+  
+  "appRemoveViolatingAds": "The App reserves the right to remove ads that violate these policies without notice or refund.",
+  "@appRemoveViolatingAds": {
+    "description": "Advertisement removal policy",
+    "context": "advertising_policy"
+  },
+  
+  "repeatedViolationsBan": "Repeated violations may result in a ban from advertising on the platform.",
+  "@repeatedViolationsBan": {
+    "description": "Consequence of repeated violations",
+    "context": "advertising_policy"
+  },
+  
+  "usersMustNot": "Users must not:",
+  "@usersMustNot": {
+    "description": "Introduction to prohibited activities list",
+    "context": "prohibited_activities"
+  },
+  
+  "misrepresentServices": "Misrepresent themselves or their services.",
+  "@misrepresentServices": {
+    "description": "Prohibited activity - misrepresentation",
+    "context": "prohibited_activities"
+  },
+  
+  "engageFraudulent": "Engage in fraudulent activities.",
+  "@engageFraudulent": {
+    "description": "Prohibited activity - fraud",
+    "context": "prohibited_activities"
+  },
+  
+  "violateLocalLaws": "Violate any local, state, or national laws.",
+  "@violateLocalLaws": {
+    "description": "Prohibited activity - law violation",
+    "context": "prohibited_activities"
+  },
+  
+  "useAppIllegalPurposes": "Use the App for any illegal or unethical purposes.",
+  "@useAppIllegalPurposes": {
+    "description": "Prohibited activity - illegal use",
+    "context": "prohibited_activities"
+  },
+  
+  "disputesHandledBySupport": "Any disputes between users must be handled through the App's customer support team.",
+  "@disputesHandledBySupport": {
+    "description": "Dispute resolution process",
+    "context": "dispute_resolution"
+  },
+  
+  "appNotResponsibleDisagreements": "The App is not responsible for any disagreements between customers and service providers but will assist in resolving disputes where possible.",
+  "@appNotResponsibleDisagreements": {
+    "description": "App responsibility limitation in disputes",
+    "context": "dispute_resolution"
+  },
+  
+  "serviceProviderCancellation": "Service Provider Cancellation",
+  "@serviceProviderCancellation": {
+    "description": "Service provider cancellation policies section title",
+    "context": "cancellation_policy"
+  },
+  
+  "inform48HoursBefore": "Service providers must inform the customer and the platform at least 48 hours before the scheduled service if they need to cancel.",
+  "@inform48HoursBefore": {
+    "description": "Advance cancellation notice requirement",
+    "context": "cancellation_policy"
+  },
+  
+  "frequentCancellations": "Frequent Cancellations",
+  "@frequentCancellations": {
+    "description": "Repeated cancellation consequences section title",
+    "context": "cancellation_policy"
+  },
+  
+  "repeatedCancellationsPenalties": "Repeated last-minute cancellations or no-shows may result in penalties, lower visibility in search results, or account suspension.",
+  "@repeatedCancellationsPenalties": {
+    "description": "Consequence of frequent cancellations",
+    "context": "cancellation_policy"
+  },
+  
+  "customerCompensation": "Customer Compensation",
+  "@customerCompensation": {
+    "description": "Customer compensation section title",
+    "context": "cancellation_policy"
+  },
+  
+  "providerCancelCompensation": "If a service provider cancels after a customer has already made preparations (e.g., purchasing materials, rearranging schedules), compensation may be required.",
+  "@providerCancelCompensation": {
+    "description": "Compensation requirement for provider cancellations",
+    "context": "cancellation_policy"
+  },
+  
+  "unavoidableCancellations": "Unavoidable Cancellations",
+  "@unavoidableCancellations": {
+    "description": "Emergency cancellation section title",
+    "context": "cancellation_policy"
+  },
+  
+  "unforeseeableCircumstances": "If a service provider must cancel due to unforeseen circumstances (e.g., health issues, family emergencies), they should notify support immediately to avoid penalties.",
+  "@unforeseeableCircumstances": {
+    "description": "Emergency cancellation policy",
+    "context": "cancellation_policy"
+  },
+  
+  "freeCancellationWindow": "Free Cancellation Window",
+  "@freeCancellationWindow": {
+    "description": "Free cancellation period section title",
+    "context": "cancellation_policy"
+  },
+  
+  "customersFreeCancel48Hours": "Customers can cancel a booking for free if done at least 48 hours before the scheduled service.",
+  "@customersFreeCancel48Hours": {
+    "description": "Free cancellation timeframe",
+    "context": "cancellation_policy"
+  },
+  
+  "lateCancellations": "Late Cancellations",
+  "@lateCancellations": {
+    "description": "Late cancellation penalties section title",
+    "context": "cancellation_policy"
+  },
+  
+  "lateCancellationFee": "If a cancellation is made within 24 hours of the scheduled service, a cancellation fee of 20% of the paid amount may be charged.",
+  "@lateCancellationFee": {
+    "description": "Late cancellation fee policy",
+    "context": "cancellation_policy"
+  },
+  
+  "noShows": "No-Shows",
+  "@noShows": {
+    "description": "No-show policy section title",
+    "context": "cancellation_policy"
+  },
+  
+  "noShowFullCharge": "If the customer fails to be present at the service location without prior cancellation, they may be charged the full service fee.",
+  "@noShowFullCharge": {
+    "description": "No-show penalty policy",
+    "context": "cancellation_policy"
+  },
+  
+  "refundPolicy": "Refund Policy",
+  "@refundPolicy": {
+    "description": "Refund policy section title",
+    "context": "cancellation_policy"
+  },
+  
+  "refundEligibilityDepends": "Refund eligibility depends on the specific service provider's policy. In some cases, partial refunds may be issued after deducting applicable fees.",
+  "@refundEligibilityDepends": {
+    "description": "Refund eligibility explanation",
+    "context": "cancellation_policy"
+  },
+  
+  "reportUnforeseeableCircumstances": "If a service is canceled by either party due to unforeseen circumstances, both the customer and the service provider should report the issue through the App to avoid penalties.",
+  "@reportUnforeseeableCircumstances": {
+    "description": "Emergency cancellation reporting requirement",
+    "context": "cancellation_policy"
+  },
+  
+  "appModifyCancellationPolicies": "The App reserves the right to modify cancellation policies and will notify users of significant changes.",
+  "@appModifyCancellationPolicies": {
+    "description": "Policy modification notice",
+    "context": "cancellation_policy"
+  },
+  
+  "appSuspendTerminateViolations": "The App reserves the right to suspend or terminate any account that violates these terms.",
+  "@appSuspendTerminateViolations": {
+    "description": "Account termination policy",
+    "context": "termination_suspension"
+  },
+  
+  "usersDeactivateAccounts": "Users may deactivate their accounts at any time through the App settings.",
+  "@usersDeactivateAccounts": {
+    "description": "User account deactivation option",
+    "context": "termination_suspension"
+  },
+  
+  "appPlatformConnect": "The App acts as a platform to connect customers with service providers but does not guarantee service quality or outcomes.",
+  "@appPlatformConnect": {
+    "description": "Platform role disclaimer",
+    "context": "liability_disclaimers"
+  },
+  
+  "appNotLiableUserInteractions": "The App is not liable for any damages, losses, or disputes arising from user interactions.",
+  "@appNotLiableUserInteractions": {
+    "description": "Liability limitation",
+    "context": "liability_disclaimers"
+  },
+  
+  "appUpdateTermsAnytime": "The App reserves the right to update these Terms and Conditions at any time. Users will be notified of significant changes.",
+  "@appUpdateTermsAnytime": {
+    "description": "Terms update policy",
+    "context": "changes_to_terms"
+  },
+  
+  "continuedUseAcceptance": "Continued use of the App after changes are posted constitutes acceptance of the new terms.",
+  "@continuedUseAcceptance": {
+    "description": "Acceptance of updated terms",
+    "context": "changes_to_terms"
+  },
+  
+  "contactSupportForQuestions": "For questions or concerns regarding these Terms and Conditions, please contact our support team within the App.",
+  "@contactSupportForQuestions": {
+    "description": "Contact information for terms questions",
+    "context": "contact_information"
+  },
+    "acknowledgmentReadUnderstood": "By using Good One, you acknowledge that you have read, understood, and agreed to these Terms and Conditions.",
+  "@acknowledgmentReadUnderstood": {
+    "description": "Final acceptance acknowledgment",
+    "context": "contact_information"
+  },
+  
+  "emergencyCancellations": "Emergency Cancellations",
+  "@emergencyCancellations": {
+    "description": "Emergency cancellation section title",
+    "context": "cancellation_policy"
+  },
+  
+  "emergencyCancellationPolicy": "If a cancellation is due to an emergency (e.g., medical issues, accidents), the customer must provide proof, and a full refund may be issued at the platform's discretion.",
+  "@emergencyCancellationPolicy": {
+    "description": "Emergency cancellation policy description",
+    "context": "cancellation_policy"
+  },
+    "advanceNotice": "Advance Notice",
+  "@advanceNotice": {
+    "description": "Advance notice requirement section title",
+    "context": "cancellation_policy"
+  },
+
+    "connectingToChat": "Connecting to chat...",
+  "@connectingToChat": {
+    "description": "Status message while establishing chat connection"
+  },
+  
+  "loadingMessages": "Loading messages...",
+  "@loadingMessages": {
+    "description": "Status message while retrieving chat messages"
+  },
+  
+  "connecting": "Connecting...",
+  "@connecting": {
+    "description": "General status message for establishing connection"
+  },
+  
+  "startConversationWith": "Start a conversation with",
+  "@startConversationWith": {
+    "description": "Action prompt to begin chat with specific user"
+  },
+  
+  "failedToInitializeChat": "Failed to initialize chat",
+  "@failedToInitializeChat": {
+    "description": "Error message when chat system cannot start"
+  },
+  
+  "initializingChat": "Initializing chat...",
+  "@initializingChat": {
+    "description": "Status message while setting up chat system"
+  },
+  
+  "loadingConversations": "Loading conversations...",
+  "@loadingConversations": {
+    "description": "Status message while retrieving chat list"
+  },
+  
+  "unknownUser": "Unknown User",
+  "@unknownUser": {
+    "description": "Placeholder for unidentified user in chat"
+  },
+  
+  "welcomeToOurApp": "Welcome to our app",
+  "@welcomeToOurApp": {
+    "description": "Greeting message for new users"
+  },
+  
+  "accountTypeSelectionPrompt": "Please select your account type",
+  "@accountTypeSelectionPrompt": {
+    "description": "Instruction for choosing user role during registration"
+  },
+  
+  "day": "day",
+  "@day": {
+    "description": "Singular time unit for daily services"
+  },
+  
+  "fixedPrice": "Fixed Price",
+  "@fixedPrice": {
+    "description": "Pricing model with set cost regardless of time"
+  },
+  
+  "welcomeToYourBookings": "Welcome to your bookings",
+  "@welcomeToYourBookings": {
+    "description": "Greeting message for bookings section"
+  },
+  
+  "noActiveBookings": "No active bookings",
+  "@noActiveBookings": {
+    "description": "Message when user has no current reservations"
+  },
+  
+  "noActiveBookingsMessage": "You have no active bookings at the moment",
+  "@noActiveBookingsMessage": {
+    "description": "Detailed message explaining empty active bookings list"
+  },
+  
+  "noCompletedBookings": "No completed bookings",
+  "@noCompletedBookings": {
+    "description": "Message when user has no finished services"
+  },
+  
+  "noCanceledBookingsMessage": "You have no canceled bookings",
+  "@noCanceledBookingsMessage": {
+    "description": "Message when user has no cancelled reservations"
+  },
+  
+  "noCanceledBookings": "No canceled bookings",
+  "@noCanceledBookings": {
+    "description": "Short message for empty cancelled bookings list"
+  },
+  
+  "startBookingPrompt": "Start booking your services now",
+  "@startBookingPrompt": {
+    "description": "Call to action encouraging user to make first booking"
+  },
+  
+  "oopsSomethingWentWrong": "Oops! Something went wrong",
+  "@oopsSomethingWentWrong": {
+    "description": "Friendly error message for unexpected failures"
+  },
+  
+  "pricingType": "Pricing Type",
+  "@pricingType": {
+    "description": "Label for service cost structure selection"
+  },
+  
+  "hourly": "Hourly",
+  "@hourly": {
+    "description": "Pricing model based on time per hour"
+  },
+  
+  "daily": "Daily",
+  "@daily": {
+    "description": "Pricing model based on full day rate"
+  },
+  
+  "fixed": "Fixed",
+  "@fixed": {
+    "description": "Pricing model with set total cost"
+  },
+  
+  "additional": "Additional",
+  "@additional": {
+    "description": "Extra or supplementary charges"
+  },
+  
+  "additionalCostLabel": "Additional Cost",
+  "@additionalCostLabel": {
+    "description": "Label for extra charges beyond base price"
+  },
+  
+  "dateTime": "Date & Time",
+  "@dateTime": {
+    "description": "Combined label for scheduling information"
+  },
+  
+  "estimatedPrice": "Estimated Price",
+  "@estimatedPrice": {
+    "description": "Approximate cost calculation for service"
+  },
+  
+  "hourlyPricing": "Hourly Pricing",
+  "@hourlyPricing": {
+    "description": "Cost structure based on hourly rates"
+  },
+  
+  "dailyPricing": "Daily Pricing",
+  "@dailyPricing": {
+    "description": "Cost structure based on daily rates"
+  },
+  
+  "fixedPricing": "Fixed Pricing",
+  "@fixedPricing": {
+    "description": "Cost structure with predetermined total price"
+  },
+  
+  "pricing": "Pricing",
+  "@pricing": {
+    "description": "General cost information or structure"
+  },
+  
+  "chargedAt": "Charged at",
+  "@chargedAt": {
+    "description": "Prefix indicating the rate or cost being applied"
+  },
+  
+  "selectHoursNeeded": "Select hours needed",
+  "@selectHoursNeeded": {
+    "description": "Instruction to choose duration in hours"
+  },
+  
+  "selectDaysNeeded": "Select days needed",
+  "@selectDaysNeeded": {
+    "description": "Instruction to choose duration in days"
+  },
+  
+  "fixedPriceOf": "Fixed price of",
+  "@fixedPriceOf": {
+    "description": "Prefix for displaying set cost amount"
+  },
+  
+  "forCompleteService": "for complete service",
+  "@forCompleteService": {
+    "description": "Suffix explaining fixed price covers entire job"
+  },
+  
+  "servicePricingInformation": "Service pricing information",
+  "@servicePricingInformation": {
+    "description": "Label for cost details section"
+  },
+  
+  "completeServiceFixedPrice": "Complete service fixed price",
+  "@completeServiceFixedPrice": {
+    "description": "Label for total job cost in fixed pricing model"
+  },
+  
+  "confirmed": "Confirmed",
+  "@confirmed": {
+    "description": "Status indicating verification or approval"
+  },
+  
+  "clearFilters": "Clear Filters",
+  "@clearFilters": {
+    "description": "Action to remove all search filters"
+  },
+  
+  "allReviews": "All Reviews",
+  "@allReviews": {
+    "description": "Option to view complete list of customer feedback"
+  },
+  
+  "reviews": "Reviews",
+  "@reviews": {
+    "description": "Customer feedback and ratings section"
+  },
+  
+  "defaultOrder": "Default Order",
+  "@defaultOrder": {
+    "description": "Standard sorting arrangement for lists"
+  },
+  
+  "highestRating": "Highest Rating",
+  "@highestRating": {
+    "description": "Sorting option for best-rated items first"
+  },
+  
+  "lowestPrice": "Lowest Price",
+  "@lowestPrice": {
+    "description": "Sorting option for cheapest items first"
+  },
+  
+  "highestPrice": "Highest Price",
+  "@highestPrice": {
+    "description": "Sorting option for most expensive items first"
+  },
+  
+  "mostPopular": "Most Popular",
+  "@mostPopular": {
+    "description": "Sorting option for most frequently chosen items"
+  },
+  
+  "hourlyServicesFirst": "Hourly Services First",
+  "@hourlyServicesFirst": {
+    "description": "Sorting option prioritizing time-based pricing"
+  },
+  
+  "dailyServicesFirst": "Daily Services First",
+  "@dailyServicesFirst": {
+    "description": "Sorting option prioritizing day-based pricing"
+  },
+  
+  "fixedPriceFirst": "Fixed Price First",
+  "@fixedPriceFirst": {
+    "description": "Sorting option prioritizing set-price services"
+  },
+
+  "sortBy": "Sort By",
+  "@sortBy": {
+    "description": "Label for arranging list items in specific order"
+  },
+  
+  "hourlyServices": "Hourly Services",
+  "@hourlyServices": {
+    "description": "Category of services priced by hour"
+  },
+  
+  "dailyServices": "Daily Services",
+  "@dailyServices": {
+    "description": "Category of services priced by day"
+  },
+  
+  "fixedPriceServices": "Fixed Price Services",
+  "@fixedPriceServices": {
+    "description": "Category of services with predetermined total cost"
+  },
+  
+  "markAllAsRead": "Mark All as Read",
+  "@markAllAsRead": {
+    "description": "Action to mark all notifications as viewed"
+  },
+  
+  "allNotificationsMarkedAsRead": "All notifications marked as read",
+  "@allNotificationsMarkedAsRead": {
+    "description": "Confirmation message that all notifications are now viewed"
+  },
+  
+  "failedToMarkAsRead": "Failed to mark as read",
+  "@failedToMarkAsRead": {
+    "description": "Error message when notification status update fails"
+  },
+  
+  "loadingNotifications": "Loading notifications...",
+  "@loadingNotifications": {
+    "description": "Status message while retrieving notification list"
+  },
+  
+  "errorLoadingNotifications": "Error loading notifications",
+  "@errorLoadingNotifications": {
+    "description": "Error message when notifications cannot be retrieved"
+  },
+  
+  "unknownErrorOccurred": "Unknown error occurred",
+  "@unknownErrorOccurred": {
+    "description": "Generic error message for unidentified failures"
+  },
+  
+  "noNotificationsMessage": "No notifications available",
+  "@noNotificationsMessage": {
+    "description": "Message when notification list is empty"
+  },
+  
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Action to reload or update current content"
+  },
+  
+  "newLabel": "NEW",
+  "@newLabel": {
+    "description": "Label indicating recently added or unread item"
+  },
+  
+  "notificationOpened": "Notification opened",
+  "@notificationOpened": {
+    "description": "Confirmation that notification was successfully viewed"
+  },
+  
+  "errorOpeningNotification": "Error opening notification",
+  "@errorOpeningNotification": {
+    "description": "Error message when notification cannot be opened"
+  },
+  
+  "minimumRatings": "Minimum Ratings",
+  "@minimumRatings": {
+    "description": "Filter option for lowest acceptable rating score"
+  },
+  
+  "ratings": "Ratings",
+  "@ratings": {
+    "description": "Customer evaluation scores for services"
+  },
+  
+  "filterAndSort": "Filter & Sort",
+  "@filterAndSort": {
+    "description": "Options to refine and arrange search results"
+  },
+  
+  "priceRange": "Price Range",
+  "@priceRange": {
+    "description": "Filter option for minimum and maximum cost"
+  },
+  
+  "editUpdateServiceDetails": "Edit/Update Service Details",
+  "@editUpdateServiceDetails": {
+    "description": "Action to modify service information"
+  },
+  
+  "serviceVisibility": "Service Visibility",
+  "@serviceVisibility": {
+    "description": "Setting controlling whether service is shown to customers"
+  },
+  
+  "serviceIsActive": "Service is active",
+  "@serviceIsActive": {
+    "description": "Status indicating service is available for booking"
+  },
+  
+  "serviceIsInactive": "Service is inactive",
+  "@serviceIsInactive": {
+    "description": "Status indicating service is not available for booking"
+  },
+  
+  "customersCanSeeAndBook": "Customers can see and book this service",
+  "@customersCanSeeAndBook": {
+    "description": "Explanation that service is publicly visible and bookable"
+  },
+  
+  "serviceHiddenFromCustomers": "Service is hidden from customers",
+  "@serviceHiddenFromCustomers": {
+    "description": "Explanation that service is not visible to potential clients"
+  },
+  
+  "unsavedChanges": "Unsaved Changes",
+  "@unsavedChanges": {
+    "description": "Warning that modifications have not been saved"
+  },
+  
+  "serviceDetails": "Service Details",
+  "@serviceDetails": {
+    "description": "Comprehensive information about specific service"
+  },
+  
+  "certificate": "Certificate",
+  "@certificate": {
+    "description": "Professional qualification or credential document"
+  },
+  
+  "uploadCertificate": "Upload Certificate",
+  "@uploadCertificate": {
+    "description": "Action to add professional credential document"
+  },
+  
+  "setPricePerHour": "Set Price Per Hour",
+  "@setPricePerHour": {
+    "description": "Action to establish hourly rate for service"
+  },
+  
+  "dailyRate": "Daily Rate",
+  "@dailyRate": {
+    "description": "Cost charged per full day of service"
+  },
+  
+  "setPricePerDay": "Set Price Per Day",
+  "@setPricePerDay": {
+    "description": "Action to establish daily rate for service"
+  },
+  
+  "oneTimeServicePrice": "One-time Service Price",
+  "@oneTimeServicePrice": {
+    "description": "Fixed cost for single completion of specific task"
+  },
+  
+  "serviceGallery": "Service Gallery",
+  "@serviceGallery": {
+    "description": "Collection of photos showcasing work quality"
+  },
+  
+  "noImagesYet": "No images yet",
+  "@noImagesYet": {
+    "description": "Message when photo gallery is empty"
+  },
+  
+  "addPhotosToShowcase": "Add photos to showcase your work",
+  "@addPhotosToShowcase": {
+    "description": "Instruction to upload images demonstrating service quality"
+  },
+  
+  "failedToLoad": "Failed to load",
+  "@failedToLoad": {
+    "description": "Error message when content cannot be retrieved"
+  },
+  
+  "updating": "Updating...",
+  "@updating": {
+    "description": "Status message while saving changes"
+  },
+  
+  "updateFailed": "Update failed",
+  "@updateFailed": {
+    "description": "Error message when changes cannot be saved"
+  },
+  
+  "serviceUpdatedSuccessfully": "Service updated successfully",
+  "@serviceUpdatedSuccessfully": {
+    "description": "Confirmation that service changes were saved"
+  },
+  
+  "addCertificate": "Add Certificate",
+  "@addCertificate": {
+    "description": "Action to include professional credential"
+  },
+  
+  "addPhoto": "Add Photo",
+  "@addPhoto": {
+    "description": "Action to include image in gallery"
+  },
+  
+  "useYourCamera": "Use Your Camera",
+  "@useYourCamera": {
+    "description": "Option to capture new photo with device camera"
+  },
+  
+  "selectFromGallery": "Select from Gallery",
+  "@selectFromGallery": {
+    "description": "Option to choose existing photo from device storage"
+  },
+  
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Action to retry failed operation"
+  },
+  
+  "noOrdersYet": "No orders yet",
+  "@noOrdersYet": {
+    "description": "Message when service provider has no customer requests"
+  },
+  
+  "ordersFromCustomersWillAppear": "Orders from customers will appear here",
+  "@ordersFromCustomersWillAppear": {
+    "description": "Explanation of where service requests will be displayed"
+  },
+  
+  "noOrders": "No orders",
+  "@noOrders": {
+    "description": "Short message for empty orders list"
+  },
+  
+  "noOrdersScheduledFor": "No orders scheduled for",
+  "@noOrdersScheduledFor": {
+    "description": "Message when no services are planned for specific date"
+  },
+  
+  "costPerDay": "Cost per day",
+  "@costPerDay": {
+    "description": "Daily rate charge for service"
+  },
+  
+  "serviceType": "Service Type",
+  "@serviceType": {
+    "description": "Category or classification of work offered"
+  },
+  
+  "fixedPriceService": "Fixed Price Service",
+  "@fixedPriceService": {
+    "description": "Service category with predetermined total cost"
+  },
+
+    "fixedRate": "Fixed Rate",
+  "@fixedRate": {
+    "description": "Predetermined cost that doesn't change with time"
+  },
+  
+  "creating": "Creating...",
+  "@creating": {
+    "description": "Status message while setting up new service or content"
+  },
+  
+  "serviceVisibleToCustomers": "Service visible to customers",
+  "@serviceVisibleToCustomers": {
+    "description": "Setting indicating service can be seen and booked by clients"
+  },
+  
+  "canChangeAnytimeAfterCreating": "You can change this anytime after creating the service",
+  "@canChangeAnytimeAfterCreating": {
+    "description": "Information that settings can be modified later"
+  },
+  
+  "createFirstServicePrompt": "Create your first service to get started",
+  "@createFirstServicePrompt": {
+    "description": "Encouragement for new service providers to add their first offering"
+  },
+  
+  "active": "Active",
+  "@active": {
+    "description": "Status indicating service or account is currently operational"
+  },
+
+"freeCancellationDescription": "Customers can cancel a booking for free if done at least 48 hours before the scheduled service.",
+"@freeCancellationDescription": {
+  "description": "Explanation of free cancellation policy"
+},
+
+"lateCancellationDescription": "If a cancellation is made within 24 hours of the scheduled service, a cancellation fee of 20% of the paid amount may be charged.",
+"@lateCancellationDescription": {
+  "description": "Explanation of late cancellation fee"
+},
+
+
+"noShowDescription": "If the customer fails to be present at the service location without prior cancellation, they may be charged the full service fee.",
+"@noShowDescription": {
+  "description": "Explanation of no-show penalty"
+},
+
+
+"refundPolicyDescription": "Refund eligibility depends on the specific service provider's policy. In some cases, partial refunds may be issued after deducting applicable fees.",
+"@refundPolicyDescription": {
+  "description": "Explanation of refund eligibility"
+},
+
+"emergencyCancellationDescription": "If a cancellation is due to an emergency (e.g., medical issues, accidents), the customer must provide proof, and a full refund may be issued at the platform's discretion.",
+"@emergencyCancellationDescription": {
+  "description": "Explanation of emergency cancellation policy"
+},
+
+"advanceNoticeDescription": "Service providers must inform the customer and the platform at least 48 hours before the scheduled service if they need to cancel.",
+"@advanceNoticeDescription": {
+  "description": "Explanation of advance notice requirement"
+},
+
+"frequentCancellationDescription": "Repeated last-minute cancellations or no-shows may result in penalties, lower visibility in search results, or account suspension.",
+"@frequentCancellationDescription": {
+  "description": "Explanation of frequent cancellation penalties"
+},
+
+"customerCompensationDescription": "If a service provider cancels after a customer has already made preparations (e.g., purchasing materials, rearranging schedules), compensation may be required.",
+"@customerCompensationDescription": {
+  "description": "Explanation of customer compensation policy"
+},
+
+
+"unavoidableCancellationDescription": "If a service provider must cancel due to unforeseen circumstances (e.g., health issues, family emergencies), they should notify support immediately to avoid penalties.",
+"@unavoidableCancellationDescription": {
+  "description": "Explanation of unavoidable cancellation policy"
+},
+
+"generalRulesDescription1": "If a service is canceled by either party due to unforeseen circumstances, both the customer and the service provider should report the issue through the App to avoid penalties.",
+"@generalRulesDescription1": {
+  "description": "First general rule about reporting cancellations"
+},
+
+"generalRulesDescription2": "The App reserves the right to modify cancellation policies and will notify users of significant changes.",
+"@generalRulesDescription2": {
+  "description": "Second general rule about policy modifications"
+},
+
+"personalInformation": "Personal Information",
+"@personalInformation": {
+  "description": "Title for personal data collection section"
+},
+
+"personalInformationDescription": "We collect information such as your name, email address, and phone number when you use our app.",
+"@personalInformationDescription": {
+  "description": "Explanation of personal information collected by the app"
+},
+
+"locationInformation": "Location Information",
+"@locationInformation": {
+  "description": "Title for location data collection section"
+},
+
+"locationInformationDescription": "If location services are enabled, we collect geographic data to enhance your user experience.",
+"@locationInformationDescription": {
+  "description": "Explanation of location data collection and usage"
+},
+
+"deviceInformation": "Device Information",
+"@deviceInformation": {
+  "description": "Title for device data collection section"
+},
+
+"deviceInformationDescription": "We collect details like device type, operating system, and IP address.",
+"@deviceInformationDescription": {
+  "description": "Explanation of device information collected"
+},
+
+"usageData": "Usage Data",
+"@usageData": {
+  "description": "Title for usage analytics collection section"
+},
+
+"usageDataDescription": "We gather data on how you interact with the app to improve our services.",
+"@usageDataDescription": {
+  "description": "Explanation of usage data collection and purpose"
+},
+
+"serviceImprovement": "Service Improvement",
+"@serviceImprovement": {
+  "description": "Title for data usage in service enhancement"
+},
+
+"serviceImprovementDescription": "We use your data to enhance and personalize app services.",
+"@serviceImprovementDescription": {
+  "description": "Explanation of how data is used for service improvement"
+},
+
+"notificationsUsage": "Notifications",
+"@notificationsUsage": {
+  "description": "Title for notification data usage section"
+},
+
+"notificationsUsageDescription": "We send notifications and service-related alerts to keep you informed.",
+"@notificationsUsageDescription": {
+  "description": "Explanation of notification system data usage"
+},
+
+"communicationUsage": "Communication",
+"@communicationUsage": {
+  "description": "Title for communication data usage section"
+},
+
+"communicationUsageDescription": "We use your data to process requests and communicate with you.",
+"@communicationUsageDescription": {
+  "description": "Explanation of data usage for customer communication"
+},
+
+"legalCompliance": "Legal Compliance",
+"@legalCompliance": {
+  "description": "Title for legal compliance data usage section"
+},
+
+"legalComplianceDescription": "We ensure compliance with legal and regulatory requirements.",
+"@legalComplianceDescription": {
+  "description": "Explanation of data usage for legal compliance purposes"
+},
+
+"serviceProviders": "Service Providers",
+"@serviceProviders": {
+  "description": "Title for third-party service provider data sharing section"
+},
+
+"serviceProvidersDescription": "We may share your data with payment processors, analytics providers, and technical support companies.",
+"@serviceProvidersDescription": {
+  "description": "Explanation of data sharing with business partners"
+},
+
+"legalComplianceSharing": "Legal Compliance",
+"@legalComplianceSharing": {
+  "description": "Title for legal compliance data sharing section"
+},
+
+"legalComplianceSharingDescription": "We may share data if required by law or to protect our rights.",
+"@legalComplianceSharingDescription": {
+  "description": "Explanation of data sharing for legal reasons"
+},
+
+"advertisingPartners": "Advertising Partners",
+"@advertisingPartners": {
+  "description": "Title for advertising partner data sharing section"
+},
+
+"advertisingPartnersDescription": "With your consent, we may share some data for marketing purposes.",
+"@advertisingPartnersDescription": {
+  "description": "Explanation of optional data sharing for marketing"
+},
+
+"modifyingData": "Modifying Data",
+"@modifyingData": {
+  "description": "Title for user right to modify personal data"
+},
+
+"modifyingDataDescription": "You may update or correct your personal data through the app.",
+"@modifyingDataDescription": {
+  "description": "Explanation of user's right to modify their data"
+},
+
+"requestingDeletion": "Requesting Deletion",
+"@requestingDeletion": {
+  "description": "Title for user right to request data deletion"
+},
+
+"requestingDeletionDescription": "You may request the deletion of your data, unless we are legally required to retain it.",
+"@requestingDeletionDescription": {
+  "description": "Explanation of user's right to delete their data with legal exceptions"
+},
+
+"dataProtectionDescription": "We implement security measures to protect your data from unauthorized access, alteration, or loss. However, absolute security over the internet cannot be guaranteed.",
+"@dataProtectionDescription": {
+  "description": "Explanation of security measures and limitations for data protection"
+},
+
+"policyChangesDescription": "We may update this policy from time to time. You will be notified of significant changes through in-app notifications or via email.",
+"@policyChangesDescription": {
+  "description": "Explanation of how privacy policy changes will be communicated"
+},
+
+"contactUsDescription": "If you have any questions about this Privacy Policy, you can contact us via email or phone. By using the app, you agree to the terms of this Privacy Policy.",
+"@contactUsDescription": {
+  "description": "Contact information and agreement acknowledgment for privacy policy"
+},
+
+ "profileUpdatedSuccessfully": "Profile updated successfully",
+   "@profileUpdatedSuccessfully": {
+    "description": "Success message displayed when user profile information is updated successfully",
+    "context": "Shown as a snackbar message after successful profile edit"
   }
+
+
+
 
 }

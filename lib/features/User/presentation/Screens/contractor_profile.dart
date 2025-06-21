@@ -135,7 +135,7 @@ class ContractorProfile extends StatelessWidget {
                 children: [
                   Text(
                     contractor.fullName!,
-                    style: AppTextStyles.text(context),
+                    style: AppTextStyles.title2(context),
                   ),
                   SizedBox(width: context.getWidth(5)),
                   contractor.securityCheck == 1
@@ -148,21 +148,15 @@ class ContractorProfile extends StatelessWidget {
               ),
               Text(
                 contractor.service!,
-                style: AppTextStyles.title2(context),
+                style: AppTextStyles.text(context).copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               Text(
-                '${contractor.costPerHour} \$ /${AppLocalizations.of(context)!.hour}',
-                style: AppTextStyles.price(context),
+                contractor.subcategory!.name,
+                style: AppTextStyles.text(context),
               ),
-              Row(
-                children: [
-                  Image.asset(AppAssets.location),
-                  Text(
-                    '${contractor.city}, ${contractor.country}',
-                    style: AppTextStyles.text(context),
-                  )
-                ],
-              ),
+              _buildPricingDisplay(context, contractor),
             ],
           ),
         ),
@@ -184,7 +178,7 @@ class ContractorProfile extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                '${AppLocalizations.of(context)!.confird} ${contractor.service} (${AppLocalizations.of(context)!.withLisence})',
+                '${AppLocalizations.of(context)!.confirmed} ${contractor.service} (${AppLocalizations.of(context)!.withLisence})',
                 style: AppTextStyles.textButton(context),
               ),
             )
@@ -515,5 +509,92 @@ class ContractorProfile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildPricingDisplay(BuildContext context, Contractor contractor) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.getWidth(12),
+        vertical: context.getHeight(6),
+      ),
+      margin: EdgeInsets.symmetric(vertical: context.getHeight(4)),
+      decoration: BoxDecoration(
+        color: _getPricingBackgroundColor(contractor.displayPrice?.type),
+        borderRadius: BorderRadius.circular(context.getWidth(8)),
+        border: Border.all(
+          color: _getPricingBorderColor(contractor.displayPrice?.type),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getPricingIcon(contractor.displayPrice?.type),
+            size: context.getAdaptiveSize(16),
+            color: _getPricingTextColor(contractor.displayPrice?.type),
+          ),
+          SizedBox(width: context.getWidth(6)),
+          Text(
+            contractor.getPriceDisplayText(),
+            style: AppTextStyles.title2(context).copyWith(
+              color: _getPricingTextColor(contractor.displayPrice?.type),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getPricingBackgroundColor(String? type) {
+    switch (type) {
+      case 'hourly':
+        return AppColors.primaryColor.withOpacity(0.1);
+      case 'daily':
+        return Colors.orange.withOpacity(0.1);
+      case 'fixed':
+        return Colors.green.withOpacity(0.1);
+      default:
+        return Colors.grey.withOpacity(0.1);
+    }
+  }
+
+  Color _getPricingBorderColor(String? type) {
+    switch (type) {
+      case 'hourly':
+        return AppColors.primaryColor.withOpacity(0.3);
+      case 'daily':
+        return Colors.orange.withOpacity(0.3);
+      case 'fixed':
+        return Colors.green.withOpacity(0.3);
+      default:
+        return Colors.grey.withOpacity(0.3);
+    }
+  }
+
+  Color _getPricingTextColor(String? type) {
+    switch (type) {
+      case 'hourly':
+        return AppColors.primaryColor;
+      case 'daily':
+        return Colors.orange.shade700;
+      case 'fixed':
+        return Colors.green.shade700;
+      default:
+        return Colors.grey.shade600;
+    }
+  }
+
+  IconData _getPricingIcon(String? type) {
+    switch (type) {
+      case 'hourly':
+        return Icons.access_time;
+      case 'daily':
+        return Icons.calendar_today;
+      case 'fixed':
+        return Icons.receipt_long;
+      default:
+        return Icons.attach_money;
+    }
   }
 }

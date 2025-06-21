@@ -27,7 +27,6 @@ class _UserMainScreenState extends State<UserMainScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      print('========== user Main Screen');
       final userManager =
           Provider.of<UserManagerProvider>(context, listen: false);
       await userManager.initialize();

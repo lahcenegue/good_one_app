@@ -164,9 +164,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  AppLocalizations.of(context)!.passwordResetSuccess ??
-                      'Password reset successfully'),
+              content: Text(AppLocalizations.of(context)!.passwordResetSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -236,7 +234,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
               children: [
                 SizedBox(height: context.getHeight(30)),
                 Text(
-                  AppLocalizations.of(context)!.resetYourPassword,
+                  AppLocalizations.of(context)!.resetPassword,
                   style: AppTextStyles.title2(context),
                   textAlign: TextAlign.start,
                 ),
@@ -248,7 +246,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                 ),
                 SizedBox(height: context.getHeight(10)),
                 Text(
-                  'Email: ${authProvider.forgotPasswordEmailController.text}',
+                  '${AppLocalizations.of(context)!.email}: ${authProvider.forgotPasswordEmailController.text}',
                   style: AppTextStyles.text(context).copyWith(
                     fontWeight: FontWeight.w500,
                     color: Colors.grey[600],
@@ -289,7 +287,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                       _obscurePassword = !_obscurePassword;
                     });
                   },
-                  hintText: AppLocalizations.of(context)!.enterNewPassword,
+                  hintText: AppLocalizations.of(context)!.enterPassword,
                   errorText: _passwordError,
                 ),
                 SizedBox(height: context.getHeight(20)),
@@ -308,7 +306,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                       _obscureConfirmPassword = !_obscureConfirmPassword;
                     });
                   },
-                  hintText: AppLocalizations.of(context)!.confirmNewPassword,
+                  hintText: AppLocalizations.of(context)!.confirmPassword,
                   errorText: _confirmPasswordError,
                 ),
 

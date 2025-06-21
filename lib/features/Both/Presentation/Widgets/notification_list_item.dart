@@ -6,8 +6,6 @@ import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Features/Both/Models/notification_model.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 class NotificationListItem extends StatelessWidget {
   final NotificationModel notification;
 
@@ -15,9 +13,8 @@ class NotificationListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeString = notification.createdAt != null
-        ? DateFormat('h:mm a').format(notification.createdAt!.toLocal())
-        : AppLocalizations.of(context)!.unknownTime;
+    final timeString =
+        DateFormat('h:mm a').format(notification.createdAt.toLocal());
 
     return Card(
       elevation: 0,
@@ -29,11 +26,11 @@ class NotificationListItem extends StatelessWidget {
           backgroundColor: Colors.white,
         ),
         title: Text(
-          notification.userName!,
+          notification.userName,
           style: AppTextStyles.title2(context),
         ),
         subtitle: Text(
-          notification.action!,
+          notification.action,
           style: AppTextStyles.text(context),
         ),
         trailing: Text(

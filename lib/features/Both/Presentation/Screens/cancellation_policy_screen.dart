@@ -54,33 +54,31 @@ class CancellationPolicyScreen extends StatelessWidget {
       children: [
         _buildPolicyItem(
           context,
-          title: 'Free Cancellation Window',
+          title: AppLocalizations.of(context)!.freeCancellationWindow,
           description:
-              'Customers can cancel a booking for free if done at least 48 hours before the scheduled service.',
+              AppLocalizations.of(context)!.freeCancellationDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Late Cancellations',
+          title: AppLocalizations.of(context)!.lateCancellations,
           description:
-              'If a cancellation is made within 24 hours of the scheduled service, a cancellation fee of 20% of the paid amount may be charged.',
+              AppLocalizations.of(context)!.lateCancellationDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'No-Shows',
-          description:
-              'If the customer fails to be present at the service location without prior cancellation, they may be charged the full service fee.',
+          title: AppLocalizations.of(context)!.noShows,
+          description: AppLocalizations.of(context)!.noShowDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Refund Policy',
-          description:
-              'Refund eligibility depends on the specific service provider\'s policy. In some cases, partial refunds may be issued after deducting applicable fees.',
+          title: AppLocalizations.of(context)!.refundPolicy,
+          description: AppLocalizations.of(context)!.refundPolicyDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Emergency Cancellations',
+          title: AppLocalizations.of(context)!.emergencyCancellations,
           description:
-              'If a cancellation is due to an emergency (e.g., medical issues, accidents), the customer must provide proof, and a full refund may be issued at the platform’s discretion.',
+              AppLocalizations.of(context)!.emergencyCancellationDescription,
         ),
       ],
     );
@@ -94,27 +92,26 @@ class CancellationPolicyScreen extends StatelessWidget {
       children: [
         _buildPolicyItem(
           context,
-          title: 'Advance Notice',
-          description:
-              'Service providers must inform the customer and the platform at least 48 hours before the scheduled service if they need to cancel.',
+          title: AppLocalizations.of(context)!.advanceNotice,
+          description: AppLocalizations.of(context)!.advanceNoticeDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Frequent Cancellations',
+          title: AppLocalizations.of(context)!.frequentCancellations,
           description:
-              'Repeated last-minute cancellations or no-shows may result in penalties, lower visibility in search results, or account suspension.',
+              AppLocalizations.of(context)!.frequentCancellationDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Customer Compensation',
+          title: AppLocalizations.of(context)!.customerCompensation,
           description:
-              'If a service provider cancels after a customer has already made preparations (e.g., purchasing materials, rearranging schedules), compensation may be required.',
+              AppLocalizations.of(context)!.customerCompensationDescription,
         ),
         _buildPolicyItem(
           context,
-          title: 'Unavoidable Cancellations',
+          title: AppLocalizations.of(context)!.unavoidableCancellations,
           description:
-              'If a service provider must cancel due to unforeseen circumstances (e.g., health issues, family emergencies), they should notify support immediately to avoid penalties.',
+              AppLocalizations.of(context)!.unavoidableCancellationDescription,
         ),
       ],
     );
@@ -128,14 +125,12 @@ class CancellationPolicyScreen extends StatelessWidget {
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'If a service is canceled by either party due to unforeseen circumstances, both the customer and the service provider should report the issue through the App to avoid penalties.',
+          description: AppLocalizations.of(context)!.generalRulesDescription1,
         ),
         _buildPolicyItem(
           context,
           title: '',
-          description:
-              'The App reserves the right to modify cancellation policies and will notify users of significant changes.',
+          description: AppLocalizations.of(context)!.generalRulesDescription2,
         ),
       ],
     );

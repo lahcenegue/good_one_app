@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
+import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Error/error_widget.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/loading_indicator.dart';
-
 import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Features/User/Presentation/Widgets/contractor_list_item.dart';
+import 'package:good_one_app/Features/User/Presentation/Widgets/pricing_filter_widget.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/contractor_profile.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
-
+import 'package:good_one_app/Providers/User/contractors_by_service_provider.dart';
 import 'package:provider/provider.dart';
-
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContractorsByService extends StatefulWidget {
@@ -31,29 +31,54 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final contractorsProvider =
+          Provider.of<ContractorsByServiceProvider>(context, listen: false);
       final userManager =
           Provider.of<UserManagerProvider>(context, listen: false);
 
-      userManager.updateContractorsByServiceSearch('');
-      userManager.fetchContractorsByService(widget.serviceId);
+      contractorsProvider.updateContractorsByServiceSearch('');
+      contractorsProvider.clearAllFilters();
+      contractorsProvider.fetchContractorsByService(
+          widget.serviceId, userManager.categories);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserManagerProvider>(
-      builder: (context, userManager, _) {
+    return Consumer2<UserManagerProvider, ContractorsByServiceProvider>(
+      builder: (context, userManager, contractorsProvider, _) {
         return Scaffold(
           appBar: AppBar(
             title: Text(widget.title ?? ''),
+            actions: [
+              // Filter indicator
+              if (contractorsProvider.hasActiveFilters)
+                Container(
+                  margin: EdgeInsets.only(right: 16),
+                  child: CircleAvatar(
+                    radius: 12,
+                    backgroundColor: AppColors.primaryColor,
+                    child: Text(
+                      '${_getActiveFiltersCount(contractorsProvider)}',
+                      style: AppTextStyles.withColor(
+                        AppTextStyles.withSize(
+                            AppTextStyles.captionMedium(context), 12),
+                        AppColors.whiteText,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildSearchBar(context, userManager),
-              _buildSubcategoryFilter(context, userManager),
+              _buildSearchBar(context, contractorsProvider),
+              _buildSubcategoryFilter(context, contractorsProvider),
+              _buildPricingFilter(context, contractorsProvider),
               Expanded(
-                child: _buildContractorsList(context, userManager),
+                child: _buildContractorsList(
+                    context, userManager, contractorsProvider),
               ),
             ],
           ),
@@ -64,7 +89,7 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
 
   Widget _buildSearchBar(
     BuildContext context,
-    UserManagerProvider userManager,
+    ContractorsByServiceProvider contractorsProvider,
   ) {
     return Padding(
       padding: EdgeInsets.only(
@@ -73,7 +98,7 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
           top: context.getHeight(12),
           bottom: context.getHeight(8)),
       child: TextField(
-        onChanged: userManager.updateContractorsByServiceSearch,
+        onChanged: contractorsProvider.updateContractorsByServiceSearch,
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.search,
           prefixIcon: const Icon(Icons.search, color: Colors.grey),
@@ -82,12 +107,10 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
             borderSide: BorderSide(color: Colors.grey.shade300),
           ),
           enabledBorder: OutlineInputBorder(
-            // Lighter border when not focused
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
           ),
           focusedBorder: OutlineInputBorder(
-            // Highlight border when focused
             borderRadius: BorderRadius.circular(12),
             borderSide:
                 BorderSide(color: Theme.of(context).primaryColor, width: 1.5),
@@ -99,11 +122,12 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
   }
 
   Widget _buildSubcategoryFilter(
-      BuildContext context, UserManagerProvider userManager) {
-    final currentServiceCategory = userManager.currentViewedServiceCategory;
+      BuildContext context, ContractorsByServiceProvider contractorsProvider) {
+    final currentServiceCategory =
+        contractorsProvider.currentViewedServiceCategory;
     if (currentServiceCategory == null ||
         currentServiceCategory.subcategories.isEmpty) {
-      return const SizedBox.shrink(); // No subcategories to show
+      return const SizedBox.shrink();
     }
 
     final subcategories = currentServiceCategory.subcategories;
@@ -114,43 +138,38 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Optional: Title for the filter section
-          // Text(
-          //   AppLocalizations.of(context)!.filterBySubcategory,
-          //   style: AppTextStyles.subTitle(context).copyWith(fontSize: context.getAdaptiveSize(14)),
-          // ),
-          // SizedBox(height: context.getHeight(8)),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Wrap(
               spacing: context.getWidth(8),
-              runSpacing: context.getHeight(
-                  4), // Not really used for horizontal scroll, but good practice
+              runSpacing: context.getHeight(4),
               children: subcategories.map((sub) {
                 final bool isSelected =
-                    userManager.selectedSubcategoryIds.contains(sub.id);
+                    contractorsProvider.selectedSubcategoryIds.contains(sub.id);
                 return FilterChip(
                   label: Text(sub.name),
                   selected: isSelected,
                   onSelected: (bool selected) {
-                    userManager.toggleSubcategorySelection(sub.id);
+                    contractorsProvider.toggleSubcategorySelection(sub.id);
                   },
                   backgroundColor: isSelected
                       ? AppColors.primaryColor.withOpacity(0.1)
                       : Colors.grey.shade200,
-                  selectedColor: AppColors.primaryColor
-                      .withOpacity(0.8), // More distinct selected color
-                  labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black87,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                      fontSize: context.getAdaptiveSize(13)),
-                  checkmarkColor: Colors.white,
+                  selectedColor: AppColors.primaryColor.withOpacity(0.8),
+                  labelStyle: AppTextStyles.withColor(
+                    AppTextStyles.withWeight(
+                      AppTextStyles.withSize(AppTextStyles.bodyText(context),
+                          context.getAdaptiveSize(13)),
+                      isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    isSelected ? AppColors.whiteText : AppColors.blackAlpha87,
+                  ),
+                  checkmarkColor: AppColors.whiteText,
                   shape: StadiumBorder(
                       side: BorderSide(
                           color: isSelected
                               ? AppColors.primaryColor
-                              : Colors.grey.shade400)),
+                              : AppColors.borderGray)),
                   elevation: isSelected ? 2 : 0,
                 );
               }).toList(),
@@ -161,49 +180,126 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
     );
   }
 
+  Widget _buildPricingFilter(
+      BuildContext context, ContractorsByServiceProvider contractorsProvider) {
+    if (contractorsProvider.contractorsByService.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final priceRange = contractorsProvider.getPriceRange();
+    final availablePricingTypes =
+        contractorsProvider.getAvailablePricingTypes();
+    final availableRatingCounts =
+        contractorsProvider.getAvailableRatingCounts();
+
+    return PricingFilterWidget(
+      availablePricingTypes: availablePricingTypes,
+      selectedPricingType: contractorsProvider.selectedPricingTypeFilter,
+      minPrice: priceRange['min']!,
+      maxPrice: priceRange['max']!,
+      selectedPriceRange: contractorsProvider.selectedPriceRange,
+      selectedSortBy: contractorsProvider.selectedSortBy,
+      selectedMinRating: contractorsProvider.minRatingFilter,
+      availableRatingCounts: availableRatingCounts,
+      onPricingTypeChanged: (String? type) {
+        contractorsProvider.setPricingTypeFilter(type);
+      },
+      onPriceRangeChanged: (RangeValues? range) {
+        contractorsProvider.setPriceRangeFilter(range);
+      },
+      onSortByChanged: (String sortBy) {
+        contractorsProvider.setSortBy(sortBy);
+      },
+      onMinRatingChanged: (int? minRating) {
+        contractorsProvider.setMinRatingFilter(minRating);
+      },
+      onClearFilters: () {
+        contractorsProvider.clearAllFilters();
+      },
+    );
+  }
+
   Widget _buildContractorsList(
     BuildContext context,
     UserManagerProvider userManager,
+    ContractorsByServiceProvider contractorsProvider,
   ) {
-    if (userManager.isLoadingContractorsByService &&
-        userManager.allContractorsForCurrentService.isEmpty) {
+    if (contractorsProvider.isLoadingContractorsByService &&
+        contractorsProvider.allContractorsForCurrentService.isEmpty) {
       return LoadingIndicator();
     }
 
-    if (userManager.contractorsByServiceError != null &&
-        userManager.allContractorsForCurrentService.isEmpty) {
+    if (contractorsProvider.contractorsByServiceError != null &&
+        contractorsProvider.allContractorsForCurrentService.isEmpty) {
       return AppErrorWidget(
-        message: userManager.contractorsByServiceError!,
-        onRetry: () => userManager.fetchContractorsByService(widget.serviceId),
+        message: contractorsProvider.contractorsByServiceError!,
+        onRetry: () => contractorsProvider.fetchContractorsByService(
+            widget.serviceId, userManager.categories),
       );
     }
 
-    final displayedContractors = userManager.contractorsByService;
+    // Use the filtered and sorted contractors
+    final displayedContractors =
+        contractorsProvider.filteredAndSortedContractors;
 
     if (displayedContractors.isEmpty) {
       String message;
       bool isSubcategoryFilterActive =
-          userManager.selectedSubcategoryIds.isNotEmpty;
+          contractorsProvider.selectedSubcategoryIds.isNotEmpty;
       bool isSearchFilterActive =
-          userManager.contractorsByServiceSearchTerm.isNotEmpty;
+          contractorsProvider.contractorsByServiceSearchTerm.isNotEmpty;
+      bool hasOtherFilters = contractorsProvider.hasActiveFilters;
 
-      if (isSubcategoryFilterActive || isSearchFilterActive) {
-        message = AppLocalizations.of(context)!
-            .noContractorsMatchFilters; // ADD THIS TO .arb
-      } else if (userManager.allContractorsForCurrentService.isEmpty &&
-          !userManager.isLoadingContractorsByService) {
-        // This means API returned empty, not due to filters
-        message =
-            AppLocalizations.of(context)!.noContractorsAvailableInThisCategory;
+      if (isSubcategoryFilterActive ||
+          isSearchFilterActive ||
+          hasOtherFilters) {
+        message = 'No contractors match your filters'; // Fallback text
+        try {
+          message = AppLocalizations.of(context)!.noContractorsMatchFilters;
+        } catch (e) {
+          // Use fallback if localization key doesn't exist
+        }
+      } else if (contractorsProvider.allContractorsForCurrentService.isEmpty &&
+          !contractorsProvider.isLoadingContractorsByService) {
+        message = 'No contractors available in this category'; // Fallback text
+        try {
+          message = AppLocalizations.of(context)!
+              .noContractorsAvailableInThisCategory;
+        } catch (e) {
+          // Use fallback if localization key doesn't exist
+        }
       } else {
         message = AppLocalizations.of(context)!.noContractorsFound;
       }
+
       return Center(
         child: Padding(
           padding: EdgeInsets.all(context.getAdaptiveSize(20)),
-          child: Text(
-            message,
-            style: Theme.of(context).textTheme.titleMedium,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.filter_list_off,
+                size: context.getAdaptiveSize(64),
+                color: Colors.grey.shade400,
+              ),
+              SizedBox(height: context.getHeight(16)),
+              Text(
+                message,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              if (contractorsProvider.hasActiveFilters) ...[
+                SizedBox(height: context.getHeight(16)),
+                ElevatedButton(
+                  onPressed: () {
+                    contractorsProvider.clearAllFilters();
+                  },
+                  child: Text(AppLocalizations.of(context)!
+                      .clearFilters), // Fallback text
+                ),
+              ],
+            ],
           ),
         ),
       );
@@ -233,5 +329,14 @@ class _ContractorsByServiceState extends State<ContractorsByService> {
         );
       },
     );
+  }
+
+  int _getActiveFiltersCount(ContractorsByServiceProvider contractorsProvider) {
+    int count = 0;
+    if (contractorsProvider.selectedPricingTypeFilter != null) count++;
+    if (contractorsProvider.selectedPriceRange != null) count++;
+    if (contractorsProvider.selectedSortBy != 'default') count++;
+    if (contractorsProvider.minRatingFilter != null) count++;
+    return count;
   }
 }

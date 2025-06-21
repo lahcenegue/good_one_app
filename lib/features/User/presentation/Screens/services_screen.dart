@@ -73,7 +73,7 @@ class ServicesScreen extends StatelessWidget {
           prefixIcon: Icon(
             Icons.search,
             size: context.getAdaptiveSize(22),
-            color: Colors.grey.shade700,
+            color: AppColors.textDark,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
@@ -101,16 +101,22 @@ class ServicesScreen extends StatelessWidget {
         message: userManager.categoriesError!,
         onRetry: () => userManager.fetchCategories(),
       );
-    }
-
-    // Filter categories based on search query
+    } // Filter categories based on search query
     final filteredCategories = userManager.searchQuery.isEmpty
         ? userManager.categories
-        : userManager.categories
-            .where((category) => category.name
-                .toLowerCase()
-                .contains(userManager.searchQuery.toLowerCase()))
-            .toList();
+        : userManager.categories.where((category) {
+            final query = userManager.searchQuery.toLowerCase();
+
+            // Check if category name matches
+            final categoryMatches = category.name.toLowerCase().contains(query);
+
+            // Check if any subcategory name matches
+            final subcategoryMatches = category.subcategories.any(
+                (subcategory) =>
+                    subcategory.name.toLowerCase().contains(query));
+
+            return categoryMatches || subcategoryMatches;
+          }).toList();
 
     if (filteredCategories.isEmpty) {
       return Padding(

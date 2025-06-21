@@ -18,6 +18,7 @@ import 'package:good_one_app/Features/User/Presentation/Screens/user_notificatio
 import 'package:good_one_app/Features/User/Presentation/Screens/user_account_details_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/language_settings_screen.dart';
 import 'package:good_one_app/Features/Both/Presentation/Screens/support_screen.dart';
+import 'package:good_one_app/Features/Worker/Presentation/Screens/withdrawal_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_account_details_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_add_service_screen.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Screens/worker_main_screen.dart';
@@ -62,6 +63,7 @@ class AppRoutes {
   static const String workerAddService = '/workerAddService';
   static const String editService = '/editService';
   static const String withdrawalStatusScreen = '/withdrawalStatus';
+  static const String withdrawalScreen = '/withdrawal';
 
   // Route Definitions
   static Map<String, WidgetBuilder> define() {
@@ -97,6 +99,7 @@ class AppRoutes {
       workerAccountDetails: (_) => WorkerAccountDetailsScreen(),
       workerAddService: (_) => WorkerAddServiceScreen(),
       withdrawalStatusScreen: (_) => WithdrawalStatusScreen(),
+      withdrawalScreen: (_) => WithdrawalScreen(),
 
       //Both
       conversations: (_) => const ConversationsScreen(),

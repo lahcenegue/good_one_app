@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
+import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Features/Worker/Models/balance_model.dart';
 import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
+import 'package:good_one_app/Features/Worker/Models/earnings_model.dart';
 import 'package:good_one_app/Features/Worker/Models/withdrawal_model.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_result.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -23,27 +27,47 @@ import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 class WorkerManagerProvider extends ChangeNotifier {
   // Authentication State
   String? _token;
   UserInfo? _workerInfo;
 
-  String? _error;
+  // Section-specific errors instead of global error
+  // String? _error;
+  String? _authError;
+  String? _balanceError;
+  String? _withdrawalError;
+  String? _profileError;
+  String? _servicesError;
+  String? _accountStateError;
 
   // UI State
   int _currentIndex = 0;
   bool _isLoading = false;
 
-  //
+  // Balance section
   BalanceModel? _balance;
-  bool _isBankSelected = true;
+  bool _isBalanceLoading = false;
+
+// Earnings section
+  EarningsSummaryModel? _earningsSummary;
+  List<EarningsHistoryModel> _earningsHistory = [];
+  bool _isEarningsLoading = false;
+  String? _earningsError;
+
+  // Withdrawal section
   WithdrawalModel? _withdrawalModel;
   List<WithdrawStatus>? _withdrawStatus;
-
-  // Withdrawal Dialog State
   bool _isWithdrawalLoading = false;
   bool _saveAccountInfo = true;
+
+  // Profile section
+  bool _isProfileLoading = false;
+
+  // Account state section
+  bool _isAccountStateLoading = false;
 
   // Form Controllers
   final TextEditingController _fullNameController = TextEditingController();
@@ -54,7 +78,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   final TextEditingController _passwordController = TextEditingController();
 
   //
-  final TextEditingController _ammountController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
   final TextEditingController _transitController = TextEditingController();
   final TextEditingController _institutionController = TextEditingController();
   final TextEditingController _accountController = TextEditingController();
@@ -64,9 +88,13 @@ class WorkerManagerProvider extends ChangeNotifier {
   String? _imageError;
   final ImagePicker _picker = ImagePicker();
 
-  // Notification Data
+  // Enhanced notification handling fields
   List<NotificationModel> _notifications = [];
   bool _isNotificationLoading = false;
+  int _newNotificationCount = 0;
+  int _unreadNotificationCount = 0;
+  String? _notificationError;
+  DateTime? _lastNotificationFetch;
 
   // My services
   List<MyServicesModel> _myServices = [];
@@ -81,7 +109,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   bool _hasCertificate = false;
   int? _editingServiceId;
   int? _active;
-  String _selectedPricingType = 'hourly'; // Default to hourly
+  String _selectedPricingType = 'hourly';
 
   // Form controllers for Add Service
   final TextEditingController _servicePriceController = TextEditingController();
@@ -94,17 +122,55 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Getters for Authentication and User Info
   String? get token => _token;
   UserInfo? get workerInfo => _workerInfo;
+
+  // Section-specific error getters
+  String? get authError => _authError;
+  String? get balanceError => _balanceError;
+  String? get withdrawalError => _withdrawalError;
+  String? get profileError => _profileError;
+  String? get servicesError => _servicesError;
+  String? get accountStateError => _accountStateError;
+
+  // Check if there are any critical errors that should block the app
+  bool get hasCriticalError => _authError != null;
+
+  // Get the most critical error for display
+  String? get criticalError => _authError;
+
+  // Balance section getters
   BalanceModel? get balance => _balance;
-  String? get error => _error;
+  bool get isBalanceLoading => _isBalanceLoading;
+
+  // Earnings section getters
+  EarningsSummaryModel? get earningsSummary => _earningsSummary;
+  List<EarningsHistoryModel> get earningsHistory =>
+      List.unmodifiable(_earningsHistory);
+  bool get isEarningsLoading => _isEarningsLoading;
+  String? get earningsError => _earningsError;
+
+  // General loading state
   int get currentIndex => _currentIndex;
   bool get isLoading => _isLoading;
+
+  // Profile section getters
+  bool get isProfileLoading => _isProfileLoading;
+
+  // Account state getters
+  bool get isAccountStateLoading => _isAccountStateLoading;
+
+  // Getters for notifications
   List<NotificationModel> get notifications =>
       List.unmodifiable(_notifications);
   bool get isNotificationLoading => _isNotificationLoading;
+  int get unreadNotificationCount => _newNotificationCount;
+  int get newNotificationCount => _newNotificationCount;
+  int get totalUnreadCount => _unreadNotificationCount;
+  String? get notificationError => _notificationError;
+
+  // Private field to store the count from backend
   String? get imageError => _imageError;
   File? get selectedImage => _selectedImage;
 
-  bool get isBankSelected => _isBankSelected;
   WithdrawalModel? get withdrawalModel => _withdrawalModel;
   List<WithdrawStatus>? get withdrawStatus => _withdrawStatus;
 
@@ -136,7 +202,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   int? get avtice => _active;
   String get selectedPricingType => _selectedPricingType;
 
-  TextEditingController get amountController => _ammountController;
+  TextEditingController get amountController => _amountController;
   TextEditingController get servicePriceController => _servicePriceController;
   TextEditingController get experienceController => _experienceController;
   TextEditingController get descriptionController => _descriptionController;
@@ -149,11 +215,90 @@ class WorkerManagerProvider extends ChangeNotifier {
   }
 
   // -----------------------------------
+  // Error Management Methods
+  // -----------------------------------
+
+  void setAuthError(String? message) {
+    _authError = message;
+    notifyListeners();
+  }
+
+  void setBalanceError(String? message) {
+    _balanceError = message;
+    notifyListeners();
+  }
+
+  void setWithdrawalError(String? message) {
+    _withdrawalError = message;
+    notifyListeners();
+  }
+
+  void setProfileError(String? message) {
+    _profileError = message;
+    notifyListeners();
+  }
+
+  void setServicesError(String? message) {
+    _servicesError = message;
+    notifyListeners();
+  }
+
+  void setAccountStateError(String? message) {
+    _accountStateError = message;
+    notifyListeners();
+  }
+
+  void setEarningsError(String? message) {
+    _earningsError = message;
+    notifyListeners();
+  }
+
+  void clearAllErrors() {
+    _authError = null;
+    _balanceError = null;
+    _withdrawalError = null;
+    _earningsError = null;
+    _profileError = null;
+    _servicesError = null;
+    _accountStateError = null;
+    notifyListeners();
+  }
+
+  void clearError(String errorType) {
+    switch (errorType) {
+      case 'auth':
+        _authError = null;
+        break;
+      case 'balance':
+        _balanceError = null;
+        break;
+      case 'withdrawal':
+        _withdrawalError = null;
+        break;
+      case 'earnings':
+        _earningsError = null;
+        break;
+      case 'profile':
+        _profileError = null;
+        break;
+      case 'services':
+        _servicesError = null;
+        break;
+      case 'accountState':
+        _accountStateError = null;
+        break;
+    }
+    notifyListeners();
+  }
+
+  // -----------------------------------
   // Initialization
   // -----------------------------------
-  /// Initializes the provider by loading user data and fetching notifications.
+
   Future<void> initialize() async {
-    setError(null);
+    print(
+        '======================== initialize Worker manager ==================');
+    setAuthError(null);
     _setLoading(true);
 
     try {
@@ -163,13 +308,19 @@ class WorkerManagerProvider extends ChangeNotifier {
           _loadWorkerData(),
           fetchNotifications(),
           fetchMyServices(),
+          getEarningsSummary(),
+          if (_workerInfo?.id != null)
+            Provider.of<ChatProvider>(
+                    NavigationService.navigatorKey.currentContext!,
+                    listen: false)
+                .initialize(_workerInfo!.id.toString()),
         ]);
       } else {
         await clearData();
         await NavigationService.navigateToAndReplace(AppRoutes.userMain);
       }
     } catch (e) {
-      setError('Initialization failed: $e');
+      setAuthError('Initialization failed: $e');
     } finally {
       _setLoading(false);
     }
@@ -192,66 +343,46 @@ class WorkerManagerProvider extends ChangeNotifier {
         _accountController.text = bankAccount['account'] ?? '';
       }
 
-      // Load saved Interac info
-      final interacAccount =
-          await StorageManager.getObject(StorageKeys.interacAccountKey);
-      if (interacAccount != null) {
-        _emailController.text = interacAccount['email'] ?? '';
-      }
-
       notifyListeners();
     } catch (e) {
       print('Error loading saved account info: $e');
+      setWithdrawalError('Error loading saved account info: $e');
     }
   }
 
   /// Saves account information to storage
-  Future<void> saveAccountInfos(bool isBankTab) async {
+  Future<void> saveAccountInfos() async {
     if (!_saveAccountInfo) return;
 
     try {
-      if (isBankTab) {
-        // Save bank account info
-        final bankAccountData = {
-          'fullName': _fullNameController.text.trim(),
-          'transit': _transitController.text.trim(),
-          'institution': _institutionController.text.trim(),
-          'account': _accountController.text.trim(),
-        };
-        await StorageManager.setObject(
-            StorageKeys.bankAccountKey, bankAccountData);
-      } else {
-        // Save Interac info
-        final interacAccountData = {
-          'email': _emailController.text.trim(),
-        };
-        await StorageManager.setObject(
-            StorageKeys.interacAccountKey, interacAccountData);
-      }
+      // Save bank account info
+      final bankAccountData = {
+        'fullName': _fullNameController.text.trim(),
+        'transit': _transitController.text.trim(),
+        'institution': _institutionController.text.trim(),
+        'account': _accountController.text.trim(),
+      };
+      await StorageManager.setObject(
+          StorageKeys.bankAccountKey, bankAccountData);
     } catch (e) {
       print('Error saving account info: $e');
+      setWithdrawalError('Error saving account info: $e');
     }
   }
 
   /// Validates the withdrawal form
-  bool validateWithdrawalForm(bool isBankTab) {
-    if (_ammountController.text.trim().isEmpty ||
-        (double.tryParse(_ammountController.text.trim()) ?? 0) <= 0) {
+  bool validateWithdrawalForm() {
+    if (_amountController.text.trim().isEmpty ||
+        (double.tryParse(_amountController.text.trim()) ?? 0) <= 0) {
       return false;
     }
-    if (isBankTab) {
-      // Validate bank account form
-      return _ammountController.text.trim().isNotEmpty &&
-          _fullNameController.text.trim().isNotEmpty &&
-          _transitController.text.trim().isNotEmpty &&
-          _institutionController.text.trim().isNotEmpty &&
-          _accountController.text.trim().isNotEmpty;
-    } else {
-      // Validate Interac form
-      return _ammountController.text.trim().isNotEmpty &&
-          _emailController.text.trim().isNotEmpty &&
-          _emailController.text.contains('@');
-    }
+
+    // Validate bank account form
+    return _amountController.text.trim().isNotEmpty &&
+        _fullNameController.text.trim().isNotEmpty &&
+        _transitController.text.trim().isNotEmpty &&
+        _institutionController.text.trim().isNotEmpty &&
+        _accountController.text.trim().isNotEmpty;
   }
 
   /// Sets the save account info preference
@@ -266,12 +397,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setBankSelected(bool bankSelected) {
-    _isBankSelected = bankSelected;
-    print('====================== selected banc: $_isBankSelected');
-    notifyListeners();
-  }
-
   Future<WithdrawalAttemptResult> requestWithdrawal() async {
     if (_token == null) {
       return WithdrawalAttemptResult(
@@ -282,14 +407,15 @@ class WorkerManagerProvider extends ChangeNotifier {
 
     try {
       final request = WithdrawalRequest(
-        amount: double.tryParse(_ammountController.text),
-        method: _isBankSelected ? 'bank' : 'interac',
-        name: _fullNameController.text,
-        transit: int.tryParse(_transitController.text),
-        institution: int.tryParse(_institutionController.text),
-        account: int.tryParse(_accountController.text),
-        email: _emailController.text,
+        amount: double.tryParse(_amountController.text),
+        method: 'bank',
+        name: _fullNameController.text.trim(),
+        transit: _transitController.text.trim(),
+        institution: _institutionController.text.trim(),
+        account: _accountController.text.trim(),
+        email: _emailController.text.trim(),
       );
+
       if (request.amount == null || request.amount! <= 0) {
         return WithdrawalAttemptResult(
           false,
@@ -297,35 +423,26 @@ class WorkerManagerProvider extends ChangeNotifier {
         );
       }
 
-      if (_isBankSelected) {
-        if (request.name!.isEmpty ||
-            request.transit == null ||
-            request.institution == null ||
-            request.account == null) {
-          return WithdrawalAttemptResult(
-            false,
-            errorMessage: "Invalid data.",
-          );
-        }
-      } else {
-        // Interac
-        if (request.email == null ||
-            request.email!.isEmpty ||
-            !request.email!.contains('@')) {
-          return WithdrawalAttemptResult(
-            false,
-            errorMessage: "Invalid email for Interac.",
-          );
-        }
+      if (request.name!.isEmpty ||
+          request.transit == null ||
+          request.institution == null ||
+          request.account == null) {
+        return WithdrawalAttemptResult(
+          false,
+          errorMessage: "Please fill in all required fields.",
+        );
       }
 
       final response = await WorkerApi.withdrawRequest(request);
       if (response.success) {
         _withdrawalModel = response.data;
-
+        setWithdrawalError(null);
+        await getMyBalance();
         notifyListeners();
         return WithdrawalAttemptResult(true);
       } else {
+        setWithdrawalError(response.error ??
+            'Failed to process withdrawal. Please try again.');
         return WithdrawalAttemptResult(
           false,
           errorMessage: response.error ??
@@ -334,10 +451,12 @@ class WorkerManagerProvider extends ChangeNotifier {
       }
     } catch (e) {
       print("Exception in requestWithdrawal: $e");
+      final errorMessage =
+          'An unexpected error occurred. Please check your connection and try again.';
+      setWithdrawalError(errorMessage);
       return WithdrawalAttemptResult(
         false,
-        errorMessage:
-            'An unexpected error occurred. Please check your connection and try again.',
+        errorMessage: errorMessage,
       );
     }
   }
@@ -345,13 +464,12 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Handles withdrawal form submission
   Future<bool> submitWithdrawal(
     BuildContext context,
-    bool isBankTab,
   ) async {
-    if (!validateWithdrawalForm(isBankTab)) {
+    if (!validateWithdrawalForm()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.requiredFields),
-          backgroundColor: Colors.red[600],
+          backgroundColor: AppColors.errorDark,
         ),
       );
       return false;
@@ -359,20 +477,19 @@ class WorkerManagerProvider extends ChangeNotifier {
 
     setWithdrawalLoading(true);
 
-    WithdrawalAttemptResult result;
-
     try {
-      // Save account info if requested
-      await saveAccountInfos(isBankTab);
-
-      result = await requestWithdrawal();
+      await saveAccountInfos();
+      final result = await requestWithdrawal();
 
       if (result.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.white),
+                Icon(
+                  Icons.check_circle,
+                  color: AppColors.whiteText,
+                ),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -381,7 +498,7 @@ class WorkerManagerProvider extends ChangeNotifier {
                 ),
               ],
             ),
-            backgroundColor: Colors.green[600],
+            backgroundColor: AppColors.successDark,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -390,13 +507,13 @@ class WorkerManagerProvider extends ChangeNotifier {
         );
         return true;
       } else {
-        // Show failure SnackBar using the error set by requestWithdrawal
-        final String errorMessage = _error ??
-            AppLocalizations.of(context)!.generalError; // Use a fallback
+        // Use the error message from the result
+        final String errorMessage =
+            result.errorMessage ?? AppLocalizations.of(context)!.generalError;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red[600],
+            backgroundColor: AppColors.errorDark,
           ),
         );
         return false;
@@ -406,10 +523,9 @@ class WorkerManagerProvider extends ChangeNotifier {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.generalError),
-          backgroundColor: Colors.red[600],
+          backgroundColor: AppColors.errorDark,
         ),
       );
-
       return false;
     } finally {
       setWithdrawalLoading(false);
@@ -419,7 +535,7 @@ class WorkerManagerProvider extends ChangeNotifier {
   // Withdrawalstatus
   Future<bool> fetchWithdrawalStatus() async {
     if (_token == null) return false;
-    setError(null);
+    setWithdrawalError(null);
     _setLoading(true);
     try {
       final response = await WorkerApi.withdrawStatus();
@@ -429,31 +545,106 @@ class WorkerManagerProvider extends ChangeNotifier {
         _setLoading(false);
         return true;
       } else {
-        setError('failed to fetching withdraw status');
+        setWithdrawalError('failed to fetching withdraw status');
         _setLoading(false);
         return false;
       }
     } catch (e) {
-      setError('Exception fetching withdraw status');
+      setWithdrawalError('Exception fetching withdraw status');
       _setLoading(false);
       return false;
     }
   }
 
-  // Statistic Charts
-  List<ServiceChartData> getServicesChartData() {
-    final totalServices = myServices.length;
-    final visibleServices =
-        myServices.where((service) => service.active == 1).length;
-    final hiddenServices = totalServices - visibleServices;
-    return [ServiceChartData('Services', visibleServices, hiddenServices)];
+  // -----------------------------------
+  // Balance Management
+  // -----------------------------------
+  Future<void> getMyBalance() async {
+    if (_token == null) return;
+    setBalanceError(null);
+    _setBalanceLoading(true);
+    try {
+      final response = await WorkerApi.getMyBalance();
+      if (response.success && response.data != null) {
+        _balance = response.data!;
+
+        notifyListeners();
+      } else {
+        setBalanceError('Failed to fetch balance: ${response.error}');
+      }
+    } catch (e) {
+      setBalanceError('Exception fetch my balance: $e');
+    } finally {
+      _setBalanceLoading(false);
+    }
   }
 
-  // Load vacation status from storage
+  // -----------------------------------
+// Enhanced Earnings Management
+// -----------------------------------
+  Future<void> getEarningsHistory() async {
+    if (_token == null) return;
+    setEarningsError(null);
+    _setEarningsLoading(true);
+    try {
+      final response = await WorkerApi.getEarningsHistory();
+      if (response.success && response.data != null) {
+        _earningsHistory = response.data!;
+        notifyListeners();
+      } else {
+        setEarningsError('Failed to fetch earnings history: ${response.error}');
+      }
+    } catch (e) {
+      setEarningsError('Exception fetching earnings history: $e');
+    } finally {
+      _setEarningsLoading(false);
+    }
+  }
+
+  Future<void> getEarningsSummary() async {
+    if (_token == null) return;
+    setEarningsError(null);
+    _setEarningsLoading(true);
+    try {
+      final response = await WorkerApi.getEarningsSummary();
+      if (response.success && response.data != null) {
+        _earningsSummary = response.data!;
+        notifyListeners();
+      } else {
+        setEarningsError('Failed to fetch earnings summary: ${response.error}');
+      }
+    } catch (e) {
+      setEarningsError('Exception fetching earnings summary: $e');
+    } finally {
+      _setEarningsLoading(false);
+    }
+  }
+
+  Future<void> refreshEarningsData() async {
+    await Future.wait([
+      getMyBalance(),
+      getEarningsSummary(),
+      getEarningsHistory(),
+    ]);
+  }
+
+  void _setBalanceLoading(bool value) {
+    _isBalanceLoading = value;
+    notifyListeners();
+  }
+
+  void _setEarningsLoading(bool value) {
+    _isEarningsLoading = value;
+    notifyListeners();
+  }
+
+  // -----------------------------------
+  // Account State Management
+  // -----------------------------------
   Future<void> changeAccountState(int accountState) async {
     if (_token == null) return;
-    setError(null);
-    _setLoading(true);
+    setAccountStateError(null);
+    _setAccountStateLoading(true);
     try {
       final response = await WorkerApi.changeAccountState(accountState);
       if (response.success) {
@@ -462,33 +653,24 @@ class WorkerManagerProvider extends ChangeNotifier {
           fetchMyServices(),
         ]);
       } else {
-        setError(response.error ?? 'Failed to change account state.');
+        setAccountStateError(
+            response.error ?? 'Failed to change account state.');
       }
     } catch (e) {
-      setError('Exception fetching user info: $e');
+      setAccountStateError('Exception changing account state: $e');
     } finally {
-      _setLoading(false);
+      _setAccountStateLoading(false);
     }
   }
 
-  Future<void> getMyBalance() async {
-    if (_token == null) return;
-    setError(null);
-    _setLoading(true);
-    try {
-      final response = await WorkerApi.getMyBalance();
-      if (response.success && response.data != null) {
-        _balance = response.data!;
-        notifyListeners();
-      }
-    } catch (e) {
-      setError('Exception fetch my balance: $e');
-    } finally {
-      _setLoading(false);
-    }
+  void _setAccountStateLoading(bool value) {
+    _isAccountStateLoading = value;
+    notifyListeners();
   }
 
-  /// Loads user data from storage and fetches user info if a token is available.
+  // -----------------------------------
+  // User Data Management
+  // -----------------------------------
   Future<void> _loadWorkerData() async {
     _token = await StorageManager.getString(StorageKeys.tokenKey);
 
@@ -510,18 +692,14 @@ class WorkerManagerProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      setError('Failed to load user data: $e');
+      setAuthError('Failed to load user data: $e');
     }
   }
 
-  // -----------------------------------
-  // User Info Management
-  // -----------------------------------
-  /// Fetches user information from the API.
   Future<bool> fetchWorkerInfo() async {
     if (_token == null) return false;
-    setError(null);
-    _setLoading(true);
+    setProfileError(null);
+    _setProfileLoading(true);
     try {
       final response = await BothApi.getUserInfo();
       if (response.success && response.data != null) {
@@ -529,21 +707,26 @@ class WorkerManagerProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        setError('Failed to fetch user info: ${response.error}');
+        setProfileError('Failed to fetch user info: ${response.error}');
         return false;
       }
     } catch (e) {
-      setError('Exception fetching user info: $e');
+      setProfileError('Exception fetching user info: $e');
       return false;
     } finally {
-      _setLoading(false);
+      _setProfileLoading(false);
     }
   }
 
-  /// Edits the user's account details.
+  void _setProfileLoading(bool value) {
+    _isProfileLoading = value;
+    notifyListeners();
+  }
+
   Future<bool> editAccount(BuildContext context) async {
     try {
-      _setLoading(true);
+      _setProfileLoading(true);
+      setProfileError(null);
 
       final request = AccountEditRequest(
         image: _selectedImage,
@@ -569,24 +752,22 @@ class WorkerManagerProvider extends ChangeNotifier {
       final response = await BothApi.editAccount(request);
       if (response.success && response.data != null) {
         _workerInfo = response.data;
-
         _initializeUsersControllers();
         _selectedImage = null;
         setImageError(null);
         notifyListeners();
         return true;
       }
-      setError('Failed to edit account: ${response.error}');
+      setProfileError('Failed to edit account: ${response.error}');
       return false;
     } catch (e) {
-      setError('Exception editing account: $e');
+      setProfileError('Exception editing account: $e');
       return false;
     } finally {
-      _setLoading(false);
+      _setProfileLoading(false);
     }
   }
 
-  /// Picks an image
   Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -609,71 +790,381 @@ class WorkerManagerProvider extends ChangeNotifier {
   }
 
   // -----------------------------------
-  // Notification Management
+  // Services Management
   // -----------------------------------
-  /// Fetches notifications for the user.
-  Future<void> fetchNotifications() async {
-    _setNotificationLoading(true);
 
-    setError(null);
+  Future<void> fetchMyServices() async {
+    _setServiceLoading(true);
+    setServicesError(null);
     try {
-      final response = await BothApi.fetchNotifications();
+      final response = await WorkerApi.fetchMyServices();
       if (response.success && response.data != null) {
-        _notifications = response.data!;
-
-        notifyListeners();
+        _myServices = response.data!;
       } else {
-        setError('Failed to load notifications: ${response.error}');
+        setServicesError(response.error);
       }
     } catch (e) {
-      setError('Exception fetching notifications: $e');
+      setServicesError('Failed to fetch my services: $e');
+    } finally {
+      _setServiceLoading(false);
+    }
+  }
+
+  // Statistic Charts
+  List<ServiceChartData> getServicesChartData() {
+    final totalServices = myServices.length;
+    final visibleServices =
+        myServices.where((service) => service.active == 1).length;
+    final hiddenServices = totalServices - visibleServices;
+    return [
+      ServiceChartData(
+        'Services',
+        visibleServices,
+        hiddenServices,
+      ),
+    ];
+  }
+
+  // -----------------------------------
+  // Notifications
+  // -----------------------------------
+
+  Future<void> fetchNotifications({bool forceRefresh = false}) async {
+    // Prevent unnecessary API calls
+    if (_isNotificationLoading) {
+      debugPrint('WorkerManager: Notification fetch already in progress');
+      return;
+    }
+
+    // Check if we need to refresh (cache for 30 seconds)
+    if (!forceRefresh && _lastNotificationFetch != null) {
+      final timeSinceLastFetch =
+          DateTime.now().difference(_lastNotificationFetch!);
+      if (timeSinceLastFetch.inSeconds < 30) {
+        debugPrint('WorkerManager: Using cached notifications');
+        return;
+      }
+    }
+
+    _setNotificationLoading(true);
+    _setNotificationError(null);
+
+    try {
+      debugPrint('WorkerManager: Fetching notifications...');
+
+      // Fetch notifications and count in parallel for better performance
+      final results = await Future.wait([
+        BothApi.fetchNotifications(),
+        BothApi.getNewNotificationsCount(),
+        BothApi.getUnreadNotificationsCount(),
+      ]);
+
+      // Cast results to proper types
+      final notificationsResponse =
+          results[0] as ApiResponse<List<NotificationModel>>;
+      final newCountResponse = results[1] as ApiResponse<int>;
+      final unreadCountResponse = results[2] as ApiResponse<int>;
+
+      // Handle notifications response
+      if (notificationsResponse.success && notificationsResponse.data != null) {
+        _notifications = notificationsResponse.data!;
+        _lastNotificationFetch = DateTime.now();
+
+        debugPrint(
+            'WorkerManager: Loaded ${_notifications.length} notifications');
+      } else {
+        _setNotificationError(
+            notificationsResponse.error ?? 'Failed to load notifications');
+        debugPrint(
+            'WorkerManager: Failed to fetch notifications: ${notificationsResponse.error}');
+      }
+
+      // Handle new count response
+      if (newCountResponse.success && newCountResponse.data != null) {
+        _newNotificationCount = newCountResponse.data!;
+        debugPrint(
+            'WorkerManager: New notification count: $_newNotificationCount');
+      } else {
+        debugPrint(
+            'WorkerManager: Failed to get new count: ${newCountResponse.error}');
+        // Fallback to local count
+        _newNotificationCount = _notifications.where((n) => n.isNew).length;
+      }
+
+      // Handle unread count response
+      if (unreadCountResponse.success && unreadCountResponse.data != null) {
+        _unreadNotificationCount = unreadCountResponse.data!;
+        debugPrint(
+            'WorkerManager: Unread notification count: $_unreadNotificationCount');
+      } else {
+        debugPrint(
+            'WorkerManager: Failed to get unread count: ${unreadCountResponse.error}');
+        // Fallback to local count
+        _unreadNotificationCount =
+            _notifications.where((n) => !n.isRead).length;
+      }
+    } catch (e, stackTrace) {
+      _setNotificationError(
+          'Exception fetching notifications: ${e.toString()}');
+      debugPrint('WorkerManager: Exception in fetchNotifications: $e');
+      debugPrint('Stack trace: $stackTrace');
     } finally {
       _setNotificationLoading(false);
     }
   }
 
-  // -----------------------------------
-  // My Services
-  // -----------------------------------
-  /// Fetches my services
-  Future<void> fetchMyServices() async {
-    _setServiceLoading(true);
-    setError(null);
+  /// Enhanced method to fetch only notification counts (for home page badge)
+  Future<void> fetchNotificationCounts() async {
     try {
-      _setServiceLoading(true);
+      debugPrint('WorkerManager: Fetching notification counts...');
 
-      final response = await WorkerApi.fetchMyServices();
-      if (response.success && response.data != null) {
-        _myServices = response.data!;
-      } else {
-        setError(response.error);
+      final results = await Future.wait([
+        BothApi.getNewNotificationsCount(),
+        BothApi.getUnreadNotificationsCount(),
+      ]);
+
+      final newCountResponse = results[0];
+      final unreadCountResponse = results[1];
+
+      bool hasChanges = false;
+
+      if (newCountResponse.success && newCountResponse.data != null) {
+        final newCount = newCountResponse.data!;
+        if (_newNotificationCount != newCount) {
+          _newNotificationCount = newCount;
+          hasChanges = true;
+          debugPrint(
+              'WorkerManager: Updated new notification count: $_newNotificationCount');
+        }
       }
-      _setServiceLoading(false);
+
+      if (unreadCountResponse.success && unreadCountResponse.data != null) {
+        final unreadCount = unreadCountResponse.data!;
+        if (_unreadNotificationCount != unreadCount) {
+          _unreadNotificationCount = unreadCount;
+          hasChanges = true;
+          debugPrint(
+              'WorkerManager: Updated unread notification count: $_unreadNotificationCount');
+        }
+      }
+
+      if (hasChanges) {
+        notifyListeners();
+      }
     } catch (e) {
-      setError('Failed to fetch my services: $e');
-      _setServiceLoading(false);
+      debugPrint('WorkerManager: Exception in fetchNotificationCounts: $e');
     }
+  }
+
+  /// Enhanced mark all notifications as seen (when entering notifications screen)
+  Future<void> markAllNotificationsAsSeenNew() async {
+    debugPrint(
+        'WorkerManager: markAllNotificationsAsSeenNew called. Current new count: $_newNotificationCount');
+
+    if (_newNotificationCount == 0) {
+      debugPrint('WorkerManager: No new notifications to mark as seen');
+      return;
+    }
+
+    try {
+      // Update local state immediately for better UX
+      final oldNewCount = _newNotificationCount;
+      final updatedNotifications = _notifications
+          .map((notification) => notification.copyWith(
+                isNew: false,
+                seenAt: DateTime.now(),
+              ))
+          .toList();
+
+      _notifications = updatedNotifications;
+      _newNotificationCount = 0;
+
+      debugPrint(
+          'WorkerManager: Optimistically updated UI - marked $oldNewCount notifications as seen');
+      notifyListeners();
+
+      // Call the API to sync with backend
+      final response = await BothApi.markNotificationsAsSeen();
+
+      if (response.success) {
+        debugPrint(
+            'WorkerManager: Successfully synced seen status with backend');
+        // Refresh counts to ensure consistency
+        await fetchNotificationCounts();
+      } else {
+        debugPrint(
+            'WorkerManager: Failed to sync seen status: ${response.error}');
+        // Revert optimistic update on failure
+        _newNotificationCount = oldNewCount;
+        _notifications = _notifications
+            .map((notification) => notification.copyWith(
+                  isNew: true,
+                  seenAt: null,
+                ))
+            .toList();
+        notifyListeners();
+
+        _setNotificationError(
+            'Failed to mark notifications as seen: ${response.error}');
+      }
+    } catch (e) {
+      debugPrint(
+          'WorkerManager: Exception in markAllNotificationsAsSeenNew: $e');
+      _setNotificationError('Error marking notifications as seen: $e');
+    }
+  }
+
+  /// Enhanced mark all notifications as read
+  Future<void> markAllNotificationsAsRead() async {
+    debugPrint(
+        'WorkerManager: markAllNotificationsAsRead called. Current unread count: $_unreadNotificationCount');
+
+    if (_unreadNotificationCount == 0) {
+      debugPrint('WorkerManager: No unread notifications to mark as read');
+      return;
+    }
+
+    try {
+      // Update local state immediately for better UX
+      final oldUnreadCount = _unreadNotificationCount;
+      final updatedNotifications = _notifications
+          .map((notification) => notification.copyWith(
+                isNew: false,
+                isRead: true,
+                seenAt: notification.seenAt ?? DateTime.now(),
+                readAt: DateTime.now(),
+              ))
+          .toList();
+
+      _notifications = updatedNotifications;
+      _newNotificationCount = 0;
+      _unreadNotificationCount = 0;
+
+      debugPrint(
+          'WorkerManager: Optimistically updated UI - marked $oldUnreadCount notifications as read');
+      notifyListeners();
+
+      // Call the API to sync with backend
+      final response = await BothApi.markAllNotificationsAsRead();
+
+      if (response.success) {
+        debugPrint(
+            'WorkerManager: Successfully synced read status with backend');
+        // Refresh counts to ensure consistency
+        await fetchNotificationCounts();
+      } else {
+        debugPrint(
+            'WorkerManager: Failed to sync read status: ${response.error}');
+        // Revert optimistic update on failure
+        _unreadNotificationCount = oldUnreadCount;
+        // Revert to previous state (this is simplified - in production you'd want to store the previous state)
+        await fetchNotifications(forceRefresh: true);
+
+        _setNotificationError(
+            'Failed to mark notifications as read: ${response.error}');
+      }
+    } catch (e) {
+      debugPrint('WorkerManager: Exception in markAllNotificationsAsRead: $e');
+      _setNotificationError('Error marking notifications as read: $e');
+    }
+  }
+
+  /// Mark specific notifications as read
+  Future<void> markNotificationsAsRead(List<String> notificationIds) async {
+    if (notificationIds.isEmpty) {
+      debugPrint('WorkerManager: No notification IDs provided');
+      return;
+    }
+
+    try {
+      debugPrint(
+          'WorkerManager: Marking ${notificationIds.length} notifications as read');
+
+      // Update local state immediately
+      final updatedNotifications = _notifications.map((notification) {
+        if (notificationIds.contains(notification.id)) {
+          return notification.copyWith(
+            isNew: false,
+            isRead: true,
+            seenAt: notification.seenAt ?? DateTime.now(),
+            readAt: DateTime.now(),
+          );
+        }
+        return notification;
+      }).toList();
+
+      _notifications = updatedNotifications;
+
+      // Update counts
+      _newNotificationCount = _notifications.where((n) => n.isNew).length;
+      _unreadNotificationCount = _notifications.where((n) => !n.isRead).length;
+
+      notifyListeners();
+
+      // Sync with backend
+      final response = await BothApi.markNotificationsAsRead(notificationIds);
+
+      if (response.success) {
+        debugPrint(
+            'WorkerManager: Successfully marked specific notifications as read');
+        await fetchNotificationCounts();
+      } else {
+        debugPrint(
+            'WorkerManager: Failed to mark specific notifications as read: ${response.error}');
+        // Refresh to get correct state
+        await fetchNotifications(forceRefresh: true);
+        _setNotificationError(
+            'Failed to mark notifications as read: ${response.error}');
+      }
+    } catch (e) {
+      debugPrint('WorkerManager: Exception in markNotificationsAsRead: $e');
+      await fetchNotifications(forceRefresh: true);
+      _setNotificationError('Error marking notifications as read: $e');
+    }
+  }
+
+  /// Reset notification error
+  void clearNotificationError() {
+    _notificationError = null;
+    notifyListeners();
+  }
+
+  // Private helper methods
+  void _setNotificationLoading(bool value) {
+    _isNotificationLoading = value;
+    notifyListeners();
+  }
+
+  void _setNotificationError(String? error) {
+    _notificationError = error;
+    notifyListeners();
   }
 
   // -----------------------------------
   // Add Service Management
   // -----------------------------------
-  /// Fetches categories and subcategories for the Add Service screen.
 
+  /// Fetches categories and subcategories for the Add Service screen.
   Future<void> fetchCategories() async {
     _setServiceLoading(true);
+    setServicesError(null);
 
     _selectedCategory = null;
     _selectedSubcategory = null;
 
-    final response = await WorkerApi.fetchCategories();
+    try {
+      final response = await WorkerApi.fetchCategories();
 
-    if (response.success && response.data != null) {
-      _categories = response.data!;
-    } else {
-      _setAddServiceError(response.error);
+      if (response.success && response.data != null) {
+        _categories = response.data!;
+      } else {
+        _setAddServiceError(response.error);
+      }
+    } catch (e) {
+      _setAddServiceError('Failed to fetch categories: $e');
+    } finally {
+      _setServiceLoading(false);
     }
-    _setServiceLoading(false);
   }
 
   /// Sets the selected category and resets the subcategory.
@@ -688,7 +1179,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     _selectedCategory = null;
     _selectedSubcategory = null;
     _addServiceError = null;
-    // Also reset pricing selections for new service
     _selectedPricingType = 'hourly';
     _hourlyPriceController.clear();
     _dailyPriceController.clear();
@@ -750,12 +1240,9 @@ class WorkerManagerProvider extends ChangeNotifier {
 
       final response = await WorkerApi.createNewService(isEditing, request);
       if (response.success && response.data != null) {
-        _setServiceLoading(false);
         await fetchMyServices();
         return response.data!.serviceId!;
       } else {
-        _setServiceLoading(false);
-        // Enhanced error handling
         String errorMessage = response.error ?? 'Unknown error occurred';
         if (errorMessage.contains('validation')) {
           errorMessage = 'Please check all required fields and try again.';
@@ -774,8 +1261,9 @@ class WorkerManagerProvider extends ChangeNotifier {
         errorMessage = 'Request timed out. Please try again.';
       }
       _setAddServiceError(errorMessage);
-      _setServiceLoading(false);
       return 0;
+    } finally {
+      _setServiceLoading(false);
     }
   }
 
@@ -817,10 +1305,9 @@ class WorkerManagerProvider extends ChangeNotifier {
           _setAddServiceError(response.error);
         }
       }
-
-      _setServiceLoading(false);
     } catch (e) {
       _setAddServiceError('Failed to upload image: $e');
+    } finally {
       _setServiceLoading(false);
     }
   }
@@ -828,13 +1315,18 @@ class WorkerManagerProvider extends ChangeNotifier {
   /// Removes an image from the gallery using the image ID.
   Future<void> removeServiceImage(String imageName) async {
     _setServiceLoading(true);
-    final response = await WorkerApi().removeGalleryImage(imageName);
-    if (response.success && response.data == true) {
-      galleryImages.removeWhere((image) => image.image == imageName);
-    } else {
-      _setAddServiceError(response.error);
+    try {
+      final response = await WorkerApi().removeGalleryImage(imageName);
+      if (response.success && response.data == true) {
+        galleryImages.removeWhere((image) => image.image == imageName);
+      } else {
+        _setAddServiceError(response.error);
+      }
+    } catch (e) {
+      _setAddServiceError('Failed to remove image: $e');
+    } finally {
+      _setServiceLoading(false);
     }
-    _setServiceLoading(false);
   }
 
   /// Validates all inputs before submitting the service.
@@ -863,11 +1355,6 @@ class WorkerManagerProvider extends ChangeNotifier {
       return false;
     }
 
-    // if (_servicePriceController.text.isEmpty ||
-    //     double.tryParse(_servicePriceController.text)! <= 0) {
-    //   _setAddServiceError('Please enter a valid service price.');
-    //   return false;
-    // }
     if (_experienceController.text.isEmpty ||
         int.tryParse(_experienceController.text)! < 0) {
       _setAddServiceError('Please enter valid years of experience.');
@@ -908,11 +1395,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setNotificationLoading(bool value) {
-    _isNotificationLoading = value;
-    notifyListeners();
-  }
-
   void _initializeUsersControllers() {
     final user = _workerInfo;
     _fullNameController.text = user?.fullName ?? '';
@@ -930,17 +1412,17 @@ class WorkerManagerProvider extends ChangeNotifier {
     switch (service.pricingType) {
       case 'hourly':
         _hourlyPriceController.text = service.costPerHour?.toString() ?? '';
-        _dailyPriceController.clear(); // Clear other controllers
+        _dailyPriceController.clear();
         _fixedPriceController.clear();
         break;
       case 'daily':
         _dailyPriceController.text = service.costPerDay?.toString() ?? '';
-        _hourlyPriceController.clear(); // Clear other controllers
+        _hourlyPriceController.clear();
         _fixedPriceController.clear();
         break;
       case 'fixed':
         _fixedPriceController.text = service.fixedPrice?.toString() ?? '';
-        _hourlyPriceController.clear(); // Clear other controllers
+        _hourlyPriceController.clear();
         _dailyPriceController.clear();
         break;
       default:
@@ -954,7 +1436,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     _galleryImages =
         List.from(service.gallary.map((img) => AddImageModel(image: img)));
 
-    // Don't set category/subcategory here - let the UI handle it
     notifyListeners();
   }
 
@@ -962,6 +1443,23 @@ class WorkerManagerProvider extends ChangeNotifier {
   Future<void> clearData() async {
     _token = null;
     _workerInfo = null;
+
+    // Clear all errors
+    clearAllErrors();
+
+    // Clear notifications data
+    _notifications.clear();
+    _isNotificationLoading = false;
+    _newNotificationCount = 0;
+    _unreadNotificationCount = 0;
+    _notificationError = null;
+    _lastNotificationFetch = null;
+
+    _earningsHistory.clear();
+    _earningsSummary = null;
+    _isEarningsLoading = false;
+    _earningsError = null;
+
     await StorageManager.remove(StorageKeys.tokenKey);
     await StorageManager.remove(StorageKeys.accountTypeKey);
 
@@ -991,12 +1489,6 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sets a general error message.
-  void setError(String? message) {
-    _error = message;
-    notifyListeners();
-  }
-
   void setImageError(String? message) {
     _imageError = message;
     notifyListeners();
@@ -1018,11 +1510,9 @@ class WorkerManagerProvider extends ChangeNotifier {
     _transitController.dispose();
     _institutionController.dispose();
     _accountController.dispose();
-
     _hourlyPriceController.dispose();
     _dailyPriceController.dispose();
     _fixedPriceController.dispose();
-
     super.dispose();
   }
 }

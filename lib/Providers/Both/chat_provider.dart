@@ -49,17 +49,47 @@ class ChatProvider with ChangeNotifier {
   String? get currentUserId => _currentId;
   ScrollController get scrollController => _scrollController;
 
+  /// Getter for unread message count
+  int get unreadMessageCount {
+    try {
+      return _conversations
+          .where((conversation) => conversation.hasNewMessages)
+          .length;
+    } catch (e) {
+      debugPrint('ChatProvider: Error calculating unread count: $e');
+      return 0;
+    }
+  }
+
   Future<void> initialize(String id) async {
-    if (_currentId == id && _initialFetchComplete && _isConnected) {
-      debugPrint('ChatProvider: Already initialized for user $id');
+    debugPrint('ChatProvider: Initialize called with user ID: $id');
+    debugPrint('ChatProvider: Current user ID: $_currentId');
+
+    // ALWAYS clear state when user changes OR when initializing for the first time
+    if (_currentId != id || !_initialFetchComplete) {
+      debugPrint(
+          'ChatProvider: User changed or first initialization - clearing all data');
+      _currentId = id;
+      _clearAllStateCompletely(); // Use new comprehensive clearing method
+      _clearError();
+    } else if (_currentId == id && _initialFetchComplete && _isConnected) {
+      debugPrint(
+          'ChatProvider: Already initialized for user $id and connected');
       return;
     }
 
+    debugPrint('ChatProvider: Initializing chat for user ID: $id');
     _currentId = id;
-    _clearState();
-    _clearError();
 
     try {
+      // Force disconnect and reconnect to ensure clean state
+      if (_isConnected) {
+        debugPrint('ChatProvider: Force disconnecting existing connection');
+        _socketService.disconnect();
+        _isConnected = false;
+        await Future.delayed(const Duration(milliseconds: 500)); // Brief delay
+      }
+
       // Setup listeners only once
       if (!_listenersSetup) {
         _setupSocketListeners();
@@ -69,19 +99,40 @@ class ChatProvider with ChangeNotifier {
       await _connectWithRetry();
 
       if (_isConnected) {
-        // Initialize user and load conversations
+        debugPrint('ChatProvider: Emitting init event for user: $id');
         _socketService.emit('init', [id]);
+
+        await Future.delayed(const Duration(milliseconds: 500));
         await _loadConversations();
       } else {
-        _setError('Failed to establish connection');
+        setError('Failed to establish connection');
       }
     } catch (e) {
-      _setError('Initialization failed: $e');
+      debugPrint('ChatProvider: Initialization error: $e');
+      setError('Initialization failed: $e');
     } finally {
       _initialFetchComplete = true;
       _setLoadingConversations(false);
       notifyListeners();
     }
+  }
+
+  Future<void> switchUser(String newUserId) async {
+    debugPrint('ChatProvider: Switching user from $_currentId to $newUserId');
+
+    // Force disconnect and clear everything
+    _socketService.disconnect();
+    _isConnected = false;
+    _listenersSetup = false; // Reset listeners setup flag
+
+    // Complete state clear
+    _clearAllStateCompletely();
+
+    // Small delay to ensure clean disconnect
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // Reinitialize with new user
+    await initialize(newUserId);
   }
 
   Future<void> _connectWithRetry() async {
@@ -115,7 +166,7 @@ class ChatProvider with ChangeNotifier {
       // Set timeout
       _conversationsTimeout = Timer(Duration(seconds: _timeoutSeconds), () {
         if (_isLoadingConversations) {
-          _setError('Loading conversations timed out');
+          setError('Loading conversations timed out');
           _setLoadingConversations(false);
         }
       });
@@ -124,7 +175,7 @@ class ChatProvider with ChangeNotifier {
       _socketService.emit('get-chats', []);
       debugPrint('ChatProvider: Requested conversations');
     } catch (e) {
-      _setError('Failed to request conversations: $e');
+      setError('Failed to request conversations: $e');
       _setLoadingConversations(false);
     }
   }
@@ -157,7 +208,7 @@ class ChatProvider with ChangeNotifier {
       // Set timeout
       _messagesTimeout = Timer(Duration(seconds: _timeoutSeconds), () {
         if (_isLoadingMessages) {
-          _setError('Loading messages timed out');
+          setError('Loading messages timed out');
           _setLoadingMessages(false);
         }
       });
@@ -180,7 +231,7 @@ class ChatProvider with ChangeNotifier {
       // Reset new message indicator
       _resetNewMessageIndicator(otherUserId);
     } catch (e) {
-      _setError('Failed to load chat: $e');
+      setError('Failed to load chat: $e');
       _setLoadingMessages(false);
     }
   }
@@ -217,12 +268,12 @@ class ChatProvider with ChangeNotifier {
 
     _socketService.onDisconnected = () {
       _isConnected = false;
-      _setError('Disconnected from server');
+      setError('Disconnected from server');
       if (!isDisposed) notifyListeners();
     };
 
     _socketService.onError = (error) {
-      _setError('Connection error: $error');
+      setError('Connection error: $error');
     };
 
     // Data handlers
@@ -247,7 +298,7 @@ class ChatProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('ChatProvider: Error handling chats: $e');
-      _setError('Failed to process conversations: $e');
+      setError('Failed to process conversations: $e');
       _setLoadingConversations(false);
     }
   }
@@ -278,7 +329,7 @@ class ChatProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('ChatProvider: Error handling messages: $e');
-      _setError('Failed to process messages: $e');
+      setError('Failed to process messages: $e');
       _setLoadingMessages(false);
     }
   }
@@ -302,6 +353,18 @@ class ChatProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('ChatProvider: Error handling new message: $e');
+    }
+  }
+
+  /// Refreshes only conversation counts for badge updates
+  Future<void> refreshConversationCounts() async {
+    if (!_isConnected || _currentId == null) return;
+
+    try {
+      debugPrint('ChatProvider: Refreshing conversation counts...');
+      _socketService.emit('get-chats', []);
+    } catch (e) {
+      debugPrint('ChatProvider: Error refreshing conversation counts: $e');
     }
   }
 
@@ -487,32 +550,41 @@ class ChatProvider with ChangeNotifier {
     _conversations.sort((a, b) => (b.time ?? '').compareTo(a.time ?? ''));
   }
 
-  void _updateConversationFromMessage(String userId, ChatMessage message) {
+  void _updateConversationFromMessage(
+    String userId,
+    ChatMessage message,
+  ) {
     final index =
         _conversations.indexWhere((c) => c.user.id.toString() == userId);
+
+    bool hasNewMessages = _currentChatUserId != userId;
 
     if (index != -1) {
       _conversations[index] = ChatConversation(
         user: _conversations[index].user,
         latestMessage: message.message,
         time: message.timestamp.toIso8601String(),
-        hasNewMessages: _currentChatUserId != userId,
+        hasNewMessages: hasNewMessages,
       );
     } else {
-      _conversations.add(ChatConversation(
-        user: ChatUser(
-          id: int.tryParse(userId) ?? 0,
-          email: '',
-          fullName: 'Unknown User',
-          picture: '',
+      _conversations.add(
+        ChatConversation(
+          user: ChatUser(
+            id: int.tryParse(userId) ?? 0,
+            email: '',
+            fullName: 'Unknown User',
+            picture: '',
+          ),
+          latestMessage: message.message,
+          time: message.timestamp.toIso8601String(),
+          hasNewMessages: true,
         ),
-        latestMessage: message.message,
-        time: message.timestamp.toIso8601String(),
-        hasNewMessages: true,
-      ));
+      );
     }
 
     _conversations.sort((a, b) => (b.time ?? '').compareTo(a.time ?? ''));
+
+    notifyListeners();
   }
 
   void _resetNewMessageIndicator(String otherUserId) {
@@ -545,15 +617,50 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
+  // Add this method to your ChatProvider class
+  void disconnect() {
+    debugPrint('ChatProvider: Manually disconnecting and clearing all state');
+
+    // Disconnect the socket
+    _socketService.disconnect();
+
+    // Clear all state completely
+    _clearAllStateCompletely();
+
+    // Reset connection flags
+    _isConnected = false;
+    _listenersSetup = false;
+
+    // Reset current user
+    _currentId = null;
+
+    notifyListeners();
+  }
+
   // State management helpers
-  void _clearState() {
+  void _clearAllStateCompletely() {
+    debugPrint('ChatProvider: Performing complete state clear');
+
+    // Clear all collections
     _messages.clear();
     _conversations.clear();
     _messagesCache.clear();
     _activeRooms.clear();
+
+    // Reset all flags
     _initialFetchComplete = false;
+    _isLoadingConversations = false;
+    _isLoadingMessages = false;
+    _currentChatUserId = null;
+
+    // Cancel all timers
     _conversationsTimeout?.cancel();
     _messagesTimeout?.cancel();
+
+    // Clear error state
+    _error = null;
+
+    debugPrint('ChatProvider: Complete state clear finished');
   }
 
   void _clearError() {
@@ -563,7 +670,7 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  void _setError(String? error) {
+  void setError(String? error) {
     if (_error != error) {
       _error = error;
       notifyListeners();

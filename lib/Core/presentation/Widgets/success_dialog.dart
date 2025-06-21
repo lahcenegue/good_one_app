@@ -56,7 +56,7 @@ class SuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 24.0),
             // Buttons
-            SmallPrimaryButton(
+            PrimaryButton(
               text: confirmText,
               onPressed: onConfirm,
             ),

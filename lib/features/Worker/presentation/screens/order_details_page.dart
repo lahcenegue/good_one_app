@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:good_one_app/Providers/Worker/orders_manager_provider.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -174,33 +175,52 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           //
           // NEW: Show pricing information based on pricing type
           if (widget.order.pricingType == 'hourly') ...[
-            _buildInfoRow(AppLocalizations.of(context)!.totalHours,
-                '${widget.order.totalHours} hrs'),
-            _buildInfoRow(AppLocalizations.of(context)!.costPerHour,
-                '\$${widget.order.costPerHour?.toStringAsFixed(2) ?? '0'}'),
+            _buildInfoRow(
+              AppLocalizations.of(context)!.totalHours,
+              '${widget.order.totalHours} ${AppLocalizations.of(context)!.hours}',
+            ),
+            _buildInfoRow(
+              AppLocalizations.of(context)!.costPerHour,
+              '\$${widget.order.costPerHour?.toStringAsFixed(2) ?? '0'}',
+            ),
           ] else if (widget.order.pricingType == 'daily') ...[
-            _buildInfoRow('Total Days',
-                '${(widget.order.totalHours / 8).ceil()} days'), // Assuming 8 hours per day
-            _buildInfoRow('Cost Per Day',
-                '\$${widget.order.costPerDay?.toStringAsFixed(2) ?? '0'}'),
+            _buildInfoRow(
+              AppLocalizations.of(context)!.totalDays,
+              '${(widget.order.totalHours / 8).ceil()} ${AppLocalizations.of(context)!.days}',
+            ), // Assuming 8 hours per day
+            _buildInfoRow(
+              AppLocalizations.of(context)!.costPerDay,
+              '\$${widget.order.costPerDay?.toStringAsFixed(2) ?? '0'}',
+            ),
           ] else if (widget.order.pricingType == 'fixed') ...[
-            _buildInfoRow('Service Type', 'Fixed Price Service'),
-            _buildInfoRow('Fixed Rate',
-                '\$${widget.order.fixedPrice?.toStringAsFixed(2) ?? '0'}'),
+            _buildInfoRow(
+              AppLocalizations.of(context)!.serviceType,
+              AppLocalizations.of(context)!.fixedPriceService,
+            ),
+            _buildInfoRow(
+              AppLocalizations.of(context)!.fixedRate,
+              '\$${widget.order.fixedPrice?.toStringAsFixed(2) ?? '0'}',
+            ),
           ] else ...[
             // Fallback for legacy orders
-            _buildInfoRow(AppLocalizations.of(context)!.totalHours,
-                '${widget.order.totalHours} hrs'),
-            _buildInfoRow(AppLocalizations.of(context)!.costPerHour,
-                '\$${widget.order.costPerHour?.toStringAsFixed(2) ?? '0'}'),
+            _buildInfoRow(
+              AppLocalizations.of(context)!.totalHours,
+              '${widget.order.totalHours} ${AppLocalizations.of(context)!.hours}',
+            ),
+            _buildInfoRow(
+              AppLocalizations.of(context)!.costPerHour,
+              '\$${widget.order.costPerHour?.toStringAsFixed(2) ?? '0'}',
+            ),
           ],
 
           //
-          _buildInfoRow(AppLocalizations.of(context)!.totalHours,
-              '${widget.order.totalHours} hrs'),
+          _buildInfoRow(
+            AppLocalizations.of(context)!.totalHours,
+            '${widget.order.totalHours} ${AppLocalizations.of(context)!.hours}',
+          ),
 
           _buildInfoRow(
-            AppLocalizations.of(context)!.totalPrice,
+            AppLocalizations.of(context)!.totalAmount,
             '\$${widget.order.totalPrice.toStringAsFixed(2)}',
             isBold: true,
             valueColor: AppColors.primaryColor,
@@ -457,94 +477,176 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     final reasonController = TextEditingController();
 
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.cancelOrder,
-                style: AppTextStyles.title2(context)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(AppLocalizations.of(context)!.reasonForCancellation,
-                    style: AppTextStyles.text(context)),
-                SizedBox(height: context.getHeight(8)),
-                TextField(
-                  controller: reasonController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.enterReason,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300)),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    contentPadding: EdgeInsets.symmetric(
-                        horizontal: context.getWidth(12),
-                        vertical: context.getHeight(8)),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.of(context)!.close,
-                    style: AppTextStyles.text(context)
-                        .copyWith(color: Colors.grey)),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final reason = reasonController.text.trim();
-                  if (reason.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                            AppLocalizations.of(context)!.reasonRequired)));
-                    return;
-                  }
-                  await orderManager.cancelOrder(
-                      context, widget.order.id, reason);
-                },
-                child: Text(AppLocalizations.of(context)!.submit,
-                    style: AppTextStyles.text(context)
-                        .copyWith(color: AppColors.primaryColor)),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.cancel_outlined, color: AppColors.errorColor),
+              SizedBox(width: 8),
+              Text(
+                AppLocalizations.of(context)!.cancelOrder,
+                style: AppTextStyles.title2(context),
               ),
             ],
-          );
-        });
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.reasonForCancellation,
+                style: AppTextStyles.text(context),
+              ),
+              SizedBox(height: context.getHeight(8)),
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.enterReason,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: context.getWidth(12),
+                    vertical: context.getHeight(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                AppLocalizations.of(context)!.close,
+                style: AppTextStyles.text(context).copyWith(color: Colors.grey),
+              ),
+            ),
+            Consumer<OrdersManagerProvider>(
+              builder: (context, orderManager, child) {
+                return ElevatedButton(
+                  onPressed: orderManager.isOrdersLoading
+                      ? null
+                      : () async {
+                          final reason = reasonController.text.trim();
+                          if (reason.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .reasonRequired),
+                                backgroundColor: AppColors.errorColor,
+                              ),
+                            );
+                            return;
+                          }
+
+                          await orderManager.cancelOrder(
+                              context, widget.order.id, reason);
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.errorColor,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: orderManager.isOrdersLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(AppLocalizations.of(context)!.submit),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showCompleteOrderDialog(OrdersManagerProvider orderManager) {
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.completed,
-                style: AppTextStyles.title2(context)),
-            content: Text(AppLocalizations.of(context)!.hasServiceBeenReceived,
-                style: AppTextStyles.text(context)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  AppLocalizations.of(context)!.notYet,
-                  style:
-                      AppTextStyles.text(context).copyWith(color: Colors.grey),
-                ),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            AppLocalizations.of(context)!.completed,
+            style: AppTextStyles.title2(context),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: AppColors.successColor,
+                size: 48,
               ),
-              TextButton(
-                onPressed: () async {
-                  await orderManager.completeOrder(
-                    context,
-                    widget.order.id,
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.confirm,
-                    style: AppTextStyles.text(context)
-                        .copyWith(color: AppColors.primaryColor)),
+              SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context)!.hasServiceBeenReceived,
+                style: AppTextStyles.text(context),
+                textAlign: TextAlign.center,
               ),
             ],
-          );
-        });
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                AppLocalizations.of(context)!.notYet,
+                style: AppTextStyles.text(context).copyWith(color: Colors.grey),
+              ),
+            ),
+            Consumer<OrdersManagerProvider>(
+              builder: (context, orderManager, child) {
+                return ElevatedButton(
+                  onPressed: orderManager.isOrdersLoading
+                      ? null
+                      : () async {
+                          // Get WorkerManagerProvider before any async operations
+                          final workerProvider =
+                              Provider.of<WorkerManagerProvider>(context,
+                                  listen: false);
+
+                          // Complete the order with callback for balance refresh
+                          await orderManager.completeOrder(
+                            context,
+                            widget.order.id,
+                            onBalanceRefreshNeeded: () async {
+                              try {
+                                await workerProvider.getMyBalance();
+                              } catch (e) {
+                                print('Could not refresh balance: $e');
+                              }
+                            },
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.successColor,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: orderManager.isOrdersLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(AppLocalizations.of(context)!.confirm),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

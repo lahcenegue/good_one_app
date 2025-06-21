@@ -45,7 +45,7 @@ class OtpScreen extends StatelessWidget {
                 PrimaryButton(
                   text: AppLocalizations.of(context)!.checkCode,
                   onPressed: () {
-                    auth.checkOtp();
+                    auth.checkOtp(context);
                   },
                 ),
                 _buildFooter(context, auth),

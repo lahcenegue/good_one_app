@@ -60,8 +60,8 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
                   ), //TODO change widget
                 SizedBox(height: context.getHeight(20)),
                 _buildAccountDetailsForm(context, workerManager, worker),
-                if (workerManager.error != null)
-                  AppErrorWidget(message: workerManager.error!),
+                if (workerManager.profileError != null)
+                  AppErrorWidget(message: workerManager.profileError!),
               ],
             ),
           ),
@@ -213,9 +213,31 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
           SizedBox(height: context.getHeight(24)),
           PrimaryButton(
             text: AppLocalizations.of(context)!.update,
-            isLoading: workerManager.isLoading,
+            isLoading: workerManager.isProfileLoading,
             onPressed: () async {
-              await workerManager.editAccount(context);
+              // Clear previous profile errors before attempting
+              workerManager.clearError('profile');
+
+              final success = await workerManager.editAccount(context);
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)!
+                            .profileUpdatedSuccessfully),
+                      ],
+                    ),
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                );
+              }
             },
           ),
         ],

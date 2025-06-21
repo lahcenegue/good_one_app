@@ -55,25 +55,28 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       // Get user ID using the helper utility
       final userId = UserHelper.getCurrentUserId(context);
 
-      if (userId == null) {
-        throw Exception(
-            'User ID not available from either UserManagerProvider or WorkerManagerProvider');
+      if (userId == null || userId.isEmpty) {
+        throw Exception('User ID not available - please log in again');
       }
 
       debugPrint('ChatScreen: Initializing with User ID: $userId');
 
-      // Initialize provider if not already done
+      // Initialize provider if not already done or if user changed
       if (!provider.isConnected || provider.currentUserId != userId) {
         await provider.initialize(userId);
       }
 
-      // Initialize chat
-      await provider.initializeChat(widget.otherUserId);
+      // Ensure we're connected before initializing chat
+      if (provider.isConnected) {
+        await provider.initializeChat(widget.otherUserId);
+      } else {
+        throw Exception('Failed to connect to chat server');
+      }
 
       _isInitialized = true;
     } catch (e) {
       debugPrint('Chat initialization error: $e');
-      // Error will be shown through provider state
+      // The error will be shown through provider state
     } finally {
       _isInitializing = false;
       if (mounted) setState(() {});
@@ -131,7 +134,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                   IconButton(
                     icon: const Icon(Icons.refresh),
                     onPressed: _handleRetry,
-                    tooltip: 'Reconnect',
+                    tooltip: AppLocalizations.of(context)!.reconnect,
                   ),
               ],
             ),
@@ -153,11 +156,13 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
 
   Widget _buildChatContent(ChatProvider provider) {
     if (!_isInitialized && _isInitializing) {
-      return const _LoadingState(message: 'Connecting to chat...');
+      return _LoadingState(
+          message: AppLocalizations.of(context)!.connectingToChat);
     }
 
     if (provider.isLoadingMessages) {
-      return const _LoadingState(message: 'Loading messages...');
+      return _LoadingState(
+          message: AppLocalizations.of(context)!.loadingMessages);
     }
 
     if (provider.error != null) {
@@ -306,7 +311,7 @@ class _MessageInput extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: provider.isConnected
                           ? AppLocalizations.of(context)!.typeMessage
-                          : 'Connecting...',
+                          : AppLocalizations.of(context)!.connecting,
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(25)),
                       ),
@@ -413,7 +418,9 @@ class _ErrorState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: Icon(isConnected ? Icons.refresh : Icons.wifi),
-              label: Text(isConnected ? 'Try Again' : 'Reconnect'),
+              label: Text(isConnected
+                  ? AppLocalizations.of(context)!.retry
+                  : AppLocalizations.of(context)!.reconnect),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryColor,
                 foregroundColor: Colors.white,
@@ -450,7 +457,7 @@ class _EmptyMessages extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Start a conversation with $otherUserName',
+            '${AppLocalizations.of(context)!.startConversationWith}: $otherUserName',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 16),
           ),
@@ -459,7 +466,7 @@ class _EmptyMessages extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.wifi),
-              label: const Text('Reconnect'),
+              label: Text(AppLocalizations.of(context)!.reconnect),
             ),
           ],
         ],

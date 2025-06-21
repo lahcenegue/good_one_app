@@ -65,22 +65,106 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
     WorkerManagerProvider workerManager,
     List<WithdrawStatus> requests,
   ) {
-    if (requests.isEmpty) {
-      return _buildEmptyState(context);
-    }
+    return Column(
+      children: [
+        // Add this new balance summary card at the top
+        if (workerManager.balance != null ||
+            workerManager.earningsSummary != null)
+          Container(
+            margin: EdgeInsets.all(context.getAdaptiveSize(16)),
+            padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundCard,
+              borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.hintColor.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Balance Summary',
+                  style: AppTextStyles.title2(context),
+                ),
+                SizedBox(height: context.getHeight(12)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Available Balance:',
+                      style: AppTextStyles.text(context),
+                    ),
+                    Text(
+                      '\$${workerManager.balance?.balance?.toStringAsFixed(2) ?? '0.00'}',
+                      style: AppTextStyles.title2(context).copyWith(
+                        color: AppColors.successColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                if (workerManager.earningsSummary != null) ...[
+                  SizedBox(height: context.getHeight(8)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total Earnings:',
+                        style: AppTextStyles.text(context),
+                      ),
+                      Text(
+                        '\$${workerManager.earningsSummary!.totalEarnings.toStringAsFixed(2)}',
+                        style: AppTextStyles.text(context).copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: context.getHeight(4)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total Withdrawn:',
+                        style: AppTextStyles.text(context),
+                      ),
+                      Text(
+                        '\$${workerManager.earningsSummary!.totalWithdrawn.toStringAsFixed(2)}',
+                        style: AppTextStyles.text(context).copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
 
-    return RefreshIndicator(
-      onRefresh: () => workerManager.fetchWithdrawalStatus(),
-      child: ListView.separated(
-        padding: EdgeInsets.all(context.getAdaptiveSize(16)),
-        itemCount: requests.length,
-        itemBuilder: (context, index) {
-          final request = requests[index];
-          return _buildWithdrawalCard(context, request);
-        },
-        separatorBuilder: (context, index) =>
-            SizedBox(height: context.getHeight(12)),
-      ),
+        // Existing content
+        Expanded(
+          child: requests.isEmpty
+              ? _buildEmptyState(context)
+              : RefreshIndicator(
+                  onRefresh: () => workerManager.fetchWithdrawalStatus(),
+                  child: ListView.separated(
+                    padding: EdgeInsets.all(context.getAdaptiveSize(16)),
+                    itemCount: requests.length,
+                    itemBuilder: (context, index) {
+                      final request = requests[index];
+                      return _buildWithdrawalCard(context, request);
+                    },
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: context.getHeight(12)),
+                  ),
+                ),
+        ),
+      ],
     );
   }
 
@@ -130,7 +214,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
     return Container(
       padding: EdgeInsets.all(context.getAdaptiveSize(16)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.backgroundCard,
         borderRadius: BorderRadius.circular(context.getAdaptiveSize(16)),
         boxShadow: [
           BoxShadow(
@@ -258,13 +342,13 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
   Color _getStatusColor(int status) {
     switch (status) {
       case 2:
-        return Colors.green;
+        return AppColors.successColor;
       case 1:
-        return Colors.orange;
+        return AppColors.warningColor;
       case 0:
-        return Colors.blue;
+        return AppColors.infoColor;
       default:
-        return Colors.black;
+        return AppColors.blackText;
     }
   }
 

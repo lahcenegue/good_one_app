@@ -285,7 +285,7 @@ class WorkerHomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Total Earnings:',
+                        AppLocalizations.of(context)!.totalEarnings,
                         style: AppTextStyles.text(context).copyWith(
                           color: Colors.white70,
                           fontSize: context.getAdaptiveSize(12),
@@ -306,7 +306,7 @@ class WorkerHomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'This Month:',
+                        AppLocalizations.of(context)!.thisMonth,
                         style: AppTextStyles.text(context).copyWith(
                           color: Colors.white70,
                           fontSize: context.getAdaptiveSize(12),

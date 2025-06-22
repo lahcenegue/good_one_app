@@ -88,7 +88,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Balance Summary',
+                  AppLocalizations.of(context)!.balanceSummary,
                   style: AppTextStyles.title2(context),
                 ),
                 SizedBox(height: context.getHeight(12)),
@@ -96,7 +96,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Available Balance:',
+                      AppLocalizations.of(context)!.availableBalance,
                       style: AppTextStyles.text(context),
                     ),
                     Text(
@@ -114,7 +114,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Total Earnings:',
+                        AppLocalizations.of(context)!.totalEarnings,
                         style: AppTextStyles.text(context),
                       ),
                       Text(
@@ -130,7 +130,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Total Withdrawn:',
+                        AppLocalizations.of(context)!.totalWithdrawn,
                         style: AppTextStyles.text(context),
                       ),
                       Text(

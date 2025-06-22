@@ -2964,6 +2964,31 @@
    "@profileUpdatedSuccessfully": {
     "description": "Success message displayed when user profile information is updated successfully",
     "context": "Shown as a snackbar message after successful profile edit"
+  },  
+
+   "totalEarnings": "Total Earnings",
+  "@totalEarnings": {
+    "description": "Label indicating the total amount of money the user has earned overall"
+  },
+
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "Label indicating values related to the current month"
+  },
+
+  "balanceSummary": "Balance Summary",
+  "@balanceSummary": {
+    "description": "Header title summarizing the user's account balance"
+  },
+
+  "availableBalance": "Available Balance",
+  "@availableBalance": {
+    "description": "Label indicating the amount of money currently available for withdrawal or use"
+  },
+
+  "totalWithdrawn": "Total Withdrawn",
+  "@totalWithdrawn": {
+    "description": "Label indicating the total amount of money that has been withdrawn by the user"
   }
 
 

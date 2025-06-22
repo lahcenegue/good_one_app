@@ -7,7 +7,7 @@ import 'package:good_one_app/Providers/Worker/orders_manager_provider.dart';
 
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class OrdersStatusChart extends StatelessWidget {
   final OrdersManagerProvider ordersManager;

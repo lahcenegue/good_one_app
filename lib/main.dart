@@ -9,6 +9,7 @@ import 'package:good_one_app/Providers/User/contractors_by_service_provider.dart
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/orders_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'package:good_one_app/Providers/Both/app_settings_provider.dart';
@@ -22,8 +23,6 @@ import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_theme.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
-
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();

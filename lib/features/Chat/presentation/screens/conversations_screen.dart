@@ -14,7 +14,7 @@ import 'package:good_one_app/Features/Chat/Presentation/Screens/chat_screen.dart
 import 'package:good_one_app/Features/Chat/Presentation/Utils/chat_utils.dart';
 import 'package:good_one_app/Providers/Both/chat_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});

@@ -9,7 +9,7 @@ import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widg
 import 'package:good_one_app/Providers/Both/auth_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

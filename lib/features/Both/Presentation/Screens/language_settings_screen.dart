@@ -8,7 +8,7 @@ import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.da
 import 'package:good_one_app/Core/Presentation/resources/app_colors.dart';
 import 'package:good_one_app/Providers/Both/app_settings_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class LanguageSettingsScreen extends StatefulWidget {
   const LanguageSettingsScreen({super.key});

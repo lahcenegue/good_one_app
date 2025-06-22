@@ -13,7 +13,7 @@ import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.da
 import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
 import 'package:good_one_app/Providers/Both/auth_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});

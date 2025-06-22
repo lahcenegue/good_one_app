@@ -11,7 +11,7 @@ import 'package:good_one_app/Features/Onboarding/Presentation/Widgets/dot_indica
 import 'package:good_one_app/Features/Onboarding/Presentation/Widgets/onboard_content.dart';
 import 'package:good_one_app/Providers/Both/app_settings_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class OnBordingView extends StatelessWidget {
   const OnBordingView({super.key});

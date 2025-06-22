@@ -10,7 +10,8 @@ import 'package:good_one_app/Features/User/Presentation/Screens/contractor_profi
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 import 'package:good_one_app/Providers/User/contractors_by_service_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class ContractorsByService extends StatefulWidget {
   final int? serviceId;

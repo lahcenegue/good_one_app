@@ -5,7 +5,7 @@ import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/user_avatar.dart';
 import 'package:good_one_app/Features/User/Models/contractor.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class CustomerReviewsScreen extends StatelessWidget {
   final Contractor contractor;

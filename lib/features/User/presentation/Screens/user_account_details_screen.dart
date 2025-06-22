@@ -13,7 +13,7 @@ import 'package:good_one_app/Features/Both/Models/user_info.dart';
 import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widgets.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class UserAccountDetailsScreen extends StatefulWidget {
   const UserAccountDetailsScreen({super.key});

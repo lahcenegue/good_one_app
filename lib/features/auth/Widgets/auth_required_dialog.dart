@@ -9,7 +9,7 @@ import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.da
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class AuthRequiredDialog extends StatelessWidget {
   const AuthRequiredDialog({super.key});

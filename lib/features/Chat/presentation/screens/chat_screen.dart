@@ -8,7 +8,7 @@ import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Features/Chat/Models/chat_message.dart';
 import 'package:good_one_app/Providers/Both/chat_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class ChatScreen extends StatefulWidget {
   final String otherUserId;

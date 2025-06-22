@@ -12,7 +12,7 @@ import 'package:good_one_app/Features/Setup/Models/account_type.dart';
 import 'package:good_one_app/Features/Setup/Presentation/Widgets/account_type_card.dart';
 import 'package:good_one_app/Providers/Both/app_settings_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class AccountTypeSelectionOverlay extends StatelessWidget {
   const AccountTypeSelectionOverlay({super.key});

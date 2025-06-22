@@ -12,7 +12,7 @@ import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class OrdersManagerProvider extends ChangeNotifier {
   String? _error;

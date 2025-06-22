@@ -20,7 +20,7 @@ import 'package:good_one_app/Features/User/Models/rate_model.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/service_evaluation_screen.dart';
 import 'package:good_one_app/Features/User/Services/user_api.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 /// Manages all booking-related state and operations, including location selection.
 class BookingManagerProvider with ChangeNotifier {

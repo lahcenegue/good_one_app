@@ -16,7 +16,7 @@ import 'package:good_one_app/Features/User/Presentation/Screens/service_evaluati
 import 'package:good_one_app/Providers/User/booking_manager_provider.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 /// Modern, professional booking screen with beautiful design
 class BookingScreen extends StatelessWidget {

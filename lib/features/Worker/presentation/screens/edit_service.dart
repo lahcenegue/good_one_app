@@ -15,7 +15,7 @@ import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/category_dropdown_widget.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class EditService extends StatefulWidget {
   final MyServicesModel service;

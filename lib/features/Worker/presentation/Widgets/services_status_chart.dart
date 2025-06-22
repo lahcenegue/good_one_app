@@ -5,9 +5,10 @@ import 'package:good_one_app/Core/Utils/size_config.dart';
 import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class ServicesStatusChart extends StatelessWidget {
   final WorkerManagerProvider workerManager;

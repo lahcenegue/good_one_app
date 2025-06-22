@@ -10,7 +10,8 @@ import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
 import 'package:good_one_app/Providers/Both/auth_provider.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class PasswordResetScreen extends StatefulWidget {
   const PasswordResetScreen({super.key});

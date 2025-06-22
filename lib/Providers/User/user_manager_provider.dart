@@ -16,8 +16,9 @@ import 'package:good_one_app/Features/User/Models/service_category.dart';
 import 'package:good_one_app/Features/User/Services/user_api.dart';
 import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class UserManagerProvider extends ChangeNotifier {
   // --- Authentication State ---

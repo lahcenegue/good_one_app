@@ -14,7 +14,7 @@ import 'package:good_one_app/Features/Auth/Presentation/Widgets/shared_auth_widg
 import 'package:good_one_app/Features/Worker/Presentation/Screens/add_images_screen.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class WorkerAddServiceScreen extends StatefulWidget {
   const WorkerAddServiceScreen({super.key});

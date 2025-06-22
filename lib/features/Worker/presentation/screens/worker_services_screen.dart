@@ -13,7 +13,7 @@ import 'package:good_one_app/Features/Worker/Presentation/Screens/edit_service.d
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:good_one_app/l10n/app_localizations.dart';
 
 class WorkerServicesScreen extends StatelessWidget {
   const WorkerServicesScreen({super.key});

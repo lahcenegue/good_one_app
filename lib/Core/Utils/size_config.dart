@@ -69,7 +69,7 @@ class SizeConfig {
   static double devicePixelRatio(BuildContext context) =>
       MediaQuery.devicePixelRatioOf(context);
   static double textScaleFactor(BuildContext context) =>
-      MediaQuery.textScaleFactorOf(context);
+      MediaQuery.textScalerOf(context).scale(1.0);
 
   // Brightness
   static Brightness brightness(BuildContext context) =>

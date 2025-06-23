@@ -1,43 +1,33 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
-import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
-  String? _fcmToken;
-
-  String? get fcmToken => _fcmToken;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await _requestPermission();
-    await _setupLocalNotifications();
-    await _setupMessageHandlers();
+    try {
+      // Set up background message handler
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
 
-    _fcmToken = await _firebaseMessaging.getToken();
-    await StorageManager.setString(StorageKeys.fcmTokenKey, _fcmToken!);
+      // Setup local notifications
+      await _setupLocalNotifications();
 
-    _firebaseMessaging.onTokenRefresh.listen((newToken) async {
-      _fcmToken = newToken;
-      await StorageManager.setString(StorageKeys.fcmTokenKey, newToken);
-    });
+      // Setup message handlers
+      await _setupMessageHandlers();
 
-    _isInitialized = true;
-  }
-
-  Future<void> _requestPermission() async {
-    await _firebaseMessaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+      _isInitialized = true;
+      debugPrint('NotificationService initialized successfully');
+    } catch (e) {
+      debugPrint('NotificationService initialization error: $e');
+    }
   }
 
   Future<void> _setupLocalNotifications() async {
@@ -59,7 +49,7 @@ class NotificationService {
     await _localNotifications.initialize(
       InitializationSettings(android: android, iOS: iOS),
       onDidReceiveNotificationResponse: (details) =>
-          print('Notification tapped: ${details.payload}'),
+          debugPrint('Notification tapped: ${details.payload}'),
     );
   }
 
@@ -75,7 +65,7 @@ class NotificationService {
     final notification = message.notification;
     final android = message.notification?.android;
 
-    if (notification != null && android != null) {
+    if (notification != null) {
       await _localNotifications.show(
         notification.hashCode,
         notification.title,
@@ -97,15 +87,18 @@ class NotificationService {
   }
 
   void _handleBackgroundMessage(RemoteMessage message) {
+    debugPrint('Handling background message: ${message.messageId}');
     if (message.data['type'] == 'chat') {
       // TODO: Handle chat-specific navigation
     }
   }
+
+  // Get FCM token from TokenManager
+  String? get fcmToken => TokenManager.instance.fcmToken;
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  final notificationService = NotificationService();
-  await notificationService.initialize();
-  await notificationService.showNotification(message);
+  debugPrint('Handling background message: ${message.messageId}');
+  // You can show notifications here if needed
 }

@@ -31,25 +31,32 @@ Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Initialize StorageManager
-  await StorageManager.init();
+  try {
+    // Initialize StorageManager
+    await StorageManager.init();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    // Initialize Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  // Initialize TokenManager
-  await TokenManager.instance.initialize();
+    // Set Stripe publishable key from AppStrings
+    Stripe.publishableKey = AppConfig.stripePublicKey;
+    Stripe.merchantIdentifier = AppConfig.merchantIdentifier;
+    Stripe.urlScheme = 'flutterstripe';
+    await Stripe.instance.applySettings();
 
-  // Set Stripe publishable key from AppStrings
-  Stripe.publishableKey = AppConfig.stripePublicKey;
-  Stripe.merchantIdentifier = AppConfig.merchantIdentifier;
-  Stripe.urlScheme = 'flutterstripe';
-  await Stripe.instance.applySettings();
+    // Set global HttpOverrides
+    HttpOverrides.global = MyHttpOverrides();
 
-  // Set global HttpOverrides
-  HttpOverrides.global = MyHttpOverrides();
+    // Initialize TokenManager (with error handling)
+    // We don't want the app to crash if token initialization fails
+    await TokenManager.instance.initialize().catchError((error) {
+      print('Token initialization failed, but app will continue: $error');
+    });
+  } catch (e) {
+    print('App initialization error: $e');
+  }
 
   runApp(const MyApp());
 }

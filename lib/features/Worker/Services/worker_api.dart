@@ -106,7 +106,9 @@ class WorkerApi {
   }
 
   static Future<ApiResponse<CreateServiceModel>> createNewService(
-      bool isEditing, CreateServiceRequest request) async {
+    bool isEditing,
+    CreateServiceRequest request,
+  ) async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
 
     return await _api.postMultipart(

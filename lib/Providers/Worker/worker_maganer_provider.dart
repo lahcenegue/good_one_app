@@ -292,6 +292,37 @@ class WorkerManagerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Categorize errors for better user experience
+  String _categorizeError(dynamic error) {
+    final errorString = error.toString().toLowerCase();
+
+    if (errorString.contains('timeout')) {
+      return 'The request took too long. Please check your internet connection and try again.';
+    }
+
+    if (errorString.contains('socket') || errorString.contains('network')) {
+      return 'Network error. Please check your internet connection.';
+    }
+
+    if (errorString.contains('server error') || errorString.contains('500')) {
+      return 'Server is temporarily unavailable. Please try again in a few moments.';
+    }
+
+    if (errorString.contains('unauthorized') || errorString.contains('token')) {
+      return 'Your session has expired. Please log out and log back in.';
+    }
+
+    if (errorString.contains('file') || errorString.contains('image')) {
+      return 'File upload failed. Please try with a smaller image or check your connection.';
+    }
+
+    if (errorString.contains('validation')) {
+      return 'Please check all required fields and ensure they are filled correctly.';
+    }
+
+    return 'An unexpected error occurred. Please check your details and try again.';
+  }
+
   // -----------------------------------
   // Initialization
   // -----------------------------------
@@ -1244,23 +1275,14 @@ class WorkerManagerProvider extends ChangeNotifier {
         await fetchMyServices();
         return response.data!.serviceId!;
       } else {
-        String errorMessage = response.error ?? 'Unknown error occurred';
-        if (errorMessage.contains('validation')) {
-          errorMessage = 'Please check all required fields and try again.';
-        } else if (errorMessage.contains('network') ||
-            errorMessage.contains('connection')) {
-          errorMessage = 'Network error. Please check your connection.';
-        }
+        // Use the enhanced error categorization you already have
+        String errorMessage =
+            _categorizeError(response.error ?? 'Unknown error occurred');
         _setAddServiceError(errorMessage);
         return 0;
       }
     } catch (e) {
-      String errorMessage = 'Failed to create service: $e';
-      if (e.toString().contains('SocketException')) {
-        errorMessage = 'No internet connection. Please try again.';
-      } else if (e.toString().contains('TimeoutException')) {
-        errorMessage = 'Request timed out. Please try again.';
-      }
+      String errorMessage = _categorizeError(e);
       _setAddServiceError(errorMessage);
       return 0;
     } finally {

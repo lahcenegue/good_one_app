@@ -172,34 +172,90 @@ class ModernOrdersContentInitializer extends StatefulWidget {
 class _ModernOrdersContentInitializerState
     extends State<ModernOrdersContentInitializer>
     with SingleTickerProviderStateMixin {
+  OrdersManagerProvider? _ordersManager;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Save reference to provider for safe disposal
+    _ordersManager ??= context.read<OrdersManagerProvider>();
+  }
+
   @override
   void initState() {
     super.initState();
+    // Use a more reliable initialization method
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<OrdersManagerProvider>().initializeTabController(this);
+        final ordersManager = context.read<OrdersManagerProvider>();
+        _ordersManager = ordersManager;
+        ordersManager.initializeTabController(this);
+        // Force a rebuild after initialization
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
   }
 
   @override
+  void dispose() {
+    // Use the saved reference instead of accessing context
+    // Don't dispose the tab controller here as it's managed by the provider
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        title: Text(
-          AppLocalizations.of(context)!.myOrders,
-          style: AppTextStyles.appBarTitle(context).copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade800,
+    return Consumer<OrdersManagerProvider>(
+      builder: (context, ordersManager, _) {
+        // Check if we have a valid tab controller
+        if (ordersManager.tabController != null &&
+            ordersManager.dates.isNotEmpty) {
+          return Scaffold(
+            backgroundColor: Colors.grey.shade50,
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              title: Text(
+                AppLocalizations.of(context)!.myOrders,
+                style: AppTextStyles.appBarTitle(context).copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              centerTitle: true,
+            ),
+            body: RefreshIndicator(
+              onRefresh: () => ordersManager.fetchOrders(),
+              color: AppColors.primaryColor,
+              backgroundColor: Colors.white,
+              child: ModernOrdersContent(
+                  tabController: ordersManager.tabController!),
+            ),
+          );
+        }
+
+        // Show empty state while initializing
+        return Scaffold(
+          backgroundColor: Colors.grey.shade50,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            title: Text(
+              AppLocalizations.of(context)!.myOrders,
+              style: AppTextStyles.appBarTitle(context).copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: _buildModernEmptyState(context),
+          body: _buildModernEmptyState(context),
+        );
+      },
     );
   }
 
@@ -282,10 +338,20 @@ class _ModernOrdersContentState extends State<ModernOrdersContent>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  OrdersManagerProvider? _ordersManager;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Save reference to provider for safe access
+    _ordersManager ??= context.read<OrdersManagerProvider>();
+  }
 
   @override
   void initState() {
     super.initState();
+
+    // Add listener to the provided TabController
     widget.tabController.addListener(_handleTabChange);
 
     // Initialize animations
@@ -322,7 +388,10 @@ class _ModernOrdersContentState extends State<ModernOrdersContent>
 
   @override
   void dispose() {
+    // Remove listener from the TabController (don't dispose it)
     widget.tabController.removeListener(_handleTabChange);
+
+    // Only dispose our own animation controller
     _animationController.dispose();
     super.dispose();
   }
@@ -373,13 +442,18 @@ class _ModernOrdersContentState extends State<ModernOrdersContent>
       child: SizedBox(
         height: context.getHeight(50),
         child: TabBar(
-          controller: ordersManager.tabController,
+          controller: widget.tabController,
           isScrollable: true,
           indicatorWeight: 0,
           indicator: BoxDecoration(),
           dividerColor: Colors.transparent,
           labelPadding: EdgeInsets.symmetric(horizontal: context.getWidth(4)),
-          tabs: ordersManager.dates.map((date) {
+          // Add these properties for better touch handling
+          splashFactory: NoSplash.splashFactory,
+          overlayColor: MaterialStateProperty.all(Colors.transparent),
+          tabs: ordersManager.dates.asMap().entries.map((entry) {
+            final index = entry.key;
+            final date = entry.value;
             final dateTime = DateTime.parse(date);
             final dayOfWeek = DateFormat('EEE').format(dateTime);
             final dayOfMonth = DateFormat('d').format(dateTime);
@@ -390,10 +464,11 @@ class _ModernOrdersContentState extends State<ModernOrdersContent>
 
             return Tab(
               height: context.getHeight(45),
-              child: Builder(
-                builder: (BuildContext context) {
-                  final isSelected = ordersManager.tabController!.index ==
-                      ordersManager.dates.indexOf(date);
+              child: AnimatedBuilder(
+                animation: widget.tabController,
+                builder: (BuildContext context, Widget? child) {
+                  // Use animation value for smoother transitions
+                  final isSelected = widget.tabController.index == index;
 
                   return Container(
                     width: context.getWidth(60),
@@ -507,7 +582,8 @@ class _ModernOrdersContentState extends State<ModernOrdersContent>
     List<MyOrderModel> orders,
     String date,
   ) {
-    final ordersManager = context.read<OrdersManagerProvider>();
+    final ordersManager =
+        _ordersManager ?? context.read<OrdersManagerProvider>();
 
     if (orders.isEmpty) {
       return _buildEmptyDateState(context, date);

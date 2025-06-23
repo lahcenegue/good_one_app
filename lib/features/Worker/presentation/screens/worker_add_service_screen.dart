@@ -75,53 +75,183 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
                               onPressed: workerManager.isServiceLoading
                                   ? () {}
                                   : () async {
+                                      // Clear previous errors
+                                      workerManager.clearError('services');
+
                                       // Set the active status before creating
                                       workerManager
                                           .setActive(_tempActiveStatus);
 
-                                      final serviceId = await workerManager
-                                          .createAndEditService();
-                                      if (serviceId > 0) {
-                                        if (context.mounted) {
-                                          Navigator.pushAndRemoveUntil(
-                                            context,
-                                            MaterialPageRoute(
+                                      // Show progress indicator
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(Colors.white),
+                                                ),
+                                              ),
+                                              SizedBox(width: 16),
+                                              Expanded(
+                                                child: Text(
+                                                    'Creating your service...'),
+                                              ),
+                                            ],
+                                          ),
+                                          duration: Duration(
+                                              minutes: 2), // Long duration
+                                          backgroundColor:
+                                              AppColors.primaryColor,
+                                        ),
+                                      );
+
+                                      try {
+                                        // Use your existing method for now (we'll enhance it step by step)
+                                        final serviceId = await workerManager
+                                            .createAndEditService();
+
+                                        // Hide loading indicator
+                                        ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar();
+
+                                        if (serviceId > 0) {
+                                          // Success feedback
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  Icon(Icons.check_circle,
+                                                      color: Colors.white),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                      'Service created successfully!'),
+                                                ],
+                                              ),
+                                              backgroundColor: Colors.green,
+                                              duration: Duration(seconds: 3),
+                                            ),
+                                          );
+
+                                          // Navigate to next screen
+                                          if (context.mounted) {
+                                            Navigator.pushAndRemoveUntil(
+                                              context,
+                                              MaterialPageRoute(
                                                 builder: (context) =>
                                                     AddImagesScreen(
-                                                        serviceId: serviceId)),
-                                            (Route<dynamic> route) => false,
+                                                        serviceId: serviceId),
+                                              ),
+                                              (Route<dynamic> route) => false,
+                                            );
+                                          }
+                                        } else {
+                                          // Error handling - error message is already set in provider
+                                          final errorMessage = workerManager
+                                                  .addServiceError ??
+                                              'Failed to create service. Please try again.';
+
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.error,
+                                                          color: Colors.white),
+                                                      SizedBox(width: 8),
+                                                      Expanded(
+                                                        child: Text(
+                                                          'Service Creation Failed',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    errorMessage,
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                  ),
+                                                ],
+                                              ),
+                                              backgroundColor: Colors.red,
+                                              duration: Duration(seconds: 6),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              action: SnackBarAction(
+                                                label: 'Retry',
+                                                textColor: Colors.white,
+                                                onPressed: () {
+                                                  // Close current snackbar and retry
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                  // You can trigger the same action again by calling the function recursively
+                                                  // or implement a separate retry method
+                                                },
+                                              ),
+                                            ),
                                           );
                                         }
+                                      } catch (e) {
+                                        // Hide loading indicator
+                                        ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar();
+
+                                        // Unexpected error
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.error,
+                                                        color: Colors.white),
+                                                    SizedBox(width: 8),
+                                                    Text(
+                                                      'Unexpected Error',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 4),
+                                                Text(
+                                                  'An unexpected error occurred. Please try again or contact support if the problem persists.',
+                                                  style:
+                                                      TextStyle(fontSize: 14),
+                                                ),
+                                              ],
+                                            ),
+                                            backgroundColor: Colors.red[700],
+                                            duration: Duration(seconds: 8),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
                                       }
                                     },
                             ),
-                            if (workerManager.addServiceError != null)
-                              Padding(
-                                padding:
-                                    EdgeInsets.only(top: context.getHeight(16)),
-                                child: Container(
-                                  padding: EdgeInsets.all(
-                                      context.getAdaptiveSize(12)),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red[50],
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.red[300]!),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.error, color: Colors.red[700]),
-                                      SizedBox(width: context.getWidth(8)),
-                                      Expanded(
-                                        child: Text(
-                                          workerManager.addServiceError!,
-                                          style: AppTextStyles.errorTextStyle(
-                                              context),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
                             SizedBox(height: context.getHeight(24)),
                           ],
                         ),
@@ -408,7 +538,9 @@ class _WorkerAddServiceScreenState extends State<WorkerAddServiceScreen> {
   }
 
   Widget _buildModernPricingSection(
-      BuildContext context, WorkerManagerProvider workerManager) {
+    BuildContext context,
+    WorkerManagerProvider workerManager,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

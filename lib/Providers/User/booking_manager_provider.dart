@@ -429,6 +429,7 @@ class BookingManagerProvider with ChangeNotifier {
       if (response.success) {
         await fetchBookings();
         if (dialogContext.mounted) {
+          Navigator.of(dialogContext).pop();
           await Navigator.of(dialogContext).push(
             MaterialPageRoute(
               builder: (context) => ServiceEvaluationScreen(

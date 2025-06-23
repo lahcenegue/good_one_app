@@ -214,78 +214,7 @@ class ApiService {
     }
   }
 
-  // Future<ApiResponse<T>> _processResponse<T>(
-  //   http.Response response,
-  //   T Function(dynamic) fromJson,
-  // ) async {
-  //   try {
-  //     final dynamic decodedBody = jsonDecode(response.body);
-
-  //     // Debug print to see exact response body
-  //     print("API Response Body: ${response.body}");
-  //     print("API Status Code: ${response.statusCode}");
-
-  //     // Check if it's a successful response (200-299)
-  //     if (response.statusCode >= 200 && response.statusCode < 300) {
-  //       if (decodedBody is Map<String, dynamic> &&
-  //           decodedBody.containsKey('data')) {
-  //         return ApiResponse.success(fromJson(decodedBody['data']));
-  //       } else if (decodedBody is List) {
-  //         return ApiResponse.success(fromJson(decodedBody));
-  //       }
-  //       return ApiResponse.success(fromJson(decodedBody));
-  //     }
-
-  //     // Check for token expiration first
-  //     if (_isTokenExpired(response)) {
-  //       return ApiResponse.error('Token expired or invalid detected');
-  //     }
-
-  //     // Handle other errors
-  //     if (decodedBody is Map<String, dynamic>) {
-  //       final message = decodedBody['message']?.toString() ??
-  //           decodedBody['error']?.toString() ??
-  //           'Unknown error';
-  //       // // Check if there's an 'error' field in the response
-  //       // if (decodedBody.containsKey('error') && decodedBody['error'] != null) {
-  //       //   return ApiResponse.error(decodedBody['error'].toString());
-  //       // }
-
-  //       // final message = decodedBody['message']?.toString() ?? '';
-
-  //       // Handle other specific error codes
-  //       switch (response.statusCode) {
-  //         case 400:
-  //           return ApiResponse.error(message.isEmpty ? 'Bad Request' : message);
-  //         case 401:
-  //           return ApiResponse.error('Unauthorized: $message');
-  //         case 403:
-  //           return ApiResponse.error(
-  //               message.isEmpty ? 'Access Denied' : message);
-  //         case 404:
-  //           return ApiResponse.error(message.isEmpty ? 'Not Found' : message);
-  //         case 422:
-  //           return ApiResponse.error(
-  //               message.isEmpty ? 'Validation Error' : message);
-  //         case 429:
-  //           return ApiResponse.error('Too Many Requests');
-  //         case 500:
-  //         case 501:
-  //         case 502:
-  //         case 503:
-  //           return ApiResponse.error('Server error. Please try again later.');
-  //         default:
-  //           return ApiResponse.error('Something went wrong: $message');
-  //       }
-  //     }
-
-  //     return ApiResponse.error('Invalid response format');
-  //   } catch (e) {
-  //     return ApiResponse.error('Failed to process response: $e');
-  //   }
-  // }
-
-// Add this helper method to check for token expiration
+// Method to check for token expiration
   bool _isTokenExpired(http.Response response) {
     try {
       if (response.statusCode == 401) {

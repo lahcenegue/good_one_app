@@ -18,7 +18,7 @@ import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 
 import 'package:good_one_app/l10n/app_localizations.dart';
 
-/// Modern, professional booking screen with beautiful design
+/// Professional booking screen with beautiful design
 class BookingScreen extends StatelessWidget {
   const BookingScreen({super.key});
 
@@ -41,7 +41,7 @@ class BookingScreen extends StatelessWidget {
         }
         return Scaffold(
           backgroundColor: Colors.grey.shade50,
-          appBar: _buildModernAppBar(context),
+          appBar: _buildAppBar(context),
           body: RefreshIndicator(
             onRefresh: () async => bookingManager.fetchBookings(),
             color: AppColors.primaryColor,
@@ -55,7 +55,7 @@ class BookingScreen extends StatelessWidget {
   }
 
   /// App bar
-  PreferredSizeWidget _buildModernAppBar(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       elevation: 0,
@@ -222,7 +222,7 @@ class _BookingContentState extends State<_BookingContent> {
   }
 }
 
-/// Modern tab bar with enhanced styling
+///  tab bar with enhanced styling
 class _TabBarSection extends StatelessWidget {
   final TabController tabController;
 
@@ -280,7 +280,7 @@ class _BookingList extends StatelessWidget {
         .toList();
 
     return filteredBookings.isEmpty
-        ? _ModernEmptyState(tabIndex: currentTabIndex)
+        ? _EmptyState(tabIndex: currentTabIndex)
         : ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.all(context.getWidth(16)),
@@ -288,7 +288,7 @@ class _BookingList extends StatelessWidget {
             itemBuilder: (context, index) {
               return Padding(
                 padding: EdgeInsets.only(bottom: context.getHeight(16)),
-                child: ModernBookingCard(
+                child: BookingCard(
                   booking: filteredBookings[index],
                   animationDelay: index * 100,
                 ),
@@ -298,11 +298,11 @@ class _BookingList extends StatelessWidget {
   }
 }
 
-/// Modern empty state with beautiful illustration
-class _ModernEmptyState extends StatelessWidget {
+///  empty state with beautiful illustration
+class _EmptyState extends StatelessWidget {
   final int tabIndex;
 
-  const _ModernEmptyState({required this.tabIndex});
+  const _EmptyState({required this.tabIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +380,7 @@ class _ModernEmptyState extends StatelessWidget {
   }
 }
 
-/// Modern error state
+///  error state
 class _ErrorState extends StatelessWidget {
   final String error;
 
@@ -449,22 +449,22 @@ class _ErrorState extends StatelessWidget {
   }
 }
 
-/// Modern booking card with enhanced design
-class ModernBookingCard extends StatefulWidget {
+///  booking card with enhanced design
+class BookingCard extends StatefulWidget {
   final Booking booking;
   final int animationDelay;
 
-  const ModernBookingCard({
+  const BookingCard({
     super.key,
     required this.booking,
     this.animationDelay = 0,
   });
 
   @override
-  State<ModernBookingCard> createState() => _ModernBookingCardState();
+  State<BookingCard> createState() => _BookingCardState();
 }
 
-class _ModernBookingCardState extends State<ModernBookingCard>
+class _BookingCardState extends State<BookingCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -603,21 +603,26 @@ class _ModernBookingCardState extends State<ModernBookingCard>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Service and contractor info
-                      _ModernContractorInfo(booking: widget.booking),
+                      _ContractorInfo(booking: widget.booking),
                       SizedBox(height: context.getHeight(20)),
 
                       // Details grid
-                      _ModernDetailsGrid(booking: widget.booking),
+                      _DetailsGrid(booking: widget.booking),
 
                       // Action buttons for in-progress orders
                       if (widget.booking.status == 1) ...[
                         SizedBox(height: context.getHeight(24)),
-                        _ModernActionButtons(
+                        _ActionButtons(
                           booking: widget.booking,
                           onReceive: () => _showReceiveConfirmationDialog(
-                              context, bookingManager, widget.booking.id),
+                            context,
+                            bookingManager,
+                            widget.booking.id,
+                          ),
                           onCancel: () => _showCancelConfirmationDialog(
-                              context, bookingManager),
+                            context,
+                            bookingManager,
+                          ),
                         ),
                       ],
                     ],
@@ -660,7 +665,6 @@ class _ModernBookingCardState extends State<ModernBookingCard>
     }
   }
 
-  // ... (continue with dialog methods - same as before)
   void _showModifyBookingDialog(
       BuildContext context, BookingManagerProvider bookingManager) {
     showDialog(
@@ -703,10 +707,10 @@ class _ModernBookingCardState extends State<ModernBookingCard>
             child: TextButton(
               onPressed: () async {
                 await bookingManager.receiveOrder(
-                    context, dialogContext, bookingId);
-                if (context.mounted) {
-                  Navigator.of(dialogContext).pop();
-                }
+                  context,
+                  dialogContext,
+                  bookingId,
+                );
               },
               child: Text(
                 AppLocalizations.of(context)!.confirm,
@@ -730,11 +734,11 @@ class _ModernBookingCardState extends State<ModernBookingCard>
   }
 }
 
-/// Modern contractor info section
-class _ModernContractorInfo extends StatelessWidget {
+///  contractor info section
+class _ContractorInfo extends StatelessWidget {
   final Booking booking;
 
-  const _ModernContractorInfo({required this.booking});
+  const _ContractorInfo({required this.booking});
 
   @override
   Widget build(BuildContext context) {
@@ -790,11 +794,11 @@ class _ModernContractorInfo extends StatelessWidget {
   }
 }
 
-/// Modern details grid
-class _ModernDetailsGrid extends StatelessWidget {
+///  details grid
+class _DetailsGrid extends StatelessWidget {
   final Booking booking;
 
-  const _ModernDetailsGrid({required this.booking});
+  const _DetailsGrid({required this.booking});
 
   @override
   Widget build(BuildContext context) {
@@ -803,7 +807,7 @@ class _ModernDetailsGrid extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _ModernDetailItem(
+              child: _DetailItem(
                 icon: Icons.location_on_rounded,
                 label: AppLocalizations.of(context)!.location,
                 value: booking.location,
@@ -812,7 +816,7 @@ class _ModernDetailsGrid extends StatelessWidget {
             ),
             SizedBox(width: context.getWidth(12)),
             Expanded(
-              child: _ModernDetailItem(
+              child: _DetailItem(
                 icon: Icons.schedule_rounded,
                 label: AppLocalizations.of(context)!.time,
                 value:
@@ -826,7 +830,7 @@ class _ModernDetailsGrid extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _ModernDetailItem(
+              child: _DetailItem(
                 icon: Icons.timer_rounded,
                 label: AppLocalizations.of(context)!.duration,
                 value: booking.getFormattedDuration(context),
@@ -835,7 +839,7 @@ class _ModernDetailsGrid extends StatelessWidget {
             ),
             SizedBox(width: context.getWidth(12)),
             Expanded(
-              child: _ModernDetailItem(
+              child: _DetailItem(
                 icon: Icons.attach_money_rounded,
                 label: AppLocalizations.of(context)!.price,
                 value: booking.getServiceRateDisplay(context),
@@ -845,7 +849,7 @@ class _ModernDetailsGrid extends StatelessWidget {
           ],
         ),
         SizedBox(height: context.getHeight(12)),
-        _ModernDetailItem(
+        _DetailItem(
           icon: Icons.receipt_rounded,
           label: AppLocalizations.of(context)!.total,
           value: '\$${booking.price.toStringAsFixed(2)}',
@@ -855,7 +859,7 @@ class _ModernDetailsGrid extends StatelessWidget {
         // Show pricing type for new orders
         if (booking.service.pricingType != null) ...[
           SizedBox(height: context.getHeight(12)),
-          _ModernDetailItem(
+          _DetailItem(
             icon: _getPricingIcon(booking.service.pricingType!),
             label: AppLocalizations.of(context)!.pricingType,
             value:
@@ -894,15 +898,15 @@ class _ModernDetailsGrid extends StatelessWidget {
   }
 }
 
-/// Modern detail item with icon and styling
-class _ModernDetailItem extends StatelessWidget {
+///  detail item with icon and styling
+class _DetailItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
   final Color color;
   final bool isHighlighted;
 
-  const _ModernDetailItem({
+  const _DetailItem({
     required this.icon,
     required this.label,
     required this.value,
@@ -967,13 +971,13 @@ class _ModernDetailItem extends StatelessWidget {
   }
 }
 
-/// Modern action buttons with enhanced styling
-class _ModernActionButtons extends StatelessWidget {
+///  action buttons with enhanced styling
+class _ActionButtons extends StatelessWidget {
   final Booking booking;
   final VoidCallback onReceive;
   final VoidCallback onCancel;
 
-  const _ModernActionButtons({
+  const _ActionButtons({
     required this.booking,
     required this.onReceive,
     required this.onCancel,
@@ -1063,7 +1067,7 @@ class _ModernActionButtons extends StatelessWidget {
   }
 }
 
-/// Modern cancel confirmation dialog
+///  cancel confirmation dialog
 class _CancelConfirmationDialog extends StatelessWidget {
   final Booking booking;
   final BookingManagerProvider bookingManager;

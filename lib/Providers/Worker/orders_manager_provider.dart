@@ -6,12 +6,10 @@ import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Features/User/Models/order_model.dart';
 import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
-
 import 'package:good_one_app/Features/Worker/Models/my_order_model.dart';
 import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
-
 import 'package:good_one_app/l10n/app_localizations.dart';
 
 class OrdersManagerProvider extends ChangeNotifier {
@@ -20,6 +18,7 @@ class OrdersManagerProvider extends ChangeNotifier {
   Map<String, List<MyOrderModel>> _orders = {};
   List<String> _dates = [];
   TabController? _tabController;
+  TickerProvider? _vsync;
 
   LatLng? _customerLatLng;
   final MapController _mapController = MapController();
@@ -49,18 +48,38 @@ class OrdersManagerProvider extends ChangeNotifier {
     await fetchOrders();
   }
 
-  // Initialize TabController
+  // Initialize TabController with proper cleanup
   void initializeTabController(TickerProvider vsync) {
+    // Store the vsync for future use
+    _vsync = vsync;
+
+    // Dispose existing controller if it exists
+    _tabController?.dispose();
+
     if (_dates.isNotEmpty) {
       _tabController =
           TabController(length: _dates.length, vsync: vsync, initialIndex: 0);
+
+      // Add listener for tab changes
+      _tabController?.addListener(_onTabChanged);
+    } else {
+      _tabController = null;
     }
     notifyListeners();
   }
 
+  void _onTabChanged() {
+    // Force rebuild when tab changes
+    if (_tabController != null && !_tabController!.indexIsChanging) {
+      notifyListeners();
+    }
+  }
+
   // Update TabController when dates change
-  void updateTabController(TickerProvider vsync) {
-    initializeTabController(vsync);
+  void updateTabController() {
+    if (_vsync != null) {
+      initializeTabController(_vsync!);
+    }
   }
 
   // Orders Management
@@ -70,9 +89,17 @@ class OrdersManagerProvider extends ChangeNotifier {
     try {
       final response = await WorkerApi.fetchOrders();
       if (response.success && response.data != null) {
+        final oldDatesLength = _dates.length;
+
         // Sort orders to prioritize pending ones
         _orders = _sortOrdersByPriority(response.data!);
         _dates = orders.keys.toList();
+
+        // Update TabController if dates changed and we have a vsync
+        if (_dates.length != oldDatesLength && _vsync != null) {
+          updateTabController();
+        }
+
         notifyListeners();
       } else {
         setError(response.error ?? 'Failed to fetch orders');
@@ -80,7 +107,6 @@ class OrdersManagerProvider extends ChangeNotifier {
     } catch (e) {
       setError('Exception fetching orders: $e');
     } finally {
-      setError(null);
       _setOrdersLoading(false);
     }
   }
@@ -146,14 +172,12 @@ class OrdersManagerProvider extends ChangeNotifier {
         notifyListeners();
       } else {
         setError('Could not find location for the provided address.');
-
         _setOrdersLoading(false);
         notifyListeners();
       }
     } catch (e) {
       setError('Error geocoding address');
       _setOrdersLoading(false);
-
       notifyListeners();
     }
   }
@@ -249,9 +273,15 @@ class OrdersManagerProvider extends ChangeNotifier {
         return AppColors.successColor;
       case 3:
         return AppColors.chartInactive;
-
       default:
         return AppColors.chartInactive;
     }
+  }
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_onTabChanged);
+    _tabController?.dispose();
+    super.dispose();
   }
 }

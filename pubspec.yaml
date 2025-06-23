@@ -50,6 +50,34 @@ flutter_launcher_icons:
   adaptive_icon_background: "#f70303"
   adaptive_icon_foreground: "assets/icons/icon.png"
 
+flutter_native_splash:
+  # Enable splash screen for platforms
+  android: true
+  ios: true
+  web: false
+
+  # Background color (same for both platforms)
+  color: "#f70303"
+  
+  # Main logo/image
+  image: "assets/images/logo.png"
+  
+  # Branding text/image at bottom
+  branding: "assets/images/app_name.png"
+  
+  # iOS specific settings for better control
+  ios_content_mode: scaleAspectFit
+  
+  # Android specific settings
+  android_12:
+    color: "#f70303"
+    image: "assets/images/logo.png"
+    branding: "assets/images/branding.png"
+    
+  # Additional settings for better control
+  fullscreen: true
+  android_gravity: center
+
 flutter:
   uses-material-design: true
   generate: true

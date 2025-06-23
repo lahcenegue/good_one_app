@@ -46,7 +46,7 @@
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UIStatusBarHidden</key>
-		<false/>
+		<true/>
 		<key>NSCameraUsageDescription</key>
 		<string>We need access to let you take a profile picture</string>
 		<key>NSPhotoLibraryUsageDescription</key>
@@ -57,5 +57,7 @@
 		<string>This app needs access to location when in the background.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>To process payments</string>
+		<key>UIViewControllerBasedStatusBarAppearance</key>
+		<false/>
 	</dict>
 </plist>

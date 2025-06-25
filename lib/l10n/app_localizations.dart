@@ -3541,6 +3541,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Withdrawn'**
   String get totalWithdrawn;
+
+  /// Label for selecting the type of account
+  ///
+  /// In en, this message translates to:
+  /// **'Account Type'**
+  String get accountType;
+
+  /// Label representing a user who is seeking services
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get client;
+
+  /// Label representing a user who is offering services
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get provider;
+
+  /// Short description explaining the role of a client
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for services'**
+  String get clientDescription;
+
+  /// Short description explaining the role of a provider
+  ///
+  /// In en, this message translates to:
+  /// **'Offering services'**
+  String get providerDescription;
+
+  /// Instructional message prompting the user to choose an account type
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an account type'**
+  String get pleaseSelectAccountType;
 }
 
 class _AppLocalizationsDelegate

@@ -1862,4 +1862,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalWithdrawn => 'Total Withdrawn';
+
+  @override
+  String get accountType => 'Account Type';
+
+  @override
+  String get client => 'Client';
+
+  @override
+  String get provider => 'Provider';
+
+  @override
+  String get clientDescription => 'Looking for services';
+
+  @override
+  String get providerDescription => 'Offering services';
+
+  @override
+  String get pleaseSelectAccountType => 'Please select an account type';
 }

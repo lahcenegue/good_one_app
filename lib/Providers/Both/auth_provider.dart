@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Core/infrastructure/Services/token_manager.dart';
 import 'package:good_one_app/Features/Auth/Models/check_request.dart';
 import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'package:good_one_app/Providers/User/user_manager_provider.dart';
 import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
+import 'package:good_one_app/features/Setup/Models/account_type.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -17,7 +19,6 @@ import 'package:good_one_app/Features/Auth/Models/register_request.dart';
 import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
 import 'package:good_one_app/Features/Auth/Models/auth_request.dart';
 import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
-import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:provider/provider.dart';
 
@@ -25,6 +26,8 @@ import 'package:good_one_app/l10n/app_localizations.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isInitialized = false;
+
+  AccountType? _selectedRegistrationAccountType;
 
   // Authentication State
   AuthModel? _authData;
@@ -37,11 +40,6 @@ class AuthProvider with ChangeNotifier {
 
   String? selectedCountry;
   String? selectedCity;
-
-  // Form Controllers
-  // final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  // final GlobalKey<FormState> registrationFormKey = GlobalKey<FormState>();
-  // final GlobalKey<FormState> forgotPasswordFormKey = GlobalKey<FormState>();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController forgotPasswordEmailController =
@@ -66,6 +64,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Getters
+  AccountType? get selectedRegistrationAccountType =>
+      _selectedRegistrationAccountType;
+
   bool get isLoading => _isLoading;
   bool get isAuth => _authData?.accessToken != null;
   String? get token => _authData?.accessToken;
@@ -166,6 +167,18 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setRegistrationAccountType(AccountType type) {
+    _selectedRegistrationAccountType = type;
+
+    // Clear location data when switching from worker to customer
+    if (type == AccountType.customer) {
+      selectedCountry = null;
+      selectedCity = null;
+    }
+
+    notifyListeners();
+  }
+
 // Authentication Methods
   Future<void> login(BuildContext context) async {
     print('======Login function ======');
@@ -174,15 +187,16 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearErrors();
 
-      final [accountType, deviceToken] = await Future.wait([
-        StorageManager.getString(StorageKeys.accountTypeKey),
-        StorageManager.getString(StorageKeys.fcmTokenKey),
-      ]);
+      final accountType =
+          await StorageManager.getString(StorageKeys.accountTypeKey);
+
+      // Use TokenManager to get device token - this NEVER returns null
+      final deviceToken = await TokenManager.instance.getDeviceToken();
 
       final request = AuthRequest(
         email: emailController.text.trim(),
         password: passwordController.text,
-        deviceToken: deviceToken!,
+        deviceToken: deviceToken, // Guaranteed to be non-null
       );
 
       final response = await AuthApi.login(request);
@@ -192,31 +206,27 @@ class AuthProvider with ChangeNotifier {
         _clearFormData();
         await _saveAuthData();
 
-        // Initialize chat AFTER the providers have loaded user data
         _setLoading(false);
 
         if (accountType == AppConfig.service) {
           await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
 
-          // Initialize chat for worker after navigation with better error handling
+          // Initialize chat for worker after navigation
           try {
             final workerProvider =
                 Provider.of<WorkerManagerProvider>(context, listen: false);
             final chatProvider =
                 Provider.of<ChatProvider>(context, listen: false);
 
-            // Wait longer for the worker provider to load user data
             await Future.delayed(const Duration(milliseconds: 2000));
 
             if (workerProvider.workerInfo?.id != null) {
-              // Use switchUser instead of initialize for clean state
               await chatProvider
                   .switchUser(workerProvider.workerInfo!.id.toString());
               print(
                   'Chat initialized for worker: ${workerProvider.workerInfo!.id}');
             } else {
               print('Worker info not available yet, will retry...');
-              // Retry after additional delay
               await Future.delayed(const Duration(milliseconds: 1000));
               if (workerProvider.workerInfo?.id != null) {
                 await chatProvider
@@ -229,24 +239,21 @@ class AuthProvider with ChangeNotifier {
         } else {
           await NavigationService.navigateToAndReplace(AppRoutes.userMain);
 
-          // Initialize chat for user after navigation with better error handling
+          // Initialize chat for user after navigation
           try {
             final userProvider =
                 Provider.of<UserManagerProvider>(context, listen: false);
             final chatProvider =
                 Provider.of<ChatProvider>(context, listen: false);
 
-            // Wait longer for the user provider to load user data
             await Future.delayed(const Duration(milliseconds: 2000));
 
             if (userProvider.userInfo?.id != null) {
-              // Use switchUser instead of initialize for clean state
               await chatProvider
                   .switchUser(userProvider.userInfo!.id.toString());
               print('Chat initialized for user: ${userProvider.userInfo!.id}');
             } else {
               print('User info not available yet, will retry...');
-              // Retry after additional delay
               await Future.delayed(const Duration(milliseconds: 1000));
               if (userProvider.userInfo?.id != null) {
                 await chatProvider
@@ -286,21 +293,26 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearErrors();
 
-      final [accountType, deviceToken] = await Future.wait([
-        StorageManager.getString(StorageKeys.accountTypeKey),
-        StorageManager.getString(StorageKeys.fcmTokenKey),
-      ]);
+      // Use the selected account type from registration instead of storage
+      final accountType = _selectedRegistrationAccountType?.toJson();
 
       if (accountType == null) {
-        NavigationService.navigateToAndReplace(AppRoutes.accountSelection);
+        _error = AppLocalizations.of(context)!.pleaseSelectAccountType;
+        notifyListeners();
+        return;
       }
+
+      // Save the selected account type to storage
+      await StorageManager.setString(StorageKeys.accountTypeKey, accountType);
+
+      // Use TokenManager to get device token - this NEVER returns null
+      final deviceToken = await TokenManager.instance.getDeviceToken();
 
       if (accountType == AppConfig.service) {
         if (selectedCountry == null || selectedCity == null) {
           if (context.mounted) {
             _error = AppLocalizations.of(context)!.locationRequired;
           }
-
           notifyListeners();
           return;
         }
@@ -312,8 +324,8 @@ class AuthProvider with ChangeNotifier {
         email: emailController.text.trim(),
         phone: phoneController.text.trim(),
         password: passwordController.text,
-        type: accountType!,
-        deviceToken: deviceToken ?? '',
+        type: accountType,
+        deviceToken: deviceToken,
         country: accountType == AppConfig.service ? selectedCountry : null,
         city: accountType == AppConfig.service ? selectedCity : null,
       );
@@ -325,25 +337,6 @@ class AuthProvider with ChangeNotifier {
         _error = response.error;
         notifyListeners();
       }
-
-      // if (response.success) {
-      //   _authData = response.data;
-      //   _clearFormData();
-      //   await _saveAuthData();
-
-      //   _setLoading(false);
-      //   if (accountType == AppConfig.service) {
-      //     await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
-      //   } else {
-      //     await NavigationService.navigateToAndReplace(
-      //       AppRoutes.userMain,
-      //       arguments: 0,
-      //     );
-      //   }
-      // } else {
-      //   _error = response.error;
-      //   notifyListeners();
-      // }
     } catch (e) {
       _handleError(e);
     } finally {
@@ -500,7 +493,7 @@ class AuthProvider with ChangeNotifier {
     await StorageManager.remove(StorageKeys.accountTypeKey);
     await StorageManager.remove(StorageKeys.refreshTokenKey);
 
-    await TokenManager.instance.clearToken();
+    await TokenManager.instance.clearAuthToken();
   }
 
   // Private Helper Methods
@@ -529,7 +522,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _saveAuthData() async {
     try {
-      await TokenManager.instance.setToken(_authData!);
+      await TokenManager.instance.setAuthToken(_authData!); // CHANGED
     } catch (e) {
       throw Exception('Failed to save authentication data');
     }
@@ -552,36 +545,26 @@ class AuthProvider with ChangeNotifier {
   }
 
   void startTimer() {
+    _timer?.cancel();
     _seconds = 60;
+    notifyListeners(); // Notify immediately to show initial value
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_seconds > 0) {
         _seconds--;
         notifyListeners();
       } else {
         _timer?.cancel();
+        notifyListeners(); // Notify when timer reaches 0
       }
     });
   }
 
-  // String? _getLocalizedErrorMessage(String? errorCode,
-  //     [BuildContext? context]) {
-  //   if (context == null) return null;
-
-  //   switch (errorCode) {
-  //     case 'auth_error':
-  //       return AppLocalizations.of(context)!.authError;
-  //     case 'network_error':
-  //       return AppLocalizations.of(context)!.networkError;
-  //     case 'storage_error':
-  //       return AppLocalizations.of(context)!.storageError;
-  //     case 'invalid_credentials':
-  //       return AppLocalizations.of(context)!.invalidCredentials;
-  //     case 'invalid_response':
-  //       return AppLocalizations.of(context)!.serverError;
-  //     default:
-  //       return _failure?.message ?? AppLocalizations.of(context)!.generalError;
-  //   }
-  // }
+  void ensureTimerIsRunning() {
+    if (_timer == null || !_timer!.isActive) {
+      startTimer();
+    }
+  }
 
   void _clearFormData() {
     _obscurePassword = true;

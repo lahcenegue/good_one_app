@@ -1844,4 +1844,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get totalWithdrawn => 'إجمالي المسحوبات';
+
+  @override
+  String get accountType => 'نوع الحساب';
+
+  @override
+  String get client => 'عميل';
+
+  @override
+  String get provider => 'مزود خدمة';
+
+  @override
+  String get clientDescription => 'يبحث عن خدمات';
+
+  @override
+  String get providerDescription => 'يقدم خدمات';
+
+  @override
+  String get pleaseSelectAccountType => 'يرجى اختيار نوع الحساب';
 }

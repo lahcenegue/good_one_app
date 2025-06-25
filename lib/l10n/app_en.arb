@@ -2989,9 +2989,35 @@
   "totalWithdrawn": "Total Withdrawn",
   "@totalWithdrawn": {
     "description": "Label indicating the total amount of money that has been withdrawn by the user"
+  },
+
+  "accountType": "Account Type",
+  "@accountType": {
+    "description": "Label for selecting the type of account"
+  },
+
+  "client": "Client",
+  "@client": {
+    "description": "Label representing a user who is seeking services"
+  },
+
+  "provider": "Provider",
+  "@provider": {
+    "description": "Label representing a user who is offering services"
+  },
+
+  "clientDescription": "Looking for services",
+  "@clientDescription": {
+    "description": "Short description explaining the role of a client"
+  },
+
+  "providerDescription": "Offering services",
+  "@providerDescription": {
+    "description": "Short description explaining the role of a provider"
+  },
+
+  "pleaseSelectAccountType": "Please select an account type",
+  "@pleaseSelectAccountType": {
+    "description": "Instructional message prompting the user to choose an account type"
   }
-
-
-
-
 }

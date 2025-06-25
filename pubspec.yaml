@@ -1,7 +1,7 @@
 name: good_one_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: ^3.5.4
@@ -45,38 +45,37 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
+  image_path: "assets/icons/icon2.png"  
   remove_alpha_ios: true
-  image_path: "assets/icons/icon.png"
   adaptive_icon_background: "#f70303"
   adaptive_icon_foreground: "assets/icons/icon.png"
 
 flutter_native_splash:
-  # Enable splash screen for platforms
   android: true
   ios: true
   web: false
-
-  # Background color (same for both platforms)
+  
+  # Background color
   color: "#f70303"
   
-  # Main logo/image
+  # Use a square logo image that will appear circular
   image: "assets/images/logo.png"
   
-  # Branding text/image at bottom
-  branding: "assets/images/app_name.png"
+  # Remove branding temporarily to match Android appearance
+  # branding: "assets/images/app_name.png"
   
   # iOS specific settings for better control
   ios_content_mode: scaleAspectFit
   
-  # Android specific settings
+  # Android settings
+  android_gravity: center
   android_12:
     color: "#f70303"
     image: "assets/images/logo.png"
-    branding: "assets/images/branding.png"
-    
-  # Additional settings for better control
+    # branding: "assets/images/branding.png"
+  
+  # Make it fullscreen
   fullscreen: true
-  android_gravity: center
 
 flutter:
   uses-material-design: true

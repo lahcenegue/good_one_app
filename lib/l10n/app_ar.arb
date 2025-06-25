@@ -574,5 +574,11 @@
   "thisMonth": "هذا الشهر",
   "balanceSummary": "ملخص الرصيد",
   "availableBalance": "الرصيد المتاح",
-  "totalWithdrawn": "إجمالي المسحوبات"
+  "totalWithdrawn": "إجمالي المسحوبات",
+  "accountType": "نوع الحساب",
+  "client": "عميل",
+  "provider": "مزود خدمة",
+  "clientDescription": "يبحث عن خدمات",
+  "providerDescription": "يقدم خدمات",
+  "pleaseSelectAccountType": "يرجى اختيار نوع الحساب"
 }

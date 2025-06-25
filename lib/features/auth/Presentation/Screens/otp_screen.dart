@@ -15,6 +15,10 @@ class OtpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
+        // Ensure timer is running when screen is built
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          auth.ensureTimerIsRunning();
+        });
         return Scaffold(
           appBar: AppBar(
             title: Text(

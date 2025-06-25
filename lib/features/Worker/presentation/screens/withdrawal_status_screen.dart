@@ -34,7 +34,25 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
   Widget build(BuildContext context) {
     return Consumer<WorkerManagerProvider>(
       builder: (context, workerManager, _) {
+        // Sort withdrawal requests by date (most recent first)
         final requests = workerManager.withdrawStatus ?? [];
+        final sortedRequests = List<WithdrawStatus>.from(requests);
+
+        // Sort by createdAt date in descending order (most recent first)
+        sortedRequests.sort((a, b) {
+          if (a.createdAt == null && b.createdAt == null) return 0;
+          if (a.createdAt == null) return 1; // null dates go to end
+          if (b.createdAt == null) return -1;
+
+          try {
+            final dateA = DateTime.parse(a.createdAt!);
+            final dateB = DateTime.parse(b.createdAt!);
+            return dateB.compareTo(dateA); // Descending order (newest first)
+          } catch (e) {
+            // If date parsing fails, maintain original order
+            return 0;
+          }
+        });
 
         if (workerManager.isLoading) {
           return Scaffold(
@@ -45,7 +63,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
         return Scaffold(
           appBar: _buildAppBar(context),
           body: SafeArea(
-            child: _buildBodyContent(context, workerManager, requests),
+            child: _buildBodyContent(context, workerManager, sortedRequests),
           ),
         );
       },

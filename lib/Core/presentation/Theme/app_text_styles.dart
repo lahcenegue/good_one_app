@@ -5,18 +5,32 @@ import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 class AppTextStyles {
   const AppTextStyles._();
 
-  // Base style generator
+  // Base style generator with platform-aware sizing
   static TextStyle _baseStyle(
     BuildContext context, {
     required double fontSize,
     required FontWeight weight,
     required Color color,
+    double? height,
   }) {
     return TextStyle(
-      fontSize: context.getAdaptiveSize(fontSize),
+      fontSize: _getConsistentFontSize(context, fontSize),
       fontWeight: weight,
       color: color,
+      height: height,
+      // Disable text scaling to ensure consistency
+      textBaseline: TextBaseline.alphabetic,
     );
+  }
+
+  // Platform-aware font size calculation
+  static double _getConsistentFontSize(BuildContext context, double fontSize) {
+    // Adaptive sizing with platform-specific adjustments
+    final adaptiveSize = context.getAdaptiveSize(fontSize);
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      return adaptiveSize * 0.9; // Reduce iOS font size by 10%
+    }
+    return adaptiveSize;
   }
 
   // Heading Styles
@@ -25,6 +39,7 @@ class AppTextStyles {
         fontSize: 20,
         weight: FontWeight.w700,
         color: AppColors.blackText,
+        height: 1.2,
       );
 
   static TextStyle title(BuildContext context) => _baseStyle(
@@ -32,6 +47,7 @@ class AppTextStyles {
         fontSize: 24,
         weight: FontWeight.w500,
         color: AppColors.blackText,
+        height: 1.3,
       );
 
   static TextStyle title2(BuildContext context) => _baseStyle(
@@ -39,6 +55,7 @@ class AppTextStyles {
         fontSize: 16,
         weight: FontWeight.w600,
         color: AppColors.blackText,
+        height: 1.25,
       );
 
   static TextStyle titleLarge(BuildContext context) => _baseStyle(
@@ -46,6 +63,7 @@ class AppTextStyles {
         fontSize: 18,
         weight: FontWeight.w600,
         color: AppColors.primaryColor,
+        height: 1.25,
       );
 
   // Body Styles
@@ -54,6 +72,7 @@ class AppTextStyles {
         fontSize: 16,
         weight: FontWeight.w400,
         color: AppColors.blackText,
+        height: 1.4,
       );
 
   static TextStyle text(BuildContext context) => _baseStyle(
@@ -61,6 +80,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w400,
         color: AppColors.textGray,
+        height: 1.4,
       );
 
   static TextStyle bodyText(BuildContext context) => _baseStyle(
@@ -68,6 +88,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w400,
         color: AppColors.blackText,
+        height: 1.4,
       );
 
   static TextStyle bodyTextMedium(BuildContext context) => _baseStyle(
@@ -75,6 +96,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.blackText,
+        height: 1.4,
       );
 
   static TextStyle bodyTextBold(BuildContext context) => _baseStyle(
@@ -82,6 +104,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.bold,
         color: AppColors.textDark,
+        height: 1.4,
       );
 
   // Small Text Styles
@@ -90,6 +113,7 @@ class AppTextStyles {
         fontSize: 12,
         weight: FontWeight.w400,
         color: AppColors.textGray,
+        height: 1.3,
       );
 
   static TextStyle caption(BuildContext context) => _baseStyle(
@@ -97,6 +121,7 @@ class AppTextStyles {
         fontSize: 12,
         weight: FontWeight.w400,
         color: AppColors.textMedium,
+        height: 1.3,
       );
 
   static TextStyle captionMedium(BuildContext context) => _baseStyle(
@@ -104,6 +129,7 @@ class AppTextStyles {
         fontSize: 12,
         weight: FontWeight.w500,
         color: AppColors.blackText,
+        height: 1.3,
       );
 
   // Button Styles
@@ -112,6 +138,7 @@ class AppTextStyles {
         fontSize: 16,
         weight: FontWeight.w500,
         color: AppColors.whiteText,
+        height: 1.2,
       );
 
   static TextStyle buttonTextMedium(BuildContext context) => _baseStyle(
@@ -119,6 +146,7 @@ class AppTextStyles {
         fontSize: 16,
         weight: FontWeight.w600,
         color: AppColors.whiteText,
+        height: 1.2,
       );
 
   // Action Styles
@@ -127,6 +155,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w400,
         color: AppColors.oxblood,
+        height: 1.3,
       );
 
   static TextStyle linkText(BuildContext context) => _baseStyle(
@@ -134,6 +163,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.primaryColor,
+        height: 1.3,
       );
 
   // Form Styles
@@ -142,6 +172,7 @@ class AppTextStyles {
         fontSize: 16,
         weight: FontWeight.w400,
         color: AppColors.blackText,
+        height: 1.3,
       );
 
   static TextStyle hintText(BuildContext context) => _baseStyle(
@@ -149,6 +180,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w400,
         color: AppColors.hintColor,
+        height: 1.3,
       );
 
   static TextStyle labelText(BuildContext context) => _baseStyle(
@@ -156,6 +188,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.blackText,
+        height: 1.3,
       );
 
   static TextStyle floatingLabelText(BuildContext context) => _baseStyle(
@@ -163,6 +196,7 @@ class AppTextStyles {
         fontSize: 12,
         weight: FontWeight.w500,
         color: AppColors.blackText,
+        height: 1.2,
       );
 
   static TextStyle errorText(BuildContext context) => _baseStyle(
@@ -170,6 +204,7 @@ class AppTextStyles {
         fontSize: 12,
         weight: FontWeight.w400,
         color: AppColors.oxblood,
+        height: 1.2,
       );
 
   // Special Styles
@@ -178,6 +213,7 @@ class AppTextStyles {
         fontSize: 20,
         weight: FontWeight.w700,
         color: AppColors.primaryColor,
+        height: 1.2,
       );
 
   static TextStyle priceSmall(BuildContext context) => _baseStyle(
@@ -185,6 +221,7 @@ class AppTextStyles {
         fontSize: 16,
         weight: FontWeight.w600,
         color: AppColors.primaryColor,
+        height: 1.2,
       );
 
   static TextStyle rating(BuildContext context) => _baseStyle(
@@ -192,6 +229,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.textGray,
+        height: 1.3,
       );
 
   // Status Styles
@@ -200,6 +238,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.successDark,
+        height: 1.3,
       );
 
   static TextStyle errorTextStyle(BuildContext context) => _baseStyle(
@@ -207,6 +246,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.errorColor,
+        height: 1.3,
       );
 
   static TextStyle warningText(BuildContext context) => _baseStyle(
@@ -214,6 +254,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.warningDark,
+        height: 1.3,
       );
 
   static TextStyle infoText(BuildContext context) => _baseStyle(
@@ -221,6 +262,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w500,
         color: AppColors.infoDark,
+        height: 1.3,
       );
 
   // Language Selection Styles
@@ -229,6 +271,7 @@ class AppTextStyles {
         fontSize: 16,
         weight: FontWeight.w500,
         color: AppColors.blackText,
+        height: 1.25,
       );
 
   static TextStyle languageSubtitle(BuildContext context) => _baseStyle(
@@ -236,6 +279,7 @@ class AppTextStyles {
         fontSize: 14,
         weight: FontWeight.w400,
         color: AppColors.textMedium,
+        height: 1.3,
       );
 
   // Dynamic font size helpers
@@ -244,12 +288,14 @@ class AppTextStyles {
     required double fontSize,
     FontWeight? fontWeight,
     Color? color,
+    double? height,
   }) =>
       _baseStyle(
         context,
         fontSize: fontSize,
         weight: fontWeight ?? FontWeight.w400,
         color: color ?? AppColors.blackText,
+        height: height,
       );
 
   // Helper methods
@@ -267,6 +313,7 @@ class AppTextStyles {
 
   static TextStyle withHeight(TextStyle style, double height) =>
       style.copyWith(height: height);
+
   static TextStyle italic(TextStyle style) =>
       style.copyWith(fontStyle: FontStyle.italic);
 }

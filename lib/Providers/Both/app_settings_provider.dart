@@ -31,7 +31,7 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
   AccountType? get selectedAccountType => _selectedAccountType;
   bool get canProceed => _selectedAccountType != null;
   bool get isSetupComplete => _isSetupComplete;
-  String? get fcmToken => _notificationService.fcmToken;
+  Future<String> get fcmToken => _notificationService.getDeviceToken();
 
   bool isAccountTypeSelected(AccountType type) => _selectedAccountType == type;
 

@@ -3,6 +3,7 @@ import 'package:good_one_app/Core/Infrastructure/Api/api_response.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/infrastructure/Services/token_manager.dart';
 import 'package:good_one_app/Features/Worker/Models/balance_model.dart';
 import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
 import 'package:good_one_app/Features/Worker/Models/earnings_model.dart';
@@ -24,7 +25,6 @@ import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
 import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
 import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
-import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:provider/provider.dart';
 
@@ -713,9 +713,9 @@ class WorkerManagerProvider extends ChangeNotifier {
           await getMyBalance();
           _initializeUsersControllers();
         } else {
-          final refreshed = await TokenManager.instance.refreshToken();
+          final refreshed = await TokenManager.instance.refreshAuthToken();
           if (refreshed) {
-            _token = TokenManager.instance.token;
+            _token = TokenManager.instance.accessToken;
             await initialize();
           } else {
             await clearData();
@@ -1486,7 +1486,7 @@ class WorkerManagerProvider extends ChangeNotifier {
     await StorageManager.remove(StorageKeys.tokenKey);
     await StorageManager.remove(StorageKeys.accountTypeKey);
 
-    await TokenManager.instance.clearToken();
+    await TokenManager.instance.clearAuthToken();
     _currentIndex = 0;
     notifyListeners();
   }

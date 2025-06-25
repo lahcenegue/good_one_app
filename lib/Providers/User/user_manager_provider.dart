@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
+import 'package:good_one_app/Core/infrastructure/Services/token_manager.dart';
 import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'dart:async';
 import 'dart:io';
@@ -14,7 +15,6 @@ import 'package:good_one_app/Features/Both/Services/both_api.dart';
 import 'package:good_one_app/Features/User/Models/contractor.dart';
 import 'package:good_one_app/Features/User/Models/service_category.dart';
 import 'package:good_one_app/Features/User/Services/user_api.dart';
-import 'package:good_one_app/Features/Auth/Services/token_manager.dart';
 
 import 'package:provider/provider.dart';
 
@@ -246,7 +246,7 @@ class UserManagerProvider extends ChangeNotifier {
 
     await StorageManager.remove(StorageKeys.tokenKey);
     await StorageManager.remove(StorageKeys.accountTypeKey);
-    await TokenManager.instance.clearToken();
+    await TokenManager.instance.clearAuthToken();
     _currentIndex = 0;
     notifyListeners();
   }
@@ -366,9 +366,9 @@ class UserManagerProvider extends ChangeNotifier {
       if (userInfoSuccess) {
         _initializeControllers();
       } else {
-        final refreshed = await TokenManager.instance.refreshToken();
+        final refreshed = await TokenManager.instance.refreshAuthToken();
         if (refreshed) {
-          _token = TokenManager.instance.token;
+          _token = TokenManager.instance.accessToken;
           final refreshedUserInfoSuccess = await _fetchUserInfoInternalLogic();
           if (refreshedUserInfoSuccess) {
             _initializeControllers();

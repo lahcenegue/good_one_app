@@ -457,18 +457,20 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SmallSecondaryButton(
-          text: AppLocalizations.of(context)!.cancel,
-          onPressed: () {
-            _showCancelOrderDialog(orderManager);
-          },
+        Expanded(
+          child: SecondaryButton(
+            text: AppLocalizations.of(context)!.cancel,
+            onPressed: () {
+              _showCancelOrderDialog(orderManager);
+            },
+          ),
         ),
-        SmallPrimaryButton(
-          text: AppLocalizations.of(context)!.complete,
-          onPressed: () {
-            _showCompleteOrderDialog(orderManager);
-          },
-        )
+        // SmallPrimaryButton(
+        //   text: AppLocalizations.of(context)!.complete,
+        //   onPressed: () {
+        //     _showCompleteOrderDialog(orderManager);
+        //   },
+        // )
       ],
     );
   }
@@ -570,83 +572,83 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  void _showCompleteOrderDialog(OrdersManagerProvider orderManager) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            AppLocalizations.of(context)!.completed,
-            style: AppTextStyles.title2(context),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                color: AppColors.successColor,
-                size: 48,
-              ),
-              SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context)!.hasServiceBeenReceived,
-                style: AppTextStyles.text(context),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                AppLocalizations.of(context)!.notYet,
-                style: AppTextStyles.text(context).copyWith(color: Colors.grey),
-              ),
-            ),
-            Consumer<OrdersManagerProvider>(
-              builder: (context, orderManager, child) {
-                return ElevatedButton(
-                  onPressed: orderManager.isOrdersLoading
-                      ? null
-                      : () async {
-                          // Get WorkerManagerProvider before any async operations
-                          final workerProvider =
-                              Provider.of<WorkerManagerProvider>(context,
-                                  listen: false);
+  // void _showCompleteOrderDialog(OrdersManagerProvider orderManager) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text(
+  //           AppLocalizations.of(context)!.completed,
+  //           style: AppTextStyles.title2(context),
+  //         ),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Icon(
+  //               Icons.check_circle_outline,
+  //               color: AppColors.successColor,
+  //               size: 48,
+  //             ),
+  //             SizedBox(height: 16),
+  //             Text(
+  //               AppLocalizations.of(context)!.hasServiceBeenReceived,
+  //               style: AppTextStyles.text(context),
+  //               textAlign: TextAlign.center,
+  //             ),
+  //           ],
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.of(context).pop(),
+  //             child: Text(
+  //               AppLocalizations.of(context)!.notYet,
+  //               style: AppTextStyles.text(context).copyWith(color: Colors.grey),
+  //             ),
+  //           ),
+  //           Consumer<OrdersManagerProvider>(
+  //             builder: (context, orderManager, child) {
+  //               return ElevatedButton(
+  //                 onPressed: orderManager.isOrdersLoading
+  //                     ? null
+  //                     : () async {
+  //                         // Get WorkerManagerProvider before any async operations
+  //                         final workerProvider =
+  //                             Provider.of<WorkerManagerProvider>(context,
+  //                                 listen: false);
 
-                          // Complete the order with callback for balance refresh
-                          await orderManager.completeOrder(
-                            context,
-                            widget.order.id,
-                            onBalanceRefreshNeeded: () async {
-                              try {
-                                await workerProvider.getMyBalance();
-                              } catch (e) {
-                                print('Could not refresh balance: $e');
-                              }
-                            },
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.successColor,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: orderManager.isOrdersLoading
-                      ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(AppLocalizations.of(context)!.confirm),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //                         // Complete the order with callback for balance refresh
+  //                         await orderManager.completeOrder(
+  //                           context,
+  //                           widget.order.id,
+  //                           onBalanceRefreshNeeded: () async {
+  //                             try {
+  //                               await workerProvider.getMyBalance();
+  //                             } catch (e) {
+  //                               print('Could not refresh balance: $e');
+  //                             }
+  //                           },
+  //                         );
+  //                       },
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: AppColors.successColor,
+  //                   foregroundColor: Colors.white,
+  //                 ),
+  //                 child: orderManager.isOrdersLoading
+  //                     ? SizedBox(
+  //                         width: 20,
+  //                         height: 20,
+  //                         child: CircularProgressIndicator(
+  //                           color: Colors.white,
+  //                           strokeWidth: 2,
+  //                         ),
+  //                       )
+  //                     : Text(AppLocalizations.of(context)!.confirm),
+  //               );
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }

@@ -130,36 +130,49 @@ class WorkerApi {
   static Future<ApiResponse<Map<String, List<MyOrderModel>>>>
       fetchOrders() async {
     final token = await StorageManager.getString(StorageKeys.tokenKey);
+
     try {
       final response = await _api.get<Map<String, List<MyOrderModel>>>(
         url: ApiEndpoints.serviceOrders,
         fromJson: (dynamic json) {
-          // Ensure json is a Map
-          if (json is Map) {
-            // Cast to Map<String, dynamic> to ensure keys are strings
-            final map = json.cast<String, dynamic>();
-            return map.map((key, value) {
-              if (value is List) {
-                return MapEntry(
-                  key,
-                  value.map((item) {
-                    if (item is Map<String, dynamic>) {
-                      return MyOrderModel.fromJson(item);
-                    }
-                    throw Exception(
-                        'Invalid order format in list for date: $key, item: $item (type: ${item.runtimeType})');
-                  }).toList(),
-                );
-              }
-              throw Exception(
-                  'Invalid orders format for date: $key, value: $value (type: ${value.runtimeType})');
-            });
+          // Handle empty response case
+          if (json == null || (json is Map && json.isEmpty)) {
+            return <String, List<MyOrderModel>>{};
           }
+
+          // Handle when json is already the Map of date -> orders
+          if (json is Map<String, dynamic>) {
+            final Map<String, List<MyOrderModel>> result = {};
+
+            json.forEach((dateString, ordersList) {
+              if (ordersList is List) {
+                final orders = <MyOrderModel>[];
+                for (var orderData in ordersList) {
+                  try {
+                    if (orderData is Map<String, dynamic>) {
+                      final order = MyOrderModel.fromJson(orderData);
+                      orders.add(order);
+                    }
+                  } catch (e) {
+                    // Continue with other orders instead of failing completely
+                  }
+                }
+
+                if (orders.isNotEmpty) {
+                  result[dateString] = orders;
+                }
+              }
+            });
+
+            return result;
+          }
+
           throw Exception(
-              'Invalid response format: Expected a map of dates to orders, got: $json (type: ${json.runtimeType})');
+              'Expected Map<String, dynamic> for data, got: ${json.runtimeType}');
         },
         token: token,
       );
+
       return response;
     } catch (e) {
       return ApiResponse.error('Failed to fetch orders: $e');

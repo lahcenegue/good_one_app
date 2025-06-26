@@ -48,9 +48,12 @@ class OtpScreen extends StatelessWidget {
                 SizedBox(height: context.getHeight(40)),
                 PrimaryButton(
                   text: AppLocalizations.of(context)!.checkCode,
-                  onPressed: () {
-                    auth.checkOtp(context);
-                  },
+                  isLoading: auth.isLoading,
+                  onPressed: (auth.otpCode != null &&
+                          auth.otpCode!.length == 6 &&
+                          !auth.isLoading)
+                      ? () => auth.checkOtp(context)
+                      : () {},
                 ),
                 _buildFooter(context, auth),
               ],
@@ -73,7 +76,14 @@ class OtpScreen extends StatelessWidget {
           child: Pinput(
             length: 6,
             onCompleted: (value) async {
-              auth.getOtpCode(value);
+              auth.setOtpCode(value);
+            },
+            onChanged: (value) {
+              if (value.length == 6) {
+                auth.setOtpCode(value);
+              } else {
+                //auth.setOtpCode(null);
+              }
             },
           ),
         ),
@@ -81,7 +91,7 @@ class OtpScreen extends StatelessWidget {
         Align(
           alignment: Alignment.topLeft,
           child: Text(
-            '00:${auth.seconds}',
+            '00:${auth.seconds.toString().padLeft(2, '0')}',
             style: AppTextStyles.text(context),
           ),
         ),
@@ -93,19 +103,26 @@ class OtpScreen extends StatelessWidget {
     BuildContext context,
     AuthProvider auth,
   ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        if (auth.seconds == 0)
-          TextButton(
-            onPressed: () async {
-              auth.sendOtp();
-            },
-            child: Text(
-              AppLocalizations.of(context)!.resendCode,
-              style: AppTextStyles.textButton(context),
-            ),
-          ),
+        SizedBox(height: context.getHeight(20)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (auth.isTimerExpired) // Use the new getter
+              TextButton(
+                onPressed: auth.isLoading
+                    ? null
+                    : () async {
+                        await auth.sendOtp();
+                      },
+                child: Text(
+                  AppLocalizations.of(context)!.resendCode,
+                  style: AppTextStyles.textButton(context),
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }

@@ -8,13 +8,6 @@ import 'package:good_one_app/Core/Utils/storage_keys.dart';
 import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
 import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
 
-/// Professional TokenManager following modern Flutter/Dart practices
-///
-/// Responsibilities:
-/// - Authentication token management
-/// - FCM token management with fallback strategies
-/// - Token refresh and persistence
-/// - Cross-platform notification handling
 class TokenManager {
   TokenManager._();
   static final TokenManager _instance = TokenManager._();
@@ -38,8 +31,13 @@ class TokenManager {
   // Public getters
   AuthModel? get currentAuth => _currentAuth;
   Stream<AuthModel?> get authStream => _authStreamController.stream;
-  Stream<AuthModel?> get tokenStream =>
-      _authStreamController.stream; // Alias for compatibility
+  Stream<AuthModel?> get tokenStream {
+    if (!_isInitialized) {
+      return Stream.empty();
+    }
+    return _authStreamController.stream;
+  }
+
   String? get accessToken => _currentAuth?.accessToken;
   String? get fcmToken => _fcmToken;
   String? get apnsToken => _apnsToken;

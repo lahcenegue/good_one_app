@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/error/error_widget.dart';
-import 'package:good_one_app/features/Setup/Models/account_type.dart';
+import 'package:good_one_app/Features/Setup/Models/account_type.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -218,7 +218,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             text: AppLocalizations.of(context)!.signUp,
             isLoading: auth.isLoading,
             onPressed: () async {
-              await auth.register(context);
+              if (_validateForm(auth)) {
+                await auth.register(context);
+              }
             },
           ),
         ],
@@ -434,5 +436,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
       ),
     );
+  }
+
+  bool _validateForm(AuthProvider auth) {
+    if (!_formKey.currentState!.validate()) {
+      return false;
+    }
+
+    // Additional validation for account type
+    if (auth.selectedRegistrationAccountType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.pleaseSelectAccountType),
+          backgroundColor: AppColors.errorDark,
+        ),
+      );
+      return false;
+    }
+
+    return true;
   }
 }

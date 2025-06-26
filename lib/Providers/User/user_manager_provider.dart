@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/infrastructure/Services/token_manager.dart';
 import 'package:good_one_app/Providers/Both/chat_provider.dart';
@@ -21,128 +23,251 @@ import 'package:provider/provider.dart';
 import 'package:good_one_app/l10n/app_localizations.dart';
 
 class UserManagerProvider extends ChangeNotifier {
-  // --- Authentication State ---
+  // ================================
+  // PRIVATE FIELDS
+  // ================================
+
+  // Authentication State
   String? _token;
   UserInfo? _userInfo;
 
-  // --- Global UI State ---
+  // Global UI State
   String? _globalError;
   bool _isGlobalLoading = false;
   int _currentIndex = 0;
 
-  // --- Form Controllers ---
+  // Form Controllers
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
-  // --- Image Picker State ---
+  // Image Handling State
   File? _selectedImage;
   String? _imageError;
   final ImagePicker _picker = ImagePicker();
 
-  // --- Search State ---
+  // Search State
   String _searchQuery = '';
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
   String? _searchError;
-  final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
 
-  // --- Data Lists ---
+  // Data Collections
   Contractor? _selectedContractor;
   final List<ServiceCategory> _categories = [];
   final List<Contractor> _bestContractors = [];
   List<NotificationModel> _notifications = [];
 
-  // --- Specific Loading and Error States ---
+  // Loading States
   bool _isLoadingUserInfo = false;
-  String? _userInfoError;
-
   bool _isLoadingCategories = false;
-  String? _categoriesError;
-
   bool _isLoadingBestContractors = false;
-  String? _bestContractorsError;
-
   bool _isNotificationLoading = false;
-  String? _notificationError;
-
   bool _isLoadingEditAccount = false;
+
+  // Error States
+  String? _userInfoError;
+  String? _categoriesError;
+  String? _bestContractorsError;
+  String? _notificationError;
   String? _editAccountError;
 
-  // --- Home Screen Sort State ---
+  // Feature States
   String _homeScreenSortBy = 'default';
-
-  // --- Notification Count ---
   int _newNotificationCount = 0;
 
-  // --- Getters ---
+  // ================================
+  // GETTERS
+  // ================================
+
+  // Authentication Getters
   String? get token => _token;
   UserInfo? get userInfo => _userInfo;
   bool get isAuthenticated => _token != null && _userInfo != null;
-  int get currentIndex => _currentIndex;
 
-  // Global states
+  // UI State Getters
+  int get currentIndex => _currentIndex;
   String? get globalError => _globalError;
   bool get isGlobalLoading => _isGlobalLoading;
 
-  // Image
-  String? get imageError => _imageError;
-  File? get selectedImage => _selectedImage;
-
-  // Form Controllers
+  // Form Controller Getters
   TextEditingController get fullNameController => _fullNameController;
   TextEditingController get emailController => _emailController;
   TextEditingController get phoneController => _phoneController;
   TextEditingController get passwordController => _passwordController;
   TextEditingController get searchController => _searchController;
 
-  // Search
+  // Image State Getters
+  String? get imageError => _imageError;
+  File? get selectedImage => _selectedImage;
+
+  // Search State Getters
   String get searchQuery => _searchQuery;
   bool get isSearching => _isSearching;
   String? get searchError => _searchError;
   List<dynamic> get searchResults => List.unmodifiable(_searchResults);
 
-  // Data lists and their specific states
+  // Data Collection Getters
   Contractor? get selectedContractor => _selectedContractor;
-
   List<ServiceCategory> get categories => List.unmodifiable(_categories);
-  bool get isLoadingCategories => _isLoadingCategories;
-  String? get categoriesError => _categoriesError;
-
   List<Contractor> get bestContractors => List.unmodifiable(_bestContractors);
-  bool get isLoadingBestContractors => _isLoadingBestContractors;
-  String? get bestContractorsError => _bestContractorsError;
-
   List<NotificationModel> get notifications =>
       List.unmodifiable(_notifications);
-  bool get isNotificationLoading => _isNotificationLoading;
-  String? get notificationError => _notificationError;
 
-  /// Get the count of new notifications (never seen before)
-  int get unreadNotificationCount => _newNotificationCount;
-
+  // Loading State Getters
   bool get isLoadingUserInfo => _isLoadingUserInfo;
-  String? get userInfoError => _userInfoError;
-
+  bool get isLoadingCategories => _isLoadingCategories;
+  bool get isLoadingBestContractors => _isLoadingBestContractors;
+  bool get isNotificationLoading => _isNotificationLoading;
   bool get isLoadingEditAccount => _isLoadingEditAccount;
+
+  // Error State Getters
+  String? get userInfoError => _userInfoError;
+  String? get categoriesError => _categoriesError;
+  String? get bestContractorsError => _bestContractorsError;
+  String? get notificationError => _notificationError;
   String? get editAccountError => _editAccountError;
 
+  // Feature State Getters
   String get homeScreenSortBy => _homeScreenSortBy;
+  int get unreadNotificationCount => _newNotificationCount;
 
-  // --- Constructor ---
+  // ================================
+  // CONSTRUCTOR & INITIALIZATION
+  // ================================
+
   UserManagerProvider() {
-    initialize();
-    _searchController.addListener(_onSearchInputChanged);
+    _initialize();
+    _setupSearchListener();
   }
 
   @override
   void dispose() {
+    _cleanupResources();
+    super.dispose();
+  }
+
+  /// Initialize the provider with all necessary data
+  Future<void> initialize() async {
+    debugPrint('UserManager: Starting initialization');
+
+    _setGlobalLoading(true);
+    _setGlobalError(null);
+
+    try {
+      _token = await StorageManager.getString(StorageKeys.tokenKey);
+
+      // Prepare initialization tasks
+      final List<Future<void>> tasks = [_fetchPublicData()];
+
+      if (_token != null) {
+        tasks.addAll([
+          _loadUserDataInternal(),
+          _initializeNotifications(),
+          _initializeChat(),
+          _validateUserType(),
+        ]);
+      }
+
+      // Execute all tasks with error isolation
+      await Future.wait(tasks.map((task) => task.catchError((error) {
+            debugPrint(
+                'UserManager: Task failed during initialization: $error');
+          })));
+
+      debugPrint('UserManager: Initialization completed successfully');
+    } catch (error) {
+      final errorMessage = 'Critical app initialization failed: $error';
+      debugPrint('UserManager: $errorMessage');
+      _setGlobalError(errorMessage);
+    } finally {
+      _setGlobalLoading(false);
+    }
+  }
+
+  /// Enhanced user type validation with server verification
+  Future<void> _validateUserType() async {
+    try {
+      if (_userInfo?.type == null) {
+        debugPrint('UserManager: User type is null, skipping validation');
+        return;
+      }
+
+      if (_userInfo!.type != AppConfig.customer) {
+        debugPrint(
+            'UserManager: User type mismatch detected. Expected customer, got ${_userInfo!.type}');
+
+        // Clear inconsistent data and redirect to correct interface
+        await _clearDataAndRedirect(AppRoutes.workerMain);
+      } else {
+        debugPrint('UserManager: User type validation passed');
+      }
+    } catch (error) {
+      debugPrint('UserManager: Error during user type validation: $error');
+    }
+  }
+
+  /// Initialize chat functionality
+  Future<void> _initializeChat() async {
+    try {
+      if (_userInfo?.id == null) {
+        debugPrint(
+            'UserManager: User ID not available for chat initialization');
+        return;
+      }
+
+      final context = NavigationService.navigatorKey.currentContext;
+      if (context == null) {
+        debugPrint('UserManager: Navigation context not available for chat');
+        return;
+      }
+
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+      // Check if chat needs initialization
+      if (!chatProvider.initialFetchComplete ||
+          chatProvider.currentUserId != _userInfo!.id.toString()) {
+        await chatProvider.initialize(_userInfo!.id.toString());
+        debugPrint('UserManager: Chat initialized for user ${_userInfo!.id}');
+      }
+    } catch (error) {
+      debugPrint('UserManager: Failed to initialize chat: $error');
+    }
+  }
+
+  /// Initialize notifications
+  Future<void> _initializeNotifications() async {
+    try {
+      await Future.wait([
+        fetchNotifications(),
+        _fetchNotificationCount(),
+      ]);
+    } catch (error) {
+      debugPrint('UserManager: Failed to initialize notifications: $error');
+    }
+  }
+
+  /// Private initialization helper
+  void _initialize() {
+    initialize();
+  }
+
+  /// Setup search input listener with debouncing
+  void _setupSearchListener() {
+    _searchController.addListener(_onSearchInputChanged);
+  }
+
+  /// Cleanup all resources
+  void _cleanupResources() {
     _searchDebounce?.cancel();
     _searchController.removeListener(_onSearchInputChanged);
+
+    // Dispose all controllers
     _searchController.dispose();
     _fullNameController.dispose();
     _emailController.dispose();
@@ -150,128 +275,443 @@ class UserManagerProvider extends ChangeNotifier {
     _cityController.dispose();
     _countryController.dispose();
     _passwordController.dispose();
-    super.dispose();
   }
 
-  // Search input change listener with debounce
+  // ================================
+  // STATE MANAGEMENT METHODS
+  // ================================
+
+  /// Set current navigation index
+  void setCurrentIndex(int index) {
+    if (_currentIndex != index) {
+      _currentIndex = index;
+      notifyListeners();
+    }
+  }
+
+  /// Clear all user data and navigate to specified route
+  Future<void> _clearDataAndRedirect(String route) async {
+    try {
+      await clearData();
+      await NavigationService.navigateToAndReplace(route);
+    } catch (error) {
+      debugPrint('UserManager: Error during clear and redirect: $error');
+    }
+  }
+
+  /// Enhanced clear data method
+  Future<void> clearData() async {
+    try {
+      // Clear authentication state
+      _token = null;
+      _userInfo = null;
+      _userInfoError = null;
+
+      // Clear notifications data
+      _notifications.clear();
+      _notificationError = null;
+      _isNotificationLoading = false;
+      _newNotificationCount = 0;
+
+      // Clear storage
+      await Future.wait([
+        StorageManager.remove(StorageKeys.tokenKey),
+        StorageManager.remove(StorageKeys.accountTypeKey),
+        TokenManager.instance.clearAuthToken(),
+      ]);
+
+      // Reset UI state
+      _currentIndex = 0;
+
+      notifyListeners();
+      debugPrint('UserManager: Data cleared successfully');
+    } catch (error) {
+      debugPrint('UserManager: Error clearing data: $error');
+    }
+  }
+
+  /// Set global loading state
+  void _setGlobalLoading(bool value) {
+    if (_isGlobalLoading != value) {
+      _isGlobalLoading = value;
+      notifyListeners();
+    }
+  }
+
+  /// Set global error state
+  void _setGlobalError(String? message) {
+    if (_globalError != message) {
+      _globalError = message;
+      notifyListeners();
+    }
+  }
+
+  /// Set image error state
+  void setImageError(String? message) {
+    if (_imageError != message) {
+      _imageError = message;
+      notifyListeners();
+    }
+  }
+
+  // ================================
+  // USER DATA MANAGEMENT
+  // ================================
+
+  /// Load user data with enhanced error handling and token refresh
+  Future<void> _loadUserDataInternal() async {
+    if (_token == null) {
+      _setUserInfoError("Authentication required to load user data");
+      return;
+    }
+
+    _setUserInfoLoading(true);
+    _setUserInfoError(null);
+
+    try {
+      bool userInfoSuccess = await _fetchUserInfoInternalLogic();
+
+      if (userInfoSuccess) {
+        _initializeFormControllers();
+        debugPrint('UserManager: User data loaded successfully');
+      } else {
+        // Attempt token refresh
+        final refreshed = await TokenManager.instance.refreshAuthToken();
+
+        if (refreshed) {
+          _token = TokenManager.instance.accessToken;
+          userInfoSuccess = await _fetchUserInfoInternalLogic();
+
+          if (userInfoSuccess) {
+            _initializeFormControllers();
+            debugPrint('UserManager: User data loaded after token refresh');
+          } else {
+            _setUserInfoError('Failed to fetch user info after token refresh');
+          }
+        } else {
+          // Token refresh failed, clear data and redirect
+          await _clearDataAndRedirect(AppRoutes.login);
+          _setUserInfoError('Session expired. Please log in again');
+        }
+      }
+    } catch (error) {
+      _setUserInfoError('Exception loading user data: $error');
+    } finally {
+      _setUserInfoLoading(false);
+    }
+  }
+
+  /// Fetch user info from API
+  Future<bool> _fetchUserInfoInternalLogic() async {
+    try {
+      final response = await BothApi.getUserInfo();
+
+      if (response.success && response.data != null) {
+        _userInfo = response.data;
+        _setUserInfoError(null);
+        return true;
+      } else {
+        _setUserInfoError(response.error ?? 'Failed to fetch user info');
+        return false;
+      }
+    } catch (error) {
+      _setUserInfoError('Exception fetching user info: $error');
+      return false;
+    }
+  }
+
+  /// Initialize form controllers with user data
+  void _initializeFormControllers() {
+    if (_userInfo == null) return;
+
+    _fullNameController.text = _userInfo!.fullName ?? '';
+    _emailController.text = _userInfo!.email ?? '';
+    _phoneController.text = _userInfo!.phone?.toString() ?? '';
+    _cityController.text = _userInfo!.city ?? '';
+    _countryController.text = _userInfo!.country ?? '';
+
+    debugPrint('UserManager: Form controllers initialized');
+  }
+
+  /// Edit user account with comprehensive validation
+  Future<bool> editAccount(BuildContext context) async {
+    if (_userInfo == null) {
+      _setEditAccountError('User information not available');
+      return false;
+    }
+
+    _setEditAccountLoading(true);
+    _setEditAccountError(null);
+
+    try {
+      final request = AccountEditRequest(
+        image: _selectedImage,
+        fullName:
+            _getChangedValue(_fullNameController.text, _userInfo!.fullName),
+        email: _getChangedValue(_emailController.text, _userInfo!.email),
+        phone: _getChangedPhoneValue(),
+        password:
+            _passwordController.text.isEmpty ? null : _passwordController.text,
+      );
+
+      final response = await BothApi.editAccount(request);
+
+      if (response.success && response.data != null) {
+        _userInfo = response.data;
+        _initializeFormControllers();
+        _selectedImage = null;
+        setImageError(null);
+        _setEditAccountError(null);
+
+        debugPrint('UserManager: Account edited successfully');
+        return true;
+      } else {
+        _setEditAccountError(response.error ?? 'Failed to edit account');
+        return false;
+      }
+    } catch (error) {
+      _setEditAccountError('Exception editing account: $error');
+      return false;
+    } finally {
+      _setEditAccountLoading(false);
+    }
+  }
+
+  /// Helper method to get changed values
+  String? _getChangedValue(String newValue, String? currentValue) {
+    return newValue.trim() == (currentValue ?? '') ? null : newValue.trim();
+  }
+
+  /// Helper method to get changed phone value
+  int? _getChangedPhoneValue() {
+    final phoneText = _phoneController.text.trim();
+    final currentPhone = _userInfo!.phone?.toString() ?? '';
+
+    if (phoneText == currentPhone) return null;
+    return int.tryParse(phoneText);
+  }
+
+  /// Pick image with enhanced error handling
+  Future<void> pickImage(BuildContext context, ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1000,
+        maxHeight: 1000,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        _selectedImage = File(image.path);
+        setImageError(null);
+        debugPrint('UserManager: Image selected successfully');
+      }
+    } catch (error) {
+      if (context.mounted) {
+        setImageError(AppLocalizations.of(context)!.generalError);
+      }
+      debugPrint('UserManager: Error picking image: $error');
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  // ================================
+  // LOADING AND ERROR STATE SETTERS
+  // ================================
+
+  void _setUserInfoLoading(bool value) {
+    if (_isLoadingUserInfo != value) {
+      _isLoadingUserInfo = value;
+      notifyListeners();
+    }
+  }
+
+  void _setUserInfoError(String? error) {
+    if (_userInfoError != error) {
+      _userInfoError = error;
+      notifyListeners();
+    }
+  }
+
+  void _setEditAccountLoading(bool value) {
+    if (_isLoadingEditAccount != value) {
+      _isLoadingEditAccount = value;
+      notifyListeners();
+    }
+  }
+
+  void _setEditAccountError(String? error) {
+    if (_editAccountError != error) {
+      _editAccountError = error;
+      notifyListeners();
+    }
+  }
+
+// ================================
+  // PUBLIC DATA FETCHING METHODS
+  // ================================
+
+  /// Fetch public data (categories and contractors)
+  Future<void> _fetchPublicData() async {
+    try {
+      await Future.wait([
+        fetchCategories().catchError((error) {
+          debugPrint("UserManager: fetchCategories failed: $error");
+        }),
+        fetchBestContractors().catchError((error) {
+          debugPrint("UserManager: fetchBestContractors failed: $error");
+        }),
+      ]);
+    } catch (error) {
+      debugPrint('UserManager: Error fetching public data: $error');
+    }
+  }
+
+  /// Fetch service categories with enhanced error handling
+  Future<void> fetchCategories() async {
+    _setCategoriesLoading(true);
+    _setCategoriesError(null);
+
+    try {
+      final response = await UserApi.getCategories();
+
+      if (response.success && response.data != null) {
+        _categories.clear();
+        _categories.addAll(response.data!);
+        _setCategoriesError(null);
+        debugPrint('UserManager: Loaded ${_categories.length} categories');
+      } else {
+        _setCategoriesError(response.error ?? 'Failed to fetch categories');
+      }
+    } catch (error) {
+      _setCategoriesError('Exception fetching categories: $error');
+    } finally {
+      _setCategoriesLoading(false);
+    }
+  }
+
+  /// Fetch best contractors with enhanced error handling
+  Future<void> fetchBestContractors() async {
+    _setBestContractorsLoading(true);
+    _setBestContractorsError(null);
+
+    try {
+      final response = await UserApi.getBestContractors();
+
+      if (response.success && response.data != null) {
+        _bestContractors.clear();
+        _bestContractors.addAll(response.data!);
+        _setBestContractorsError(null);
+        debugPrint(
+            'UserManager: Loaded ${_bestContractors.length} contractors');
+      } else {
+        _setBestContractorsError(
+            response.error ?? 'Failed to fetch best contractors');
+      }
+    } catch (error) {
+      _setBestContractorsError('Exception fetching best contractors: $error');
+    } finally {
+      _setBestContractorsLoading(false);
+    }
+  }
+
+  // ================================
+  // SEARCH FUNCTIONALITY
+  // ================================
+
+  /// Handle search input changes with debouncing
   void _onSearchInputChanged() {
     final query = _searchController.text.trim();
     _searchDebounce?.cancel();
+
     if (query.isEmpty) {
-      _searchResults = [];
-      _searchError = null;
-      notifyListeners();
+      _clearSearchResults();
       return;
     }
+
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       searchServiceAndContractor(query);
     });
   }
 
-  // --- Initialization ---
-  Future<void> initialize() async {
-    print(
-        '======================== initialize user manager ==================');
-    setGlobalError(null);
-    setGlobalLoading(true);
+  /// Search for services and contractors
+  Future<void> searchServiceAndContractor(String query) async {
+    if (query.trim().isEmpty) {
+      _clearSearchResults();
+      return;
+    }
+
+    _setSearching(true);
+    _setSearchError(null);
 
     try {
-      _token = await StorageManager.getString(StorageKeys.tokenKey);
+      final response = await UserApi.search(query.trim());
 
-      List<Future<void>> tasks = [];
-      tasks.add(_fetchPublicData());
-
-      if (_token != null) {
-        tasks.add(_loadUserDataInternal());
-        tasks.add(_initializeNotifications());
-        // Initialize chat for authenticated users
-        tasks.add(_initializeChat());
+      if (response.success && response.data != null) {
+        _searchResults.clear();
+        _searchResults.addAll(response.data!);
+        _setSearchError(null);
+        debugPrint(
+            'UserManager: Found ${_searchResults.length} search results');
+      } else {
+        _setSearchError(response.error ?? 'Failed to fetch search results');
       }
-
-      await Future.wait(tasks.map((task) => task.catchError((e) {
-            debugPrint('A main initialization task failed unexpectedly: $e');
-          })));
-    } catch (e) {
-      setGlobalError('Critical app initialization failed: ${e.toString()}');
+    } catch (error) {
+      _setSearchError('Exception fetching search results: $error');
     } finally {
-      setGlobalLoading(false);
+      _setSearching(false);
     }
   }
 
-  Future<void> _initializeChat() async {
-    try {
-      if (_userInfo?.id != null) {
-        final context = NavigationService.navigatorKey.currentContext;
-        if (context != null) {
-          final chatProvider =
-              Provider.of<ChatProvider>(context, listen: false);
-          if (!chatProvider.initialFetchComplete ||
-              chatProvider.currentUserId != _userInfo!.id.toString()) {
-            await chatProvider.initialize(_userInfo!.id.toString());
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('UserManager: Failed to initialize chat: $e');
+  /// Set search query for filtering
+  void searchServicesQuery(String query) {
+    if (_searchQuery != query) {
+      _searchQuery = query;
+      notifyListeners();
     }
   }
 
-  Future<void> _initializeNotifications() async {
-    await Future.wait([
-      fetchNotifications(),
-      BothApi.getNewNotificationsCount().then((response) {
-        if (response.success && response.data != null) {
-          _newNotificationCount = response.data!;
-        }
-      }),
-    ]);
-  }
-
-  // --- State Management Helpers ---
-  void setCurrentIndex(int index) {
-    _currentIndex = index;
+  /// Clear search results
+  void _clearSearchResults() {
+    _searchResults.clear();
+    _setSearchError(null);
     notifyListeners();
   }
 
-  Future<void> clearData() async {
-    _token = null;
-    _userInfo = null;
-    _userInfoError = null;
+  // ================================
+  // CONTRACTOR MANAGEMENT
+  // ================================
 
-    // Clear notifications data
-    _notifications.clear();
-    _notificationError = null;
-    _isNotificationLoading = false;
-    _newNotificationCount = 0;
-
-    await StorageManager.remove(StorageKeys.tokenKey);
-    await StorageManager.remove(StorageKeys.accountTypeKey);
-    await TokenManager.instance.clearAuthToken();
-    _currentIndex = 0;
-    notifyListeners();
+  /// Set selected contractor
+  void setSelectedContractor(Contractor contractor) {
+    if (_selectedContractor != contractor) {
+      _selectedContractor = contractor;
+      notifyListeners();
+    }
   }
 
-  void setGlobalLoading(bool value) {
-    _isGlobalLoading = value;
-    notifyListeners();
+  /// Clear selected contractor
+  void clearSelectedContractor() {
+    if (_selectedContractor != null) {
+      _selectedContractor = null;
+      notifyListeners();
+    }
   }
 
-  void setGlobalError(String? message) {
-    _globalError = message;
-    notifyListeners();
-  }
+  // ================================
+  // HOME SCREEN SORTING
+  // ================================
 
-  void setImageError(String? message) {
-    _imageError = message;
-    notifyListeners();
-  }
-
-  // --- Home Screen Sort Methods ---
+  /// Set home screen sort criteria
   void setHomeScreenSortBy(String sortBy) {
-    _homeScreenSortBy = sortBy;
-    notifyListeners();
+    if (_homeScreenSortBy != sortBy) {
+      _homeScreenSortBy = sortBy;
+      notifyListeners();
+    }
   }
 
+  /// Get sorted best contractors based on current sort criteria
   List<Contractor> getSortedBestContractors() {
     List<Contractor> sortedContractors = List.from(_bestContractors);
 
@@ -306,21 +746,23 @@ class UserManagerProvider extends ChangeNotifier {
         break;
       case 'default':
       default:
+        // Keep original order
         break;
     }
 
     return List.unmodifiable(sortedContractors);
   }
 
+  /// Filter and sort contractors by pricing type
   List<Contractor> _filterAndSortByPricingType(
     List<Contractor> contractors,
     String pricingType,
   ) {
-    List<Contractor> withPricingType = [];
-    List<Contractor> withoutPricingType = [];
+    final List<Contractor> withPricingType = [];
+    final List<Contractor> withoutPricingType = [];
 
-    for (var contractor in contractors) {
-      String effectiveType = contractor.getEffectivePricingType();
+    for (final contractor in contractors) {
+      final effectiveType = contractor.getEffectivePricingType();
       if (effectiveType == pricingType) {
         withPricingType.add(contractor);
       } else {
@@ -328,15 +770,19 @@ class UserManagerProvider extends ChangeNotifier {
       }
     }
 
-    withPricingType = _sortContractorsByPrice(withPricingType, ascending: true);
-    return [...withPricingType, ...withoutPricingType];
+    final sortedWithType =
+        _sortContractorsByPrice(withPricingType, ascending: true);
+    return [...sortedWithType, ...withoutPricingType];
   }
 
-  List<Contractor> _sortContractorsByPrice(List<Contractor> contractors,
-      {bool ascending = true}) {
+  /// Sort contractors by price
+  List<Contractor> _sortContractorsByPrice(
+    List<Contractor> contractors, {
+    bool ascending = true,
+  }) {
     contractors.sort((a, b) {
-      double? priceA = a.getPrimaryPrice();
-      double? priceB = b.getPrimaryPrice();
+      final priceA = a.getPrimaryPrice();
+      final priceB = b.getPrimaryPrice();
 
       if (priceA == null && priceB == null) return 0;
       if (priceA == null) return 1;
@@ -348,264 +794,38 @@ class UserManagerProvider extends ChangeNotifier {
     return contractors;
   }
 
-  // --- User Info ---
-  Future<void> _loadUserDataInternal() async {
-    if (_token == null) {
-      _userInfoError = "Not authenticated to load user data.";
-      notifyListeners();
-      return;
-    }
+  // ================================
+  // NOTIFICATION MANAGEMENT
+  // ================================
 
-    _isLoadingUserInfo = true;
-    _userInfoError = null;
-    notifyListeners();
-
-    try {
-      final userInfoSuccess = await _fetchUserInfoInternalLogic();
-
-      if (userInfoSuccess) {
-        _initializeControllers();
-      } else {
-        final refreshed = await TokenManager.instance.refreshAuthToken();
-        if (refreshed) {
-          _token = TokenManager.instance.accessToken;
-          final refreshedUserInfoSuccess = await _fetchUserInfoInternalLogic();
-          if (refreshedUserInfoSuccess) {
-            _initializeControllers();
-          } else {
-            _userInfoError = _userInfoError ??
-                'Failed to fetch user info after token refresh.';
-          }
-        } else {
-          await clearData();
-          _userInfoError =
-              _userInfoError ?? 'Session expired. Please log in again.';
-          _currentIndex = 3;
-        }
-      }
-    } catch (e) {
-      _userInfoError = 'Exception loading user data: ${e.toString()}';
-    } finally {
-      _isLoadingUserInfo = false;
-      notifyListeners();
-    }
-  }
-
-  Future<bool> _fetchUserInfoInternalLogic() async {
-    _isLoadingUserInfo = true;
-    _userInfoError = null;
-
-    try {
-      final response = await BothApi.getUserInfo();
-      if (response.success && response.data != null) {
-        _userInfo = response.data;
-        _userInfoError = null;
-        return true;
-      } else {
-        _userInfoError = 'Failed to fetch user info';
-        return false;
-      }
-    } catch (e) {
-      _userInfoError = 'Exception fetching user info: ${e.toString()}';
-      return false;
-    } finally {
-      _isLoadingUserInfo = false;
-      notifyListeners();
-    }
-  }
-
-  void _initializeControllers() {
-    final user = _userInfo;
-    _fullNameController.text = user?.fullName ?? '';
-    _emailController.text = user?.email ?? '';
-    _phoneController.text = user?.phone?.toString() ?? '';
-    _cityController.text = user?.city ?? '';
-    _countryController.text = user?.country ?? '';
-  }
-
-  Future<bool> editAccount(BuildContext context) async {
-    _isLoadingEditAccount = true;
-    _editAccountError = null;
-    notifyListeners();
-
-    try {
-      final request = AccountEditRequest(
-        image: _selectedImage,
-        fullName: fullNameController.text == _userInfo!.fullName
-            ? null
-            : fullNameController.text,
-        email: emailController.text == _userInfo!.email
-            ? null
-            : emailController.text,
-        phone: phoneController.text == (_userInfo!.phone.toString())
-            ? null
-            : int.tryParse(phoneController.text),
-        password:
-            passwordController.text.isEmpty ? null : passwordController.text,
-      );
-
-      final response = await BothApi.editAccount(request);
-      if (response.success && response.data != null) {
-        _userInfo = response.data;
-        _initializeControllers();
-        _selectedImage = null;
-        setImageError(null);
-        _editAccountError = null;
-        notifyListeners();
-        return true;
-      }
-      _editAccountError = 'Failed to edit account';
-      return false;
-    } catch (e) {
-      _editAccountError = 'Exception editing account: ${e.toString()}';
-      return false;
-    } finally {
-      _isLoadingEditAccount = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> pickImage(BuildContext context, ImageSource source) async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1000,
-        maxHeight: 1000,
-        imageQuality: 85,
-      );
-      if (image != null) {
-        _selectedImage = File(image.path);
-        setImageError(null);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        setImageError(AppLocalizations.of(context)!.generalError);
-      }
-    } finally {
-      notifyListeners();
-    }
-  }
-
-  // --- Categories and Contractors ---
-  Future<void> _fetchPublicData() async {
-    await Future.wait([
-      fetchCategories().catchError(
-          (e) => debugPrint("fetchCategories failed in _fetchPublicData: $e")),
-      fetchBestContractors().catchError((e) =>
-          debugPrint("fetchBestContractors failed in _fetchPublicData: $e")),
-    ]);
-  }
-
-  Future<void> fetchCategories() async {
-    _isLoadingCategories = true;
-    _categoriesError = null;
-    notifyListeners();
-    try {
-      final response = await UserApi.getCategories();
-      if (response.success && response.data != null) {
-        _categories.clear();
-        _categories.addAll(response.data!);
-        _categoriesError = null;
-      } else {
-        _categoriesError = 'Failed to fetch categories';
-      }
-    } catch (e) {
-      _categoriesError = 'Exception fetching categories: ${e.toString()}';
-    } finally {
-      _isLoadingCategories = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> fetchBestContractors() async {
-    _isLoadingBestContractors = true;
-    _bestContractorsError = null;
-    notifyListeners();
-    try {
-      final response = await UserApi.getBestContractors();
-
-      if (response.success && response.data != null) {
-        _bestContractors.clear();
-        _bestContractors.addAll(response.data!);
-        _bestContractorsError = null;
-      } else {
-        _bestContractorsError = 'Failed to fetch best contractors';
-      }
-    } catch (e) {
-      _bestContractorsError =
-          'Exception fetching best contractors: ${e.toString()}';
-    } finally {
-      _isLoadingBestContractors = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> searchServiceAndContractor(String query) async {
-    if (query.isEmpty) {
-      _searchResults = [];
-      _searchError = null;
-      notifyListeners();
-      return;
-    }
-    _isSearching = true;
-    _searchError = null;
-    notifyListeners();
-    try {
-      final response = await UserApi.search(query);
-      if (response.success && response.data != null) {
-        _searchResults.clear();
-        _searchResults.addAll(response.data!);
-        _searchError = null;
-      } else {
-        _searchError = 'Failed fetching search results';
-      }
-    } catch (e) {
-      _searchError = 'Exception fetching search results: ${e.toString()}';
-    } finally {
-      _isSearching = false;
-      notifyListeners();
-    }
-  }
-
-  void setSelectedContractor(Contractor contractor) {
-    _selectedContractor = contractor;
-    notifyListeners();
-  }
-
-  void clearSelectedContractor() {
-    _selectedContractor = null;
-    notifyListeners();
-  }
-
-  // --- Notifications ---
+  /// Fetch notifications with enhanced error handling
   Future<void> fetchNotifications() async {
-    _isNotificationLoading = true;
-    _notificationError = null;
-    notifyListeners();
+    _setNotificationLoading(true);
+    _setNotificationError(null);
+
     try {
       debugPrint('UserManager: Fetching notifications...');
       final response = await BothApi.fetchNotifications();
+
       if (response.success && response.data != null) {
         _notifications = response.data!;
-
-        // Count new notifications based on local data
-        _newNotificationCount = _notifications.where((n) => n.isNew).length;
+        _updateNewNotificationCount();
+        _setNotificationError(null);
 
         debugPrint(
-            'UserManager: Loaded ${_notifications.length} notifications, $_newNotificationCount new');
-        _notificationError = null;
+            'UserManager: Loaded ${_notifications.length} notifications, '
+            '$_newNotificationCount new');
       } else {
-        _notificationError = 'Failed to load notifications';
+        _setNotificationError(response.error ?? 'Failed to load notifications');
       }
-    } catch (e) {
-      _notificationError = 'Exception fetching notifications: ${e.toString()}';
+    } catch (error) {
+      _setNotificationError('Exception fetching notifications: $error');
     } finally {
-      _isNotificationLoading = false;
-      notifyListeners();
+      _setNotificationLoading(false);
     }
   }
 
-  /// Enhanced method to fetch only notification counts (for home page badge)
+  /// Fetch notification counts from server
   Future<void> fetchNotificationCounts() async {
     try {
       debugPrint('UserManager: Fetching notification counts...');
@@ -616,7 +836,6 @@ class UserManagerProvider extends ChangeNotifier {
       ]);
 
       final newCountResponse = results[0];
-
       bool hasChanges = false;
 
       if (newCountResponse.success && newCountResponse.data != null) {
@@ -632,15 +851,15 @@ class UserManagerProvider extends ChangeNotifier {
       if (hasChanges) {
         notifyListeners();
       }
-    } catch (e) {
-      debugPrint('UserManager: Exception in fetchNotificationCounts: $e');
+    } catch (error) {
+      debugPrint('UserManager: Exception in fetchNotificationCounts: $error');
     }
   }
 
-  /// Enhanced mark all notifications as seen (when entering notifications screen)
+  /// Mark all notifications as seen (when entering notifications screen)
   Future<void> markAllNotificationsAsSeenNew() async {
-    debugPrint(
-        'UserManager: markAllNotificationsAsSeenNew called. Current new count: $_newNotificationCount');
+    debugPrint('UserManager: markAllNotificationsAsSeenNew called. '
+        'Current new count: $_newNotificationCount');
 
     if (_newNotificationCount == 0) {
       debugPrint('UserManager: No new notifications to mark as seen');
@@ -648,23 +867,14 @@ class UserManagerProvider extends ChangeNotifier {
     }
 
     try {
-      // Update local state immediately for better UX
+      // Optimistic update for better UX
       final oldNewCount = _newNotificationCount;
-      final updatedNotifications = _notifications
-          .map((notification) => notification.copyWith(
-                isNew: false,
-                seenAt: DateTime.now(),
-              ))
-          .toList();
+      _updateNotificationsSeenStatus();
 
-      _notifications = updatedNotifications;
-      _newNotificationCount = 0;
+      debugPrint('UserManager: Optimistically updated UI - '
+          'marked $oldNewCount notifications as seen');
 
-      debugPrint(
-          'UserManager: Optimistically updated UI - marked $oldNewCount notifications as seen');
-      notifyListeners();
-
-      // Call the API to sync with backend
+      // Sync with backend
       final response = await BothApi.markNotificationsAsSeen();
 
       if (response.success) {
@@ -674,17 +884,11 @@ class UserManagerProvider extends ChangeNotifier {
         debugPrint(
             'UserManager: Failed to sync seen status: ${response.error}');
         // Revert optimistic update on failure
-        _newNotificationCount = oldNewCount;
-        _notifications = _notifications
-            .map((notification) => notification.copyWith(
-                  isNew: true,
-                  seenAt: null,
-                ))
-            .toList();
-        notifyListeners();
+        _revertNotificationsSeenStatus(oldNewCount);
       }
-    } catch (e) {
-      debugPrint('UserManager: Exception in markAllNotificationsAsSeenNew: $e');
+    } catch (error) {
+      debugPrint(
+          'UserManager: Exception in markAllNotificationsAsSeenNew: $error');
     }
   }
 
@@ -699,22 +903,8 @@ class UserManagerProvider extends ChangeNotifier {
       debugPrint(
           'UserManager: Marking ${notificationIds.length} notifications as read');
 
-      // Update local state immediately
-      final updatedNotifications = _notifications.map((notification) {
-        if (notificationIds.contains(notification.id)) {
-          return notification.copyWith(
-            isNew: false,
-            isRead: true,
-            seenAt: notification.seenAt ?? DateTime.now(),
-            readAt: DateTime.now(),
-          );
-        }
-        return notification;
-      }).toList();
-
-      _notifications = updatedNotifications;
-      _newNotificationCount = _notifications.where((n) => n.isNew).length;
-      notifyListeners();
+      // Optimistic update
+      _updateSpecificNotificationsReadStatus(notificationIds);
 
       // Sync with backend
       final response = await BothApi.markNotificationsAsRead(notificationIds);
@@ -726,18 +916,18 @@ class UserManagerProvider extends ChangeNotifier {
       } else {
         debugPrint(
             'UserManager: Failed to mark specific notifications as read: ${response.error}');
-        await fetchNotifications();
+        await fetchNotifications(); // Refresh to get correct state
       }
-    } catch (e) {
-      debugPrint('UserManager: Exception in markNotificationsAsRead: $e');
-      await fetchNotifications();
+    } catch (error) {
+      debugPrint('UserManager: Exception in markNotificationsAsRead: $error');
+      await fetchNotifications(); // Refresh to get correct state
     }
   }
 
-  /// Mark all notifications as seen (when entering notifications screen)
+  /// Mark all notifications as read
   Future<void> markAllNotificationsAsRead() async {
-    debugPrint(
-        'UserManager: markAllNotificationsAsRead called. Current new count: $_newNotificationCount');
+    debugPrint('UserManager: markAllNotificationsAsRead called. '
+        'Current new count: $_newNotificationCount');
 
     if (_newNotificationCount == 0) {
       debugPrint('UserManager: No new notifications to mark as read');
@@ -745,24 +935,13 @@ class UserManagerProvider extends ChangeNotifier {
     }
 
     try {
-      // Update local state immediately for better UX
-      final updatedNotifications = _notifications
-          .map((notification) => notification.copyWith(
-                isNew: false,
-                isRead: true,
-                seenAt: notification.seenAt ?? DateTime.now(),
-                readAt: DateTime.now(),
-              ))
-          .toList();
-
-      _notifications = updatedNotifications;
-      _newNotificationCount = 0;
+      // Optimistic update
+      _updateAllNotificationsReadStatus();
 
       debugPrint(
           'UserManager: Optimistically updated UI - marked all notifications as read');
-      notifyListeners();
 
-      // Call the API to sync with backend
+      // Sync with backend
       final response = await BothApi.markAllNotificationsAsRead();
 
       if (response.success) {
@@ -771,22 +950,160 @@ class UserManagerProvider extends ChangeNotifier {
       } else {
         debugPrint(
             'UserManager: Failed to sync read status: ${response.error}');
-        await fetchNotifications();
+        await fetchNotifications(); // Refresh to get correct state
       }
-    } catch (e) {
-      debugPrint('UserManager: Exception in markAllNotificationsAsRead: $e');
+    } catch (error) {
+      debugPrint(
+          'UserManager: Exception in markAllNotificationsAsRead: $error');
     }
   }
 
-  /// Reset notification error
+  /// Clear notification error
   void clearNotificationError() {
-    _notificationError = null;
+    _setNotificationError(null);
+  }
+
+  // ================================
+  // PRIVATE HELPER METHODS
+  // ================================
+
+  /// Fetch notification count from server
+  Future<void> _fetchNotificationCount() async {
+    try {
+      final response = await BothApi.getNewNotificationsCount();
+      if (response.success && response.data != null) {
+        _newNotificationCount = response.data!;
+      }
+    } catch (error) {
+      debugPrint('UserManager: Error fetching notification count: $error');
+    }
+  }
+
+  /// Update new notification count based on local data
+  void _updateNewNotificationCount() {
+    _newNotificationCount = _notifications.where((n) => n.isNew).length;
+  }
+
+  /// Update notifications seen status (optimistic update)
+  void _updateNotificationsSeenStatus() {
+    final updatedNotifications = _notifications
+        .map((notification) => notification.copyWith(
+              isNew: false,
+              seenAt: DateTime.now(),
+            ))
+        .toList();
+
+    _notifications = updatedNotifications;
+    _newNotificationCount = 0;
     notifyListeners();
   }
 
-  // --- Search Query Filters ---
-  void searchServicesQuery(String query) {
-    _searchQuery = query;
+  /// Revert notifications seen status (rollback optimistic update)
+  void _revertNotificationsSeenStatus(int oldNewCount) {
+    final revertedNotifications = _notifications
+        .map((notification) => notification.copyWith(
+              isNew: true,
+              seenAt: null,
+            ))
+        .toList();
+
+    _notifications = revertedNotifications;
+    _newNotificationCount = oldNewCount;
     notifyListeners();
+  }
+
+  /// Update specific notifications read status (optimistic update)
+  void _updateSpecificNotificationsReadStatus(List<String> notificationIds) {
+    final updatedNotifications = _notifications.map((notification) {
+      if (notificationIds.contains(notification.id)) {
+        return notification.copyWith(
+          isNew: false,
+          isRead: true,
+          seenAt: notification.seenAt ?? DateTime.now(),
+          readAt: DateTime.now(),
+        );
+      }
+      return notification;
+    }).toList();
+
+    _notifications = updatedNotifications;
+    _updateNewNotificationCount();
+    notifyListeners();
+  }
+
+  /// Update all notifications read status (optimistic update)
+  void _updateAllNotificationsReadStatus() {
+    final updatedNotifications = _notifications
+        .map((notification) => notification.copyWith(
+              isNew: false,
+              isRead: true,
+              seenAt: notification.seenAt ?? DateTime.now(),
+              readAt: DateTime.now(),
+            ))
+        .toList();
+
+    _notifications = updatedNotifications;
+    _newNotificationCount = 0;
+    notifyListeners();
+  }
+
+  // ================================
+  // LOADING AND ERROR STATE SETTERS
+  // ================================
+
+  void _setCategoriesLoading(bool value) {
+    if (_isLoadingCategories != value) {
+      _isLoadingCategories = value;
+      notifyListeners();
+    }
+  }
+
+  void _setCategoriesError(String? error) {
+    if (_categoriesError != error) {
+      _categoriesError = error;
+      notifyListeners();
+    }
+  }
+
+  void _setBestContractorsLoading(bool value) {
+    if (_isLoadingBestContractors != value) {
+      _isLoadingBestContractors = value;
+      notifyListeners();
+    }
+  }
+
+  void _setBestContractorsError(String? error) {
+    if (_bestContractorsError != error) {
+      _bestContractorsError = error;
+      notifyListeners();
+    }
+  }
+
+  void _setSearching(bool value) {
+    if (_isSearching != value) {
+      _isSearching = value;
+      notifyListeners();
+    }
+  }
+
+  void _setSearchError(String? error) {
+    if (_searchError != error) {
+      _searchError = error;
+      notifyListeners();
+    }
+  }
+
+  void _setNotificationLoading(bool value) {
+    if (_isNotificationLoading != value) {
+      _isNotificationLoading = value;
+      notifyListeners();
+    }
+  }
+
+  void _setNotificationError(String? error) {
+    if (_notificationError != error) {
+      _notificationError = error;
+      notifyListeners();
+    }
   }
 }

@@ -7,7 +7,6 @@ import 'package:good_one_app/Features/Both/Presentation/Screens/terms_and_condit
 
 import 'package:good_one_app/Features/Chat/Presentation/Screens/conversations_screen.dart';
 import 'package:good_one_app/Features/Onboarding/Presentation/Screens/onbording_view.dart';
-import 'package:good_one_app/Features/Setup/Presentation/Screens/account_type_screen.dart';
 import 'package:good_one_app/Features/Setup/Presentation/Screens/language_selection_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/Booking/booking_summary_screen.dart';
 import 'package:good_one_app/Features/User/Presentation/Screens/Booking/calender_booking_screen.dart';
@@ -35,7 +34,7 @@ class AppRoutes {
   static const String onBording = '/onBording';
   static const String login = '/login';
   static const String register = '/register';
-  static const String accountSelection = '/accountSelection';
+  // static const String accountSelection = '/accountSelection';
   static const String otpScreen = '/otpScreen';
   static const String resetPassword = '/resetPassword';
 
@@ -74,7 +73,7 @@ class AppRoutes {
       onBording: (_) => const OnBordingView(),
       login: (_) => const LoginScreen(),
       register: (_) => const RegistrationScreen(),
-      accountSelection: (_) => const AccountTypeSelectionOverlay(),
+      // accountSelection: (_) => const AccountTypeSelectionOverlay(),
       otpScreen: (BuildContext context) => const OtpScreen(),
       resetPassword: (BuildContext context) => const PasswordResetScreen(),
 

@@ -380,7 +380,7 @@ class WorkerHomeScreen extends StatelessWidget {
           ),
           SizedBox(height: context.getHeight(20)),
 
-          // Orders Chart with error handling
+          // Orders Chart with enhanced error handling
           Column(
             children: [
               if (ordersManager.error != null)
@@ -404,10 +404,19 @@ class WorkerHomeScreen extends StatelessWidget {
                               color: AppColors.errorDark, fontSize: 12),
                         ),
                       ),
+                      IconButton(
+                        icon: Icon(Icons.refresh,
+                            size: 16, color: AppColors.errorDark),
+                        onPressed: () => ordersManager.fetchOrders(),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      ),
                     ],
                   ),
                 ),
-              OrdersStatusChart(ordersManager: ordersManager),
+
+              // Wrap OrdersStatusChart in error handling
+              _SafeOrdersChart(ordersManager: ordersManager),
             ],
           ),
 
@@ -601,6 +610,89 @@ class WorkerHomeScreen extends StatelessWidget {
           ),
         );
       }
+    }
+  }
+}
+
+// Safe wrapper for OrdersStatusChart that handles potential errors
+class _SafeOrdersChart extends StatelessWidget {
+  final OrdersManagerProvider ordersManager;
+
+  const _SafeOrdersChart({required this.ordersManager});
+
+  @override
+  Widget build(BuildContext context) {
+    // If there's an error, show a simple fallback
+    if (ordersManager.error != null) {
+      return Container(
+        height: 200,
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.bar_chart,
+              size: 48,
+              color: Colors.grey.shade400,
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Orders chart unavailable',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Pull to refresh or try again',
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Try to render the chart, with error boundary
+    try {
+      return OrdersStatusChart(ordersManager: ordersManager);
+    } catch (e) {
+      print('Error rendering OrdersStatusChart: $e');
+      return Container(
+        height: 200,
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.orange.shade400,
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Chart rendering failed',
+              style: TextStyle(
+                color: Colors.orange.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
     }
   }
 }

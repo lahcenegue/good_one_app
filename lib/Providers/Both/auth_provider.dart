@@ -1,32 +1,33 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:good_one_app/Core/Config/app_config.dart';
-import 'package:good_one_app/Core/infrastructure/Services/token_manager.dart';
-import 'package:good_one_app/Features/Auth/Models/check_request.dart';
-import 'package:good_one_app/Providers/Both/chat_provider.dart';
-import 'package:good_one_app/Providers/User/user_manager_provider.dart';
-import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
-import 'package:good_one_app/features/Setup/Models/account_type.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
+import 'package:good_one_app/Core/Config/app_config.dart';
+import 'package:good_one_app/Core/Infrastructure/Services/token_manager.dart';
 import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Utils/storage_keys.dart';
+import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
+import 'package:good_one_app/Features/Auth/Models/auth_request.dart';
+import 'package:good_one_app/Features/Auth/Models/check_request.dart';
 import 'package:good_one_app/Features/Auth/Models/register_request.dart';
 import 'package:good_one_app/Features/Auth/Services/auth_api.dart';
-import 'package:good_one_app/Features/Auth/Models/auth_request.dart';
-import 'package:good_one_app/Features/Auth/Models/auth_model.dart';
-
-import 'package:provider/provider.dart';
-
+import 'package:good_one_app/Features/Both/Services/both_api.dart';
+import 'package:good_one_app/Features/Setup/Models/account_type.dart';
+import 'package:good_one_app/Providers/Both/chat_provider.dart';
+import 'package:good_one_app/Providers/User/user_manager_provider.dart';
+import 'package:good_one_app/Providers/Worker/worker_maganer_provider.dart';
 import 'package:good_one_app/l10n/app_localizations.dart';
 
 class AuthProvider with ChangeNotifier {
-  bool _isInitialized = false;
+  // ================================
+  // PRIVATE FIELDS
+  // ================================
 
+  bool _isInitialized = false;
   AccountType? _selectedRegistrationAccountType;
 
   // Authentication State
@@ -34,99 +35,473 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  // OTP Timer State
   Timer? _timer;
   int _seconds = 60;
   String? _otpCode;
 
-  String? selectedCountry;
-  String? selectedCity;
+  // Location State
+  String? _selectedCountry;
+  String? _selectedCity;
 
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController forgotPasswordEmailController =
+  // Form Controllers
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _forgotPasswordEmailController =
       TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
-  final TextEditingController confirmPasswordController =
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
+  // UI State
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  //Image
+  // Image Handling
   File? _selectedImage;
   String? _imageError;
   final ImagePicker _picker = ImagePicker();
 
-  AuthProvider() {
-    initialize();
-  }
+  // ================================
+  // GETTERS
+  // ================================
 
-  // Getters
+  // Registration State
   AccountType? get selectedRegistrationAccountType =>
       _selectedRegistrationAccountType;
 
+  // Authentication State
   bool get isLoading => _isLoading;
   bool get isAuth => _authData?.accessToken != null;
   String? get token => _authData?.accessToken;
   String? get error => _error;
+
+  // OTP State
   int get seconds => _seconds;
+  bool get isTimerExpired => _seconds == 0;
   String? get otpCode => _otpCode;
+
+  // UI State
   bool get obscurePassword => _obscurePassword;
   bool get obscureConfirmPassword => _obscureConfirmPassword;
+
+  // Image State
   File? get selectedImage => _selectedImage;
   String? get imageError => _imageError;
 
+  // Location State
+  String? get selectedCountry => _selectedCountry;
+  String? get selectedCity => _selectedCity;
   List<String> get availableCities {
-    return selectedCountry != null
-        ? AppConfig.citiesByCountry[selectedCountry] ?? []
+    return _selectedCountry != null
+        ? AppConfig.citiesByCountry[_selectedCountry] ?? []
         : [];
   }
 
-  Future<void> initialize() async {
+  // Form Controllers
+  TextEditingController get emailController => _emailController;
+  TextEditingController get forgotPasswordEmailController =>
+      _forgotPasswordEmailController;
+  TextEditingController get passwordController => _passwordController;
+  TextEditingController get confirmPasswordController =>
+      _confirmPasswordController;
+  TextEditingController get fullNameController => _fullNameController;
+  TextEditingController get phoneController => _phoneController;
+
+  // ================================
+  // CONSTRUCTOR & INITIALIZATION
+  // ================================
+
+  AuthProvider() {
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
     if (_isInitialized) return;
 
-    TokenManager.instance.tokenStream.listen((auth) {
-      _authData = auth;
-    });
-    _isInitialized = true;
+    try {
+      // Initialize TokenManager FIRST before accessing its stream
+      await TokenManager.instance.initialize();
+
+      // Listen to token changes
+      TokenManager.instance.tokenStream.listen((auth) {
+        _authData = auth;
+        notifyListeners();
+      });
+
+      _isInitialized = true;
+      notifyListeners();
+    } catch (e) {
+      _handleError('Initialization failed: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _emailController.dispose();
+    _forgotPasswordEmailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _fullNameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  // ================================
+  // AUTHENTICATION METHODS
+  // ================================
+
+  /// Enhanced login with server-verified navigation
+  Future<void> login(BuildContext context) async {
+    debugPrint('AuthProvider: Starting login process');
+
+    try {
+      _setLoading(true);
+      _clearErrors();
+
+      // Get device token
+      final deviceToken = await TokenManager.instance.getDeviceToken();
+
+      // Create login request
+      final request = AuthRequest(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        deviceToken: deviceToken,
+      );
+
+      // Attempt login
+      final response = await AuthApi.login(request);
+
+      if (response.success && response.data != null) {
+        _authData = response.data;
+        await _saveAuthData();
+        _clearFormData();
+        _setLoading(false);
+
+        // Navigate based on server-verified user type
+        await _navigateBasedOnServerUserType(context);
+      } else if (response.error!.contains('not verified')) {
+        debugPrint('AuthProvider: Account not verified, sending OTP');
+        await _sendOtpForUnverifiedAccount();
+        _setLoading(false);
+
+        // Navigate to OTP screen after successfully sending OTP
+        await NavigationService.navigateToAndReplace(AppRoutes.otpScreen);
+      } else {
+        _setError(response.error ?? 'Login failed');
+      }
+    } catch (e) {
+      _handleError('Login error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Enhanced auto-login with server verification
+  Future<bool> tryAutoLogin() async {
+    debugPrint('AuthProvider: Attempting auto-login');
+
+    try {
+      if (!TokenManager.instance.isInitialized) {
+        await TokenManager.instance.initialize();
+      }
+
+      _authData = TokenManager.instance.currentAuth;
+
+      if (_authData != null) {
+        // Verify user type with server for auto-login
+        await _verifyAndSyncUserType();
+      }
+
+      notifyListeners();
+      return _authData != null;
+    } catch (e) {
+      debugPrint('AuthProvider: Auto-login failed: $e');
+      return false;
+    }
+  }
+
+  /// Register new user account
+  Future<void> register(BuildContext context) async {
+    debugPrint('AuthProvider: Starting registration process');
+
+    try {
+      _setLoading(true);
+      _clearErrors();
+
+      // Validate account type selection
+      final accountType = _selectedRegistrationAccountType?.toJson();
+      if (accountType == null) {
+        _setError(AppLocalizations.of(context)!.pleaseSelectAccountType);
+        return;
+      }
+
+      // Save account type to storage
+      await StorageManager.setString(StorageKeys.accountTypeKey, accountType);
+
+      // Validate location for service providers
+      if (accountType == AppConfig.service) {
+        if (_selectedCountry == null || _selectedCity == null) {
+          _setError(AppLocalizations.of(context)!.locationRequired);
+          return;
+        }
+      }
+
+      // Get device token
+      final deviceToken = await TokenManager.instance.getDeviceToken();
+
+      // Create registration request
+      final request = RegisterRequest(
+        image: _selectedImage,
+        fullName: _fullNameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        password: _passwordController.text,
+        type: accountType,
+        deviceToken: deviceToken,
+        country: accountType == AppConfig.service ? _selectedCountry : null,
+        city: accountType == AppConfig.service ? _selectedCity : null,
+      );
+
+      // Attempt registration
+      final response = await AuthApi.register(request);
+
+      if (response.success) {
+        _setLoading(false);
+        await NavigationService.navigateToAndReplace(AppRoutes.otpScreen);
+      } else {
+        _setError(response.error ?? 'Registration failed');
+      }
+    } catch (e) {
+      _handleError('Registration error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Verify OTP and complete authentication
+  Future<void> checkOtp(BuildContext context) async {
+    debugPrint('AuthProvider: Verifying OTP');
+
+    try {
+      _setLoading(true);
+      _clearErrors();
+
+      if (_otpCode == null) {
+        _setError('OTP code is required');
+        return;
+      }
+
+      // Create OTP verification request
+      final request = CheckRequest(
+        email: _emailController.text.trim(),
+        otp: _otpCode!,
+      );
+
+      // Verify OTP
+      final response = await AuthApi.checkOtp(request);
+
+      if (response.success && response.data != null) {
+        _authData = response.data;
+        await _saveAuthData();
+        _clearFormData();
+
+        // Navigate based on server-verified user type
+        await _navigateBasedOnServerUserType(context);
+      } else {
+        _setError(response.error ?? 'OTP verification failed');
+      }
+    } catch (e) {
+      _handleError('OTP verification error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Enhanced logout with proper cleanup
+  Future<void> logout(BuildContext context) async {
+    debugPrint('AuthProvider: Starting logout process');
+
+    try {
+      _setLoading(true);
+      _clearErrors();
+
+      // Clear chat data BEFORE clearing auth data
+      await _clearChatData(context);
+
+      // Clear authentication data
+      await _clearAuthData();
+
+      // Clear form data
+      _clearFormData();
+    } catch (e) {
+      _handleError('Logout error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // ================================
+  // OTP METHODS
+  // ================================
+
+  /// Send OTP code via email
+  Future<void> sendOtp({bool isForPasswordReset = false}) async {
+    debugPrint(
+        'AuthProvider: Sending OTP${isForPasswordReset ? ' for password reset' : ''}');
+
+    try {
+      final email = isForPasswordReset
+          ? _forgotPasswordEmailController.text.trim()
+          : _emailController.text.trim();
+
+      if (email.isEmpty) {
+        _setError('Email is required');
+        return;
+      }
+
+      final response = await AuthApi.sendOtp(email: email);
+
+      if (response.success) {
+        startTimer();
+
+        final targetRoute =
+            isForPasswordReset ? AppRoutes.resetPassword : AppRoutes.otpScreen;
+
+        await NavigationService.navigateTo(targetRoute);
+      } else {
+        _setError(response.error ?? 'Failed to send OTP');
+      }
+    } catch (e) {
+      _handleError('Send OTP error: $e');
+    }
+  }
+
+  /// Resend OTP for password reset
+  Future<void> resendOtpForPasswordReset() async {
+    debugPrint('AuthProvider: Resending OTP for password reset');
+
+    try {
+      final response = await AuthApi.sendOtp(
+        email: _forgotPasswordEmailController.text.trim(),
+      );
+
+      if (response.success) {
+        startTimer();
+      } else {
+        _setError(response.error ?? 'Failed to resend OTP');
+      }
+    } catch (e) {
+      _handleError('Resend OTP error: $e');
+    }
+  }
+
+  Future<void> _sendOtpForUnverifiedAccount() async {
+    debugPrint('AuthProvider: Sending OTP for unverified account');
+
+    try {
+      final email = _emailController.text.trim();
+
+      if (email.isEmpty) {
+        throw Exception('Email is required for OTP verification');
+      }
+
+      final response = await AuthApi.sendOtp(email: email);
+
+      if (response.success) {
+        // Start the timer for OTP
+        startTimer();
+        debugPrint('AuthProvider: OTP sent successfully to $email');
+      } else {
+        throw Exception(response.error ?? 'Failed to send OTP');
+      }
+    } catch (e) {
+      debugPrint('AuthProvider: Error sending OTP for unverified account: $e');
+      throw e; // Re-throw to be handled by the calling method
+    }
+  }
+
+  /// Set OTP code from user input
+  void setOtpCode(String otpCode) {
+    _otpCode = otpCode;
     notifyListeners();
   }
 
-  // UI Methods
+  // ================================
+  // TIMER METHODS
+  // ================================
+
+  /// Start OTP countdown timer
+  void startTimer() {
+    _timer?.cancel();
+    _seconds = 60;
+    notifyListeners();
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_seconds > 0) {
+        _seconds--;
+        notifyListeners();
+      } else {
+        _timer?.cancel();
+        _timer = null;
+        notifyListeners();
+      }
+    });
+  }
+
+  /// Ensure timer is running when needed
+  void ensureTimerIsRunning() {
+    if ((_timer == null || !_timer!.isActive) && _seconds > 0) {
+      startTimer();
+    }
+  }
+
+  // ================================
+  // UI STATE METHODS
+  // ================================
+
+  /// Toggle password visibility
   void togglePasswordVisibility() {
     _obscurePassword = !_obscurePassword;
     notifyListeners();
   }
 
+  /// Toggle confirm password visibility
   void toggleConfirmPasswordVisibility() {
     _obscureConfirmPassword = !_obscureConfirmPassword;
     notifyListeners();
   }
 
+  // ================================
+  // FORM VALIDATION METHODS
+  // ================================
+
   String? validateFullName(String? value, BuildContext context) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return AppLocalizations.of(context)!.fullNameRequired;
     }
     return null;
   }
 
   String? validateEmail(String? value, BuildContext context) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return AppLocalizations.of(context)!.emailRequired;
     }
-    if (!value.contains('@')) {
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
       return AppLocalizations.of(context)!.invalidEmail;
     }
     return null;
   }
 
   String? validatePhone(String? value, BuildContext context) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return AppLocalizations.of(context)!.phoneRequired;
     }
-    // Add your phone validation logic here
+    if (!RegExp(r'^\+?[\d\s\-\(\)]{10,}$').hasMatch(value.trim())) {
+      return 'Please enter a valid phone number';
+    }
     return null;
   }
 
@@ -151,352 +526,41 @@ class AuthProvider with ChangeNotifier {
     return null;
   }
 
+  // ================================
+  // LOCATION METHODS
+  // ================================
+
   void setCountry(String? country) {
-    selectedCountry = country;
-    selectedCity = null;
+    _selectedCountry = country;
+    _selectedCity = null; // Reset city when country changes
     notifyListeners();
   }
 
   void setCity(String? city) {
-    selectedCity = city;
+    _selectedCity = city;
     notifyListeners();
   }
 
-  void getOtpCode(String otpCode) {
-    _otpCode = otpCode;
-    notifyListeners();
-  }
+  // ================================
+  // REGISTRATION TYPE METHODS
+  // ================================
 
   void setRegistrationAccountType(AccountType type) {
     _selectedRegistrationAccountType = type;
 
-    // Clear location data when switching from worker to customer
+    // Clear location data when switching to customer
     if (type == AccountType.customer) {
-      selectedCountry = null;
-      selectedCity = null;
+      _selectedCountry = null;
+      _selectedCity = null;
     }
 
     notifyListeners();
   }
 
-// Authentication Methods
-  Future<void> login(BuildContext context) async {
-    print('======Login function ======');
+  // ================================
+  // IMAGE HANDLING METHODS
+  // ================================
 
-    try {
-      _setLoading(true);
-      _clearErrors();
-
-      final accountType =
-          await StorageManager.getString(StorageKeys.accountTypeKey);
-
-      // Use TokenManager to get device token - this NEVER returns null
-      final deviceToken = await TokenManager.instance.getDeviceToken();
-
-      final request = AuthRequest(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-        deviceToken: deviceToken, // Guaranteed to be non-null
-      );
-
-      final response = await AuthApi.login(request);
-
-      if (response.success) {
-        _authData = response.data;
-        _clearFormData();
-        await _saveAuthData();
-
-        _setLoading(false);
-
-        if (accountType == AppConfig.service) {
-          await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
-
-          // Initialize chat for worker after navigation
-          try {
-            final workerProvider =
-                Provider.of<WorkerManagerProvider>(context, listen: false);
-            final chatProvider =
-                Provider.of<ChatProvider>(context, listen: false);
-
-            await Future.delayed(const Duration(milliseconds: 2000));
-
-            if (workerProvider.workerInfo?.id != null) {
-              await chatProvider
-                  .switchUser(workerProvider.workerInfo!.id.toString());
-              print(
-                  'Chat initialized for worker: ${workerProvider.workerInfo!.id}');
-            } else {
-              print('Worker info not available yet, will retry...');
-              await Future.delayed(const Duration(milliseconds: 1000));
-              if (workerProvider.workerInfo?.id != null) {
-                await chatProvider
-                    .switchUser(workerProvider.workerInfo!.id.toString());
-              }
-            }
-          } catch (e) {
-            print('Worker chat initialization failed: $e');
-          }
-        } else {
-          await NavigationService.navigateToAndReplace(AppRoutes.userMain);
-
-          // Initialize chat for user after navigation
-          try {
-            final userProvider =
-                Provider.of<UserManagerProvider>(context, listen: false);
-            final chatProvider =
-                Provider.of<ChatProvider>(context, listen: false);
-
-            await Future.delayed(const Duration(milliseconds: 2000));
-
-            if (userProvider.userInfo?.id != null) {
-              await chatProvider
-                  .switchUser(userProvider.userInfo!.id.toString());
-              print('Chat initialized for user: ${userProvider.userInfo!.id}');
-            } else {
-              print('User info not available yet, will retry...');
-              await Future.delayed(const Duration(milliseconds: 1000));
-              if (userProvider.userInfo?.id != null) {
-                await chatProvider
-                    .switchUser(userProvider.userInfo!.id.toString());
-              }
-            }
-          } catch (e) {
-            print('User chat initialization failed: $e');
-          }
-        }
-      } else if (response.error == 'Account is not verified') {
-        await sendOtp();
-      } else {
-        _error = response.error;
-        notifyListeners();
-      }
-    } catch (e) {
-      _handleError(e);
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<bool> tryAutoLogin() async {
-    try {
-      await TokenManager.instance.initialize();
-      _authData = TokenManager.instance.currentAuth;
-      notifyListeners();
-      return _authData != null;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<void> register(BuildContext context) async {
-    try {
-      _setLoading(true);
-      _clearErrors();
-
-      // Use the selected account type from registration instead of storage
-      final accountType = _selectedRegistrationAccountType?.toJson();
-
-      if (accountType == null) {
-        _error = AppLocalizations.of(context)!.pleaseSelectAccountType;
-        notifyListeners();
-        return;
-      }
-
-      // Save the selected account type to storage
-      await StorageManager.setString(StorageKeys.accountTypeKey, accountType);
-
-      // Use TokenManager to get device token - this NEVER returns null
-      final deviceToken = await TokenManager.instance.getDeviceToken();
-
-      if (accountType == AppConfig.service) {
-        if (selectedCountry == null || selectedCity == null) {
-          if (context.mounted) {
-            _error = AppLocalizations.of(context)!.locationRequired;
-          }
-          notifyListeners();
-          return;
-        }
-      }
-
-      final request = RegisterRequest(
-        image: _selectedImage,
-        fullName: fullNameController.text.trim(),
-        email: emailController.text.trim(),
-        phone: phoneController.text.trim(),
-        password: passwordController.text,
-        type: accountType,
-        deviceToken: deviceToken,
-        country: accountType == AppConfig.service ? selectedCountry : null,
-        city: accountType == AppConfig.service ? selectedCity : null,
-      );
-
-      final response = await AuthApi.register(request);
-      if (response.success) {
-        await NavigationService.navigateToAndReplace(AppRoutes.otpScreen);
-      } else {
-        _error = response.error;
-        notifyListeners();
-      }
-    } catch (e) {
-      _handleError(e);
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> logout(BuildContext context) async {
-    try {
-      _setLoading(true);
-      _clearErrors();
-      _clearFormData();
-
-      // Clear chat data on logout - IMPORTANT: Do this BEFORE clearing auth data
-      try {
-        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-
-        // Completely disconnect and clear all chat state
-        chatProvider.disconnect();
-
-        // Additional cleanup - force clear any remaining state
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        print('Chat disconnected and cleared on logout');
-      } catch (e) {
-        print('Chat cleanup failed: $e');
-      }
-
-      // Clear authentication data
-      clearData();
-    } catch (e) {
-      _handleError(e);
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  //TODO
-  Future<void> deleteAccount() async {}
-
-  Future<void> sendOtp({bool isForPasswordReset = false}) async {
-    try {
-      final email = isForPasswordReset
-          ? forgotPasswordEmailController.text.trim()
-          : emailController.text.trim();
-
-      final response = await AuthApi.sendOtp(email: email);
-      if (response.success) {
-        startTimer();
-        if (isForPasswordReset) {
-          await NavigationService.navigateTo(AppRoutes.resetPassword);
-        } else {
-          await NavigationService.navigateTo(AppRoutes.otpScreen);
-        }
-      } else {
-        _error = response.error;
-        notifyListeners();
-      }
-    } catch (e) {
-      _handleError(e);
-    }
-  }
-
-  Future<void> resendOtpForPasswordReset() async {
-    try {
-      final response = await AuthApi.sendOtp(
-        email: forgotPasswordEmailController.text.trim(),
-      );
-      if (response.success) {
-        startTimer();
-      }
-    } catch (e) {
-      _handleError(e);
-    }
-  }
-
-  Future<void> checkOtp(BuildContext context) async {
-    try {
-      _setLoading(true);
-      _clearErrors();
-
-      final accountType =
-          await StorageManager.getString(StorageKeys.accountTypeKey);
-
-      final request = CheckRequest(
-        email: emailController.text.trim(),
-        otp: _otpCode!,
-      );
-
-      final response = await AuthApi.checkOtp(request);
-
-      if (response.success) {
-        _authData = response.data;
-        _clearFormData();
-        await _saveAuthData();
-        _setLoading(false);
-
-        if (accountType == AppConfig.service) {
-          await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
-
-          // Initialize chat for worker
-          try {
-            final workerProvider =
-                Provider.of<WorkerManagerProvider>(context, listen: false);
-            final chatProvider =
-                Provider.of<ChatProvider>(context, listen: false);
-
-            await Future.delayed(const Duration(milliseconds: 2000));
-
-            if (workerProvider.workerInfo?.id != null) {
-              await chatProvider
-                  .switchUser(workerProvider.workerInfo!.id.toString());
-              print(
-                  'Chat initialized for verified worker: ${workerProvider.workerInfo!.id}');
-            }
-          } catch (e) {
-            print('Worker chat initialization failed: $e');
-          }
-        } else {
-          await NavigationService.navigateToAndReplace(AppRoutes.userMain);
-
-          // Initialize chat for user
-          try {
-            final userProvider =
-                Provider.of<UserManagerProvider>(context, listen: false);
-            final chatProvider =
-                Provider.of<ChatProvider>(context, listen: false);
-
-            await Future.delayed(const Duration(milliseconds: 2000));
-
-            if (userProvider.userInfo?.id != null) {
-              await chatProvider
-                  .switchUser(userProvider.userInfo!.id.toString());
-              print(
-                  'Chat initialized for verified user: ${userProvider.userInfo!.id}');
-            }
-          } catch (e) {
-            print('User chat initialization failed: $e');
-          }
-        }
-      } else {
-        _error = response.error;
-        notifyListeners();
-      }
-    } catch (e) {
-      _handleError(e);
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> clearData() async {
-    await StorageManager.remove(StorageKeys.tokenKey);
-    await StorageManager.remove(StorageKeys.accountTypeKey);
-    await StorageManager.remove(StorageKeys.refreshTokenKey);
-
-    await TokenManager.instance.clearAuthToken();
-  }
-
-  // Private Helper Methods
   Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -514,80 +578,247 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       if (context.mounted) {
         _imageError = AppLocalizations.of(context)!.generalError;
-      }
-
-      notifyListeners();
-    }
-  }
-
-  Future<void> _saveAuthData() async {
-    try {
-      await TokenManager.instance.setAuthToken(_authData!); // CHANGED
-    } catch (e) {
-      throw Exception('Failed to save authentication data');
-    }
-  }
-
-  void _setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
-  }
-
-  void _clearErrors() {
-    _imageError = null;
-    _error = null;
-    notifyListeners();
-  }
-
-  void _handleError(dynamic error) {
-    _error = error.toString();
-    notifyListeners();
-  }
-
-  void startTimer() {
-    _timer?.cancel();
-    _seconds = 60;
-    notifyListeners(); // Notify immediately to show initial value
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_seconds > 0) {
-        _seconds--;
         notifyListeners();
+      }
+    }
+  }
+
+  // ================================
+  // PRIVATE HELPER METHODS
+  // ================================
+
+  /// Navigate based on server-verified user type
+  Future<void> _navigateBasedOnServerUserType(BuildContext context) async {
+    debugPrint(
+        'AuthProvider: Determining navigation based on server user type');
+
+    try {
+      // Call /me endpoint to get server-verified user type
+      final userInfoResponse = await BothApi.getUserInfo();
+
+      if (userInfoResponse.success && userInfoResponse.data != null) {
+        final userType = userInfoResponse.data!.type;
+        debugPrint('AuthProvider: Server user type: $userType');
+
+        // Save the correct account type to storage
+        await StorageManager.setString(
+            StorageKeys.accountTypeKey, userType ?? AppConfig.customer);
+
+        // Navigate and initialize chat based on user type
+        if (userType == AppConfig.service) {
+          await _navigateToWorkerInterface(context);
+        } else {
+          await _navigateToUserInterface(context);
+        }
       } else {
-        _timer?.cancel();
-        notifyListeners(); // Notify when timer reaches 0
+        debugPrint(
+            'AuthProvider: Failed to get user info, using fallback navigation');
+        await _fallbackNavigation();
+      }
+    } catch (e) {
+      debugPrint('AuthProvider: Error determining user type: $e');
+      await _fallbackNavigation();
+    }
+  }
+
+  /// Navigate to worker interface with chat initialization
+  Future<void> _navigateToWorkerInterface(BuildContext context) async {
+    debugPrint('AuthProvider: Navigating to worker interface');
+
+    await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+
+    // Initialize chat for worker after navigation
+    _scheduleWorkerChatInitialization(context);
+  }
+
+  /// Navigate to user interface with chat initialization
+  Future<void> _navigateToUserInterface(BuildContext context) async {
+    debugPrint('AuthProvider: Navigating to user interface');
+
+    await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+
+    // Initialize chat for user after navigation
+    _scheduleUserChatInitialization(context);
+  }
+
+  /// Schedule worker chat initialization
+  void _scheduleWorkerChatInitialization(BuildContext context) {
+    Timer(const Duration(milliseconds: 2000), () async {
+      try {
+        if (!context.mounted) return;
+
+        final workerProvider =
+            Provider.of<WorkerManagerProvider>(context, listen: false);
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+        if (workerProvider.workerInfo?.id != null) {
+          await chatProvider
+              .switchUser(workerProvider.workerInfo!.id.toString());
+          debugPrint(
+              'AuthProvider: Chat initialized for worker: ${workerProvider.workerInfo!.id}');
+        } else {
+          debugPrint(
+              'AuthProvider: Worker info not available for chat initialization');
+        }
+      } catch (e) {
+        debugPrint('AuthProvider: Worker chat initialization failed: $e');
       }
     });
   }
 
-  void ensureTimerIsRunning() {
-    if (_timer == null || !_timer!.isActive) {
-      startTimer();
+  /// Schedule user chat initialization
+  void _scheduleUserChatInitialization(BuildContext context) {
+    Timer(const Duration(milliseconds: 2000), () async {
+      try {
+        if (!context.mounted) return;
+
+        final userProvider =
+            Provider.of<UserManagerProvider>(context, listen: false);
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+        if (userProvider.userInfo?.id != null) {
+          await chatProvider.switchUser(userProvider.userInfo!.id.toString());
+          debugPrint(
+              'AuthProvider: Chat initialized for user: ${userProvider.userInfo!.id}');
+        } else {
+          debugPrint(
+              'AuthProvider: User info not available for chat initialization');
+        }
+      } catch (e) {
+        debugPrint('AuthProvider: User chat initialization failed: $e');
+      }
+    });
+  }
+
+  /// Fallback navigation using stored account type
+  Future<void> _fallbackNavigation() async {
+    debugPrint('AuthProvider: Using fallback navigation');
+
+    try {
+      final storedAccountType =
+          await StorageManager.getString(StorageKeys.accountTypeKey);
+
+      if (storedAccountType == AppConfig.service) {
+        await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+      } else {
+        await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+      }
+    } catch (e) {
+      debugPrint('AuthProvider: Fallback navigation failed: $e');
+      // Default to user interface as ultimate fallback
+      await NavigationService.navigateToAndReplace(AppRoutes.userMain);
     }
   }
 
+  /// Verify and sync user type with server
+  Future<void> _verifyAndSyncUserType() async {
+    try {
+      final userInfoResponse = await BothApi.getUserInfo();
+
+      if (userInfoResponse.success && userInfoResponse.data != null) {
+        final serverUserType = userInfoResponse.data!.type;
+        final storedUserType =
+            await StorageManager.getString(StorageKeys.accountTypeKey);
+
+        // Update stored type if different from server
+        if (serverUserType != storedUserType) {
+          debugPrint(
+              'AuthProvider: Syncing user type - Server: $serverUserType, Stored: $storedUserType');
+          await StorageManager.setString(
+              StorageKeys.accountTypeKey, serverUserType ?? AppConfig.customer);
+        }
+      }
+    } catch (e) {
+      debugPrint(
+          'AuthProvider: Error verifying user type during auto-login: $e');
+    }
+  }
+
+  /// Clear chat data during logout
+  Future<void> _clearChatData(BuildContext context) async {
+    try {
+      if (!context.mounted) return;
+
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      chatProvider.disconnect();
+
+      // Wait for cleanup to complete
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      debugPrint('AuthProvider: Chat disconnected and cleared on logout');
+    } catch (e) {
+      debugPrint('AuthProvider: Chat cleanup failed: $e');
+    }
+  }
+
+  /// Clear all authentication data
+  Future<void> _clearAuthData() async {
+    await StorageManager.remove(StorageKeys.tokenKey);
+    await StorageManager.remove(StorageKeys.accountTypeKey);
+    await StorageManager.remove(StorageKeys.refreshTokenKey);
+    await TokenManager.instance.clearAuthToken();
+
+    _authData = null;
+    notifyListeners();
+  }
+
+  /// Save authentication data securely
+  Future<void> _saveAuthData() async {
+    if (_authData == null) {
+      throw Exception('No authentication data to save');
+    }
+
+    try {
+      await TokenManager.instance.setAuthToken(_authData!);
+    } catch (e) {
+      throw Exception('Failed to save authentication data: $e');
+    }
+  }
+
+  /// Clear all form data
   void _clearFormData() {
     _obscurePassword = true;
     _obscureConfirmPassword = true;
     _selectedImage = null;
     _otpCode = null;
-    fullNameController.clear();
-    emailController.clear();
-    forgotPasswordEmailController.clear();
-    passwordController.clear();
-    phoneController.clear();
+    _selectedCountry = null;
+    _selectedCity = null;
+    _selectedRegistrationAccountType = null;
+
+    _fullNameController.clear();
+    _emailController.clear();
+    _forgotPasswordEmailController.clear();
+    _passwordController.clear();
+    _confirmPasswordController.clear();
+    _phoneController.clear();
 
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    emailController.dispose();
-    forgotPasswordEmailController.dispose();
-    passwordController.dispose();
-    fullNameController.dispose();
-    phoneController.dispose();
-    super.dispose();
+  /// Set loading state
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  /// Set error message
+  void _setError(String? message) {
+    _error = message;
+    _imageError = null;
+    notifyListeners();
+  }
+
+  /// Clear all errors
+  void _clearErrors() {
+    _error = null;
+    _imageError = null;
+    notifyListeners();
+  }
+
+  /// Handle errors with consistent logging
+  void _handleError(dynamic error) {
+    final errorMessage = error.toString();
+    debugPrint('AuthProvider: $errorMessage');
+    _setError(errorMessage);
   }
 }

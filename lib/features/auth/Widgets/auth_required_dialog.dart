@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/Utils/size_config.dart';
-import 'package:good_one_app/Core/Utils/storage_keys.dart';
-import 'package:good_one_app/Core/Infrastructure/Storage/storage_manager.dart';
 import 'package:good_one_app/Core/Presentation/Widgets/Buttons/primary_button.dart';
 import 'package:good_one_app/Core/Presentation/Theme/app_text_styles.dart';
 import 'package:good_one_app/Core/Presentation/Resources/app_colors.dart';
@@ -71,15 +69,8 @@ class AuthRequiredDialog extends StatelessWidget {
                       child: PrimaryButton(
                         text: AppLocalizations.of(context)!.login,
                         onPressed: () async {
-                          if (await StorageManager.getString(
-                                  StorageKeys.accountTypeKey) ==
-                              null) {
-                            NavigationService.navigateToAndReplace(
-                                AppRoutes.accountSelection);
-                          } else {
-                            NavigationService.navigateToAndReplace(
-                                AppRoutes.login);
-                          }
+                          Navigator.pop(context);
+                          NavigationService.navigateTo(AppRoutes.login);
                         },
                       ),
                     ),

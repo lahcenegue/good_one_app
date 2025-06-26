@@ -86,14 +86,19 @@ class OrdersManagerProvider extends ChangeNotifier {
   Future<void> fetchOrders() async {
     setError(null);
     _setOrdersLoading(true);
+
     try {
       final response = await WorkerApi.fetchOrders();
-      if (response.success && response.data != null) {
+
+      if (response.success) {
         final oldDatesLength = _dates.length;
 
+        // The response.data should be Map<String, List<MyOrderModel>>
+        final ordersMap = response.data ?? <String, List<MyOrderModel>>{};
+
         // Sort orders to prioritize pending ones
-        _orders = _sortOrdersByPriority(response.data!);
-        _dates = orders.keys.toList();
+        _orders = _sortOrdersByPriority(ordersMap);
+        _dates = _orders.keys.toList();
 
         // Update TabController if dates changed and we have a vsync
         if (_dates.length != oldDatesLength && _vsync != null) {
@@ -117,6 +122,7 @@ class OrdersManagerProvider extends ChangeNotifier {
   }
 
   // This sorts orders to show incomplete (pending) orders first
+// This sorts orders to show incomplete (pending) orders first
   Map<String, List<MyOrderModel>> _sortOrdersByPriority(
       Map<String, List<MyOrderModel>> orders) {
     Map<String, List<MyOrderModel>> sortedOrders = {};
@@ -131,7 +137,15 @@ class OrdersManagerProvider extends ChangeNotifier {
         if (a.status != 1 && b.status == 1) return 1;
 
         // Among non-pending orders, sort by creation time (newest first)
-        return b.createdAt.compareTo(a.createdAt);
+        // Parse createdAt strings to DateTime for comparison
+        try {
+          final aCreatedAt = DateTime.parse(a.createdAt);
+          final bCreatedAt = DateTime.parse(b.createdAt);
+          return bCreatedAt.compareTo(aCreatedAt);
+        } catch (e) {
+          // If date parsing fails, maintain original order
+          return 0;
+        }
       });
 
       sortedOrders[date] = dateOrders;
@@ -142,13 +156,27 @@ class OrdersManagerProvider extends ChangeNotifier {
 
   // Helper methods for summary data
   List<ChartData> getRequestStatusChartData(BuildContext context) {
+    // Handle empty orders case gracefully
+    if (_orders.isEmpty) {
+      return [
+        ChartData(
+            AppLocalizations.of(context)!.pending, 0, AppColors.chartPending),
+        ChartData(AppLocalizations.of(context)!.completed, 0,
+            AppColors.chartCompleted),
+      ];
+    }
+
     final completedOrders = totalOrders - pendingOrders;
-    return [
+    final chartData = [
       ChartData(AppLocalizations.of(context)!.pending, pendingOrders,
           AppColors.chartPending),
       ChartData(AppLocalizations.of(context)!.completed, completedOrders,
           AppColors.chartCompleted),
-    ].where((item) => item.value > 0).toList();
+    ];
+
+    // Return all data points for charts, even if they're zero
+    // This prevents empty chart issues
+    return chartData;
   }
 
   void _setOrdersLoading(bool value) {

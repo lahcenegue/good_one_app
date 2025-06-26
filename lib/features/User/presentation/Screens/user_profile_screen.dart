@@ -237,7 +237,7 @@ class UserProfileScreen extends StatelessWidget {
       child: PrimaryButton(
         text: AppLocalizations.of(context)!.login,
         onPressed: () {
-          NavigationService.navigateTo(AppRoutes.accountSelection);
+          NavigationService.navigateTo(AppRoutes.login);
         },
       ),
     );

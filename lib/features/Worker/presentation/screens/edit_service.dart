@@ -70,7 +70,7 @@ class _EditServiceState extends State<EditService>
           Provider.of<WorkerManagerProvider>(context, listen: false);
 
       await workerManager.fetchCategories();
-      workerManager.initializeServiceControlles(widget.service);
+      workerManager.initializeServiceControllers(widget.service);
       _setCorrectCategoryAndSubcategory(workerManager);
 
       // Start animations

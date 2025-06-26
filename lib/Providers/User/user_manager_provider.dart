@@ -198,11 +198,15 @@ class UserManagerProvider extends ChangeNotifier {
         return;
       }
 
+      // ADD THESE DEBUG LINES
+      debugPrint('UserManager: _userInfo.type = "${_userInfo!.type}"');
+      debugPrint('UserManager: AppConfig.customer = "${AppConfig.customer}"');
+      debugPrint(
+          'UserManager: Types match: ${_userInfo!.type == AppConfig.customer}');
+
       if (_userInfo!.type != AppConfig.customer) {
         debugPrint(
-            'UserManager: User type mismatch detected. Expected customer, got ${_userInfo!.type}');
-
-        // Clear inconsistent data and redirect to correct interface
+            'UserManager: User type mismatch detected. Expected ${AppConfig.customer}, got ${_userInfo!.type}');
         await _clearDataAndRedirect(AppRoutes.workerMain);
       } else {
         debugPrint('UserManager: User type validation passed');

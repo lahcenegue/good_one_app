@@ -39,7 +39,7 @@ class AppConfig {
   static const String storagePrefix = 'good_one_';
 
   /// Account Types
-  static const String customer = 'Customer';
+  static const String customer = 'customer';
   static const String service = 'worker';
 
   /// Stripe Info

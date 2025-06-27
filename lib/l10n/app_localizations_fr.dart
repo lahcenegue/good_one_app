@@ -1906,4 +1906,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pleaseSelectAccountType =>
       'Veuillez sélectionner un type de compte';
+
+  @override
+  String get loadingUserData => 'Chargement des données utilisateur...';
+
+  @override
+  String get loadingUserInformation =>
+      'Chargement des informations utilisateur...';
 }

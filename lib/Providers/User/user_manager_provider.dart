@@ -3,7 +3,6 @@ import 'package:good_one_app/Core/Config/app_config.dart';
 import 'package:good_one_app/Core/Navigation/app_routes.dart';
 import 'package:good_one_app/Core/Navigation/navigation_service.dart';
 import 'package:good_one_app/Core/infrastructure/Services/token_manager.dart';
-import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -17,8 +16,6 @@ import 'package:good_one_app/Features/Both/Services/both_api.dart';
 import 'package:good_one_app/Features/User/Models/contractor.dart';
 import 'package:good_one_app/Features/User/Models/service_category.dart';
 import 'package:good_one_app/Features/User/Services/user_api.dart';
-
-import 'package:provider/provider.dart';
 
 import 'package:good_one_app/l10n/app_localizations.dart';
 
@@ -166,10 +163,13 @@ class UserManagerProvider extends ChangeNotifier {
       final List<Future<void>> tasks = [_fetchPublicData()];
 
       if (_token != null) {
+        // Only fetch user info if not already set
+        if (_userInfo == null) {
+          tasks.add(_loadUserDataInternal());
+        }
+
         tasks.addAll([
-          _loadUserDataInternal(),
           _initializeNotifications(),
-          _initializeChat(),
           _validateUserType(),
         ]);
       }
@@ -216,34 +216,6 @@ class UserManagerProvider extends ChangeNotifier {
     }
   }
 
-  /// Initialize chat functionality
-  Future<void> _initializeChat() async {
-    try {
-      if (_userInfo?.id == null) {
-        debugPrint(
-            'UserManager: User ID not available for chat initialization');
-        return;
-      }
-
-      final context = NavigationService.navigatorKey.currentContext;
-      if (context == null) {
-        debugPrint('UserManager: Navigation context not available for chat');
-        return;
-      }
-
-      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-
-      // Check if chat needs initialization
-      if (!chatProvider.initialFetchComplete ||
-          chatProvider.currentUserId != _userInfo!.id.toString()) {
-        await chatProvider.initialize(_userInfo!.id.toString());
-        debugPrint('UserManager: Chat initialized for user ${_userInfo!.id}');
-      }
-    } catch (error) {
-      debugPrint('UserManager: Failed to initialize chat: $error');
-    }
-  }
-
   /// Initialize notifications
   Future<void> _initializeNotifications() async {
     try {
@@ -254,6 +226,14 @@ class UserManagerProvider extends ChangeNotifier {
     } catch (error) {
       debugPrint('UserManager: Failed to initialize notifications: $error');
     }
+  }
+
+  /// Set user data directly (called during login to avoid null states)
+  void setUserDataDirectly(UserInfo userData) {
+    _userInfo = userData;
+    _initializeFormControllers();
+    notifyListeners();
+    debugPrint('UserManager: User data set directly from login');
   }
 
   /// Private initialization helper

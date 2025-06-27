@@ -580,5 +580,7 @@
   "provider": "مزود خدمة",
   "clientDescription": "يبحث عن خدمات",
   "providerDescription": "يقدم خدمات",
-  "pleaseSelectAccountType": "يرجى اختيار نوع الحساب"
+  "pleaseSelectAccountType": "يرجى اختيار نوع الحساب",
+  "loadingUserData": "جاري تحميل بيانات المستخدم...",
+  "loadingUserInformation": "جاري تحميل معلومات المستخدم..."
 }

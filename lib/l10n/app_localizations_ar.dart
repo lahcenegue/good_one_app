@@ -1862,4 +1862,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pleaseSelectAccountType => 'يرجى اختيار نوع الحساب';
+
+  @override
+  String get loadingUserData => 'جاري تحميل بيانات المستخدم...';
+
+  @override
+  String get loadingUserInformation => 'جاري تحميل معلومات المستخدم...';
 }

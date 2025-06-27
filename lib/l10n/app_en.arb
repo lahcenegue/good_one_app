@@ -3019,5 +3019,15 @@
   "pleaseSelectAccountType": "Please select an account type",
   "@pleaseSelectAccountType": {
     "description": "Instructional message prompting the user to choose an account type"
+  },
+
+  "loadingUserData": "Loading user data...",
+  "@loadingUserData": {
+    "description": "Displayed while user data is being fetched or loaded"
+  },
+
+  "loadingUserInformation": "Loading user information...",
+  "@loadingUserInformation": {
+    "description": "Displayed while retrieving or initializing user information"
   }
 }

@@ -141,7 +141,8 @@ class UserProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   AppLocalizations.of(context)!.loginToContinue,
-                  style: AppTextStyles.title(context),
+                  style: AppTextStyles.subTitle(context),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: context.getHeight(40)),
               ],

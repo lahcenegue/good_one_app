@@ -580,5 +580,7 @@
   "provider": "Prestataire",
   "clientDescription": "À la recherche de services",
   "providerDescription": "Offrant des services",
-  "pleaseSelectAccountType": "Veuillez sélectionner un type de compte"
+  "pleaseSelectAccountType": "Veuillez sélectionner un type de compte",
+  "loadingUserData": "Chargement des données utilisateur...",
+  "loadingUserInformation": "Chargement des informations utilisateur..."
 }

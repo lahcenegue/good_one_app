@@ -1880,4 +1880,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseSelectAccountType => 'Please select an account type';
+
+  @override
+  String get loadingUserData => 'Loading user data...';
+
+  @override
+  String get loadingUserInformation => 'Loading user information...';
 }

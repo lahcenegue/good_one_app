@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:good_one_app/Features/Both/Models/user_info.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -158,33 +159,44 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearErrors();
 
-      // Get device token
       final deviceToken = await TokenManager.instance.getDeviceToken();
 
-      // Create login request
       final request = AuthRequest(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         deviceToken: deviceToken,
       );
 
-      // Attempt login
       final response = await AuthApi.login(request);
 
       if (response.success && response.data != null) {
         _authData = response.data;
         await _saveAuthData();
-        _clearFormData();
-        _setLoading(false);
 
-        // Navigate based on server-verified user type
-        await _navigateBasedOnServerUserType(context);
+        // Get user info to determine user type
+        final userInfoResponse = await BothApi.getUserInfo();
+
+        if (userInfoResponse.success && userInfoResponse.data != null) {
+          final userData = userInfoResponse.data!;
+          final userType = userData.type ?? AppConfig.customer;
+
+          // Save user type to storage
+          await StorageManager.setString(StorageKeys.accountTypeKey, userType);
+
+          _clearFormData();
+
+          // Navigate and initialize the appropriate provider
+          if (userType == AppConfig.service) {
+            await _navigateAndInitializeWorker(context, userData);
+          } else {
+            await _navigateAndInitializeUser(context, userData);
+          }
+        } else {
+          throw Exception('Failed to get user information after login');
+        }
       } else if (response.error!.contains('not verified')) {
-        debugPrint('AuthProvider: Account not verified, sending OTP');
         await _sendOtpForUnverifiedAccount();
         _setLoading(false);
-
-        // Navigate to OTP screen after successfully sending OTP
         await NavigationService.navigateToAndReplace(AppRoutes.otpScreen);
       } else {
         _setError(response.error ?? 'Login failed');
@@ -194,6 +206,64 @@ class AuthProvider with ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  /// Navigate to worker interface and ensure initialization
+  Future<void> _navigateAndInitializeWorker(
+      BuildContext context, UserInfo userData) async {
+    await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
+
+    // Wait a frame for the widget tree to build
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!context.mounted) return;
+
+      try {
+        final workerProvider =
+            Provider.of<WorkerManagerProvider>(context, listen: false);
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+        // Pre-populate with user data to avoid null states
+        workerProvider.setUserDataDirectly(userData);
+
+        // Initialize chat with user ID
+        if (userData.id != null) {
+          await chatProvider.initialize(userData.id.toString());
+        }
+
+        debugPrint('AuthProvider: Worker interface initialized successfully');
+      } catch (e) {
+        debugPrint('AuthProvider: Worker initialization error: $e');
+      }
+    });
+  }
+
+  /// Navigate to user interface and ensure initialization
+  Future<void> _navigateAndInitializeUser(
+      BuildContext context, UserInfo userData) async {
+    await NavigationService.navigateToAndReplace(AppRoutes.userMain);
+
+    // Wait a frame for the widget tree to build
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!context.mounted) return;
+
+      try {
+        final userProvider =
+            Provider.of<UserManagerProvider>(context, listen: false);
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+        // Pre-populate with user data to avoid null states
+        userProvider.setUserDataDirectly(userData);
+
+        // Initialize chat with user ID
+        if (userData.id != null) {
+          await chatProvider.initialize(userData.id.toString());
+        }
+
+        debugPrint('AuthProvider: User interface initialized successfully');
+      } catch (e) {
+        debugPrint('AuthProvider: User initialization error: $e');
+      }
+    });
   }
 
   /// Enhanced auto-login with server verification
@@ -279,6 +349,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   /// Verify OTP and complete authentication
+  /// Enhanced OTP verification
   Future<void> checkOtp(BuildContext context) async {
     debugPrint('AuthProvider: Verifying OTP');
 
@@ -291,22 +362,39 @@ class AuthProvider with ChangeNotifier {
         return;
       }
 
-      // Create OTP verification request
       final request = CheckRequest(
         email: _emailController.text.trim(),
         otp: _otpCode!,
       );
 
-      // Verify OTP
       final response = await AuthApi.checkOtp(request);
 
       if (response.success && response.data != null) {
         _authData = response.data;
         await _saveAuthData();
-        _clearFormData();
 
-        // Navigate based on server-verified user type
-        await _navigateBasedOnServerUserType(context);
+        // Get user info to determine user type
+        final userInfoResponse = await BothApi.getUserInfo();
+
+        if (userInfoResponse.success && userInfoResponse.data != null) {
+          final userData = userInfoResponse.data!;
+          final userType = userData.type ?? AppConfig.customer;
+
+          // Save user type to storage
+          await StorageManager.setString(StorageKeys.accountTypeKey, userType);
+
+          _clearFormData();
+
+          // Navigate and initialize the appropriate provider
+          if (userType == AppConfig.service) {
+            await _navigateAndInitializeWorker(context, userData);
+          } else {
+            await _navigateAndInitializeUser(context, userData);
+          }
+        } else {
+          throw Exception(
+              'Failed to get user information after OTP verification');
+        }
       } else {
         _setError(response.error ?? 'OTP verification failed');
       }
@@ -416,7 +504,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('AuthProvider: Error sending OTP for unverified account: $e');
-      throw e; // Re-throw to be handled by the calling method
+      rethrow; // Re-throw to be handled by the calling method
     }
   }
 
@@ -583,129 +671,6 @@ class AuthProvider with ChangeNotifier {
   // ================================
   // PRIVATE HELPER METHODS
   // ================================
-
-  /// Navigate based on server-verified user type
-  Future<void> _navigateBasedOnServerUserType(BuildContext context) async {
-    debugPrint(
-        'AuthProvider: Determining navigation based on server user type');
-
-    try {
-      // Call /me endpoint to get server-verified user type
-      final userInfoResponse = await BothApi.getUserInfo();
-
-      if (userInfoResponse.success && userInfoResponse.data != null) {
-        final userType = userInfoResponse.data!.type;
-        debugPrint('AuthProvider: Server user type: $userType');
-
-        // Save the correct account type to storage
-        await StorageManager.setString(
-            StorageKeys.accountTypeKey, userType ?? AppConfig.customer);
-
-        // Navigate and initialize chat based on user type
-        if (userType == AppConfig.service) {
-          await _navigateToWorkerInterface(context);
-        } else {
-          await _navigateToUserInterface(context);
-        }
-      } else {
-        debugPrint(
-            'AuthProvider: Failed to get user info, using fallback navigation');
-        await _fallbackNavigation();
-      }
-    } catch (e) {
-      debugPrint('AuthProvider: Error determining user type: $e');
-      await _fallbackNavigation();
-    }
-  }
-
-  /// Navigate to worker interface with chat initialization
-  Future<void> _navigateToWorkerInterface(BuildContext context) async {
-    debugPrint('AuthProvider: Navigating to worker interface');
-
-    await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
-
-    // Initialize chat for worker after navigation
-    _scheduleWorkerChatInitialization(context);
-  }
-
-  /// Navigate to user interface with chat initialization
-  Future<void> _navigateToUserInterface(BuildContext context) async {
-    debugPrint('AuthProvider: Navigating to user interface');
-
-    await NavigationService.navigateToAndReplace(AppRoutes.userMain);
-
-    // Initialize chat for user after navigation
-    _scheduleUserChatInitialization(context);
-  }
-
-  /// Schedule worker chat initialization
-  void _scheduleWorkerChatInitialization(BuildContext context) {
-    Timer(const Duration(milliseconds: 2000), () async {
-      try {
-        if (!context.mounted) return;
-
-        final workerProvider =
-            Provider.of<WorkerManagerProvider>(context, listen: false);
-        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-
-        if (workerProvider.workerInfo?.id != null) {
-          await chatProvider
-              .switchUser(workerProvider.workerInfo!.id.toString());
-          debugPrint(
-              'AuthProvider: Chat initialized for worker: ${workerProvider.workerInfo!.id}');
-        } else {
-          debugPrint(
-              'AuthProvider: Worker info not available for chat initialization');
-        }
-      } catch (e) {
-        debugPrint('AuthProvider: Worker chat initialization failed: $e');
-      }
-    });
-  }
-
-  /// Schedule user chat initialization
-  void _scheduleUserChatInitialization(BuildContext context) {
-    Timer(const Duration(milliseconds: 2000), () async {
-      try {
-        if (!context.mounted) return;
-
-        final userProvider =
-            Provider.of<UserManagerProvider>(context, listen: false);
-        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-
-        if (userProvider.userInfo?.id != null) {
-          await chatProvider.switchUser(userProvider.userInfo!.id.toString());
-          debugPrint(
-              'AuthProvider: Chat initialized for user: ${userProvider.userInfo!.id}');
-        } else {
-          debugPrint(
-              'AuthProvider: User info not available for chat initialization');
-        }
-      } catch (e) {
-        debugPrint('AuthProvider: User chat initialization failed: $e');
-      }
-    });
-  }
-
-  /// Fallback navigation using stored account type
-  Future<void> _fallbackNavigation() async {
-    debugPrint('AuthProvider: Using fallback navigation');
-
-    try {
-      final storedAccountType =
-          await StorageManager.getString(StorageKeys.accountTypeKey);
-
-      if (storedAccountType == AppConfig.service) {
-        await NavigationService.navigateToAndReplace(AppRoutes.workerMain);
-      } else {
-        await NavigationService.navigateToAndReplace(AppRoutes.userMain);
-      }
-    } catch (e) {
-      debugPrint('AuthProvider: Fallback navigation failed: $e');
-      // Default to user interface as ultimate fallback
-      await NavigationService.navigateToAndReplace(AppRoutes.userMain);
-    }
-  }
 
   /// Verify and sync user type with server
   Future<void> _verifyAndSyncUserType() async {

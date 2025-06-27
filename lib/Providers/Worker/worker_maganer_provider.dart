@@ -10,7 +10,6 @@ import 'package:good_one_app/Features/Worker/Models/chart_models.dart';
 import 'package:good_one_app/Features/Worker/Models/earnings_model.dart';
 import 'package:good_one_app/Features/Worker/Models/withdrawal_model.dart';
 import 'package:good_one_app/Features/Worker/Presentation/Widgets/withdrawal_result.dart';
-import 'package:good_one_app/Providers/Both/chat_provider.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -26,8 +25,6 @@ import 'package:good_one_app/Features/Worker/Models/create_service_model.dart';
 import 'package:good_one_app/Features/Worker/Models/my_services_model.dart';
 import 'package:good_one_app/Features/Worker/Models/subcategory_model.dart';
 import 'package:good_one_app/Features/Worker/Services/worker_api.dart';
-
-import 'package:provider/provider.dart';
 
 import 'package:good_one_app/l10n/app_localizations.dart';
 
@@ -219,6 +216,14 @@ class WorkerManagerProvider extends ChangeNotifier {
     super.dispose();
   }
 
+  /// Set user data directly (called during login to avoid null states)
+  void setUserDataDirectly(UserInfo userData) {
+    _workerInfo = userData;
+    _initializeFormControllers();
+    notifyListeners();
+    debugPrint('WorkerManager: User data set directly from login');
+  }
+
   /// Initialize the provider with all necessary data
   Future<void> initialize() async {
     debugPrint('WorkerManager: Starting initialization');
@@ -230,12 +235,16 @@ class WorkerManagerProvider extends ChangeNotifier {
       _token = await StorageManager.getString(StorageKeys.tokenKey);
 
       if (_token != null) {
+        // Only fetch user info if not already set
+        if (_workerInfo == null) {
+          await _loadWorkerData();
+        }
+
         await Future.wait([
-          _loadWorkerData(),
+          getMyBalance(),
+          getEarningsSummary(),
           fetchNotifications(),
           fetchMyServices(),
-          getEarningsSummary(),
-          _initializeChat(),
           _validateUserType(),
         ]);
 
@@ -271,35 +280,6 @@ class WorkerManagerProvider extends ChangeNotifier {
       }
     } catch (error) {
       debugPrint('WorkerManager: Error during user type validation: $error');
-    }
-  }
-
-  /// Initialize chat functionality
-  Future<void> _initializeChat() async {
-    try {
-      if (_workerInfo?.id == null) {
-        debugPrint(
-            'WorkerManager: Worker ID not available for chat initialization');
-        return;
-      }
-
-      final context = NavigationService.navigatorKey.currentContext;
-      if (context == null) {
-        debugPrint('WorkerManager: Navigation context not available for chat');
-        return;
-      }
-
-      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-
-      // Check if chat needs initialization
-      if (!chatProvider.initialFetchComplete ||
-          chatProvider.currentUserId != _workerInfo!.id.toString()) {
-        await chatProvider.initialize(_workerInfo!.id.toString());
-        debugPrint(
-            'WorkerManager: Chat initialized for worker ${_workerInfo!.id}');
-      }
-    } catch (error) {
-      debugPrint('WorkerManager: Failed to initialize chat: $error');
     }
   }
 

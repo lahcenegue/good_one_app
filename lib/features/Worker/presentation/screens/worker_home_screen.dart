@@ -44,12 +44,36 @@ class WorkerHomeScreen extends StatelessWidget {
           );
         }
 
+        if (workerManager.workerInfo == null && !workerManager.isLoading) {
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.refresh, size: 48, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context)!.loadingUserInformation,
+                    style: AppTextStyles.title2(context),
+                  ),
+                  SizedBox(height: 12),
+                  PrimaryButton(
+                    text: AppLocalizations.of(context)!.refresh,
+                    onPressed: () => workerManager.initialize(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         return RefreshIndicator(
           onRefresh: () async {
             final currentUserId = workerManager.workerInfo?.id?.toString();
             await Future.wait([
               workerManager.initialize(),
-              workerManager.refreshEarningsData(), // Add this line
+              workerManager.refreshEarningsData(),
               ordersManager.initialize(),
               if (currentUserId != null) chatProvider.initialize(currentUserId),
             ]);

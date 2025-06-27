@@ -23,15 +23,6 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WorkerManagerProvider>(
       builder: (context, workerManager, _) {
-        final worker = workerManager.workerInfo;
-        if (worker == null) {
-          return Center(
-            child: Text(
-              AppLocalizations.of(context)!.userDataNotAvailable,
-            ),
-          );
-        }
-
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -39,34 +30,100 @@ class WorkerAccountDetailsScreen extends StatelessWidget {
               style: AppTextStyles.appBarTitle(context),
             ),
           ),
-          body: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.getWidth(20),
-              vertical: context.getHeight(10),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: context.getHeight(20)),
-                _buildImagePicker(context, workerManager),
-                if (workerManager.imageError != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: context.getHeight(8)),
-                    child: Text(
-                      workerManager.imageError!,
-                      style: AppTextStyles.text(context)
-                          .copyWith(color: Colors.red),
-                    ),
-                  ), //TODO change widget
-                SizedBox(height: context.getHeight(20)),
-                _buildAccountDetailsForm(context, workerManager, worker),
-                if (workerManager.profileError != null)
-                  AppErrorWidget(message: workerManager.profileError!),
-              ],
-            ),
-          ),
+          body: _buildBody(context, workerManager),
         );
       },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, WorkerManagerProvider workerManager) {
+    final worker = workerManager.workerInfo;
+
+    if (workerManager.isLoading && worker == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Loading account details..."),
+          ],
+        ),
+      );
+    }
+
+    // Show loading if still initializing
+    if (workerManager.isLoading || workerManager.isProfileLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context)!.loadingUserData,
+              style: AppTextStyles.text(context),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // If no worker data, provide retry mechanism
+    if (worker == null) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.refresh, size: 48, color: Colors.grey),
+              SizedBox(height: 16),
+              Text(
+                "Account information not available",
+                style: AppTextStyles.title2(context),
+              ),
+              SizedBox(height: 16),
+              PrimaryButton(
+                text: AppLocalizations.of(context)!.retry,
+                onPressed: () => workerManager.initialize(),
+              ),
+              SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(AppLocalizations.of(context)!.back),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    // Show the normal content when data is available
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.getWidth(20),
+        vertical: context.getHeight(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: context.getHeight(20)),
+          _buildImagePicker(context, workerManager),
+          if (workerManager.imageError != null)
+            Padding(
+              padding: EdgeInsets.only(top: context.getHeight(8)),
+              child: Text(
+                workerManager.imageError!,
+                style: AppTextStyles.text(context).copyWith(color: Colors.red),
+              ),
+            ),
+          SizedBox(height: context.getHeight(20)),
+          _buildAccountDetailsForm(
+              context, workerManager, workerManager.workerInfo!),
+          if (workerManager.profileError != null)
+            AppErrorWidget(message: workerManager.profileError!),
+        ],
+      ),
     );
   }
 

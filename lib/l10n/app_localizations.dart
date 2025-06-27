@@ -3579,6 +3579,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select an account type'**
   String get pleaseSelectAccountType;
+
+  /// Displayed while user data is being fetched or loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Loading user data...'**
+  String get loadingUserData;
+
+  /// Displayed while retrieving or initializing user information
+  ///
+  /// In en, this message translates to:
+  /// **'Loading user information...'**
+  String get loadingUserInformation;
 }
 
 class _AppLocalizationsDelegate

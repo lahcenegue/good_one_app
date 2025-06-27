@@ -32,20 +32,15 @@ class AppLocalization {
         return 'Français';
       case 'ar':
         return 'العربية';
-      case 'af':
-        return 'Afrikaans';
-      case 'sq':
-        return 'Shqip';
+
       default:
         return 'Unknown';
     }
   }
 
   static List<LanguageOption> supportedLanguages = const [
-    LanguageOption(code: 'fr', name: 'Francais', subtitle: 'Franche'),
+    LanguageOption(code: 'fr', name: 'Français', subtitle: 'Franche'),
     LanguageOption(code: 'ar', name: 'العربية', subtitle: 'Arabic'),
     LanguageOption(code: 'en', name: 'English', subtitle: 'Englais'),
-    LanguageOption(code: 'af', name: 'Afrikaans', subtitle: 'Afikaans'),
-    LanguageOption(code: 'sq', name: 'Shqip', subtitle: 'Albanais'),
   ];
 }

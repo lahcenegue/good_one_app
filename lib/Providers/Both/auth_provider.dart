@@ -121,9 +121,6 @@ class AuthProvider with ChangeNotifier {
     if (_isInitialized) return;
 
     try {
-      // Initialize TokenManager FIRST before accessing its stream
-      await TokenManager.instance.initialize();
-
       // Listen to token changes
       TokenManager.instance.tokenStream.listen((auth) {
         _authData = auth;

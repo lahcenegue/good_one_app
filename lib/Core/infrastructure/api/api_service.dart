@@ -130,19 +130,6 @@ class ApiService {
     try {
       final dynamic decodedBody = jsonDecode(response.body);
 
-      // Debug print to see exact response body
-      print("=== API RESPONSE DEBUG ===");
-      print("Status Code: ${response.statusCode}");
-      print("Response Body Type: ${decodedBody.runtimeType}");
-      print("Response Body: ${response.body}");
-      print("Is List: ${decodedBody is List}");
-      print("Is Map: ${decodedBody is Map<String, dynamic>}");
-      if (decodedBody is Map<String, dynamic>) {
-        print("Map keys: ${decodedBody.keys.toList()}");
-        print("Has 'data' key: ${decodedBody.containsKey('data')}");
-      }
-      print("========================");
-
       // Check if it's a successful response (200-299)
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
@@ -150,21 +137,15 @@ class ApiService {
 
           if (decodedBody is Map<String, dynamic> &&
               decodedBody.containsKey('data')) {
-            print("Processing as wrapped data response");
             result = fromJson(decodedBody['data']);
           } else if (decodedBody is List) {
-            print("Processing as direct list response");
             result = fromJson(decodedBody);
           } else {
-            print("Processing as direct response");
             result = fromJson(decodedBody);
           }
 
-          print("✅ Successfully processed response");
           return ApiResponse.success(result);
         } catch (parseError) {
-          print("❌ Error in fromJson parsing: $parseError");
-          print("Data being parsed: $decodedBody");
           return ApiResponse.error('Failed to parse response: $parseError');
         }
       }

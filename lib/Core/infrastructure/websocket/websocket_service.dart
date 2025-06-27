@@ -30,6 +30,9 @@ class WebSocketService {
   final Map<String, List<Function(dynamic)>> _eventListeners = {};
   bool _listenersRegistered = false;
 
+  // Add the missing _activeRooms field
+  final Set<String> _activeRooms = {};
+
   // Callbacks
   void Function()? onConnected;
   void Function()? onDisconnected;
@@ -314,27 +317,49 @@ class WebSocketService {
     _reconnectTimer = null;
   }
 
-  void _stopConnectionTimeout() {
-    _connectionTimeoutTimer?.cancel();
-    _connectionTimeoutTimer = null;
-  }
+  // Fixed: Removed unused _stopConnectionTimeout method
 
   void disconnect() {
-    debugPrint('WebSocket: Manually disconnecting');
+    debugPrint('WebSocket: Manually disconnecting and clearing all state');
 
-    _stopHeartbeat();
-    _stopReconnectTimer();
-    _stopConnectionTimeout();
+    // Properly dispose all timers
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
 
-    _socket?.disconnect();
-    _socket?.dispose();
-    _socket = null;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
 
+    _connectionTimeoutTimer?.cancel();
+    _connectionTimeoutTimer = null;
+
+    // Clear all event listeners
+    _eventListeners.clear();
+
+    // Clear active rooms
+    _activeRooms.clear();
+
+    // Properly dispose socket
+    if (_socket != null) {
+      _socket!.clearListeners(); // Clear all socket listeners
+      _socket!.disconnect();
+      _socket!.dispose();
+      _socket = null;
+    }
+
+    // Reset all state
     _isConnected = false;
     _isConnecting = false;
     _reconnectAttempts = 0;
     _listenersRegistered = false;
     _lastError = null;
+  }
+
+  void disposeService() {
+    disconnect();
+    // Clear all callbacks
+    onConnected = null;
+    onDisconnected = null;
+    onError = null;
   }
 
   // Force reconnection with clean slate

@@ -49,7 +49,6 @@ class AppSettingsProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (_isInitialized) return;
 
     try {
-      await StorageManager.init(); // Explicitly initialize StorageManager
       pageController = PageController(initialPage: 0);
 
       await Future.wait([

@@ -158,71 +158,116 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // Core providers
-        ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-
-        // User providers
-        ChangeNotifierProvider(create: (_) => UserManagerProvider()),
-        ChangeNotifierProvider(create: (_) => ContractorsByServiceProvider()),
-        ChangeNotifierProvider(create: (_) => BookingManagerProvider()),
-
-        // Worker providers
-        ChangeNotifierProvider(create: (_) => WorkerManagerProvider()),
-        ChangeNotifierProvider(create: (_) => OrdersManagerProvider()),
-
-        // Chat provider
-        ChangeNotifierProxyProvider<UserManagerProvider, ChatProvider>(
-          create: (context) => ChatProvider(),
-          update: (context, userManager, previous) {
-            final chatProvider = previous ?? ChatProvider();
-            return chatProvider;
-          },
-        ),
-      ],
-      child: Consumer<AppSettingsProvider>(
-        builder: (context, appSettings, _) {
-          if (!appSettings.isInitialized) {
-            return MaterialApp(
-              theme: AppTheme.light,
-              home: Scaffold(
-                body: LoadingIndicator(),
-              ),
-            );
-          }
-
+    return FutureBuilder<void>(
+      future: _initializeProviders(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            navigatorKey: NavigationService.navigatorKey,
-            scaffoldMessengerKey: rootScaffoldMessengerKey,
-
-            // Localization
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-            locale: appSettings.appLocale,
-
-            // Theme and routing
             theme: AppTheme.light,
-            initialRoute: appSettings.initialRoute,
-            routes: AppRoutes.define(),
-
-            // Remove splash screen when app is ready
-            builder: (context, child) {
-              // Remove splash screen on first build
-              FlutterNativeSplash.remove();
-              return child!;
-            },
+            home: Scaffold(
+              body: LoadingIndicator(),
+            ),
           );
-        },
-      ),
+        }
+
+        if (snapshot.hasError) {
+          return MaterialApp(
+            theme: AppTheme.light,
+            home: Scaffold(
+              body: Center(
+                child: Text('Initialization failed: ${snapshot.error}'),
+              ),
+            ),
+          );
+        }
+
+        return MultiProvider(
+          providers: [
+            // Core providers
+            ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+
+            // User providers
+            ChangeNotifierProvider(create: (_) => UserManagerProvider()),
+            ChangeNotifierProvider(
+                create: (_) => ContractorsByServiceProvider()),
+            ChangeNotifierProvider(create: (_) => BookingManagerProvider()),
+
+            // Worker providers
+            ChangeNotifierProvider(create: (_) => WorkerManagerProvider()),
+            ChangeNotifierProvider(create: (_) => OrdersManagerProvider()),
+
+            // Chat provider
+            ChangeNotifierProxyProvider<UserManagerProvider, ChatProvider>(
+              create: (context) => ChatProvider(),
+              update: (context, userManager, previous) {
+                final chatProvider = previous ?? ChatProvider();
+                return chatProvider;
+              },
+            ),
+          ],
+          child: Consumer<AppSettingsProvider>(
+            builder: (context, appSettings, _) {
+              if (!appSettings.isInitialized) {
+                return MaterialApp(
+                  theme: AppTheme.light,
+                  home: Scaffold(
+                    body: LoadingIndicator(),
+                  ),
+                );
+              }
+
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                navigatorKey: NavigationService.navigatorKey,
+                scaffoldMessengerKey: rootScaffoldMessengerKey,
+
+                // Localization
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
+                locale: appSettings.appLocale,
+
+                // Theme and routing
+                theme: AppTheme.light,
+                initialRoute: appSettings.initialRoute,
+                routes: AppRoutes.define(),
+
+                // Remove splash screen when app is ready
+                builder: (context, child) {
+                  // Remove splash screen on first build
+                  FlutterNativeSplash.remove();
+                  return child!;
+                },
+              );
+            },
+          ),
+        );
+      },
     );
+  }
+
+  // Sequential initialization to prevent race conditions
+  Future<void> _initializeProviders() async {
+    debugPrint('🔄 Starting sequential provider initialization');
+
+    try {
+      // Initialize core services first (ONLY ONCE HERE)
+      await StorageManager.init();
+      debugPrint('✅ StorageManager initialized');
+
+      await TokenManager.instance.initialize();
+      debugPrint('✅ TokenManager initialized');
+
+      debugPrint('✅ All core services initialized sequentially');
+    } catch (e) {
+      debugPrint('❌ Provider initialization failed: $e');
+      rethrow;
+    }
   }
 }
 

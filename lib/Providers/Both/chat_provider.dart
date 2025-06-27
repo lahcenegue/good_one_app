@@ -715,7 +715,9 @@ class ChatProvider with ChangeNotifier {
     _conversationsTimeout?.cancel();
     _messagesTimeout?.cancel();
     _scrollController.dispose();
-    _socketService.disconnect();
+
+    _socketService.disposeService();
+
     super.dispose();
   }
 }

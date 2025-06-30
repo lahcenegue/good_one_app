@@ -40,6 +40,7 @@ class AuthRequiredDialog extends StatelessWidget {
               Text(
                 AppLocalizations.of(context)!.loginToContinue,
                 style: AppTextStyles.title2(context),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: context.getWidth(10)),
               Text(
@@ -65,7 +66,7 @@ class AuthRequiredDialog extends StatelessWidget {
                       ),
                     ),
                     SizedBox(
-                      width: context.getWidth(120),
+                      width: context.getWidth(140),
                       child: PrimaryButton(
                         text: AppLocalizations.of(context)!.login,
                         onPressed: () async {

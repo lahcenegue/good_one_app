@@ -235,11 +235,40 @@ class UserProfileScreen extends StatelessWidget {
         horizontal: context.getWidth(20),
         vertical: context.getHeight(20),
       ),
-      child: PrimaryButton(
-        text: AppLocalizations.of(context)!.login,
-        onPressed: () {
-          NavigationService.navigateTo(AppRoutes.login);
-        },
+      child: Column(
+        children: [
+          PrimaryButton(
+            text: AppLocalizations.of(context)!.login,
+            onPressed: () {
+              NavigationService.navigateTo(AppRoutes.login);
+            },
+          ),
+          _buildSignUpSection(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignUpSection(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: context.getHeight(20)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.noAccount,
+            style: AppTextStyles.text(context),
+          ),
+          TextButton(
+            onPressed: () {
+              NavigationService.navigateTo(AppRoutes.register);
+            },
+            child: Text(
+              AppLocalizations.of(context)!.signUp,
+              style: AppTextStyles.textButton(context),
+            ),
+          ),
+        ],
       ),
     );
   }
